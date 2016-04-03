@@ -1,4 +1,4 @@
-/// <reference path="mod-reference/reference/modreference.d.ts" />
+/// <reference path="mod-reference/modreference.d.ts" />
 declare class Mod extends Mods.Mod {
     private dialog;
     private keyBind;
