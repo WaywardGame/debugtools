@@ -78,6 +78,7 @@ var Mod = (function (_super) {
                 }
                 else if ($(this).hasClass("item-get")) {
                     Item.create(id);
+                    game.updateCraftTableAndWeight();
                 }
                 else if ($(this).hasClass("place-env-item")) {
                     var tile = game.getTile(player.x + player.direction.x, player.y + player.direction.y, player.z);

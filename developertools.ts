@@ -96,6 +96,7 @@ class Mod extends Mods.Mod {
 					game.spawnMonster(id, player.x + player.direction.x, player.y + player.direction.y, player.z, true);
 				} else if ($(this).hasClass("item-get")) {
 					Item.create(id);
+					game.updateCraftTableAndWeight();
 				} else if ($(this).hasClass("place-env-item")) {
 					// Remove if Doodad already there
 					var tile = game.getTile(player.x + player.direction.x, player.y + player.direction.y, player.z);
