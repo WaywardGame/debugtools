@@ -1,9 +1,8 @@
 {
 	"name": "Developer Tools",
 	"description": "Adds a special developer tools menu into the game.",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"author": "Spacetech",
-	"required_mods": [],
 	"hooks": [
 		"CanMonsterAttack",
 		"GetPlayerSpriteBatchLayer",
@@ -13,9 +12,6 @@
 		"OnMove",
 		"OnNoInputReceived",
 		"OnShowInGameScreen"
-	],
-	"compatible_minor_versions": [
-		0
 	],
 	"unloadable": true,
 	"files": [

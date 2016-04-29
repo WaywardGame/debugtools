@@ -191,7 +191,10 @@ var Mod = (function (_super) {
         };
         objects.forEach(function (obj, index) {
             if (obj && !obj.tall) {
-                sorted.push({ id: index, name: makePretty(enums[index]) });
+                var enumName = enums[index];
+                if (enumName) {
+                    sorted.push({ id: index, name: makePretty(enumName) });
+                }
             }
         });
         sorted.sort(function (a, b) {

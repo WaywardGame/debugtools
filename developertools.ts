@@ -83,11 +83,11 @@ class Mod extends Mods.Mod {
 
 		this.container.append(html);
 
-		this.container.on("click", ".select-control", function() {
+		this.container.on("click", ".select-control", function () {
 			$(`.${$(this).data("control")}`).trigger("change");
 		});
 
-		this.container.on("change", "select", function() {
+		this.container.on("change", "select", function () {
 			var id = parseInt($(this).find("option:selected").data("id"), 10);
 			if (id >= 0) {
 				if ($(this).hasClass("change-tile")) {
@@ -224,7 +224,10 @@ class Mod extends Mods.Mod {
 		objects.forEach((obj: any, index: any) => {
 			// Doodad tree fix
 			if (obj && !obj.tall) {
-				sorted.push({ id: index, name: makePretty(enums[index]) });
+				var enumName = enums[index];
+				if (enumName) {
+					sorted.push({ id: index, name: makePretty(enumName) });
+				}
 			}
 		});
 
