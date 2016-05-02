@@ -17,7 +17,7 @@ Open the folder in Visual Studio Code and build with Ctrl+Shift+B.
 [http://steamcommunity.com/sharedfiles/filedetails/?id=474819610](http://steamcommunity.com/sharedfiles/filedetails/?id=474819610)
 
 ## Screenshots
-![Developer Tools](http://images.akamai.steamusercontent.com/ugc/312243066448011233/6EC7A0200015806D18647B28F65DB5DB24636CA1/ "Developer Tools")
+![Developer Tools](https://raw.githubusercontent.com/WaywardGame/developertools/master/mod.png "Developer Tools")
 
 ![Screenshot #1](http://images.akamai.steamusercontent.com/ugc/312243491181375632/4657D78E3FE938B1C800FDD7883DF005D11F2170/ "Screenshot #1")
 
