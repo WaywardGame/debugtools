@@ -90,7 +90,7 @@ class Mod extends Mods.Mod {
 		});
 
 		this.container.on("input change", "#daynightslider", function () {
-			game.dayNight = $(this).val();
+			game.dayNight = parseFloat($(this).val());
 			game.updateRender = true;
 			game.fov.compute();
 			if (ui.setRangeValue) {
