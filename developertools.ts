@@ -81,10 +81,21 @@ class Mod extends Mods.Mod {
 		html += this.generateSelect(TileEvent.Type, TileEvent.tileEvents, "place-tile-event", "Place Tile Event");
 		html += this.generateSelect(MonsterType, corpses, "place-corpse", "Place Corpse");
 
+		html += `DayNight: <input id="daynightslider" type ="range" min="0.0" max="1.0" step ="0.01" data-range-id="daynight" />`;
+
 		this.container.append(html);
 
 		this.container.on("click", ".select-control", function () {
 			$(`.${$(this).data("control")}`).trigger("change");
+		});
+
+		this.container.on("input change", "#daynightslider", function () {
+			game.dayNight = $(this).val();
+			game.updateRender = true;
+			game.fov.compute();
+			if (ui.setRangeValue) {
+				ui.setRangeValue("daynight", game.dayNight);
+			}
 		});
 
 		this.container.on("change", "select", function () {
@@ -152,7 +163,6 @@ class Mod extends Mods.Mod {
 
 		this.container.append($("<button>Noclip</button>").click(() => {
 			this.noclipEnabled = !this.noclipEnabled;
-			game.updateRender = true;
 		}));
 
 		this.dialog = this.createDialog(this.container, {
@@ -161,9 +171,14 @@ class Mod extends Mods.Mod {
 			x: 10,
 			y: 140,
 			width: 380,
-			height: 280,
+			height: 315,
 			minWidth: 405,
-			minHeight: 300
+			minHeight: 315,
+			onOpen: () => {
+				if (ui.setRangeValue) {
+					ui.setRangeValue("daynight", game.dayNight);
+				}
+			}
 		});
 	}
 
