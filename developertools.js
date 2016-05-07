@@ -57,6 +57,8 @@ var Mod = (function (_super) {
     Mod.prototype.onShowInGameScreen = function () {
         var _this = this;
         this.container = $("<div></div>");
+        this.inner = $("<div class=\"inner\"></div>");
+        this.container.append(this.inner);
         var html = this.generateSelect(TerrainType, terrains, "change-tile", "Change Tile");
         html += this.generateSelect(MonsterType, monsters, "spawn-monster", "Spawn Monster");
         html += this.generateSelect(ItemType, Item.defines, "item-get", "Get Item");
@@ -64,11 +66,11 @@ var Mod = (function (_super) {
         html += this.generateSelect(TileEvent.Type, TileEvent.tileEvents, "place-tile-event", "Place Tile Event");
         html += this.generateSelect(MonsterType, corpses, "place-corpse", "Place Corpse");
         html += "DayNight: <input id=\"daynightslider\" type =\"range\" min=\"0.0\" max=\"1.0\" step =\"0.01\" data-range-id=\"daynight\" />";
-        this.container.append(html);
-        this.container.on("click", ".select-control", function () {
+        this.inner.append(html);
+        this.inner.on("click", ".select-control", function () {
             $("." + $(this).data("control")).trigger("change");
         });
-        this.container.on("input change", "#daynightslider", function () {
+        this.inner.on("input change", "#daynightslider", function () {
             game.dayNight = parseFloat($(this).val());
             game.updateRender = true;
             game.fov.compute();
@@ -76,7 +78,7 @@ var Mod = (function (_super) {
                 ui.setRangeValue("daynight", game.dayNight);
             }
         });
-        this.container.on("change", "select", function () {
+        this.inner.on("change", "select", function () {
             var id = parseInt($(this).find("option:selected").data("id"), 10);
             if (id >= 0) {
                 if ($(this).hasClass("change-tile")) {
@@ -97,7 +99,7 @@ var Mod = (function (_super) {
                     var doodad = Doodad.create(id, player.x + player.direction.x, player.y + player.direction.y, player.z);
                     if (Doodad.defines[id].growing) {
                         for (var i = 0; i < Doodad.defines.length; i++) {
-                            if (Doodad.defines[i].growth && Doodad.defines[i].growth == id) {
+                            if (Doodad.defines[i].growth && Doodad.defines[i].growth === id) {
                                 doodad.growInto = i;
                                 break;
                             }
@@ -113,7 +115,7 @@ var Mod = (function (_super) {
                 game.updateGame();
             }
         });
-        this.container.append($("<button>Refresh Stats</button>").click(function () {
+        this.inner.append($("<button>Refresh Stats</button>").click(function () {
             player.health = player.strength;
             player.stamina = player.dexterity;
             player.hunger = player.starvation;
@@ -123,7 +125,7 @@ var Mod = (function (_super) {
             player.status.poisoned = false;
             game.updateGame();
         }));
-        this.container.append($("<button>Kill All Monsters</button>").click(function () {
+        this.inner.append($("<button>Kill All Monsters</button>").click(function () {
             for (var i = 0; i < game.monsters.length; i++) {
                 if (game.monsters[i]) {
                     game.deleteMonsters(i);
@@ -132,28 +134,31 @@ var Mod = (function (_super) {
             game.monsters = [];
             game.updateGame();
         }));
-        this.container.append($("<button>Reload Shaders</button>").click(function () {
+        this.inner.append($("<button>Reload Shaders</button>").click(function () {
             Shaders.loadShaders(function () {
                 Shaders.compileShaders();
                 game.updateGame();
             });
         }));
-        this.container.append($("<button>Noclip</button>").click(function () {
+        this.inner.append($("<button>Noclip</button>").click(function () {
             _this.noclipEnabled = !_this.noclipEnabled;
         }));
         this.dialog = this.createDialog(this.container, {
             id: this.getName(),
             title: "Developer Tools",
             x: 10,
-            y: 140,
+            y: 180,
             width: 380,
-            height: 315,
-            minWidth: 405,
-            minHeight: 315,
+            height: 400,
+            minWidth: 380,
+            minHeight: 400,
             onOpen: function () {
                 if (ui.setRangeValue) {
                     ui.setRangeValue("daynight", game.dayNight);
                 }
+            },
+            onResizeStop: function () {
+                _this.updateDialogHeight();
             }
         });
     };
@@ -161,6 +166,7 @@ var Mod = (function (_super) {
         switch (keyBind) {
             case this.keyBind:
                 ui.toggleDialog(this.dialog);
+                this.updateDialogHeight();
                 return false;
         }
         return undefined;
@@ -188,6 +194,14 @@ var Mod = (function (_super) {
     };
     Mod.prototype.onNoInputReceived = function () {
         this.inMove = false;
+    };
+    Mod.prototype.updateDialogHeight = function () {
+        if (!this.dialog) {
+            return;
+        }
+        var height = this.container.find(".inner").outerHeight() + 43;
+        this.container.dialog("option", "height", height);
+        this.container.dialog("option", "maxHeight", height);
     };
     Mod.prototype.generateSelect = function (enums, objects, className, labelName) {
         var html = "<select class=\"" + className + "\"><option selected disabled>" + labelName + "</option>";

@@ -7,6 +7,7 @@ class Mod extends Mods.Mod {
 	private noclipDelay: number;
 	private inMove: boolean;
 	private container: JQuery;
+	private inner: JQuery;
 
 	private data: {
 		loadedCount: number
@@ -73,6 +74,8 @@ class Mod extends Mods.Mod {
 
 	public onShowInGameScreen(): void {
 		this.container = $("<div></div>");
+		this.inner = $(`<div class="inner"></div>`);
+		this.container.append(this.inner);
 
 		var html = this.generateSelect(TerrainType, terrains, "change-tile", "Change Tile");
 		html += this.generateSelect(MonsterType, monsters, "spawn-monster", "Spawn Monster");
@@ -83,13 +86,13 @@ class Mod extends Mods.Mod {
 
 		html += `DayNight: <input id="daynightslider" type ="range" min="0.0" max="1.0" step ="0.01" data-range-id="daynight" />`;
 
-		this.container.append(html);
+		this.inner.append(html);
 
-		this.container.on("click", ".select-control", function () {
+		this.inner.on("click", ".select-control", function () {
 			$(`.${$(this).data("control")}`).trigger("change");
 		});
 
-		this.container.on("input change", "#daynightslider", function () {
+		this.inner.on("input change", "#daynightslider", function () {
 			game.dayNight = parseFloat($(this).val());
 			game.updateRender = true;
 			game.fov.compute();
@@ -98,7 +101,7 @@ class Mod extends Mods.Mod {
 			}
 		});
 
-		this.container.on("change", "select", function () {
+		this.inner.on("change", "select", function () {
 			var id = parseInt($(this).find("option:selected").data("id"), 10);
 			if (id >= 0) {
 				if ($(this).hasClass("change-tile")) {
@@ -118,7 +121,7 @@ class Mod extends Mods.Mod {
 					// Set defaults for growing doodads
 					if (Doodad.defines[id].growing) {
 						for (let i = 0; i < Doodad.defines.length; i++) {
-							if (Doodad.defines[i].growth && Doodad.defines[i].growth == id) {
+							if (Doodad.defines[i].growth && Doodad.defines[i].growth === id) {
 								doodad.growInto = i;
 								break;
 							}
@@ -133,7 +136,7 @@ class Mod extends Mods.Mod {
 			}
 		});
 
-		this.container.append($("<button>Refresh Stats</button>").click(() => {
+		this.inner.append($("<button>Refresh Stats</button>").click(() => {
 			player.health = player.strength;
 			player.stamina = player.dexterity;
 			player.hunger = player.starvation;
@@ -144,7 +147,7 @@ class Mod extends Mods.Mod {
 			game.updateGame();
 		}));
 
-		this.container.append($("<button>Kill All Monsters</button>").click(() => {
+		this.inner.append($("<button>Kill All Monsters</button>").click(() => {
 			for (var i = 0; i < game.monsters.length; i++) {
 				if (game.monsters[i]) {
 					game.deleteMonsters(i);
@@ -154,14 +157,14 @@ class Mod extends Mods.Mod {
 			game.updateGame();
 		}));
 
-		this.container.append($("<button>Reload Shaders</button>").click(() => {
+		this.inner.append($("<button>Reload Shaders</button>").click(() => {
 			Shaders.loadShaders(() => {
 				Shaders.compileShaders();
 				game.updateGame();
 			});
 		}));
 
-		this.container.append($("<button>Noclip</button>").click(() => {
+		this.inner.append($("<button>Noclip</button>").click(() => {
 			this.noclipEnabled = !this.noclipEnabled;
 		}));
 
@@ -169,15 +172,18 @@ class Mod extends Mods.Mod {
 			id: this.getName(),
 			title: "Developer Tools",
 			x: 10,
-			y: 140,
+			y: 180,
 			width: 380,
-			height: 315,
-			minWidth: 405,
-			minHeight: 315,
+			height: 400,
+			minWidth: 380,
+			minHeight: 400,
 			onOpen: () => {
 				if (ui.setRangeValue) {
 					ui.setRangeValue("daynight", game.dayNight);
 				}
+			},
+			onResizeStop: () => {
+				this.updateDialogHeight();
 			}
 		});
 	}
@@ -186,6 +192,7 @@ class Mod extends Mods.Mod {
 		switch (keyBind) {
 			case this.keyBind:
 				ui.toggleDialog(this.dialog);
+				this.updateDialogHeight();
 				return false;
 		}
 		return undefined;
@@ -221,6 +228,18 @@ class Mod extends Mods.Mod {
 
 	///////////////////////////////////////////////////
 	// Helper functions
+
+	// Recalculate the inner height
+	public updateDialogHeight(): void {
+		if (!this.dialog) {
+			return;
+		}
+
+		var height = this.container.find(".inner").outerHeight() + 43;
+		this.container.dialog("option", "height", height);
+		this.container.dialog("option", "maxHeight", height);
+	}
+
 	private generateSelect(enums: any, objects: Array<any>, className: string, labelName: string): string {
 		var html = `<select class="${className}"><option selected disabled>${labelName}</option>`;
 
@@ -250,7 +269,7 @@ class Mod extends Mods.Mod {
 			return b.name.localeCompare(a.name);
 		});
 
-		for (var i = sorted.length; i--;) {
+		for (var i = sorted.length; i--) {
 			html += `<option data-id="${sorted[i].id}">${sorted[i].name}</option>`;
 		}
 

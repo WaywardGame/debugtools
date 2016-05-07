@@ -6,6 +6,7 @@ declare class Mod extends Mods.Mod {
     private noclipDelay;
     private inMove;
     private container;
+    private inner;
     private data;
     onInitialize(saveDataGlobal: any): any;
     onLoad(saveData: any): void;
@@ -19,5 +20,6 @@ declare class Mod extends Mods.Mod {
     canMonsterAttack(monsterId: number, monster: IMonster): boolean;
     onMove(nextX: number, nextY: number, tile: ITile, direction: FacingDirection): boolean;
     onNoInputReceived(): void;
+    updateDialogHeight(): void;
     private generateSelect(enums, objects, className, labelName);
 }
