@@ -121,7 +121,7 @@ var Mod = (function (_super) {
             player.hunger = player.starvation;
             player.thirst = player.dehydration;
             player.status.bleeding = false;
-            player.status.burning = false;
+            player.status.burned = false;
             player.status.poisoned = false;
             game.updateGame();
         }));

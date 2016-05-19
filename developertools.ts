@@ -142,7 +142,7 @@ class Mod extends Mods.Mod {
 			player.hunger = player.starvation;
 			player.thirst = player.dehydration;
 			player.status.bleeding = false;
-			player.status.burning = false;
+			player.status.burned = false;
 			player.status.poisoned = false;
 			game.updateGame();
 		}));
@@ -269,7 +269,7 @@ class Mod extends Mods.Mod {
 			return b.name.localeCompare(a.name);
 		});
 
-		for (var i = sorted.length; i--) {
+		for (var i = sorted.length; i--; ) {
 			html += `<option data-id="${sorted[i].id}">${sorted[i].name}</option>`;
 		}
 
