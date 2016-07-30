@@ -1,4 +1,3 @@
-/// <reference path="mod-reference/modreference.d.ts" />
 interface IInspectionMessages {
     QueryInspection: number;
     QueryObjectNotFound: number;
@@ -34,31 +33,4 @@ declare class MonsterInspector extends Inspector {
     private monsterId;
     constructor(monsterId: number, mouseX: number, mouseY: number);
     update(): void;
-}
-declare class Mod extends Mods.Mod implements IInspectionMessageDelegate {
-    private dialog;
-    private keyBind;
-    private noclipEnabled;
-    private noclipDelay;
-    private inMove;
-    private container;
-    private inner;
-    private inspection;
-    InspectionMessages: IInspectionMessages;
-    private data;
-    onInitialize(saveDataGlobal: any): any;
-    onLoad(saveData: any): void;
-    onSave(): any;
-    onUnload(): void;
-    onGameStart(isLoadingSave: boolean): void;
-    isPlayerSwimming(player: Player, isSwimming: boolean): boolean;
-    onShowInGameScreen(): void;
-    onTurnComplete(): void;
-    onMouseDown(event: JQueryEventObject): boolean;
-    onKeyBindPress(keyBind: KeyBind): boolean;
-    canMonsterAttack(monsterId: number, monster: IMonster): boolean;
-    onMove(nextX: number, nextY: number, tile: ITile, direction: FacingDirection): boolean;
-    onNoInputReceived(): void;
-    updateDialogHeight(): void;
-    private generateSelect(enums, objects, className, labelName);
 }

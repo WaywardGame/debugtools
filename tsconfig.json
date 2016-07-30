@@ -6,7 +6,7 @@
         "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
-        "outDir": "",
+        "outFile": "developertools.js",
         "sourceMap": true
     }
 }

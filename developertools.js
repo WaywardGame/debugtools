@@ -3,6 +3,123 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var Inspection = (function () {
+    function Inspection(messageDelegate) {
+        this.messageDelegate = messageDelegate;
+        this.inspectors = [];
+        ui.appendStyle("inspection-data", ".inspection-data{width:100%;}.inspection-data th{text-align:left}.inspection-data table{width:100%}");
+    }
+    Inspection.prototype.isQueryingInspection = function () {
+        return this.bQueryInspection;
+    };
+    Inspection.prototype.queryInspection = function () {
+        this.bQueryInspection = true;
+        ui.displayMessage(this.messageDelegate.InspectionMessages.QueryInspection, MessageType.None);
+    };
+    Inspection.prototype.update = function () {
+        for (var _i = 0, _a = this.inspectors; _i < _a.length; _i++) {
+            var inspector = _a[_i];
+            inspector.update();
+        }
+    };
+    Inspection.prototype.inspect = function (mouseX, mouseY, createDialog) {
+        var tilePosition = renderer.screenToTile(mouseX, mouseY);
+        this.bQueryInspection = false;
+        var tile = game.getTile(tilePosition.x, tilePosition.y, player.z);
+        if (tile.monsterId !== undefined) {
+            var inspector = new MonsterInspector(tile.monsterId, mouseX, mouseY);
+            inspector.createDialog(createDialog);
+            this.inspectors.push(inspector);
+        }
+        else {
+            ui.displayMessage(this.messageDelegate.InspectionMessages.QueryObjectNotFound, MessageType.Bad);
+        }
+    };
+    return Inspection;
+}());
+var Inspector = (function () {
+    function Inspector(target, id, title, mouseX, mouseY) {
+        var _this = this;
+        this.target = target;
+        this.dialogContainer = $("<div></div>");
+        this.dialogInfo = {
+            id: id,
+            title: "Inspector - " + title,
+            x: mouseX,
+            y: mouseY,
+            width: 380,
+            height: 400,
+            minWidth: 150,
+            minHeight: 50,
+            onOpen: function () {
+            },
+            onResizeStop: function () {
+            }
+        };
+        this.dialogContainer.append($("<button>Log</button>").click(function () {
+            console.log(_this.target);
+        }));
+        this.dataContainer = $("<table class='inspection-data'></table>");
+        this.dialogContainer.append(this.dataContainer);
+    }
+    Inspector.prototype.createDialog = function (creator) {
+        this.dialog = creator(this.dialogContainer, this.dialogInfo);
+        ui.openDialog(this.dialog);
+    };
+    return Inspector;
+}());
+var MonsterInspector = (function (_super) {
+    __extends(MonsterInspector, _super);
+    function MonsterInspector(monsterId, mouseX, mouseY) {
+        var monster = game.monsters[monsterId];
+        var desc = monsters[monster.type];
+        _super.call(this, monster, "monster-id:" + monsterId, "Monster (" + desc.name + ")", mouseX, mouseY);
+        this.monsterId = monsterId;
+        this.monster = (this.target);
+        var data = $("<table></table>");
+        data.append("<tr><th rowspan='3'>Position:</th><td>fromX:</td><td data-attribute=\"fromX\"></td><td>x:</td><td data-attribute=\"x\"></tr>");
+        data.append("<tr><td>fromY:</td><td data-attribute=\"fromY\"></td><td>y:</td><td data-attribute=\"y\"></tr>");
+        data.append("<tr><td></td><td></td><td>z:</td><td data-attribute=\"z\"></tr>");
+        this.dataContainer.append($("<tr></tr>").append($("<td></td>").append(data)));
+        data = $("<table></table>");
+        data.append("<tr><th>Behaviors:</th><td data-attribute=\"ai\"></td></tr>");
+        this.dataContainer.append($("<tr></tr>").append($("<td></td>").append(data)));
+        var dc = this.dataContainer;
+        this.attributes = {
+            fromX: dc.find("[data-attribute='fromX']"),
+            fromY: dc.find("[data-attribute='fromY']"),
+            x: dc.find("[data-attribute='x']"),
+            y: dc.find("[data-attribute='y']"),
+            z: dc.find("[data-attribute='z']"),
+            ai: dc.find("[data-attribute='ai']")
+        };
+        this.update();
+    }
+    MonsterInspector.prototype.update = function () {
+        if (game.monsters[this.monsterId] === undefined) {
+            return;
+        }
+        for (var key in this.attributes) {
+            var attr = this.attributes[key];
+            if (key == "ai") {
+                var values = Object.keys(MonsterAiType).map(function (k) { return MonsterAiType[k]; }).filter(function (v) { return typeof v === "number"; });
+                var ai = this.monster[key];
+                var behaviors = [];
+                for (var _i = 0, values_1 = values; _i < values_1.length; _i++) {
+                    var behavior = values_1[_i];
+                    if ((ai & behavior) === behavior) {
+                        behaviors.push(MonsterAiType[behavior]);
+                    }
+                }
+                attr.text(behaviors.join(', '));
+            }
+            else {
+                attr.text(this.monster[key].toString());
+            }
+        }
+    };
+    return MonsterInspector;
+}(Inspector));
 var Mod = (function (_super) {
     __extends(Mod, _super);
     function Mod() {
@@ -26,6 +143,11 @@ var Mod = (function (_super) {
         this.noclipDelay = Delay.Movement;
         this.inMove = false;
         this.keyBind = this.addKeyBind(this.getName(), 220);
+        this.InspectionMessages = {
+            QueryInspection: this.addMessage("QueryInspection", "Choose an object to inspect by clicking on its tile."),
+            QueryObjectNotFound: this.addMessage("QueryObjectNotFound", "The selected tile contains no object that can be inspected.")
+        };
+        this.inspection = new Inspection(this);
         console.log("Loaded developer tools " + this.data.loadedCount + " times.", this.data);
     };
     Mod.prototype.onSave = function () {
@@ -41,14 +163,6 @@ var Mod = (function (_super) {
     Mod.prototype.isPlayerSwimming = function (player, isSwimming) {
         if (this.noclipEnabled) {
             return false;
-        }
-        else {
-            return undefined;
-        }
-    };
-    Mod.prototype.getPlayerSpriteBatchLayer = function (player, batchLayer) {
-        if (this.noclipEnabled) {
-            return SpriteBatchLayer.FlyingMonster;
         }
         else {
             return undefined;
@@ -115,6 +229,9 @@ var Mod = (function (_super) {
                 game.updateGame();
             }
         });
+        this.inner.append($("<button>Inspect</button>").click(function () {
+            _this.inspection.queryInspection();
+        }));
         this.inner.append($("<button>Refresh Stats</button>").click(function () {
             player.health = player.strength;
             player.stamina = player.dexterity;
@@ -142,6 +259,13 @@ var Mod = (function (_super) {
         }));
         this.inner.append($("<button>Noclip</button>").click(function () {
             _this.noclipEnabled = !_this.noclipEnabled;
+            if (_this.noclipEnabled) {
+                player.moveType = MoveType.Flying;
+            }
+            else {
+                player.moveType = MoveType.Land;
+            }
+            game.updateGame();
         }));
         this.dialog = this.createDialog(this.container, {
             id: this.getName(),
@@ -161,6 +285,16 @@ var Mod = (function (_super) {
                 _this.updateDialogHeight();
             }
         });
+    };
+    Mod.prototype.onTurnComplete = function () {
+        this.inspection.update();
+    };
+    Mod.prototype.onMouseDown = function (event) {
+        if (this.inspection.isQueryingInspection()) {
+            var mousePosition = ui.getMousePositionFromMouseEvent(event);
+            this.inspection.inspect(mousePosition.x, mousePosition.y, this.createDialog);
+            return false;
+        }
     };
     Mod.prototype.onKeyBindPress = function (keyBind) {
         switch (keyBind) {

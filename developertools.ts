@@ -1,6 +1,7 @@
 ﻿/// <reference path="mod-reference/modreference.d.ts"/>
+/// <reference path="inspection.ts"/>
 
-class Mod extends Mods.Mod {
+class Mod extends Mods.Mod implements IInspectionMessageDelegate {
 	private dialog: JQuery;
 	private keyBind: number;
 	private noclipEnabled: boolean;
@@ -8,9 +9,12 @@ class Mod extends Mods.Mod {
 	private inMove: boolean;
 	private container: JQuery;
 	private inner: JQuery;
+	private inspection: Inspection;
+
+	public InspectionMessages: IInspectionMessages;
 
 	private data: {
-		loadedCount: number
+		loadedCount: number;
 	};
 
 	public onInitialize(saveDataGlobal: any): any {
@@ -36,6 +40,13 @@ class Mod extends Mods.Mod {
 
 		this.keyBind = this.addKeyBind(this.getName(), 220);
 
+		this.InspectionMessages = {
+			QueryInspection: this.addMessage("QueryInspection", "Choose an object to inspect by clicking on its tile."),
+			QueryObjectNotFound: this.addMessage("QueryObjectNotFound", "The selected tile contains no object that can be inspected.")
+		};
+
+		this.inspection = new Inspection(this);
+
 		console.log(`Loaded developer tools ${this.data.loadedCount} times.`, this.data);
 	}
 
@@ -59,14 +70,6 @@ class Mod extends Mods.Mod {
 	public isPlayerSwimming(player: Player, isSwimming: boolean): boolean {
 		if (this.noclipEnabled) {
 			return false;
-		} else {
-			return undefined;
-		}
-	}
-
-	public getPlayerSpriteBatchLayer(player: Player, batchLayer: SpriteBatchLayer): SpriteBatchLayer {
-		if (this.noclipEnabled) {
-			return SpriteBatchLayer.FlyingMonster;
 		} else {
 			return undefined;
 		}
@@ -136,6 +139,10 @@ class Mod extends Mods.Mod {
 			}
 		});
 
+		this.inner.append($("<button>Inspect</button>").click(() => {
+			this.inspection.queryInspection();
+		}));
+
 		this.inner.append($("<button>Refresh Stats</button>").click(() => {
 			player.health = player.strength;
 			player.stamina = player.dexterity;
@@ -166,6 +173,12 @@ class Mod extends Mods.Mod {
 
 		this.inner.append($("<button>Noclip</button>").click(() => {
 			this.noclipEnabled = !this.noclipEnabled;
+			if (this.noclipEnabled) {
+				player.moveType = MoveType.Flying;
+			} else {
+				player.moveType = MoveType.Land;
+			}
+			game.updateGame();
 		}));
 
 		this.dialog = this.createDialog(this.container, {
@@ -186,6 +199,18 @@ class Mod extends Mods.Mod {
 				this.updateDialogHeight();
 			}
 		});
+	}
+
+	public onTurnComplete() {
+		this.inspection.update();
+	}
+
+	public onMouseDown(event: JQueryEventObject): boolean {
+		if (this.inspection.isQueryingInspection()) {
+			const mousePosition = ui.getMousePositionFromMouseEvent(event);
+			this.inspection.inspect(mousePosition.x, mousePosition.y, this.createDialog);
+			return false;
+		}
 	}
 
 	public onKeyBindPress(keyBind: KeyBind): boolean {
@@ -209,10 +234,13 @@ class Mod extends Mods.Mod {
 			} else {
 				this.noclipDelay = Delay.Movement;
 			}
+			
 			game.addDelay(this.noclipDelay);
+			
 			player.updateDirection(direction);
 			player.nextX = nextX;
 			player.nextY = nextY;
+			
 			this.inMove = true;
 			game.passTurn();
 
