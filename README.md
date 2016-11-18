@@ -1,7 +1,7 @@
 # Developer Tools
 Adds a special developer tools menu into the game. By default you can open it by pressing '\'.
 
-In the menu, you can give yourself items, change terrain, spawn monsters, refresh health, no-clip and more!
+In the menu, you can give yourself items, change terrain, spawn creatures, refresh health, no-clip and more!
 
 ## Cloning:
 ```
