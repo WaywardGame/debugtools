@@ -47,6 +47,7 @@ define(["require", "exports", "./inspection"], function (require, exports, inspe
         }
         onUnload() {
             this.removeOptionsSection("Mod Refresh");
+            this.modRefreshSection = null;
         }
         onGameStart(isLoadingSave) {
             game.options.hints = false;

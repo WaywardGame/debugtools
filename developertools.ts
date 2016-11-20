@@ -84,6 +84,7 @@ export default class Mod extends Mods.Mod implements IInspectionMessageDelegate 
 
 	public onUnload(): void {
 		this.removeOptionsSection("Mod Refresh");
+		this.modRefreshSection = null;
 	}
 
 	///////////////////////////////////////////////////
