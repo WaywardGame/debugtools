@@ -333,7 +333,7 @@ export default class Mod extends Mods.Mod implements IInspectionMessageDelegate 
 		return 42;
 	}
 
-	private generateSelect(enums: any, objects: Array<any>, className: string, labelName: string): string {
+	private generateSelect(enums: any, objects: any[], className: string, labelName: string): string {
 		let html = `<select class="${className}"><option selected disabled>${labelName}</option>`;
 
 		let sorted = new Array<any>();
