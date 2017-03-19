@@ -1,3 +1,9 @@
+import Creatures from "creature/Creatures";
+import { AiType, ICreature } from "creature/ICreature";
+import { Source } from "Enums";
+import { MessageType } from "language/Messages";
+import { IDialogInfo } from "ui/IUi";
+import * as Utilities from "Utilities";
 
 export interface IInspectionMessages {
 	QueryInspection: number;
@@ -26,11 +32,11 @@ export class Inspection {
 
 	public queryInspection() {
 		this.bQueryInspection = true;
-		ui.displayMessage(this.messageDelegate.inspectionMessages.QueryInspection, MessageType.None);
+		ui.displayMessage(localPlayer, this.messageDelegate.inspectionMessages.QueryInspection, MessageType.None);
 	}
 
 	public update() {
-		for (let inspector of this.inspectors) {
+		for (const inspector of this.inspectors) {
 			inspector.update();
 		}
 	}
@@ -38,13 +44,13 @@ export class Inspection {
 	public inspect(mouseX: number, mouseY: number, createDialog: any) {
 		const tilePosition = renderer.screenToTile(mouseX, mouseY);
 		this.bQueryInspection = false;
-		const tile = game.getTile(tilePosition.x, tilePosition.y, player.z);
+		const tile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
 		if (tile.creatureId !== undefined) {
 			const inspector = new CreatureInspector(tile.creatureId, mouseX, mouseY);
 			inspector.createDialog(createDialog);
 			this.inspectors.push(inspector);
 		} else {
-			ui.displayMessage(this.messageDelegate.inspectionMessages.QueryObjectNotFound, MessageType.Bad);
+			ui.displayMessage(localPlayer, this.messageDelegate.inspectionMessages.QueryObjectNotFound, MessageType.Bad);
 		}
 	}
 
@@ -55,7 +61,7 @@ abstract class Inspector {
 	protected dataContainer: JQuery;
 	protected attributes: { [index: string]: JQuery };
 	private dialog: JQuery;
-	private dialogInfo: UI.IDialogInfo;
+	private dialogInfo: IDialogInfo;
 	private dialogContainer: JQuery;
 
 	constructor(target: Object, id: string, title: string, mouseX: number, mouseY: number) {
@@ -93,15 +99,15 @@ abstract class Inspector {
 }
 
 class CreatureInspector extends Inspector {
-	public creature: Creature.ICreature;
+	public creature: ICreature;
 	private creatureId: number;
 
 	constructor(creatureId: number, mouseX: number, mouseY: number) {
 		const creature = game.creatures[creatureId];
-		const desc = Creature.defines[creature.type];
+		const desc = Creatures[creature.type];
 		super(creature, `creature-id:${creatureId}`, `Creature (${desc.name})`, mouseX, mouseY);
 		this.creatureId = creatureId;
-		this.creature = <Creature.ICreature>(this.target);
+		this.creature = (this.target) as ICreature;
 		let data = $("<table></table>");
 		data.append(`<tr><th rowspan='3'>Position:</th><td>fromX:</td><td data-attribute="fromX"></td><td>x:</td><td data-attribute="x"></tr>`);
 		data.append(`<tr><td>fromY:</td><td data-attribute="fromY"></td><td>y:</td><td data-attribute="y"></tr>`);
@@ -128,20 +134,20 @@ class CreatureInspector extends Inspector {
 			return;
 		}
 
-		for (let key in this.attributes) {
+		for (const key in this.attributes) {
 			const attr = this.attributes[key];
 			if (key === "ai") {
-				const values = Utilities.Enums.getValues(Creature.AiType);
-				const ai = <Creature.AiType>(<any>this.creature)[key];
-				let behaviors: string[] = [];
-				for (let behavior of values) {
+				const values = Utilities.Enums.getValues(AiType);
+				const ai = (this.creature as any)[key] as AiType;
+				const behaviors: string[] = [];
+				for (const behavior of values) {
 					if ((ai & behavior) === behavior) {
-						behaviors.push(Creature.AiType[behavior]);
+						behaviors.push(AiType[behavior]);
 					}
 				}
 				attr.text(behaviors.join(", "));
 			} else {
-				attr.text((<any>this.creature)[key].toString());
+				attr.text((this.creature as any)[key].toString());
 			}
 		}
 	}

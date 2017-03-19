@@ -1,5 +1,6 @@
-define(["require", "exports"], function (require, exports) {
+define(["require", "exports", "creature/Creatures", "creature/ICreature", "Enums", "language/Messages", "Utilities"], function (require, exports, Creatures_1, ICreature_1, Enums_1, Messages_1, Utilities) {
     "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
     class Inspection {
         constructor(messageDelegate) {
             this.messageDelegate = messageDelegate;
@@ -11,24 +12,24 @@ define(["require", "exports"], function (require, exports) {
         }
         queryInspection() {
             this.bQueryInspection = true;
-            ui.displayMessage(this.messageDelegate.inspectionMessages.QueryInspection, MessageType.None);
+            ui.displayMessage(localPlayer, this.messageDelegate.inspectionMessages.QueryInspection, Messages_1.MessageType.None);
         }
         update() {
-            for (let inspector of this.inspectors) {
+            for (const inspector of this.inspectors) {
                 inspector.update();
             }
         }
         inspect(mouseX, mouseY, createDialog) {
             const tilePosition = renderer.screenToTile(mouseX, mouseY);
             this.bQueryInspection = false;
-            const tile = game.getTile(tilePosition.x, tilePosition.y, player.z);
+            const tile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
             if (tile.creatureId !== undefined) {
                 const inspector = new CreatureInspector(tile.creatureId, mouseX, mouseY);
                 inspector.createDialog(createDialog);
                 this.inspectors.push(inspector);
             }
             else {
-                ui.displayMessage(this.messageDelegate.inspectionMessages.QueryObjectNotFound, MessageType.Bad);
+                ui.displayMessage(localPlayer, this.messageDelegate.inspectionMessages.QueryObjectNotFound, Messages_1.MessageType.Bad);
             }
         }
     }
@@ -52,7 +53,7 @@ define(["require", "exports"], function (require, exports) {
                 }
             };
             this.dialogContainer.append($("<button>Log</button>").click(() => {
-                Utilities.Console.log(Source.Mod, this.target);
+                Utilities.Console.log(Enums_1.Source.Mod, this.target);
             }));
             this.dataContainer = $("<table class='inspection-data'></table>");
             this.dialogContainer.append(this.dataContainer);
@@ -65,7 +66,7 @@ define(["require", "exports"], function (require, exports) {
     class CreatureInspector extends Inspector {
         constructor(creatureId, mouseX, mouseY) {
             const creature = game.creatures[creatureId];
-            const desc = Creature.defines[creature.type];
+            const desc = Creatures_1.default[creature.type];
             super(creature, `creature-id:${creatureId}`, `Creature (${desc.name})`, mouseX, mouseY);
             this.creatureId = creatureId;
             this.creature = (this.target);
@@ -92,15 +93,15 @@ define(["require", "exports"], function (require, exports) {
             if (game.creatures[this.creatureId] === undefined) {
                 return;
             }
-            for (let key in this.attributes) {
+            for (const key in this.attributes) {
                 const attr = this.attributes[key];
                 if (key === "ai") {
-                    const values = Utilities.Enums.getValues(Creature.AiType);
+                    const values = Utilities.Enums.getValues(ICreature_1.AiType);
                     const ai = this.creature[key];
-                    let behaviors = [];
-                    for (let behavior of values) {
+                    const behaviors = [];
+                    for (const behavior of values) {
                         if ((ai & behavior) === behavior) {
-                            behaviors.push(Creature.AiType[behavior]);
+                            behaviors.push(ICreature_1.AiType[behavior]);
                         }
                     }
                     attr.text(behaviors.join(", "));
@@ -112,4 +113,4 @@ define(["require", "exports"], function (require, exports) {
         }
     }
 });
-//# sourceMappingURL=inspection.js.map
+//# sourceMappingURL=Inspection.js.map

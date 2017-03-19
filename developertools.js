@@ -1,13 +1,27 @@
-define(["require", "exports", "./inspection"], function (require, exports, inspection_1) {
+define(["require", "exports", "creature/corpse/Corpses", "creature/Creatures", "doodad/Doodads", "Enums", "item/Items", "mapgen/MapGenHelpers", "mod/Mod", "renderer/Shaders", "tile/ITerrain", "tile/ITileEvent", "tile/Terrains", "tile/TileEvents", "Utilities", "./Inspection"], function (require, exports, Corpses_1, Creatures_1, Doodads_1, Enums_1, Items_1, MapGenHelpers, Mod_1, Shaders, ITerrain_1, ITileEvent_1, Terrains_1, TileEvents_1, Utilities, Inspection_1) {
     "use strict";
-    class Mod extends Mods.Mod {
+    Object.defineProperty(exports, "__esModule", { value: true });
+    class DeveloperTools extends Mod_1.default {
+        constructor() {
+            super(...arguments);
+            this.isPlayingAudio = false;
+        }
         onInitialize(saveDataGlobal) {
+            this.loadFile("developerTools.css", (cssString, success) => {
+                if (success) {
+                    ui.appendStyle("developer-tools", cssString);
+                }
+            });
             if (!saveDataGlobal) {
                 saveDataGlobal = { initializedCount: 1 };
             }
-            Utilities.Console.log(Source.Mod, `Initialized developer tools ${saveDataGlobal.initializedCount} times.`);
-            saveDataGlobal.initializedCount++;
-            return saveDataGlobal;
+            Utilities.Console.log(Enums_1.Source.Mod, `Initialized developer tools ${saveDataGlobal.initializedCount} times.`);
+            this.globalData = saveDataGlobal;
+            this.globalData.initializedCount++;
+        }
+        onUninitialize() {
+            Utilities.Console.log(Enums_1.Source.Mod, `Uninitialized developer tools!`);
+            return this.globalData;
         }
         onLoad(saveData) {
             this.data = saveData;
@@ -16,21 +30,21 @@ define(["require", "exports", "./inspection"], function (require, exports, inspe
                     loadedCount: 0
                 };
             }
-            this.noclipDelay = Delay.Movement;
+            this.noclipDelay = Enums_1.Delay.Movement;
             this.inMove = false;
             this.keyBind = this.addKeyBind(this.getName(), 220);
-            if (!this.modRefreshSection) {
-                this.modRefreshSection = this.createOptionsSection("Mod Refresh");
+            if (!this.elementModRefreshSection) {
+                this.elementModRefreshSection = this.createOptionsSection("Mod Refresh");
             }
-            this.modRefreshSection.find(".mods-list").remove();
-            this.modRefreshSection.append(`<ul class="mods-list"></ul>`);
-            const list = this.modRefreshSection.find("ul");
-            const mods = Mods.getMods();
+            this.elementModRefreshSection.find(".mods-list").remove();
+            this.elementModRefreshSection.append(`<ul class="mods-list"></ul>`);
+            const list = this.elementModRefreshSection.find("ul");
+            const mods = modManager.getMods();
             for (let i = 0; i < mods.length; i++) {
-                const name = Mods.getName(i);
+                const name = modManager.getName(i);
                 const row = $(`<li>${name} - </li>`);
                 $("<button>Refresh</button>").click(() => {
-                    Mods.reload(i);
+                    modManager.reload(i);
                 }).appendTo(row);
                 list.append(row);
             }
@@ -38,8 +52,8 @@ define(["require", "exports", "./inspection"], function (require, exports, inspe
                 QueryInspection: this.addMessage("QueryInspection", "Choose an object to inspect by clicking on its tile."),
                 QueryObjectNotFound: this.addMessage("QueryObjectNotFound", "The selected tile contains no object that can be inspected.")
             };
-            this.inspection = new inspection_1.Inspection(this);
-            Utilities.Console.log(Source.Mod, `Loaded developer tools ${this.data.loadedCount} times.`, this.data);
+            this.inspection = new Inspection_1.Inspection(this);
+            Utilities.Console.log(Enums_1.Source.Mod, `Loaded developer tools ${this.data.loadedCount} times.`, this.data);
         }
         onSave() {
             this.data.loadedCount++;
@@ -47,13 +61,13 @@ define(["require", "exports", "./inspection"], function (require, exports, inspe
         }
         onUnload() {
             this.removeOptionsSection("Mod Refresh");
-            this.modRefreshSection = null;
+            this.elementModRefreshSection = null;
         }
         onGameStart(isLoadingSave) {
-            game.options.hints = false;
+            saveDataGlobal.options.hints = false;
             this.noclipEnabled = false;
         }
-        isPlayerSwimming(player, isSwimming) {
+        isPlayerSwimming(localPlayer, isSwimming) {
             if (this.noclipEnabled) {
                 return false;
             }
@@ -62,137 +76,174 @@ define(["require", "exports", "./inspection"], function (require, exports, inspe
             }
         }
         onShowInGameScreen() {
-            this.container = $("<div></div>");
-            this.inner = $(`<div class="inner"></div>`);
-            this.container.append(this.inner);
-            let html = this.generateSelect(TerrainType, Terrain.defines, "change-tile", "Change Tile");
-            html += this.generateSelect(CreatureType, Creature.defines, "spawn-creature", "Spawn Creature");
-            html += this.generateSelect(ItemType, Item.defines, "item-get", "Get Item");
-            html += this.generateSelect(DoodadType, Doodad.defines, "place-env-item", "Place Doodad");
-            html += this.generateSelect(TileEvent.Type, TileEvent.defines, "place-tile-event", "Place Tile Event");
-            html += this.generateSelect(CreatureType, Corpse.defines, "place-corpse", "Place Corpse");
-            html += this.generateSelect(Terrain.TileTemplateType, undefined, "spawn-template", "Spawn Template");
-            html += `DayNight: <input id="daynightslider" type ="range" min="0.0" max="1.0" step ="0.01" data-range-id="daynight" />`;
-            this.inner.append(html);
-            this.inner.on("click", ".select-control", function () {
+            this.elementContainer = $("<div></div>");
+            this.elementInner = $(`<div class="inner"></div>`);
+            this.elementContainer.append(this.elementInner);
+            let html = this.generateSelect(Enums_1.TerrainType, Terrains_1.default, "change-tile", "Change Tile");
+            html += this.generateSelect(Enums_1.CreatureType, Creatures_1.default, "spawn-creature", "Spawn Creature");
+            html += this.generateSelect(Enums_1.ItemType, Items_1.default, "item-get", "Get Item");
+            html += this.generateSelect(Enums_1.DoodadType, Doodads_1.default, "place-env-item", "Place Doodad");
+            html += this.generateSelect(ITileEvent_1.TileEventType, TileEvents_1.default, "place-tile-event", "Place Tile Event");
+            html += this.generateSelect(Enums_1.CreatureType, Corpses_1.default, "place-corpse", "Place Corpse");
+            html += this.generateSelect(ITerrain_1.TileTemplateType, undefined, "spawn-template", "Spawn Template");
+            html += this.generateSelect(Enums_1.SfxType, undefined, "play-audio", "Play Audio");
+            html += `Time: <input id="daynightslider" type ="range" min="0.0" max="1.0" step ="0.01" data-range-id="daynight" />`;
+            html += `<div id="daynighttime"></div>`;
+            this.elementInner.append(html);
+            this.elementDayNightTime = $("<div id='daynighttime'>").appendTo(this.elementInner);
+            this.elementInner.on("click", ".select-control", function () {
                 $(`.${$(this).data("control")}`).trigger("change");
             });
-            this.inner.on("input change", "#daynightslider", function () {
-                game.dayNight = parseFloat($(this).val());
+            const self = this;
+            this.elementInner.on("input change", "#daynightslider", function () {
+                game.time.setTime(parseFloat($(this).val()));
+                self.elementDayNightTime.text(game.time.getTimeFormat());
                 game.updateRender = true;
-                game.fov.compute();
+                fieldOfView.compute();
                 if (ui.setRangeValue) {
-                    ui.setRangeValue("daynight", game.dayNight);
+                    ui.setRangeValue("daynight", game.time.getTime());
                 }
             });
-            this.inner.on("change", "select", function () {
-                let id = parseInt($(this).find("option:selected").data("id"), 10);
+            this.elementInner.on("change", "select", function () {
+                const id = parseInt($(this).find("option:selected").data("id"), 10);
                 if (id >= 0) {
                     if ($(this).hasClass("change-tile")) {
-                        game.changeTile({ type: id }, player.x + player.direction.x, player.y + player.direction.y, player.z, false);
+                        game.changeTile({ type: id }, localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z, false);
                     }
                     else if ($(this).hasClass("spawn-creature")) {
-                        Creature.spawn(id, player.x + player.direction.x, player.y + player.direction.y, player.z, true);
+                        creatureManager.spawn(id, localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z, true);
                     }
                     else if ($(this).hasClass("item-get")) {
-                        Item.create(id);
+                        localPlayer.createItemInInventory(id);
                         game.updateCraftTableAndWeight();
                     }
                     else if ($(this).hasClass("place-env-item")) {
-                        let tile = game.getTile(player.x + player.direction.x, player.y + player.direction.y, player.z);
+                        const tile = game.getTile(localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z);
                         if (tile.doodadId !== undefined) {
-                            Doodad.remove(game.doodads[tile.doodadId]);
+                            doodadManager.remove(game.doodads[tile.doodadId]);
                         }
-                        const doodad = Doodad.create(id, player.x + player.direction.x, player.y + player.direction.y, player.z);
-                        if (Doodad.defines[id].growing) {
-                            for (let i = 0; i < Doodad.defines.length; i++) {
-                                if (Doodad.defines[i].growth && Doodad.defines[i].growth === id) {
-                                    doodad.growInto = i;
+                        const doodad = doodadManager.create(id, localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z);
+                        if (Doodads_1.default[id].growing) {
+                            for (const value of Utilities.Enums.getValues(Enums_1.DoodadType)) {
+                                const doodadDescription = Doodads_1.default[value];
+                                if (doodadDescription && doodadDescription.growth && doodadDescription.growth === id) {
+                                    doodad.growInto = value;
                                     break;
                                 }
                             }
                         }
                     }
                     else if ($(this).hasClass("place-tile-event")) {
-                        TileEvent.create(id, player.x + player.direction.x, player.y + player.direction.y, player.z);
+                        tileEventManager.create(id, localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z);
                     }
                     else if ($(this).hasClass("place-corpse")) {
-                        let corpse = {
+                        const corpse = {
                             type: id,
-                            x: player.x + player.direction.x,
-                            y: player.y + player.direction.y,
-                            z: player.z,
+                            x: localPlayer.x + localPlayer.direction.x,
+                            y: localPlayer.y + localPlayer.direction.y,
+                            z: localPlayer.z,
                             aberrant: false,
-                            decay: Corpse.defines[id].decay
+                            decay: Corpses_1.default[id].decay
                         };
-                        Corpse.create(corpse);
+                        corpseManager.create(corpse);
                     }
                     else if ($(this).hasClass("spawn-template")) {
-                        MapGen.spawnTemplate(id, player.x + player.direction.x, player.y + player.direction.y, player.z);
+                        MapGenHelpers.spawnTemplate(id, localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z);
+                    }
+                    else if ($(this).hasClass("play-audio")) {
+                        self.isPlayingAudio = !self.isPlayingAudio;
+                        $("[data-control='play-audio']").toggleClass("active", self.isPlayingAudio);
+                        self.audioToPlay = id;
                     }
                     game.updateGame();
                 }
             });
-            this.inner.append($("<button>Inspect</button>").click(() => {
+            this.elementInner.append($("<button>Inspect</button>").click(() => {
                 this.inspection.queryInspection();
-            }));
-            this.inner.append($("<button>Refresh Stats</button>").click(() => {
-                player.health = player.getMaxHealth();
-                player.stamina = player.dexterity;
-                player.hunger = player.starvation;
-                player.thirst = player.dehydration;
-                player.status.bleeding = false;
-                player.status.burned = false;
-                player.status.poisoned = false;
+            }), $("<button>Refresh Stats</button>").click(() => {
+                localPlayer.stats.health.value = localPlayer.getMaxHealth();
+                localPlayer.stats.stamina.value = localPlayer.dexterity;
+                localPlayer.stats.hunger.value = localPlayer.starvation;
+                localPlayer.stats.thirst.value = localPlayer.dehydration;
+                localPlayer.status.bleeding = false;
+                localPlayer.status.burned = false;
+                localPlayer.status.poisoned = false;
                 game.updateGame();
-            }));
-            this.inner.append($("<button>Kill All Creatures</button>").click(() => {
+            }), $("<button>Kill All Creatures</button>").click(() => {
                 for (let i = 0; i < game.creatures.length; i++) {
                     if (game.creatures[i] !== undefined) {
-                        Creature.remove(game.creatures[i]);
+                        creatureManager.remove(game.creatures[i]);
                     }
                 }
                 game.creatures = [];
                 game.updateGame();
-            }));
-            this.inner.append($("<button>Unlock Recipes</button>").click(() => {
-                for (let itemType = ItemType.None + 1; itemType < Utilities.Enums.getMax(ItemType); itemType++) {
-                    const description = Item.defines[itemType];
+            }), $("<button>Unlock Recipes</button>").click(() => {
+                const itemTypes = Utilities.Enums.getValues(Enums_1.ItemType);
+                for (const itemType of itemTypes) {
+                    const description = Items_1.default[itemType];
                     if (description && description.recipe && description.craftable !== false) {
                         game.crafted[itemType] = true;
                     }
                 }
                 game.updateCraftTableAndWeight();
                 game.updateGame();
-            }));
-            this.inner.append($("<button>Reload Shaders</button>").click(() => {
+            }), $("<button>Reload Shaders</button>").click(() => {
                 Shaders.loadShaders(() => {
                     Shaders.compileShaders();
                     game.updateGame();
                 });
-            }));
-            this.inner.append($("<button>Noclip</button>").click(() => {
+            }), $("<button>Noclip</button>").click(() => {
                 this.noclipEnabled = !this.noclipEnabled;
                 if (this.noclipEnabled) {
-                    player.moveType = MoveType.Flying;
+                    localPlayer.moveType = Enums_1.MoveType.Flying;
                 }
                 else {
-                    player.moveType = MoveType.Land;
+                    localPlayer.moveType = Enums_1.MoveType.Land;
                 }
                 game.updateGame();
+            }), $("<button>Toggle FOV</button>").click(() => {
+                fieldOfView.disabled = !fieldOfView.disabled;
+                fieldOfView.compute();
+                game.updateGame();
+            }), $("<button>Zoom Out</button>").click(() => {
+                renderer.setTileScale(0.15);
+                renderer.computeSpritesInViewport();
+                game.updateRender = true;
+            }), $("<button>Toggle Tilled</button>").click(() => {
+                const x = localPlayer.x;
+                const y = localPlayer.y;
+                const z = localPlayer.z;
+                const tile = game.getTile(x, y, z);
+                game.tileData[x] = game.tileData[x] || [];
+                game.tileData[x][y] = game.tileData[x][y] || [];
+                game.tileData[x][y][localPlayer.z] = game.tileData[x][y][z] || [];
+                const tileData = game.tileData[x][y][z];
+                if (tileData.length === 0) {
+                    tileData.push({
+                        type: Utilities.TileHelpers.getType(tile),
+                        tilled: true
+                    });
+                }
+                else {
+                    tileData[0].tilled = tileData[0].tilled ? false : true;
+                }
+                Utilities.TileHelpers.setTilled(tile, tileData[0].tilled);
+                world.updateTile(x, y, z, tile);
+                renderer.computeSpritesInViewport();
+                game.updateRender = true;
             }));
-            this.dialog = this.createDialog(this.container, {
+            this.elementDialog = this.createDialog(this.elementContainer, {
                 id: this.getName(),
                 title: "Developer Tools",
                 x: 20,
                 y: 180,
-                width: 380,
+                width: 400,
                 height: 400,
-                minWidth: 380,
+                minWidth: 400,
                 minHeight: 400,
                 onOpen: () => {
                     if (ui.setRangeValue) {
-                        ui.setRangeValue("daynight", game.dayNight);
+                        ui.setRangeValue("daynight", game.time.getTime());
                     }
                 },
                 onResizeStop: () => {
@@ -202,6 +253,11 @@ define(["require", "exports", "./inspection"], function (require, exports, inspe
         }
         onTurnComplete() {
             this.inspection.update();
+            if (ui.setRangeValue) {
+                const time = game.time.getTime();
+                ui.setRangeValue("daynight", time);
+                this.elementDayNightTime.text(game.time.getTimeFormat(time));
+            }
         }
         onMouseDown(event) {
             if (this.inspection.isQueryingInspection()) {
@@ -209,11 +265,17 @@ define(["require", "exports", "./inspection"], function (require, exports, inspe
                 this.inspection.inspect(mousePosition.x, mousePosition.y, this.createDialog);
                 return false;
             }
+            else if (this.isPlayingAudio) {
+                const mousePosition = ui.getMousePositionFromMouseEvent(event);
+                const tilePosition = renderer.screenToTile(mousePosition.x, mousePosition.y);
+                audio.queueEffect(this.audioToPlay, tilePosition.x, tilePosition.y, localPlayer.z);
+                return false;
+            }
         }
         onKeyBindPress(keyBind) {
             switch (keyBind) {
                 case this.keyBind:
-                    ui.toggleDialog(this.dialog);
+                    ui.toggleDialog(this.elementDialog);
                     this.updateDialogHeight();
                     return false;
             }
@@ -228,37 +290,39 @@ define(["require", "exports", "./inspection"], function (require, exports, inspe
                     this.noclipDelay = Math.max(this.noclipDelay - 1, 0);
                 }
                 else {
-                    this.noclipDelay = Delay.Movement;
+                    this.noclipDelay = Enums_1.Delay.Movement;
                 }
-                game.addDelay(this.noclipDelay);
-                player.updateDirection(direction);
-                player.nextX = nextX;
-                player.nextY = nextY;
+                localPlayer.addDelay(this.noclipDelay, true);
+                actionManager.execute(localPlayer, Enums_1.ActionType.UpdateDirection, {
+                    direction: direction
+                });
+                localPlayer.nextX = nextX;
+                localPlayer.nextY = nextY;
                 this.inMove = true;
-                game.passTurn();
+                game.passTurn(localPlayer);
                 return false;
             }
-            return null;
+            return undefined;
         }
         onNoInputReceived() {
             this.inMove = false;
         }
         updateDialogHeight() {
-            if (!this.dialog) {
+            if (!this.elementDialog) {
                 return;
             }
-            let height = this.container.find(".inner").outerHeight() + 43;
-            this.container.dialog("option", "height", height);
-            this.container.dialog("option", "maxHeight", height);
+            const height = this.elementContainer.find(".inner").outerHeight() + 43;
+            this.elementContainer.dialog("option", "height", height);
+            this.elementContainer.dialog("option", "maxHeight", height);
         }
         testFunction() {
-            Utilities.Console.log(Source.Mod, "This is a test function");
+            Utilities.Console.log(Enums_1.Source.Mod, "This is a test function");
             return 42;
         }
         generateSelect(enums, objects, className, labelName) {
             let html = `<select class="${className}"><option selected disabled>${labelName}</option>`;
-            let sorted = new Array();
-            let makePretty = (str) => {
+            const sorted = new Array();
+            const makePretty = (str) => {
                 let result = str[0];
                 for (let i = 1; i < str.length; i++) {
                     if (str[i] === str[i].toUpperCase()) {
@@ -268,22 +332,9 @@ define(["require", "exports", "./inspection"], function (require, exports, inspe
                 }
                 return result;
             };
-            if (objects) {
-                objects.forEach((obj, index) => {
-                    if (obj && !obj.tall) {
-                        let enumName = enums[index];
-                        if (enumName) {
-                            sorted.push({ id: index, name: makePretty(enumName) });
-                        }
-                    }
-                });
-            }
-            else {
-                let enumValues = Utilities.Enums.getValues(enums);
-                for (let enumValue of enumValues) {
-                    sorted.push({ id: enumValue, name: makePretty(enums[enumValue]) });
-                }
-            }
+            Utilities.Enums.forEach(enums, (name, value) => {
+                sorted.push({ id: value, name: makePretty(name) });
+            });
             sorted.sort((a, b) => {
                 return a.name.localeCompare(b.name);
             });
@@ -294,7 +345,6 @@ define(["require", "exports", "./inspection"], function (require, exports, inspe
             return html;
         }
     }
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.default = Mod;
+    exports.default = DeveloperTools;
 });
-//# sourceMappingURL=developertools.js.map
+//# sourceMappingURL=DeveloperTools.js.map

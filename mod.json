@@ -1,7 +1,7 @@
 {
 	"name": "Developer Tools",
 	"description": "Adds a special developer tools menu into the game.",
-	"version": "1.2.0",
+	"version": "1.3.0",
 	"author": "Spacetech",
 	"hooks": [
 		"CanCreatureAttack",
@@ -15,9 +15,9 @@
 		"OnShowInGameScreen"
 	],
 	"unloadable": true,
-	"compatible_minor_versions": [
-		2
+	"compatibleMinorVersions": [
+		3
 	],
-	"file": "developertools.js",
+	"file": "DeveloperTools.js",
 	"publishedFileId": "474819610"
 }

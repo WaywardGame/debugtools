@@ -1,33 +1,68 @@
-﻿/// <reference path="mod-reference/modreference.d.ts"/>
-/// <reference path="inspection.ts"/>
+import Corpses from "creature/corpse/Corpses";
+import { ICorpse } from "creature/corpse/ICorpse";
+import Creatures from "creature/Creatures";
+import { ICreature } from "creature/ICreature";
+import Doodads from "doodad/Doodads";
+import { ActionType, CreatureType, Delay, DoodadType, FacingDirection, ItemType, KeyBind, MoveType, SfxType, Source, TerrainType } from "Enums";
+import Items from "item/Items";
+import * as MapGenHelpers from "mapgen/MapGenHelpers";
+import Mod from "mod/Mod";
+import IPlayer from "Player/IPlayer";
+import * as Shaders from "renderer/Shaders";
+import { TileTemplateType } from "tile/ITerrain";
+import { ITile } from "tile/ITerrain";
+import { TileEventType } from "tile/ITileEvent";
+import Terrains from "tile/Terrains";
+import TileEvents from "tile/TileEvents";
+import * as Utilities from "Utilities";
+import { IInspectionMessageDelegate, IInspectionMessages, Inspection } from "./Inspection";
 
-import { IInspectionMessageDelegate, IInspectionMessages, Inspection } from "./inspection";
-
-export default class Mod extends Mods.Mod implements IInspectionMessageDelegate {
+export default class DeveloperTools extends Mod implements IInspectionMessageDelegate {
 
 	public inspectionMessages: IInspectionMessages;
 
-	private dialog: JQuery;
-	private modRefreshSection: JQuery;
+	private elementDialog: JQuery;
+	private elementModRefreshSection: JQuery;
 	private keyBind: number;
 	private noclipEnabled: boolean;
 	private noclipDelay: number;
 	private inMove: boolean;
-	private container: JQuery;
-	private inner: JQuery;
+	private elementContainer: JQuery;
+	private elementInner: JQuery;
+	private elementDayNightTime: JQuery;
 	private inspection: Inspection;
+	private isPlayingAudio = false;
+	private audioToPlay: number;
 
 	private data: {
 		loadedCount: number;
 	};
 
+	private globalData: {
+		initializedCount: number;
+	};
+
 	public onInitialize(saveDataGlobal: any): any {
+		this.loadFile("developerTools.css", (cssString, success) => {
+			if (success) {
+				ui.appendStyle("developer-tools", cssString);
+			}
+		});
+
 		if (!saveDataGlobal) {
 			saveDataGlobal = { initializedCount: 1 };
 		}
+
 		Utilities.Console.log(Source.Mod, `Initialized developer tools ${saveDataGlobal.initializedCount} times.`);
-		saveDataGlobal.initializedCount++;
-		return saveDataGlobal;
+
+		this.globalData = saveDataGlobal;
+		this.globalData.initializedCount++;
+	}
+
+	public onUninitialize(): any {
+		Utilities.Console.log(Source.Mod, `Uninitialized developer tools!`);
+
+		return this.globalData;
 	}
 
 	public onLoad(saveData: any): void {
@@ -44,24 +79,24 @@ export default class Mod extends Mods.Mod implements IInspectionMessageDelegate 
 
 		this.keyBind = this.addKeyBind(this.getName(), 220);
 
-		if (!this.modRefreshSection) {
-			this.modRefreshSection = this.createOptionsSection("Mod Refresh");
+		if (!this.elementModRefreshSection) {
+			this.elementModRefreshSection = this.createOptionsSection("Mod Refresh");
 		}
 
-		this.modRefreshSection.find(".mods-list").remove();
+		this.elementModRefreshSection.find(".mods-list").remove();
 
-		this.modRefreshSection.append(`<ul class="mods-list"></ul>`);
+		this.elementModRefreshSection.append(`<ul class="mods-list"></ul>`);
 
-		const list = this.modRefreshSection.find("ul");
-		const mods = Mods.getMods();
+		const list = this.elementModRefreshSection.find("ul");
 
+		const mods = modManager.getMods();
 		for (let i = 0; i < mods.length; i++) {
-			const name = Mods.getName(i);
+			const name = modManager.getName(i);
 
 			const row = $(`<li>${name} - </li>`);
 
 			$("<button>Refresh</button>").click(() => {
-				Mods.reload(i);
+				modManager.reload(i);
 			}).appendTo(row);
 
 			list.append(row);
@@ -84,7 +119,7 @@ export default class Mod extends Mods.Mod implements IInspectionMessageDelegate 
 
 	public onUnload(): void {
 		this.removeOptionsSection("Mod Refresh");
-		this.modRefreshSection = null;
+		this.elementModRefreshSection = null;
 	}
 
 	///////////////////////////////////////////////////
@@ -92,11 +127,11 @@ export default class Mod extends Mods.Mod implements IInspectionMessageDelegate 
 
 	public onGameStart(isLoadingSave: boolean): void {
 		// disable hints
-		game.options.hints = false;
+		saveDataGlobal.options.hints = false;
 		this.noclipEnabled = false;
 	}
 
-	public isPlayerSwimming(player: Player, isSwimming: boolean): boolean {
+	public isPlayerSwimming(localPlayer: IPlayer, isSwimming: boolean): boolean {
 		if (this.noclipEnabled) {
 			return false;
 		} else {
@@ -105,154 +140,210 @@ export default class Mod extends Mods.Mod implements IInspectionMessageDelegate 
 	}
 
 	public onShowInGameScreen(): void {
-		this.container = $("<div></div>");
-		this.inner = $(`<div class="inner"></div>`);
-		this.container.append(this.inner);
+		this.elementContainer = $("<div></div>");
+		this.elementInner = $(`<div class="inner"></div>`);
+		this.elementContainer.append(this.elementInner);
 
-		let html = this.generateSelect(TerrainType, Terrain.defines, "change-tile", "Change Tile");
-		html += this.generateSelect(CreatureType, Creature.defines, "spawn-creature", "Spawn Creature");
-		html += this.generateSelect(ItemType, Item.defines, "item-get", "Get Item");
-		html += this.generateSelect(DoodadType, Doodad.defines, "place-env-item", "Place Doodad");
-		html += this.generateSelect(TileEvent.Type, TileEvent.defines, "place-tile-event", "Place Tile Event");
-		html += this.generateSelect(CreatureType, Corpse.defines, "place-corpse", "Place Corpse");
-		html += this.generateSelect(Terrain.TileTemplateType, undefined, "spawn-template", "Spawn Template");
+		let html = this.generateSelect(TerrainType, Terrains, "change-tile", "Change Tile");
+		html += this.generateSelect(CreatureType, Creatures, "spawn-creature", "Spawn Creature");
+		html += this.generateSelect(ItemType, Items, "item-get", "Get Item");
+		html += this.generateSelect(DoodadType, Doodads, "place-env-item", "Place Doodad");
+		html += this.generateSelect(TileEventType, TileEvents, "place-tile-event", "Place Tile Event");
+		html += this.generateSelect(CreatureType, Corpses, "place-corpse", "Place Corpse");
+		html += this.generateSelect(TileTemplateType, undefined, "spawn-template", "Spawn Template");
+		html += this.generateSelect(SfxType, undefined, "play-audio", "Play Audio");
 
-		html += `DayNight: <input id="daynightslider" type ="range" min="0.0" max="1.0" step ="0.01" data-range-id="daynight" />`;
+		html += `Time: <input id="daynightslider" type ="range" min="0.0" max="1.0" step ="0.01" data-range-id="daynight" />`;
+		html += `<div id="daynighttime"></div>`;
 
-		this.inner.append(html);
+		this.elementInner.append(html);
+		this.elementDayNightTime = $("<div id='daynighttime'>").appendTo(this.elementInner);
 
-		this.inner.on("click", ".select-control", function () {
+		this.elementInner.on("click", ".select-control", function () {
 			$(`.${$(this).data("control")}`).trigger("change");
 		});
 
-		this.inner.on("input change", "#daynightslider", function () {
-			game.dayNight = parseFloat($(this).val());
+		const self = this;
+		this.elementInner.on("input change", "#daynightslider", function () {
+			game.time.setTime(parseFloat($(this).val()));
+			self.elementDayNightTime.text(game.time.getTimeFormat());
 			game.updateRender = true;
-			game.fov.compute();
+			fieldOfView.compute();
 			if (ui.setRangeValue) {
-				ui.setRangeValue("daynight", game.dayNight);
+				ui.setRangeValue("daynight", game.time.getTime());
 			}
 		});
 
-		this.inner.on("change", "select", function () {
-			let id = parseInt($(this).find("option:selected").data("id"), 10);
+		this.elementInner.on("change", "select", function () {
+			const id = parseInt($(this).find("option:selected").data("id"), 10);
 			if (id >= 0) {
 				if ($(this).hasClass("change-tile")) {
-					game.changeTile({ type: id }, player.x + player.direction.x, player.y + player.direction.y, player.z, false);
+					game.changeTile({ type: id }, localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z, false);
 
 				} else if ($(this).hasClass("spawn-creature")) {
-					Creature.spawn(id, player.x + player.direction.x, player.y + player.direction.y, player.z, true);
+					creatureManager.spawn(id, localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z, true);
 
 				} else if ($(this).hasClass("item-get")) {
-					Item.create(id);
+					localPlayer.createItemInInventory(id);
 					game.updateCraftTableAndWeight();
 
 				} else if ($(this).hasClass("place-env-item")) {
 					// Remove if Doodad already there
-					let tile = game.getTile(player.x + player.direction.x, player.y + player.direction.y, player.z);
+					const tile = game.getTile(localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z);
 					if (tile.doodadId !== undefined) {
-						Doodad.remove(game.doodads[tile.doodadId]);
+						doodadManager.remove(game.doodads[tile.doodadId]);
 					}
-					const doodad = Doodad.create(id, player.x + player.direction.x, player.y + player.direction.y, player.z);
+
+					const doodad = doodadManager.create(id, localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z);
+
 					// Set defaults for growing doodads
-					if (Doodad.defines[id].growing) {
-						for (let i = 0; i < Doodad.defines.length; i++) {
-							if (Doodad.defines[i].growth && Doodad.defines[i].growth === id) {
-								doodad.growInto = i;
+					if (Doodads[id].growing) {
+						for (const value of Utilities.Enums.getValues(DoodadType)) {
+							const doodadDescription = Doodads[value];
+							if (doodadDescription && doodadDescription.growth && doodadDescription.growth === id) {
+								doodad.growInto = value;
 								break;
 							}
 						}
 					}
 
 				} else if ($(this).hasClass("place-tile-event")) {
-					TileEvent.create(id, player.x + player.direction.x, player.y + player.direction.y, player.z);
+					tileEventManager.create(id, localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z);
 
 				} else if ($(this).hasClass("place-corpse")) {
-					let corpse: Corpse.ICorpse = {
+					const corpse: ICorpse = {
 						type: id,
-						x: player.x + player.direction.x,
-						y: player.y + player.direction.y,
-						z: player.z,
+						x: localPlayer.x + localPlayer.direction.x,
+						y: localPlayer.y + localPlayer.direction.y,
+						z: localPlayer.z,
 						aberrant: false,
-						decay: Corpse.defines[id].decay
+						decay: Corpses[id].decay
 					};
 
-					Corpse.create(corpse);
+					corpseManager.create(corpse);
 
 				} else if ($(this).hasClass("spawn-template")) {
-					MapGen.spawnTemplate(id, player.x + player.direction.x, player.y + player.direction.y, player.z);
+					MapGenHelpers.spawnTemplate(id, localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z);
+
+				} else if ($(this).hasClass("play-audio")) {
+					self.isPlayingAudio = !self.isPlayingAudio;
+					$("[data-control='play-audio']").toggleClass("active", self.isPlayingAudio);
+					self.audioToPlay = id;
 				}
 
 				game.updateGame();
 			}
 		});
 
-		this.inner.append($("<button>Inspect</button>").click(() => {
-			this.inspection.queryInspection();
-		}));
+		this.elementInner.append(
+			$("<button>Inspect</button>").click(() => {
+				this.inspection.queryInspection();
+			}),
 
-		this.inner.append($("<button>Refresh Stats</button>").click(() => {
-			player.health = player.getMaxHealth();
-			player.stamina = player.dexterity;
-			player.hunger = player.starvation;
-			player.thirst = player.dehydration;
-			player.status.bleeding = false;
-			player.status.burned = false;
-			player.status.poisoned = false;
-			game.updateGame();
-		}));
-
-		this.inner.append($("<button>Kill All Creatures</button>").click(() => {
-			for (let i = 0; i < game.creatures.length; i++) {
-				if (game.creatures[i] !== undefined) {
-					Creature.remove(game.creatures[i]);
-				}
-			}
-			game.creatures = [];
-			game.updateGame();
-		}));
-
-		this.inner.append($("<button>Unlock Recipes</button>").click(() => {
-			for (let itemType = ItemType.None + 1; itemType < Utilities.Enums.getMax(ItemType); itemType++) {
-				const description = Item.defines[itemType];
-				if (description && description.recipe && description.craftable !== false) {
-					game.crafted[itemType] = true;
-				}
-			}
-
-			game.updateCraftTableAndWeight();
-			game.updateGame();
-		}));
-
-		this.inner.append($("<button>Reload Shaders</button>").click(() => {
-			Shaders.loadShaders(() => {
-				Shaders.compileShaders();
+			$("<button>Refresh Stats</button>").click(() => {
+				localPlayer.stats.health.value = localPlayer.getMaxHealth();
+				localPlayer.stats.stamina.value = localPlayer.dexterity;
+				localPlayer.stats.hunger.value = localPlayer.starvation;
+				localPlayer.stats.thirst.value = localPlayer.dehydration;
+				localPlayer.status.bleeding = false;
+				localPlayer.status.burned = false;
+				localPlayer.status.poisoned = false;
 				game.updateGame();
-			});
-		}));
+			}),
 
-		this.inner.append($("<button>Noclip</button>").click(() => {
-			this.noclipEnabled = !this.noclipEnabled;
-			if (this.noclipEnabled) {
-				player.moveType = MoveType.Flying;
-			} else {
-				player.moveType = MoveType.Land;
-			}
-			game.updateGame();
-		}));
+			$("<button>Kill All Creatures</button>").click(() => {
+				for (let i = 0; i < game.creatures.length; i++) {
+					if (game.creatures[i] !== undefined) {
+						creatureManager.remove(game.creatures[i]);
+					}
+				}
+				game.creatures = [];
+				game.updateGame();
+			}),
 
-		this.dialog = this.createDialog(this.container, {
+			$("<button>Unlock Recipes</button>").click(() => {
+				const itemTypes = Utilities.Enums.getValues(ItemType);
+				for (const itemType of itemTypes) {
+					const description = Items[itemType];
+					if (description && description.recipe && description.craftable !== false) {
+						game.crafted[itemType] = true;
+					}
+				}
+
+				game.updateCraftTableAndWeight();
+				game.updateGame();
+			}),
+
+			$("<button>Reload Shaders</button>").click(() => {
+				Shaders.loadShaders(() => {
+					Shaders.compileShaders();
+					game.updateGame();
+				});
+			}),
+
+			$("<button>Noclip</button>").click(() => {
+				this.noclipEnabled = !this.noclipEnabled;
+				if (this.noclipEnabled) {
+					localPlayer.moveType = MoveType.Flying;
+				} else {
+					localPlayer.moveType = MoveType.Land;
+				}
+				game.updateGame();
+			}),
+
+			$("<button>Toggle FOV</button>").click(() => {
+				fieldOfView.disabled = !fieldOfView.disabled;
+				fieldOfView.compute();
+				game.updateGame();
+			}),
+
+			$("<button>Zoom Out</button>").click(() => {
+				renderer.setTileScale(0.15);
+				renderer.computeSpritesInViewport();
+				game.updateRender = true;
+			}),
+
+			$("<button>Toggle Tilled</button>").click(() => {
+				const x = localPlayer.x;
+				const y = localPlayer.y;
+				const z = localPlayer.z;
+				const tile = game.getTile(x, y, z);
+
+				game.tileData[x] = game.tileData[x] || [];
+				game.tileData[x][y] = game.tileData[x][y] || [];
+				game.tileData[x][y][localPlayer.z] = game.tileData[x][y][z] || [];
+
+				const tileData = game.tileData[x][y][z];
+				if (tileData.length === 0) {
+					tileData.push({
+						type: Utilities.TileHelpers.getType(tile),
+						tilled: true
+					});
+				} else {
+					tileData[0].tilled = tileData[0].tilled ? false : true;
+				}
+
+				Utilities.TileHelpers.setTilled(tile, tileData[0].tilled);
+
+				world.updateTile(x, y, z, tile);
+
+				renderer.computeSpritesInViewport();
+				game.updateRender = true;
+			})
+		);
+
+		this.elementDialog = this.createDialog(this.elementContainer, {
 			id: this.getName(),
 			title: "Developer Tools",
 			x: 20,
 			y: 180,
-			width: 380,
+			width: 400,
 			height: 400,
-			minWidth: 380,
+			minWidth: 400,
 			minHeight: 400,
 			onOpen: () => {
 				if (ui.setRangeValue) {
-					ui.setRangeValue("daynight", game.dayNight);
+					ui.setRangeValue("daynight", game.time.getTime());
 				}
 			},
 			onResizeStop: () => {
@@ -263,6 +354,11 @@ export default class Mod extends Mods.Mod implements IInspectionMessageDelegate 
 
 	public onTurnComplete() {
 		this.inspection.update();
+		if (ui.setRangeValue) {
+			const time = game.time.getTime();
+			ui.setRangeValue("daynight", time);
+			this.elementDayNightTime.text(game.time.getTimeFormat(time));
+		}
 	}
 
 	public onMouseDown(event: JQueryEventObject): boolean {
@@ -270,24 +366,29 @@ export default class Mod extends Mods.Mod implements IInspectionMessageDelegate 
 			const mousePosition = ui.getMousePositionFromMouseEvent(event);
 			this.inspection.inspect(mousePosition.x, mousePosition.y, this.createDialog);
 			return false;
+		} else if (this.isPlayingAudio) {
+			const mousePosition = ui.getMousePositionFromMouseEvent(event);
+			const tilePosition = renderer.screenToTile(mousePosition.x, mousePosition.y);
+			audio.queueEffect(this.audioToPlay, tilePosition.x, tilePosition.y, localPlayer.z);
+			return false;
 		}
 	}
 
 	public onKeyBindPress(keyBind: KeyBind): boolean {
 		switch (keyBind) {
 			case this.keyBind:
-				ui.toggleDialog(this.dialog);
+				ui.toggleDialog(this.elementDialog);
 				this.updateDialogHeight();
 				return false;
 		}
 		return undefined;
 	}
 
-	public canCreatureAttack(creatureId: number, creature: Creature.ICreature): boolean {
+	public canCreatureAttack(creatureId: number, creature: ICreature): boolean {
 		return this.noclipEnabled ? false : null;
 	}
 
-	public onMove(nextX: number, nextY: number, tile: Terrain.ITile, direction: FacingDirection): boolean {
+	public onMove(nextX: number, nextY: number, tile: ITile, direction: FacingDirection): boolean | undefined {
 		if (this.noclipEnabled) {
 			if (this.inMove) {
 				this.noclipDelay = Math.max(this.noclipDelay - 1, 0);
@@ -295,19 +396,23 @@ export default class Mod extends Mods.Mod implements IInspectionMessageDelegate 
 				this.noclipDelay = Delay.Movement;
 			}
 
-			game.addDelay(this.noclipDelay);
+			localPlayer.addDelay(this.noclipDelay, true);
 
-			player.updateDirection(direction);
-			player.nextX = nextX;
-			player.nextY = nextY;
+			actionManager.execute(localPlayer, ActionType.UpdateDirection, {
+				direction: direction
+			});
+
+			localPlayer.nextX = nextX;
+			localPlayer.nextY = nextY;
 
 			this.inMove = true;
-			game.passTurn();
+			game.passTurn(localPlayer);
 
 			// disable default movement
 			return false;
 		}
-		return null;
+
+		return undefined;
 	}
 
 	public onNoInputReceived(): void {
@@ -319,13 +424,13 @@ export default class Mod extends Mods.Mod implements IInspectionMessageDelegate 
 
 	// Recalculate the inner height
 	public updateDialogHeight(): void {
-		if (!this.dialog) {
+		if (!this.elementDialog) {
 			return;
 		}
 
-		let height = this.container.find(".inner").outerHeight() + 43;
-		this.container.dialog("option", "height", height);
-		this.container.dialog("option", "maxHeight", height);
+		const height = this.elementContainer.find(".inner").outerHeight() + 43;
+		this.elementContainer.dialog("option", "height", height);
+		this.elementContainer.dialog("option", "maxHeight", height);
 	}
 
 	public testFunction(): number {
@@ -333,11 +438,11 @@ export default class Mod extends Mods.Mod implements IInspectionMessageDelegate 
 		return 42;
 	}
 
-	private generateSelect(enums: any, objects: any[], className: string, labelName: string): string {
+	private generateSelect(enums: any, objects: any, className: string, labelName: string): string {
 		let html = `<select class="${className}"><option selected disabled>${labelName}</option>`;
 
-		let sorted = new Array<any>();
-		let makePretty = (str: string): string => {
+		const sorted = new Array<any>();
+		const makePretty = (str: string): string => {
 			let result = str[0];
 			for (let i = 1; i < str.length; i++) {
 				if (str[i] === str[i].toUpperCase()) {
@@ -348,22 +453,21 @@ export default class Mod extends Mods.Mod implements IInspectionMessageDelegate 
 			return result;
 		};
 
+		/*
 		if (objects) {
 			objects.forEach((obj: any, index: any) => {
 				// Doodad tree fix
 				if (obj && !obj.tall) {
-					let enumName = enums[index];
+					const enumName = enums[index];
 					if (enumName) {
 						sorted.push({ id: index, name: makePretty(enumName) });
 					}
 				}
 			});
-		} else {
-			let enumValues = Utilities.Enums.getValues(enums);
-			for (let enumValue of enumValues) {
-				sorted.push({ id: enumValue, name: makePretty(enums[enumValue]) });
-			}
-		}
+		} else {*/
+		Utilities.Enums.forEach(enums, (name, value) => {
+			sorted.push({ id: value, name: makePretty(name) });
+		});
 
 		sorted.sort((a: any, b: any): number => {
 			return a.name.localeCompare(b.name);
