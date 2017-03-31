@@ -1,6 +1,5 @@
 define(["require", "exports", "creature/Creatures", "creature/ICreature", "Enums", "language/Messages", "Utilities"], function (require, exports, Creatures_1, ICreature_1, Enums_1, Messages_1, Utilities) {
     "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
     class Inspection {
         constructor(messageDelegate) {
             this.messageDelegate = messageDelegate;

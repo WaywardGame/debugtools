@@ -15,7 +15,7 @@ import { TileEventType } from "tile/ITileEvent";
 import Terrains from "tile/Terrains";
 import TileEvents from "tile/TileEvents";
 import * as Utilities from "Utilities";
-import { IInspectionMessageDelegate, IInspectionMessages, Inspection } from "./Inspection";
+import { IInspectionMessageDelegate, IInspectionMessages, Inspection } from "./Inspection.js";
 
 export default class DeveloperTools extends Mod implements IInspectionMessageDelegate {
 

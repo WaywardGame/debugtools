@@ -1,6 +1,5 @@
-define(["require", "exports", "creature/corpse/Corpses", "creature/Creatures", "doodad/Doodads", "Enums", "item/Items", "mapgen/MapGenHelpers", "mod/Mod", "renderer/Shaders", "tile/ITerrain", "tile/ITileEvent", "tile/Terrains", "tile/TileEvents", "Utilities", "./Inspection"], function (require, exports, Corpses_1, Creatures_1, Doodads_1, Enums_1, Items_1, MapGenHelpers, Mod_1, Shaders, ITerrain_1, ITileEvent_1, Terrains_1, TileEvents_1, Utilities, Inspection_1) {
+define(["require", "exports", "creature/corpse/Corpses", "creature/Creatures", "doodad/Doodads", "Enums", "item/Items", "mapgen/MapGenHelpers", "mod/Mod", "renderer/Shaders", "tile/ITerrain", "tile/ITileEvent", "tile/Terrains", "tile/TileEvents", "Utilities", "./Inspection.js"], function (require, exports, Corpses_1, Creatures_1, Doodads_1, Enums_1, Items_1, MapGenHelpers, Mod_1, Shaders, ITerrain_1, ITileEvent_1, Terrains_1, TileEvents_1, Utilities, Inspection_js_1) {
     "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
     class DeveloperTools extends Mod_1.default {
         constructor() {
             super(...arguments);
@@ -52,7 +51,7 @@ define(["require", "exports", "creature/corpse/Corpses", "creature/Creatures", "
                 QueryInspection: this.addMessage("QueryInspection", "Choose an object to inspect by clicking on its tile."),
                 QueryObjectNotFound: this.addMessage("QueryObjectNotFound", "The selected tile contains no object that can be inspected.")
             };
-            this.inspection = new Inspection_1.Inspection(this);
+            this.inspection = new Inspection_js_1.Inspection(this);
             Utilities.Console.log(Enums_1.Source.Mod, `Loaded developer tools ${this.data.loadedCount} times.`, this.data);
         }
         onSave() {
@@ -345,6 +344,7 @@ define(["require", "exports", "creature/corpse/Corpses", "creature/Creatures", "
             return html;
         }
     }
+    Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = DeveloperTools;
 });
 //# sourceMappingURL=DeveloperTools.js.map
