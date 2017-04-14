@@ -34,7 +34,6 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
     canCreatureAttack(creatureId: number, creature: ICreature): boolean;
     onMove(nextX: number, nextY: number, tile: ITile, direction: FacingDirection): boolean | undefined;
     onNoInputReceived(): void;
-    updateDialogHeight(): void;
     testFunction(): number;
     private generateSelect(enums, objects, className, labelName);
 }

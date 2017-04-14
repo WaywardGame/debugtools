@@ -43,11 +43,6 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 	};
 
 	public onInitialize(saveDataGlobal: any): any {
-		this.loadFile("developerTools.css", (cssString, success) => {
-			if (success) {
-				ui.appendStyle("developer-tools", cssString);
-			}
-		});
 
 		if (!saveDataGlobal) {
 			saveDataGlobal = { initializedCount: 1 };
@@ -153,7 +148,7 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 		html += this.generateSelect(TileTemplateType, undefined, "spawn-template", "Spawn Template");
 		html += this.generateSelect(SfxType, undefined, "play-audio", "Play Audio");
 
-		html += `Time: <input id="daynightslider" type ="range" min="0.0" max="1.0" step ="0.01" data-range-id="daynight" />`;
+		html += `<br />Time: <input id="daynightslider" type ="range" min="0.0" max="1.0" step ="0.01" data-range-id="daynight" />`;
 		html += `<div id="daynighttime"></div>`;
 
 		this.elementInner.append(html);
@@ -337,17 +332,13 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 			title: "Developer Tools",
 			x: 20,
 			y: 180,
-			width: 400,
-			height: 400,
-			minWidth: 400,
-			minHeight: 400,
+			width: 440,
+			height: "auto",
+			resizable: false,
 			onOpen: () => {
 				if (ui.setRangeValue) {
 					ui.setRangeValue("daynight", game.time.getTime());
 				}
-			},
-			onResizeStop: () => {
-				this.updateDialogHeight();
 			}
 		});
 	}
@@ -378,7 +369,6 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 		switch (keyBind) {
 			case this.keyBind:
 				ui.toggleDialog(this.elementDialog);
-				this.updateDialogHeight();
 				return false;
 		}
 		return undefined;
@@ -421,17 +411,6 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 
 	///////////////////////////////////////////////////
 	// Helper functions
-
-	// Recalculate the inner height
-	public updateDialogHeight(): void {
-		if (!this.elementDialog) {
-			return;
-		}
-
-		const height = this.elementContainer.find(".inner").outerHeight() + 43;
-		this.elementContainer.dialog("option", "height", height);
-		this.elementContainer.dialog("option", "maxHeight", height);
-	}
 
 	public testFunction(): number {
 		Utilities.Console.log(Source.Mod, "This is a test function");
@@ -477,7 +456,7 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 			html += `<option data-id="${sorted[i].id}">${sorted[i].name}</option>`;
 		}
 
-		html += `</select><button class="select-control" data-control="${className}">></button><br />`;
+		html += `</select><button class="select-control" data-control="${className}">></button>`;
 
 		return html;
 	}

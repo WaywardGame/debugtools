@@ -1,16 +1,12 @@
 define(["require", "exports", "creature/corpse/Corpses", "creature/Creatures", "doodad/Doodads", "Enums", "item/Items", "mapgen/MapGenHelpers", "mod/Mod", "renderer/Shaders", "tile/ITerrain", "tile/ITileEvent", "tile/Terrains", "tile/TileEvents", "Utilities", "./Inspection.js"], function (require, exports, Corpses_1, Creatures_1, Doodads_1, Enums_1, Items_1, MapGenHelpers, Mod_1, Shaders, ITerrain_1, ITileEvent_1, Terrains_1, TileEvents_1, Utilities, Inspection_js_1) {
     "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
     class DeveloperTools extends Mod_1.default {
         constructor() {
             super(...arguments);
             this.isPlayingAudio = false;
         }
         onInitialize(saveDataGlobal) {
-            this.loadFile("developerTools.css", (cssString, success) => {
-                if (success) {
-                    ui.appendStyle("developer-tools", cssString);
-                }
-            });
             if (!saveDataGlobal) {
                 saveDataGlobal = { initializedCount: 1 };
             }
@@ -86,7 +82,7 @@ define(["require", "exports", "creature/corpse/Corpses", "creature/Creatures", "
             html += this.generateSelect(Enums_1.CreatureType, Corpses_1.default, "place-corpse", "Place Corpse");
             html += this.generateSelect(ITerrain_1.TileTemplateType, undefined, "spawn-template", "Spawn Template");
             html += this.generateSelect(Enums_1.SfxType, undefined, "play-audio", "Play Audio");
-            html += `Time: <input id="daynightslider" type ="range" min="0.0" max="1.0" step ="0.01" data-range-id="daynight" />`;
+            html += `<br />Time: <input id="daynightslider" type ="range" min="0.0" max="1.0" step ="0.01" data-range-id="daynight" />`;
             html += `<div id="daynighttime"></div>`;
             this.elementInner.append(html);
             this.elementDayNightTime = $("<div id='daynighttime'>").appendTo(this.elementInner);
@@ -236,17 +232,13 @@ define(["require", "exports", "creature/corpse/Corpses", "creature/Creatures", "
                 title: "Developer Tools",
                 x: 20,
                 y: 180,
-                width: 400,
-                height: 400,
-                minWidth: 400,
-                minHeight: 400,
+                width: 440,
+                height: "auto",
+                resizable: false,
                 onOpen: () => {
                     if (ui.setRangeValue) {
                         ui.setRangeValue("daynight", game.time.getTime());
                     }
-                },
-                onResizeStop: () => {
-                    this.updateDialogHeight();
                 }
             });
         }
@@ -275,7 +267,6 @@ define(["require", "exports", "creature/corpse/Corpses", "creature/Creatures", "
             switch (keyBind) {
                 case this.keyBind:
                     ui.toggleDialog(this.elementDialog);
-                    this.updateDialogHeight();
                     return false;
             }
             return undefined;
@@ -306,14 +297,6 @@ define(["require", "exports", "creature/corpse/Corpses", "creature/Creatures", "
         onNoInputReceived() {
             this.inMove = false;
         }
-        updateDialogHeight() {
-            if (!this.elementDialog) {
-                return;
-            }
-            const height = this.elementContainer.find(".inner").outerHeight() + 43;
-            this.elementContainer.dialog("option", "height", height);
-            this.elementContainer.dialog("option", "maxHeight", height);
-        }
         testFunction() {
             Utilities.Console.log(Enums_1.Source.Mod, "This is a test function");
             return 42;
@@ -340,11 +323,10 @@ define(["require", "exports", "creature/corpse/Corpses", "creature/Creatures", "
             for (let i = 0; i < sorted.length; i++) {
                 html += `<option data-id="${sorted[i].id}">${sorted[i].name}</option>`;
             }
-            html += `</select><button class="select-control" data-control="${className}">></button><br />`;
+            html += `</select><button class="select-control" data-control="${className}">></button>`;
             return html;
         }
     }
-    Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = DeveloperTools;
 });
 //# sourceMappingURL=DeveloperTools.js.map
