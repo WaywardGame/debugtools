@@ -1,0 +1,8 @@
+{
+	"extends": "English",
+	"dictionaries": {
+		"keyBind": {
+			"developerTools": "Developer Tools"
+		}
+	}
+}

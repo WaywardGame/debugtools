@@ -15,7 +15,7 @@ import { TileEventType } from "tile/ITileEvent";
 import Terrains from "tile/Terrains";
 import TileEvents from "tile/TileEvents";
 import * as Utilities from "Utilities";
-import { IInspectionMessageDelegate, IInspectionMessages, Inspection } from "./Inspection.js";
+import { IInspectionMessageDelegate, IInspectionMessages, Inspection } from "./Inspection";
 
 export default class DeveloperTools extends Mod implements IInspectionMessageDelegate {
 
@@ -43,6 +43,7 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 	};
 
 	public onInitialize(saveDataGlobal: any): any {
+		this.keyBind = this.addKeyBind(this.getName(), 220);
 
 		if (!saveDataGlobal) {
 			saveDataGlobal = { initializedCount: 1 };
@@ -71,8 +72,6 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 
 		this.noclipDelay = Delay.Movement;
 		this.inMove = false;
-
-		this.keyBind = this.addKeyBind(this.getName(), 220);
 
 		if (!this.elementModRefreshSection) {
 			this.elementModRefreshSection = this.createOptionsSection("Mod Refresh");

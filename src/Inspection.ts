@@ -41,7 +41,7 @@ export class Inspection {
 		}
 	}
 
-	public inspect(mouseX: number, mouseY: number, createDialog: any) {
+	public inspect(mouseX: number, mouseY: number, createDialog: (dialogContainer: JQuery, dialogInfo: IDialogInfo) => JQuery) {
 		const tilePosition = renderer.screenToTile(mouseX, mouseY);
 		this.bQueryInspection = false;
 		const tile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
@@ -50,6 +50,7 @@ export class Inspection {
 			inspector.createDialog(createDialog);
 			this.inspectors.push(inspector);
 		} else {
+			Utilities.Console.log(Source.Mod, `Tile position: ${tilePosition.x}, ${tilePosition.y}, ${localPlayer.z}.`, tile);
 			ui.displayMessage(localPlayer, this.messageDelegate.inspectionMessages.QueryObjectNotFound, MessageType.Bad);
 		}
 	}
@@ -57,14 +58,14 @@ export class Inspection {
 }
 
 abstract class Inspector {
-	public target: Object;
+	public target: object;
 	protected dataContainer: JQuery;
 	protected attributes: { [index: string]: JQuery };
 	private dialog: JQuery;
 	private dialogInfo: IDialogInfo;
 	private dialogContainer: JQuery;
 
-	constructor(target: Object, id: string, title: string, mouseX: number, mouseY: number) {
+	constructor(target: object, id: string, title: string, mouseX: number, mouseY: number) {
 		this.target = target;
 		this.dialogContainer = $("<div></div>");
 		this.dialogInfo = {
@@ -92,7 +93,7 @@ abstract class Inspector {
 
 	public abstract update(): void;
 
-	public createDialog(creator: Function) {
+	public createDialog(creator: (dialogContainer: JQuery, dialogInfo: IDialogInfo) => JQuery) {
 		this.dialog = creator(this.dialogContainer, this.dialogInfo);
 		ui.openDialog(this.dialog);
 	}

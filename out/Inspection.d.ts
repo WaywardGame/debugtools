@@ -1,3 +1,4 @@
+import { IDialogInfo } from "ui/IUi";
 export interface IInspectionMessages {
     QueryInspection: number;
     QueryObjectNotFound: number;
@@ -13,5 +14,5 @@ export declare class Inspection {
     isQueryingInspection(): boolean;
     queryInspection(): void;
     update(): void;
-    inspect(mouseX: number, mouseY: number, createDialog: any): void;
+    inspect(mouseX: number, mouseY: number, createDialog: (dialogContainer: JQuery, dialogInfo: IDialogInfo) => JQuery): void;
 }
