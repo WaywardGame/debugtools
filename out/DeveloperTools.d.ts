@@ -3,9 +3,7 @@ import { FacingDirection, KeyBind } from "Enums";
 import Mod from "mod/Mod";
 import IPlayer from "Player/IPlayer";
 import { ITile } from "tile/ITerrain";
-import { IInspectionMessageDelegate, IInspectionMessages } from "./Inspection";
-export default class DeveloperTools extends Mod implements IInspectionMessageDelegate {
-    inspectionMessages: IInspectionMessages;
+export default class DeveloperTools extends Mod {
     private elementDialog;
     private elementModRefreshSection;
     private keyBind;
@@ -18,6 +16,7 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
     private inspection;
     private isPlayingAudio;
     private audioToPlay;
+    private dictionary;
     private data;
     private globalData;
     onInitialize(saveDataGlobal: any): any;

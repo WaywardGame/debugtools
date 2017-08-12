@@ -1,9 +1,9 @@
 {
 	"name": "Developer Tools",
 	"description": "Adds a special developer tools menu into the game.",
-	"version": "1.3.2",
+	"version": "1.4",
 	"author": "Spacetech",
-	"compatibleMinorVersions": [ 3 ],
+	"compatibleMinorVersions": [ 4 ],
 	
 	"hooks": [
 		"CanCreatureAttack",

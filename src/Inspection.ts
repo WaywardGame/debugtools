@@ -1,27 +1,20 @@
 import Creatures from "creature/Creatures";
 import { AiType, ICreature } from "creature/ICreature";
-import { Source } from "Enums";
+import { Source, TerrainType } from "Enums";
 import { MessageType } from "language/Messages";
 import { IDialogInfo } from "ui/IUi";
 import * as Utilities from "Utilities";
 
-export interface IInspectionMessages {
-	QueryInspection: number;
-	QueryObjectNotFound: number;
-}
-
-export interface IInspectionMessageDelegate {
-	inspectionMessages: IInspectionMessages;
-}
+import { DevToolsMessage } from "./IDeveloperTools";
 
 export class Inspection {
 
 	private bQueryInspection: boolean;
-	private messageDelegate: IInspectionMessageDelegate;
 	private inspectors: Inspector[];
+	private dictionary: number;
 
-	constructor(messageDelegate: IInspectionMessageDelegate) {
-		this.messageDelegate = messageDelegate;
+	constructor(dictionary: number) {
+		this.dictionary = dictionary;
 		this.inspectors = [];
 		ui.appendStyle("inspection-data", ".inspection-data{width:100%;}.inspection-data th{text-align:left}.inspection-data table{width:100%}");
 	}
@@ -32,7 +25,7 @@ export class Inspection {
 
 	public queryInspection() {
 		this.bQueryInspection = true;
-		ui.displayMessage(localPlayer, this.messageDelegate.inspectionMessages.QueryInspection, MessageType.None);
+		ui.displayMessage(localPlayer, languageManager.getDefaultTranslation(this.dictionary, DevToolsMessage.QueryInspection), MessageType.None);
 	}
 
 	public update() {
@@ -45,13 +38,22 @@ export class Inspection {
 		const tilePosition = renderer.screenToTile(mouseX, mouseY);
 		this.bQueryInspection = false;
 		const tile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
-		if (tile.creatureId !== undefined) {
-			const inspector = new CreatureInspector(tile.creatureId, mouseX, mouseY);
+
+		Utilities.Console.log(Source.Mod, `Tile at (${tilePosition.x}, ${tilePosition.y}, ${localPlayer.z}).`, tile);
+
+		Utilities.Console.log(Source.Mod, `Type: ${TerrainType[Utilities.TileHelpers.getType(tile)]}`);
+		Utilities.Console.log(Source.Mod, `Gfx: ${Utilities.TileHelpers.getGfx(tile)}`);
+
+		if (tile.creature) {
+			const inspector = new CreatureInspector(tile.creature, mouseX, mouseY);
 			inspector.createDialog(createDialog);
 			this.inspectors.push(inspector);
+
+		} else if (tile.doodad) {
+			Utilities.Console.log(Source.Mod, `Doodad`, tile.doodad);
+
 		} else {
-			Utilities.Console.log(Source.Mod, `Tile position: ${tilePosition.x}, ${tilePosition.y}, ${localPlayer.z}.`, tile);
-			ui.displayMessage(localPlayer, this.messageDelegate.inspectionMessages.QueryObjectNotFound, MessageType.Bad);
+			ui.displayMessage(localPlayer, languageManager.getDefaultTranslation(this.dictionary, DevToolsMessage.QueryObjectNotFound), MessageType.Bad);
 		}
 	}
 
@@ -103,11 +105,10 @@ class CreatureInspector extends Inspector {
 	public creature: ICreature;
 	private creatureId: number;
 
-	constructor(creatureId: number, mouseX: number, mouseY: number) {
-		const creature = game.creatures[creatureId];
+	constructor(creature: ICreature, mouseX: number, mouseY: number) {
 		const desc = Creatures[creature.type];
-		super(creature, `creature-id:${creatureId}`, `Creature (${desc.name})`, mouseX, mouseY);
-		this.creatureId = creatureId;
+		super(creature, `creature-id:${creature.id}`, `Creature (${desc.name})`, mouseX, mouseY);
+		this.creatureId = creature.id;
 		this.creature = (this.target) as ICreature;
 		let data = $("<table></table>");
 		data.append(`<tr><th rowspan='3'>Position:</th><td>fromX:</td><td data-attribute="fromX"></td><td>x:</td><td data-attribute="x"></tr>`);

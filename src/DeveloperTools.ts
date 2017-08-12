@@ -1,9 +1,8 @@
 import Corpses from "creature/corpse/Corpses";
-import { ICorpse } from "creature/corpse/ICorpse";
 import Creatures from "creature/Creatures";
 import { ICreature } from "creature/ICreature";
 import Doodads from "doodad/Doodads";
-import { ActionType, CreatureType, Delay, DoodadType, FacingDirection, ItemType, KeyBind, MoveType, SfxType, Source, TerrainType } from "Enums";
+import { ActionType, CreatureType, Delay, DoodadType, FacingDirection, ItemType, KeyBind, LoadingType, MoveType, PlayerState, ScreenId, SfxType, Source, TerrainType } from "Enums";
 import Items from "item/Items";
 import * as MapGenHelpers from "mapgen/MapGenHelpers";
 import Mod from "mod/Mod";
@@ -15,12 +14,11 @@ import { TileEventType } from "tile/ITileEvent";
 import Terrains from "tile/Terrains";
 import TileEvents from "tile/TileEvents";
 import * as Utilities from "Utilities";
-import { IInspectionMessageDelegate, IInspectionMessages, Inspection } from "./Inspection";
 
-export default class DeveloperTools extends Mod implements IInspectionMessageDelegate {
+import { DevToolsMessage } from "./IDeveloperTools";
+import { Inspection } from "./Inspection";
 
-	public inspectionMessages: IInspectionMessages;
-
+export default class DeveloperTools extends Mod {
 	private elementDialog: JQuery;
 	private elementModRefreshSection: JQuery;
 	private keyBind: number;
@@ -34,6 +32,8 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 	private isPlayingAudio = false;
 	private audioToPlay: number;
 
+	private dictionary: number;
+
 	private data: {
 		loadedCount: number;
 	};
@@ -44,6 +44,7 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 
 	public onInitialize(saveDataGlobal: any): any {
 		this.keyBind = this.addKeyBind(this.getName(), 220);
+		this.dictionary = this.addDictionary("DeveloperTools", DevToolsMessage);
 
 		if (!saveDataGlobal) {
 			saveDataGlobal = { initializedCount: 1 };
@@ -74,7 +75,7 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 		this.inMove = false;
 
 		if (!this.elementModRefreshSection) {
-			this.elementModRefreshSection = this.createOptionsSection("Mod Refresh");
+			this.elementModRefreshSection = this.createOptionsSection(languageManager.getDefaultTranslation(this.dictionary, DevToolsMessage.OptionsSectionModRefresh));
 		}
 
 		this.elementModRefreshSection.find(".mods-list").remove();
@@ -96,12 +97,7 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 			list.append(row);
 		}
 
-		this.inspectionMessages = {
-			QueryInspection: this.addMessage("QueryInspection", "Choose an object to inspect by clicking on its tile."),
-			QueryObjectNotFound: this.addMessage("QueryObjectNotFound", "The selected tile contains no object that can be inspected.")
-		};
-
-		this.inspection = new Inspection(this);
+		this.inspection = new Inspection(this.dictionary);
 
 		Utilities.Console.log(Source.Mod, `Loaded developer tools ${this.data.loadedCount} times.`, this.data);
 	}
@@ -112,7 +108,7 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 	}
 
 	public onUnload(): void {
-		this.removeOptionsSection("Mod Refresh");
+		this.removeOptionsSection(this.elementModRefreshSection);
 		this.elementModRefreshSection = null;
 	}
 
@@ -128,9 +124,9 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 	public isPlayerSwimming(localPlayer: IPlayer, isSwimming: boolean): boolean {
 		if (this.noclipEnabled) {
 			return false;
-		} else {
-			return undefined;
 		}
+
+		return undefined;
 	}
 
 	public onShowInGameScreen(): void {
@@ -184,37 +180,17 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 				} else if ($(this).hasClass("place-env-item")) {
 					// Remove if Doodad already there
 					const tile = game.getTile(localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z);
-					if (tile.doodadId !== undefined) {
-						doodadManager.remove(game.doodads[tile.doodadId]);
+					if (tile.doodad) {
+						doodadManager.remove(tile.doodad);
 					}
 
-					const doodad = doodadManager.create(id, localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z);
-
-					// Set defaults for growing doodads
-					if (Doodads[id].growing) {
-						for (const value of Utilities.Enums.getValues(DoodadType)) {
-							const doodadDescription = Doodads[value];
-							if (doodadDescription && doodadDescription.growth && doodadDescription.growth === id) {
-								doodad.growInto = value;
-								break;
-							}
-						}
-					}
+					doodadManager.create(id, localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z);
 
 				} else if ($(this).hasClass("place-tile-event")) {
 					tileEventManager.create(id, localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z);
 
 				} else if ($(this).hasClass("place-corpse")) {
-					const corpse: ICorpse = {
-						type: id,
-						x: localPlayer.x + localPlayer.direction.x,
-						y: localPlayer.y + localPlayer.direction.y,
-						z: localPlayer.z,
-						aberrant: false,
-						decay: Corpses[id].decay
-					};
-
-					corpseManager.create(corpse);
+					corpseManager.create(id, localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z);
 
 				} else if ($(this).hasClass("spawn-template")) {
 					MapGenHelpers.spawnTemplate(id, localPlayer.x + localPlayer.direction.x, localPlayer.y + localPlayer.direction.y, localPlayer.z);
@@ -225,7 +201,9 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 					self.audioToPlay = id;
 				}
 
-				game.updateGame();
+				localPlayer.updateStatsAndAttributes();
+
+				game.updateView(true);
 			}
 		});
 
@@ -242,7 +220,7 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 				localPlayer.status.bleeding = false;
 				localPlayer.status.burned = false;
 				localPlayer.status.poisoned = false;
-				game.updateGame();
+				localPlayer.updateStatsAndAttributes();
 			}),
 
 			$("<button>Kill All Creatures</button>").click(() => {
@@ -251,27 +229,31 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 						creatureManager.remove(game.creatures[i]);
 					}
 				}
+
 				game.creatures = [];
-				game.updateGame();
+
+				game.updateView(false);
 			}),
 
 			$("<button>Unlock Recipes</button>").click(() => {
 				const itemTypes = Utilities.Enums.getValues(ItemType);
 				for (const itemType of itemTypes) {
 					const description = Items[itemType];
-					if (description && description.recipe && description.craftable !== false) {
-						game.crafted[itemType] = true;
+					if (description && description.recipe && description.craftable !== false && !game.crafted[itemType]) {
+						game.crafted[itemType] = {
+							newUnlock: true,
+							unlockTime: Date.now()
+						};
 					}
 				}
 
 				game.updateCraftTableAndWeight();
-				game.updateGame();
 			}),
 
 			$("<button>Reload Shaders</button>").click(() => {
 				Shaders.loadShaders(() => {
 					Shaders.compileShaders();
-					game.updateGame();
+					game.updateView(true);
 				});
 			}),
 
@@ -282,13 +264,12 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 				} else {
 					localPlayer.moveType = MoveType.Land;
 				}
-				game.updateGame();
+				game.updateView(true);
 			}),
 
 			$("<button>Toggle FOV</button>").click(() => {
 				fieldOfView.disabled = !fieldOfView.disabled;
-				fieldOfView.compute();
-				game.updateGame();
+				game.updateView(true);
 			}),
 
 			$("<button>Zoom Out</button>").click(() => {
@@ -298,8 +279,8 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 			}),
 
 			$("<button>Toggle Tilled</button>").click(() => {
-				const x = localPlayer.x;
-				const y = localPlayer.y;
+				const x = localPlayer.x + localPlayer.direction.x;
+				const y = localPlayer.y + localPlayer.direction.y;
 				const z = localPlayer.z;
 				const tile = game.getTile(x, y, z);
 
@@ -323,6 +304,16 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 
 				renderer.computeSpritesInViewport();
 				game.updateRender = true;
+			}),
+
+			$("<button>Travel Away</button>").click(() => {
+				localPlayer.state = PlayerState.Traveling;
+
+				ui.showLoadingScreen(LoadingType.Normal);
+				ui.switchToScreen(ScreenId.None);
+				setTimeout(() => {
+					game.resetGameState();
+				}, 50);
 			})
 		);
 
@@ -331,7 +322,7 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 			title: "Developer Tools",
 			x: 20,
 			y: 180,
-			width: 440,
+			width: 490,
 			height: "auto",
 			resizable: false,
 			onOpen: () => {
@@ -380,7 +371,7 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 	public onMove(nextX: number, nextY: number, tile: ITile, direction: FacingDirection): boolean | undefined {
 		if (this.noclipEnabled) {
 			if (this.inMove) {
-				this.noclipDelay = Math.max(this.noclipDelay - 1, 0);
+				this.noclipDelay = Math.max(this.noclipDelay - 1, 1);
 			} else {
 				this.noclipDelay = Delay.Movement;
 			}
@@ -391,10 +382,13 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 				direction: direction
 			});
 
+			localPlayer.isMoving = true;
 			localPlayer.nextX = nextX;
 			localPlayer.nextY = nextY;
+			localPlayer.nextMoveTime = game.absoluteTime + (this.noclipDelay * game.interval);
 
 			this.inMove = true;
+
 			game.passTurn(localPlayer);
 
 			// disable default movement
@@ -431,18 +425,6 @@ export default class DeveloperTools extends Mod implements IInspectionMessageDel
 			return result;
 		};
 
-		/*
-		if (objects) {
-			objects.forEach((obj: any, index: any) => {
-				// Doodad tree fix
-				if (obj && !obj.tall) {
-					const enumName = enums[index];
-					if (enumName) {
-						sorted.push({ id: index, name: makePretty(enumName) });
-					}
-				}
-			});
-		} else {*/
 		Utilities.Enums.forEach(enums, (name, value) => {
 			sorted.push({ id: value, name: makePretty(name) });
 		});

@@ -1,16 +1,9 @@
 import { IDialogInfo } from "ui/IUi";
-export interface IInspectionMessages {
-    QueryInspection: number;
-    QueryObjectNotFound: number;
-}
-export interface IInspectionMessageDelegate {
-    inspectionMessages: IInspectionMessages;
-}
 export declare class Inspection {
     private bQueryInspection;
-    private messageDelegate;
     private inspectors;
-    constructor(messageDelegate: IInspectionMessageDelegate);
+    private dictionary;
+    constructor(dictionary: number);
     isQueryingInspection(): boolean;
     queryInspection(): void;
     update(): void;

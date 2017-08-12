@@ -3,6 +3,11 @@
 	"dictionaries": {
 		"keyBind": {
 			"developerTools": "Developer Tools"
+		},
+		"developerTools": {
+			"queryInspection": "Choose an object to inspect by clicking on its tile.",
+			"queryObjectNotFound": "The selected tile contains no object that can be inspected.",
+			"optionsSectionModRefresh": "Mod Refresh"
 		}
 	}
 }
