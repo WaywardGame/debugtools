@@ -3,28 +3,28 @@
 	"description": "Adds a special developer tools menu into the game.",
 	"version": "1.4",
 	"author": "Spacetech",
-	"compatibleMinorVersions": [ 4 ],
-	
+	"compatibleMinorVersions": [
+		5
+	],
+	"multiplayerCompatible": true,
 	"hooks": [
+		"CanClientMove",
 		"CanCreatureAttack",
 		"IsPlayerSwimming",
 		"OnGameStart",
-		"OnKeyBindPress",
-		"OnMouseDown",
-		"OnTurnComplete",
+		"OnGameTickEnd",
+		"OnBindLoop",
 		"OnMove",
 		"OnNoInputReceived",
 		"OnShowInGameScreen"
 	],
 	"file": "out/DeveloperTools",
 	"unloadable": true,
-	
 	"stylesheets": [
 		"style/developerTools"
 	],
 	"languages": [
 		"lang/english"
 	],
-	
 	"publishedFileId": "474819610"
 }
