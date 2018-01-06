@@ -51,6 +51,7 @@ export default class DeveloperTools extends Mod {
 	private elementInner: JQuery;
 	private elementDayNightTime: JQuery;
 	private elementReputationValue: JQuery;
+	private elementWeightBonusValue: JQuery;
 	private inspection: Inspection;
 	private isPlayingAudio = false;
 	private audioToPlay: number;
@@ -62,6 +63,7 @@ export default class DeveloperTools extends Mod {
 	private selectAction: number;
 	private setTimeAction: number;
 	private setReputationAction: number;
+	private setWeightBonusAction: number;
 	private refreshStatsAction: number;
 	private killAllCreaturesAction: number;
 	private unlockRecipesAction: number;
@@ -85,7 +87,7 @@ export default class DeveloperTools extends Mod {
 		};
 		this.globalData.initializedCount++;
 
-		Utilities.Console.log(Source.Mod, `Initialized developer tools ${saveDataGlobal.initializedCount} times.`);
+		Utilities.Console.log(Source.Mod, `Initialized developer tools ${this.globalData.initializedCount} times.`);
 
 		this.createOptionsSection((uiApi, section) => {
 			new CheckButton(uiApi, {
@@ -194,6 +196,18 @@ export default class DeveloperTools extends Mod {
 				this.updateSliders();
 				ui.refreshAttributes();
 			}
+		});
+
+		this.setWeightBonusAction = this.addActionType({ name: "Set Weight Bonus", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
+
+			player.weightBonus = argument.object;
+
+			if (player.isLocalPlayer()) {
+				this.updateSliders();
+				ui.refreshAttributes();
+			}
+
+			game.updateTablesAndWeight();
 		});
 
 		this.refreshStatsAction = this.addActionType({ name: "Refresh Stats", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
@@ -360,9 +374,12 @@ export default class DeveloperTools extends Mod {
 
 		html += '<br />Reputation: <div id="reputationslidervalue"></div><input id="reputationslider" type="range" min="-64000" max="64000" step="1" data-range-id="reputation" />';
 
+		html += '<br />Weight Bonus: <div id="weightbonusvalue"></div><input id="weightbonusslider" type="range" min="0" max="2500" step="1" data-range-id="weightbonus" />';
+
 		this.elementInner.append(html);
 		this.elementDayNightTime = this.elementInner.find("#daynighttime");
 		this.elementReputationValue = this.elementInner.find("#reputationslidervalue");
+		this.elementWeightBonusValue = this.elementInner.find("#weightbonusvalue");
 
 		this.elementInner.on("click", ".select-control", function () {
 			$(`.${$(this).data("control")}`).trigger("change");
@@ -378,6 +395,12 @@ export default class DeveloperTools extends Mod {
 
 		this.elementInner.on("input change", "#reputationslider", function () {
 			actionManager.execute(localPlayer, self.setReputationAction, {
+				object: parseFloat($(this).val())
+			});
+		});
+
+		this.elementInner.on("input change", "#weightbonusslider", function () {
+			actionManager.execute(localPlayer, self.setWeightBonusAction, {
 				object: parseFloat($(this).val())
 			});
 		});
@@ -468,7 +491,11 @@ export default class DeveloperTools extends Mod {
 
 			$("<button>Teleport to Host</button>").click(() => actionManager.execute(localPlayer, this.teleportToHostAction)),
 
-			$("<button>Tame</button>").click(() => actionManager.execute(localPlayer, this.tameCreatureAction))
+			$("<button>Tame</button>").click(() => actionManager.execute(localPlayer, this.tameCreatureAction)),
+
+			$("<button>Reset WebGL</button>").click(() => {
+				game.resetWebGL();
+			})
 		);
 
 		this.elementDialog = this.createDialog(this.elementContainer, {
@@ -637,11 +664,19 @@ export default class DeveloperTools extends Mod {
 
 	private updateSliders() {
 		const time = game.time.getTime();
+
+		if (!this.elementDayNightTime) {
+			return;
+		}
+
 		this.elementDayNightTime.text(game.time.getTimeFormat(time));
 		this.elementReputationValue.text(localPlayer.getReputation());
+		this.elementWeightBonusValue.text(localPlayer.weightBonus);
 		document.getElementById("daynightslider")
 			.style.setProperty("--percent", `${game.time.getTime() * 100}`);
 		document.getElementById("reputationslider")
 			.style.setProperty("--percent", `${(localPlayer.getReputation() + 64000) / 128000 * 100}`);
+		document.getElementById("weightbonusslider")
+			.style.setProperty("--percent", `${(localPlayer.weightBonus / 2500 * 100)}`);
 	}
 }

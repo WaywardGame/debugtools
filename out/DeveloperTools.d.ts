@@ -12,6 +12,7 @@ export default class DeveloperTools extends Mod {
     private elementInner;
     private elementDayNightTime;
     private elementReputationValue;
+    private elementWeightBonusValue;
     private inspection;
     private isPlayingAudio;
     private audioToPlay;
@@ -21,6 +22,7 @@ export default class DeveloperTools extends Mod {
     private selectAction;
     private setTimeAction;
     private setReputationAction;
+    private setWeightBonusAction;
     private refreshStatsAction;
     private killAllCreaturesAction;
     private unlockRecipesAction;
