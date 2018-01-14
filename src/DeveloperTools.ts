@@ -269,9 +269,7 @@ export default class DeveloperTools extends Mod {
 		});
 
 		this.toggleTilledAction = this.addActionType({ name: "Toggle Tilled", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			const x = player.x + player.direction.x;
-			const y = player.y + player.direction.y;
-			const z = player.z;
+			const { x, y, z } = player.getFacingPoint();
 			const tile = game.getTile(x, y, z);
 
 			const tileType = Utilities.TileHelpers.getType(tile);
@@ -318,7 +316,7 @@ export default class DeveloperTools extends Mod {
 		});
 
 		this.tameCreatureAction = this.addActionType({ name: "Force Tame Creature", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			const tile = game.getTileInFrontOfPlayer(player);
+			const tile = player.getFacingTile();
 			if (!tile) {
 				return;
 			}
