@@ -4,7 +4,7 @@ import Mod from "mod/Mod";
 import IPlayer from "Player/IPlayer";
 import { ITile } from "tile/ITerrain";
 import { BindCatcherApi } from "newui/BindingManager";
-export default class DeveloperTools extends Mod {
+export default class DebugTools extends Mod {
     private elementDialog;
     private keyBindDialog;
     private keyBindSelectLocation;

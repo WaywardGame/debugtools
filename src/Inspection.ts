@@ -5,7 +5,7 @@ import { MessageType } from "language/Messages";
 import { IDialogInfo } from "ui/IUi";
 import * as Utilities from "Utilities";
 
-import { DevToolsMessage } from "./IDeveloperTools";
+import { DebugToolsMessage } from "./IDebugTools";
 
 export class Inspection {
 
@@ -25,7 +25,7 @@ export class Inspection {
 
 	public queryInspection() {
 		this.bQueryInspection = true;
-		ui.displayMessage(localPlayer, languageManager.getTranslationString(this.dictionary, DevToolsMessage.QueryInspection), MessageType.None);
+		ui.displayMessage(localPlayer, languageManager.getTranslationString(this.dictionary, DebugToolsMessage.QueryInspection), MessageType.None);
 	}
 
 	public update() {
@@ -53,7 +53,7 @@ export class Inspection {
 			Utilities.Console.log(Source.Mod, "Doodad", tile.doodad);
 
 		} else {
-			ui.displayMessage(localPlayer, languageManager.getTranslationString(this.dictionary, DevToolsMessage.QueryObjectNotFound), MessageType.Bad);
+			ui.displayMessage(localPlayer, languageManager.getTranslationString(this.dictionary, DebugToolsMessage.QueryObjectNotFound), MessageType.Bad);
 		}
 	}
 

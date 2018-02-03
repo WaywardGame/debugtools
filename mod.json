@@ -1,6 +1,6 @@
 {
-	"name": "Developer Tools",
-	"description": "Adds a special developer tools menu into the game.",
+	"name": "Debug Tools",
+	"description": "Adds a special debug tools menu into the game.",
 	"version": "1.4",
 	"author": "Spacetech",
 	"compatibleMinorVersions": [
@@ -18,10 +18,10 @@
 		"OnNoInputReceived",
 		"OnShowInGameScreen"
 	],
-	"file": "out/DeveloperTools",
+	"file": "out/DebugTools",
 	"unloadable": true,
 	"stylesheets": [
-		"style/developerTools"
+		"style/debugTools"
 	],
 	"languages": [
 		"lang/english"

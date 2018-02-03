@@ -2,10 +2,10 @@
 	"extends": "English",
 	"dictionaries": {
 		"bindable": {
-			"modDeveloperToolsToggle": "Toggle Developer Tools",
-			"modDeveloperToolsSelectLocation": "Select Location"
+			"modDebugToolsToggle": "Toggle Debug Tools",
+			"modDebugToolsSelectLocation": "Select Location"
 		},
-		"developerTools": {
+		"debugTools": {
 			"queryInspection": "Choose an object to inspect by clicking on its tile.",
 			"queryObjectNotFound": "The selected tile contains no object that can be inspected.",
 			"optionsAutoOpen": "Open Dialog on Load"

@@ -20,7 +20,7 @@ import * as Utilities from "Utilities";
 import { IActionArgument, IActionResult } from "action/IAction";
 import { BindCatcherApi } from "newui/BindingManager";
 import { CheckButton } from "newui/util/CheckButton";
-import { DevToolsMessage } from "./IDeveloperTools";
+import { DebugToolsMessage } from "./IDebugTools";
 import { Inspection } from "./Inspection";
 
 interface SelectAction {
@@ -43,7 +43,7 @@ interface ISaveDataGlobal {
 	autoOpen: boolean;
 }
 
-export default class DeveloperTools extends Mod {
+export default class DebugTools extends Mod {
 	private elementDialog: JQuery;
 	private keyBindDialog: number;
 	private keyBindSelectLocation: number;
@@ -79,7 +79,7 @@ export default class DeveloperTools extends Mod {
 	public onInitialize(saveDataGlobal: any): any {
 		this.keyBindDialog = this.addBindable("Toggle", { key: "Backslash" });
 		this.keyBindSelectLocation = this.addBindable("SelectLocation", { mouseButton: 0 });
-		this.dictionary = this.addDictionary("DeveloperTools", DevToolsMessage);
+		this.dictionary = this.addDictionary("DebugTools", DebugToolsMessage);
 
 		this.globalData = saveDataGlobal ? saveDataGlobal : {
 			initializedCount: 0,
@@ -87,13 +87,13 @@ export default class DeveloperTools extends Mod {
 		};
 		this.globalData.initializedCount++;
 
-		Utilities.Console.log(Source.Mod, `Initialized developer tools ${this.globalData.initializedCount} times.`);
+		Utilities.Console.log(Source.Mod, `Initialized debug tools ${this.globalData.initializedCount} times.`);
 
 		this.createOptionsSection((uiApi, section) => {
 			new CheckButton(uiApi, {
 				text: {
 					dictionary: this.dictionary,
-					entry: DevToolsMessage.OptionsAutoOpen
+					entry: DebugToolsMessage.OptionsAutoOpen
 				},
 				refresh: () => !!this.globalData.autoOpen,
 				onChange: (_, checked) => {
@@ -104,7 +104,7 @@ export default class DeveloperTools extends Mod {
 	}
 
 	public onUninitialize(): any {
-		Utilities.Console.log(Source.Mod, "Uninitialized developer tools!");
+		Utilities.Console.log(Source.Mod, "Uninitialized debug tools!");
 
 		return this.globalData;
 	}
@@ -123,7 +123,7 @@ export default class DeveloperTools extends Mod {
 
 		this.inspection = new Inspection(this.dictionary);
 
-		Utilities.Console.log(Source.Mod, `Loaded developer tools ${this.data.loadedCount} times.`, this.data);
+		Utilities.Console.log(Source.Mod, `Loaded debug tools ${this.data.loadedCount} times.`, this.data);
 
 		this.addCommand("refresh", (player: IPlayer) => {
 			actionManager.execute(player, this.refreshStatsAction);
@@ -132,13 +132,15 @@ export default class DeveloperTools extends Mod {
 		this.selectAction = this.addActionType({ name: "Select", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
 			const selectAction = argument.object as SelectAction;
 
+			const { x, y, z } = player.getFacingPoint();
+
 			switch (selectAction.type) {
 				case "change-tile":
-					game.changeTile({ type: selectAction.id }, player.x + player.direction.x, player.y + player.direction.y, player.z, false);
+					game.changeTile({ type: selectAction.id }, x, y, z, false);
 					break;
 
 				case "spawn-creature":
-					creatureManager.spawn(selectAction.id, player.x + player.direction.x, player.y + player.direction.y, player.z, true);
+					creatureManager.spawn(selectAction.id, x, y, z, true);
 					break;
 
 				case "item-get":
@@ -148,24 +150,24 @@ export default class DeveloperTools extends Mod {
 
 				case "place-env-item":
 					// Remove if Doodad already there
-					const tile = game.getTile(player.x + player.direction.x, player.y + player.direction.y, player.z);
+					const tile = game.getTile(x, y, z);
 					if (tile.doodad) {
 						doodadManager.remove(tile.doodad);
 					}
 
-					doodadManager.create(selectAction.id, player.x + player.direction.x, player.y + player.direction.y, player.z);
+					doodadManager.create(selectAction.id, x, y, z);
 					break;
 
 				case "place-tile-event":
-					tileEventManager.create(selectAction.id, player.x + player.direction.x, player.y + player.direction.y, player.z);
+					tileEventManager.create(selectAction.id, x, y, z);
 					break;
 
 				case "place-corpse":
-					corpseManager.create(selectAction.id, player.x + player.direction.x, player.y + player.direction.y, player.z);
+					corpseManager.create(selectAction.id, x, y, z);
 					break;
 
 				case "spawn-template":
-					MapGenHelpers.spawnTemplate(selectAction.id, player.x + player.direction.x, player.y + player.direction.y, player.z);
+					MapGenHelpers.spawnTemplate(selectAction.id, x, y, z);
 					break;
 			}
 
@@ -498,7 +500,7 @@ export default class DeveloperTools extends Mod {
 
 		this.elementDialog = this.createDialog(this.elementContainer, {
 			id: this.getName(),
-			title: "Developer Tools",
+			title: "Debug Tools",
 			open: this.globalData.autoOpen,
 			x: 20,
 			y: 180,
@@ -576,7 +578,7 @@ export default class DeveloperTools extends Mod {
 			return undefined;
 		}
 
-		// todo: convert this to use dev tools mod save data
+		// todo: convert this to use debug tools mod save data
 		let playerData = this.data.playerData[player.identifier];
 		if (!playerData) {
 			playerData = this.data.playerData[player.identifier] = {

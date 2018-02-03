@@ -1,4 +1,4 @@
-export enum DevToolsMessage {
+export enum DebugToolsMessage {
 	QueryInspection,
 	QueryObjectNotFound,
 	OptionsAutoOpen
