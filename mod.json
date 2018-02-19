@@ -10,10 +10,13 @@
 	"hooks": [
 		"CanClientMove",
 		"CanCreatureAttack",
+		"GetAmbientColor",
+		"GetAmbientLightLevel",
+		"GetTileLightLevel",
 		"IsPlayerSwimming",
+		"OnBindLoop",
 		"OnGameStart",
 		"OnGameTickEnd",
-		"OnBindLoop",
 		"OnMove",
 		"OnNoInputReceived",
 		"OnShowInGameScreen"

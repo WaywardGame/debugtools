@@ -30,6 +30,7 @@ interface SelectAction {
 
 interface ISaveData {
 	loadedCount: number;
+	disableLights: boolean;
 	playerData: { [index: string]: IPlayerData };
 }
 
@@ -72,6 +73,7 @@ export default class DebugTools extends Mod {
 	private toggleTilledAction: number;
 	private teleportToHostAction: number;
 	private tameCreatureAction: number;
+	private toggleLightsAction: number;
 
 	private data: ISaveData;
 	private globalData: ISaveDataGlobal;
@@ -115,6 +117,7 @@ export default class DebugTools extends Mod {
 		if (!this.data || !this.data.loadedCount) {
 			this.data = {
 				loadedCount: 0,
+				disableLights: false,
 				playerData: {}
 			};
 		}
@@ -336,6 +339,12 @@ export default class DebugTools extends Mod {
 
 			Utilities.Console.log(Source.Mod, "Tamed creature", creature);
 		});
+
+		this.toggleLightsAction = this.addActionType({ name: "Toggle Lighting", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
+			this.data.disableLights = !this.data.disableLights;
+			player.updateStatsAndAttributes();
+			game.updateView(true);
+		});
 	}
 
 	public onSave(): any {
@@ -495,7 +504,9 @@ export default class DebugTools extends Mod {
 
 			$("<button>Reset WebGL</button>").click(() => {
 				game.resetWebGL();
-			})
+			}),
+
+			$("<button>Toggle Lighting</button>").click(() => actionManager.execute(localPlayer, this.toggleLightsAction))
 		);
 
 		this.elementDialog = this.createDialog(this.elementContainer, {
@@ -623,6 +634,30 @@ export default class DebugTools extends Mod {
 		if (playerData) {
 			playerData.inMove = false;
 		}
+	}
+
+	public getAmbientColor(colors: number[]): number[] | undefined {
+		if (this.data.disableLights) {
+			return [1, 1, 1];
+		}
+
+		return undefined;
+	}
+
+	public getAmbientLightLevel(ambientLight: number, z: number): number | undefined {
+		if (this.data.disableLights) {
+			return 1;
+		}
+
+		return undefined;
+	}
+
+	public getTileLightLevel(tile: ITile, x: number, y: number, z: number): number | undefined {
+		if (this.data.disableLights) {
+			return 0;
+		}
+
+		return undefined;
 	}
 
 	///////////////////////////////////////////////////
