@@ -1,9 +1,9 @@
 import { ICreature } from "creature/ICreature";
-import { FacingDirection } from "Enums";
+import { FacingDirection, SpriteBatchLayer } from "Enums";
 import Mod from "mod/Mod";
+import { BindCatcherApi } from "newui/BindingManager";
 import IPlayer from "Player/IPlayer";
 import { ITile } from "tile/ITerrain";
-import { BindCatcherApi } from "newui/BindingManager";
 export default class DebugTools extends Mod {
     private elementDialog;
     private keyBindDialog;
@@ -25,6 +25,7 @@ export default class DebugTools extends Mod {
     private setWeightBonusAction;
     private refreshStatsAction;
     private killAllCreaturesAction;
+    private killAllNPCsAction;
     private unlockRecipesAction;
     private reloadShadersAction;
     private noclipAction;
@@ -40,6 +41,8 @@ export default class DebugTools extends Mod {
     onSave(): any;
     onGameStart(isLoadingSave: boolean): void;
     isPlayerSwimming(player: IPlayer, isSwimming: boolean): boolean;
+    getPlayerStrength(strength: number, player: IPlayer): number;
+    getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer): SpriteBatchLayer;
     onShowInGameScreen(): void;
     onGameTickEnd(): void;
     canClientMove(): false | undefined;

@@ -1,11 +1,15 @@
 import Creatures from "creature/Creatures";
-import { AiType, ICreature } from "creature/ICreature";
-import { Source, TerrainType } from "Enums";
-import { MessageType } from "language/Messages";
+import { ICreature } from "creature/ICreature";
+import { AiType } from "entity/IEntity";
+import { TerrainType } from "Enums";
+import { MessageType } from "language/IMessages";
 import { IDialogInfo } from "ui/IUi";
-import * as Utilities from "Utilities";
-
+import Enums from "utilities/enum/Enums";
+import Log from "utilities/Log";
+import TileHelpers from "utilities/TileHelpers";
 import { DebugToolsMessage } from "./IDebugTools";
+
+let log: Log;
 
 export class Inspection {
 
@@ -13,7 +17,8 @@ export class Inspection {
 	private inspectors: Inspector[];
 	private dictionary: number;
 
-	constructor(dictionary: number) {
+	constructor(dictionary: number, logIn: Log) {
+		log = logIn;
 		this.dictionary = dictionary;
 		this.inspectors = [];
 		ui.appendStyle("inspection-data", ".inspection-data{width:100%;}.inspection-data th{text-align:left}.inspection-data table{width:100%}");
@@ -39,10 +44,10 @@ export class Inspection {
 		this.bQueryInspection = false;
 		const tile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
 
-		Utilities.Console.log(Source.Mod, `Tile at (${tilePosition.x}, ${tilePosition.y}, ${localPlayer.z}).`, tile);
+		log.info(`Tile at (${tilePosition.x}, ${tilePosition.y}, ${localPlayer.z}).`, tile);
 
-		Utilities.Console.log(Source.Mod, `Type: ${TerrainType[Utilities.TileHelpers.getType(tile)]}`);
-		Utilities.Console.log(Source.Mod, `Gfx: ${Utilities.TileHelpers.getGfx(tile)}`);
+		log.info(`Type: ${TerrainType[TileHelpers.getType(tile)]}`);
+		log.info(`Gfx: ${TileHelpers.getGfx(tile)}`);
 
 		if (tile.creature) {
 			const inspector = new CreatureInspector(tile.creature, mouseX, mouseY);
@@ -50,7 +55,7 @@ export class Inspection {
 			this.inspectors.push(inspector);
 
 		} else if (tile.doodad) {
-			Utilities.Console.log(Source.Mod, "Doodad", tile.doodad);
+			log.info("Doodad", tile.doodad);
 
 		} else {
 			ui.displayMessage(localPlayer, languageManager.getTranslationString(this.dictionary, DebugToolsMessage.QueryObjectNotFound), MessageType.Bad);
@@ -86,7 +91,7 @@ abstract class Inspector {
 		};
 
 		this.dialogContainer.append($("<button>Log</button>").click(() => {
-			Utilities.Console.log(Source.Mod, this.target);
+			log.info(this.target);
 		}));
 
 		this.dataContainer = $("<table class='inspection-data'></table>");
@@ -139,7 +144,7 @@ class CreatureInspector extends Inspector {
 		for (const key in this.attributes) {
 			const attr = this.attributes[key];
 			if (key === "ai") {
-				const values = Utilities.Enums.getValues(AiType);
+				const values = Enums.values(AiType);
 				const ai = (this.creature as any)[key] as AiType;
 				const behaviors: string[] = [];
 				for (const behavior of values) {
