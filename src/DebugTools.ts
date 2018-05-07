@@ -7,7 +7,7 @@ import { IStatMax, Stat } from "entity/IStats";
 import { ActionType, CreatureType, Delay, DoodadType, FacingDirection, ItemType, MoveType, NPCType, PlayerState, SentenceCaseStyle, SfxType, SpriteBatchLayer, StatusType, TerrainType, WorldZ } from "Enums";
 import Items from "item/Items";
 import * as MapGenHelpers from "mapgen/MapGenHelpers";
-import Mod, { HookMethod } from "mod/Mod";
+import Mod from "mod/Mod";
 import { BindCatcherApi } from "newui/BindingManager";
 import { CheckButton } from "newui/element/CheckButton";
 import IPlayer from "Player/IPlayer";
@@ -24,6 +24,7 @@ import Log from "utilities/Log";
 import Strings from "utilities/string/Strings";
 import TileHelpers from "utilities/TileHelpers";
 
+import { HookMethod } from "mod/IHookHost";
 import { DebugToolsMessage } from "./IDebugTools";
 import { Inspection } from "./Inspection";
 
