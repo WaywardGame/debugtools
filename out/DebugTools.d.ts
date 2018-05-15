@@ -43,7 +43,7 @@ export default class DebugTools extends Mod {
     isPlayerSwimming(player: IPlayer, isSwimming: boolean): boolean;
     getPlayerStrength(strength: number, player: IPlayer): number;
     getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer): SpriteBatchLayer;
-    onShowInGameScreen(): void;
+    onGameScreenVisible(): void;
     onGameTickEnd(): void;
     canClientMove(): false | undefined;
     onBindLoop(bindPressed: true | undefined, api: BindCatcherApi): true | undefined;

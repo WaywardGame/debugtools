@@ -415,7 +415,7 @@ export default class DebugTools extends Mod {
 	}
 
 	@HookMethod
-	public onShowInGameScreen(): void {
+	public onGameScreenVisible(): void {
 		this.elementContainer = $("<div></div>");
 		this.elementInner = $('<div class="inner"></div>');
 		this.elementContainer.append(this.elementInner);
