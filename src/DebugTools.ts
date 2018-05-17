@@ -9,7 +9,7 @@ import Items from "item/Items";
 import * as MapGenHelpers from "mapgen/MapGenHelpers";
 import Mod from "mod/Mod";
 import { BindCatcherApi } from "newui/BindingManager";
-import { CheckButton } from "newui/element/CheckButton";
+import { CheckButton } from "newui/component/CheckButton";
 import IPlayer from "Player/IPlayer";
 import { ParticleType } from "renderer/particle/IParticle";
 import Particles from "renderer/particle/Particles";
