@@ -3,6 +3,7 @@ import { ICreature } from "creature/ICreature";
 import { AiType } from "entity/IEntity";
 import { TerrainType } from "Enums";
 import { MessageType } from "language/IMessages";
+import Translation from "language/Translation";
 import { IDialogInfo } from "ui/IUi";
 import Enums from "utilities/enum/Enums";
 import Log from "utilities/Log";
@@ -30,7 +31,7 @@ export class Inspection {
 
 	public queryInspection() {
 		this.bQueryInspection = true;
-		ui.displayMessage(localPlayer, languageManager.getTranslationString(this.dictionary, DebugToolsMessage.QueryInspection), MessageType.None);
+		localPlayer.sendMessage(new Translation(this.dictionary, DebugToolsMessage.QueryInspection).get());
 	}
 
 	public update() {
@@ -58,7 +59,7 @@ export class Inspection {
 			log.info("Doodad", tile.doodad);
 
 		} else {
-			ui.displayMessage(localPlayer, languageManager.getTranslationString(this.dictionary, DebugToolsMessage.QueryObjectNotFound), MessageType.Bad);
+			localPlayer.sendMessage(new Translation(this.dictionary, DebugToolsMessage.QueryObjectNotFound).get(), MessageType.Bad);
 		}
 	}
 
