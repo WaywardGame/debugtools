@@ -39,7 +39,6 @@ export default class DebugTools extends Mod {
     onUninitialize(): any;
     onLoad(saveData: any): void;
     onSave(): any;
-    onGameStart(isLoadingSave: boolean): void;
     isPlayerSwimming(player: IPlayer, isSwimming: boolean): boolean;
     getPlayerStrength(strength: number, player: IPlayer): number;
     getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer): SpriteBatchLayer;

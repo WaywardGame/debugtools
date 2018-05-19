@@ -394,12 +394,6 @@ export default class DebugTools extends Mod {
 	// Hooks
 
 	@HookMethod
-	public onGameStart(isLoadingSave: boolean): void {
-		// disable hints/notes
-		saveDataGlobal.options.openNotesAutomatically = false;
-	}
-
-	@HookMethod
 	public isPlayerSwimming(player: IPlayer, isSwimming: boolean): boolean {
 		return player.moveType === MoveType.Flying ? false : undefined;
 	}
