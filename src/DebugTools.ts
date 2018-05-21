@@ -4,7 +4,7 @@ import Creatures from "creature/Creatures";
 import { ICreature } from "creature/ICreature";
 import Doodads from "doodad/Doodads";
 import { IStatMax, Stat } from "entity/IStats";
-import { ActionType, CreatureType, Delay, DoodadType, FacingDirection, ItemType, MoveType, NPCType, PlayerState, SentenceCaseStyle, SfxType, SpriteBatchLayer, StatusType, TerrainType, WorldZ } from "Enums";
+import { ActionType, Bindable, CreatureType, Delay, DoodadType, FacingDirection, ItemType, MoveType, NPCType, PlayerState, SentenceCaseStyle, SfxType, SpriteBatchLayer, StatusType, TerrainType, WorldZ } from "Enums";
 import Items from "item/Items";
 import * as MapGenHelpers from "mapgen/MapGenHelpers";
 import Mod from "mod/Mod";
@@ -587,19 +587,19 @@ export default class DebugTools extends Mod {
 	}
 
 	@HookMethod
-	public onBindLoop(bindPressed: true | undefined, api: BindCatcherApi): true | undefined {
+	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable {
 		if (api.wasPressed(this.keyBindDialog) && !bindPressed) {
 			ui.toggleDialog(this.elementDialog);
-			bindPressed = true;
+			bindPressed = this.keyBindDialog;
 		}
 
 		if (api.wasPressed(this.keyBindSelectLocation) && !bindPressed) {
 			if (this.inspection.isQueryingInspection()) {
-				bindPressed = true;
+				bindPressed = this.keyBindSelectLocation;
 				this.inspection.inspect(api.mouseX, api.mouseY, this.createDialog);
 
 			} else if (this.isPlayingAudio) {
-				bindPressed = true;
+				bindPressed = this.keyBindSelectLocation;
 				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
 
 				if (tilePosition.x < 0) {
@@ -613,7 +613,7 @@ export default class DebugTools extends Mod {
 				audio.queueEffect(this.audioToPlay, tilePosition.x, tilePosition.y, localPlayer.z);
 
 			} else if (this.isCreatingParticle) {
-				bindPressed = true;
+				bindPressed = this.keyBindSelectLocation;
 				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
 				if (tilePosition.x < 0) {
 					tilePosition.x += game.mapSize;

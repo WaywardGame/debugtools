@@ -1,5 +1,5 @@
 import { ICreature } from "creature/ICreature";
-import { FacingDirection, SpriteBatchLayer } from "Enums";
+import { Bindable, FacingDirection, SpriteBatchLayer } from "Enums";
 import Mod from "mod/Mod";
 import { BindCatcherApi } from "newui/BindingManager";
 import IPlayer from "Player/IPlayer";
@@ -45,7 +45,7 @@ export default class DebugTools extends Mod {
     onGameScreenVisible(): void;
     onGameTickEnd(): void;
     canClientMove(): false | undefined;
-    onBindLoop(bindPressed: true | undefined, api: BindCatcherApi): true | undefined;
+    onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     canCreatureAttack(creature: ICreature, enemy: IPlayer | ICreature): boolean;
     onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: FacingDirection): boolean | undefined;
     onNoInputReceived(player: IPlayer): void;
