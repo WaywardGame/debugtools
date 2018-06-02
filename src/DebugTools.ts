@@ -6,10 +6,11 @@ import Doodads from "doodad/Doodads";
 import { IStatMax, Stat } from "entity/IStats";
 import { ActionType, Bindable, CreatureType, Delay, DoodadType, FacingDirection, ItemType, MoveType, NPCType, PlayerState, SentenceCaseStyle, SfxType, SpriteBatchLayer, StatusType, TerrainType, WorldZ } from "Enums";
 import Items from "item/Items";
+import Translation from "language/Translation";
 import * as MapGenHelpers from "mapgen/MapGenHelpers";
 import Mod from "mod/Mod";
 import { BindCatcherApi } from "newui/BindingManager";
-import { CheckButton } from "newui/component/CheckButton";
+import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
 import IPlayer from "Player/IPlayer";
 import { ParticleType } from "renderer/particle/IParticle";
 import Particles from "renderer/particle/Particles";
@@ -103,16 +104,13 @@ export default class DebugTools extends Mod {
 		log.info(`Initialized debug tools ${this.globalData.initializedCount} times.`);
 
 		this.createOptionsSection((uiApi, section) => {
-			new CheckButton(uiApi, {
-				text: {
-					dictionary: this.dictionary,
-					entry: DebugToolsMessage.OptionsAutoOpen
-				},
-				refresh: () => !!this.globalData.autoOpen,
-				onChange: (_, checked) => {
+			new CheckButton(uiApi)
+				.setText(() => new Translation(this.dictionary, DebugToolsMessage.OptionsAutoOpen))
+				.setRefreshMethod(() => !!this.globalData.autoOpen)
+				.on(CheckButtonEvent.Change, (_, checked) => {
 					this.globalData.autoOpen = checked;
-				}
-			}).appendTo(section);
+				})
+				.appendTo(section);
 		});
 	}
 
