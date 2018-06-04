@@ -103,15 +103,14 @@ export default class DebugTools extends Mod {
 
 		log.info(`Initialized debug tools ${this.globalData.initializedCount} times.`);
 
-		this.createOptionsSection((uiApi, section) => {
-			new CheckButton(uiApi)
+		this.registerOptionsSection((api, section) => section
+			.append(new CheckButton(api)
 				.setText(() => new Translation(this.dictionary, DebugToolsMessage.OptionsAutoOpen))
 				.setRefreshMethod(() => !!this.globalData.autoOpen)
 				.on(CheckButtonEvent.Change, (_, checked) => {
 					this.globalData.autoOpen = checked;
 				})
-				.appendTo(section);
-		});
+				.appendTo(section)));
 	}
 
 	public onUninitialize(): any {
