@@ -52,6 +52,6 @@ export default class DebugTools extends Mod {
     getAmbientColor(colors: number[]): number[] | undefined;
     getAmbientLightLevel(ambientLight: number, z: number): number | undefined;
     getTileLightLevel(tile: ITile, x: number, y: number, z: number): number | undefined;
-    private generateSelect(enums, objects, className, labelName);
-    private updateSliders();
+    private generateSelect;
+    private updateSliders;
 }

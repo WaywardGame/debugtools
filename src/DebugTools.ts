@@ -716,7 +716,7 @@ export default class DebugTools extends Mod {
 	///////////////////////////////////////////////////
 	// Helper functions
 
-	private generateSelect(enums: any, objects: SaferDescription<any> | undefined, className: string, labelName: string): string {
+	private generateSelect(enums: any, objects: Description<any> | undefined, className: string, labelName: string): string {
 		let html = `<select class="${className}" data-selectid="${className}"><option selected disabled>${labelName}</option>`;
 
 		const sorted = new Array<any>();
@@ -761,7 +761,7 @@ export default class DebugTools extends Mod {
 			return;
 		}
 
-		this.elementDayNightTime.text(game.time.getFormatted(time));
+		this.elementDayNightTime.text(Translation.getString(game.time.getTranslation(time)));
 		this.elementReputationValue.text(localPlayer.getReputation());
 		this.elementWeightBonusValue.text(this.data.weightBonus);
 		document.getElementById("daynightslider")
