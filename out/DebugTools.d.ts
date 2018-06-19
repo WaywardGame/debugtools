@@ -1,5 +1,5 @@
 import { ICreature } from "creature/ICreature";
-import { Bindable, FacingDirection, SpriteBatchLayer } from "Enums";
+import { Bindable, Direction, SpriteBatchLayer } from "Enums";
 import Mod from "mod/Mod";
 import { BindCatcherApi } from "newui/BindingManager";
 import IPlayer from "Player/IPlayer";
@@ -47,7 +47,7 @@ export default class DebugTools extends Mod {
     canClientMove(): false | undefined;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     canCreatureAttack(creature: ICreature, enemy: IPlayer | ICreature): boolean;
-    onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: FacingDirection): boolean | undefined;
+    onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined;
     onNoInputReceived(player: IPlayer): void;
     getAmbientColor(colors: number[]): number[] | undefined;
     getAmbientLightLevel(ambientLight: number, z: number): number | undefined;

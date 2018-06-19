@@ -4,7 +4,7 @@ import Creatures from "creature/Creatures";
 import { ICreature } from "creature/ICreature";
 import Doodads from "doodad/Doodads";
 import { IStatMax, Stat } from "entity/IStats";
-import { ActionType, Bindable, CreatureType, Delay, DoodadType, FacingDirection, ItemType, MoveType, NPCType, PlayerState, SentenceCaseStyle, SfxType, SpriteBatchLayer, StatusType, TerrainType, WorldZ } from "Enums";
+import { ActionType, Bindable, CreatureType, Delay, DoodadType, Direction, ItemType, MoveType, NPCType, PlayerState, SentenceCaseStyle, SfxType, SpriteBatchLayer, StatusType, TerrainType, WorldZ } from "Enums";
 import Items from "item/Items";
 import Translation from "language/Translation";
 import * as MapGenHelpers from "mapgen/MapGenHelpers";
@@ -633,7 +633,7 @@ export default class DebugTools extends Mod {
 	}
 
 	@HookMethod
-	public onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: FacingDirection): boolean | undefined {
+	public onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined {
 		if (player.moveType !== MoveType.Flying) {
 			return undefined;
 		}

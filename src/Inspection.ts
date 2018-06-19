@@ -31,7 +31,7 @@ export class Inspection {
 
 	public queryInspection() {
 		this.bQueryInspection = true;
-		game.messages.send(new Translation(this.dictionary, DebugToolsMessage.QueryInspection).get());
+		localPlayer.messages.send(new Translation(this.dictionary, DebugToolsMessage.QueryInspection).get());
 	}
 
 	public update() {
@@ -59,7 +59,7 @@ export class Inspection {
 			log.info("Doodad", tile.doodad);
 
 		} else {
-			game.messages.type(MessageType.Bad)
+			localPlayer.messages.type(MessageType.Bad)
 				.send(new Translation(this.dictionary, DebugToolsMessage.QueryObjectNotFound).get());
 		}
 	}
