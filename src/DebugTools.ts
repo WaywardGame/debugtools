@@ -1,11 +1,16 @@
+import { IActionArgument, IActionResult } from "action/IAction";
 import Corpses from "creature/corpse/Corpses";
 import Creatures from "creature/Creatures";
 import { ICreature } from "creature/ICreature";
 import Doodads from "doodad/Doodads";
-import { ActionType, CreatureType, Delay, DoodadType, FacingDirection, ItemType, MoveType, PlayerState, SfxType, Source, TerrainType, WorldZ } from "Enums";
+import { IStatMax, Stat } from "entity/IStats";
+import { ActionType, Bindable, CreatureType, Delay, DoodadType, Direction, ItemType, MoveType, NPCType, PlayerState, SentenceCaseStyle, SfxType, SpriteBatchLayer, StatusType, TerrainType, WorldZ } from "Enums";
 import Items from "item/Items";
+import Translation from "language/Translation";
 import * as MapGenHelpers from "mapgen/MapGenHelpers";
 import Mod from "mod/Mod";
+import { BindCatcherApi } from "newui/BindingManager";
+import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
 import IPlayer from "Player/IPlayer";
 import { ParticleType } from "renderer/particle/IParticle";
 import Particles from "renderer/particle/Particles";
@@ -15,11 +20,12 @@ import { TileEventType } from "tile/ITileEvent";
 import Terrains from "tile/Terrains";
 import TerrainTemplates from "tile/TerrainTemplates";
 import TileEvents from "tile/TileEvents";
-import * as Utilities from "Utilities";
+import Enums from "utilities/enum/Enums";
+import Log from "utilities/Log";
+import Strings from "utilities/string/Strings";
+import TileHelpers from "utilities/TileHelpers";
 
-import { IActionArgument, IActionResult } from "action/IAction";
-import { BindCatcherApi } from "newui/BindingManager";
-import { CheckButton } from "newui/util/CheckButton";
+import { HookMethod } from "mod/IHookHost";
 import { DebugToolsMessage } from "./IDebugTools";
 import { Inspection } from "./Inspection";
 
@@ -32,6 +38,7 @@ interface ISaveData {
 	loadedCount: number;
 	disableLights: boolean;
 	playerData: { [index: string]: IPlayerData };
+	weightBonus: number;
 }
 
 interface IPlayerData {
@@ -43,6 +50,8 @@ interface ISaveDataGlobal {
 	initializedCount: number;
 	autoOpen: boolean;
 }
+
+let log: Log;
 
 export default class DebugTools extends Mod {
 	private elementDialog: JQuery;
@@ -67,6 +76,7 @@ export default class DebugTools extends Mod {
 	private setWeightBonusAction: number;
 	private refreshStatsAction: number;
 	private killAllCreaturesAction: number;
+	private killAllNPCsAction: number;
 	private unlockRecipesAction: number;
 	private reloadShadersAction: number;
 	private noclipAction: number;
@@ -79,7 +89,7 @@ export default class DebugTools extends Mod {
 	private globalData: ISaveDataGlobal;
 
 	public onInitialize(saveDataGlobal: any): any {
-		this.keyBindDialog = this.addBindable("Toggle", { key: "Backslash" });
+		this.keyBindDialog = this.addBindable("Toggle", [{ key: "Backslash" }, { key: "IntlBackslash" }]);
 		this.keyBindSelectLocation = this.addBindable("SelectLocation", { mouseButton: 0 });
 		this.dictionary = this.addDictionary("DebugTools", DebugToolsMessage);
 
@@ -89,24 +99,22 @@ export default class DebugTools extends Mod {
 		};
 		this.globalData.initializedCount++;
 
-		Utilities.Console.log(Source.Mod, `Initialized debug tools ${this.globalData.initializedCount} times.`);
+		log = this.getLog();
 
-		this.createOptionsSection((uiApi, section) => {
-			new CheckButton(uiApi, {
-				text: {
-					dictionary: this.dictionary,
-					entry: DebugToolsMessage.OptionsAutoOpen
-				},
-				refresh: () => !!this.globalData.autoOpen,
-				onChange: (_, checked) => {
+		log.info(`Initialized debug tools ${this.globalData.initializedCount} times.`);
+
+		this.registerOptionsSection((api, section) => section
+			.append(new CheckButton(api)
+				.setText(() => new Translation(this.dictionary, DebugToolsMessage.OptionsAutoOpen))
+				.setRefreshMethod(() => !!this.globalData.autoOpen)
+				.on(CheckButtonEvent.Change, (_, checked) => {
 					this.globalData.autoOpen = checked;
-				}
-			}).appendTo(section);
-		});
+				})
+				.appendTo(section)));
 	}
 
 	public onUninitialize(): any {
-		Utilities.Console.log(Source.Mod, "Uninitialized debug tools!");
+		log.info("Uninitialized debug tools!");
 
 		return this.globalData;
 	}
@@ -118,15 +126,20 @@ export default class DebugTools extends Mod {
 			this.data = {
 				loadedCount: 0,
 				disableLights: false,
-				playerData: {}
+				playerData: {},
+				weightBonus: 0
 			};
+		}
+
+		if (this.data.weightBonus === undefined) {
+			this.data.weightBonus = 0;
 		}
 
 		this.data.playerData = this.data.playerData || {};
 
-		this.inspection = new Inspection(this.dictionary);
+		this.inspection = new Inspection(this.dictionary, log);
 
-		Utilities.Console.log(Source.Mod, `Loaded debug tools ${this.data.loadedCount} times.`, this.data);
+		log.info(`Loaded debug tools ${this.data.loadedCount} times.`, this.data);
 
 		this.addCommand("refresh", (player: IPlayer) => {
 			actionManager.execute(player, this.refreshStatsAction);
@@ -144,6 +157,10 @@ export default class DebugTools extends Mod {
 
 				case "spawn-creature":
 					creatureManager.spawn(selectAction.id, x, y, z, true);
+					break;
+
+				case "spawn-npc":
+					npcManager.spawn(selectAction.id, x, y, z);
 					break;
 
 				case "item-get":
@@ -192,37 +209,43 @@ export default class DebugTools extends Mod {
 		});
 
 		this.setReputationAction = this.addActionType({ name: "Set Reputation", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			player.benignity = 0;
-			player.malignity = 0;
+			player.setStat(Stat.Benignity, 0);
+			player.setStat(Stat.Malignity, 0);
 
 			player.updateReputation(argument.object);
 
 			if (player.isLocalPlayer()) {
 				this.updateSliders();
-				ui.refreshAttributes();
 			}
 		});
 
 		this.setWeightBonusAction = this.addActionType({ name: "Set Weight Bonus", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
 
-			player.weightBonus = argument.object;
+			this.data.weightBonus = argument.object;
+			player.updateStrength();
 
 			if (player.isLocalPlayer()) {
 				this.updateSliders();
-				ui.refreshAttributes();
 			}
 
 			game.updateTablesAndWeight();
 		});
 
 		this.refreshStatsAction = this.addActionType({ name: "Refresh Stats", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			player.stats.health.value = player.getMaxHealth();
-			player.stats.stamina.value = player.dexterity;
-			player.stats.hunger.value = player.starvation;
-			player.stats.thirst.value = player.dehydration;
-			player.status.bleeding = false;
-			player.status.burned = false;
-			player.status.poisoned = false;
+			const health = player.getStat<IStatMax>(Stat.Health);
+			const stamina = player.getStat<IStatMax>(Stat.Stamina);
+			const hunger = player.getStat<IStatMax>(Stat.Hunger);
+			const thirst = player.getStat<IStatMax>(Stat.Thirst);
+
+			player.setStat(health, player.getMaxHealth());
+			player.setStat(stamina, stamina.max);
+			player.setStat(hunger, hunger.max);
+			player.setStat(thirst, thirst.max);
+
+			player.setStatus(StatusType.Bleeding, false);
+			player.setStatus(StatusType.Burned, false);
+			player.setStatus(StatusType.Poisoned, false);
+
 			player.state = PlayerState.None;
 			player.updateStatsAndAttributes();
 		});
@@ -239,8 +262,20 @@ export default class DebugTools extends Mod {
 			game.updateView(false);
 		});
 
+		this.killAllNPCsAction = this.addActionType({ name: "Kill All NPCs", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
+			for (let i = 0; i < game.npcs.length; i++) {
+				if (game.npcs[i] !== undefined) {
+					npcManager.remove(game.npcs[i]);
+				}
+			}
+
+			game.npcs = [];
+
+			game.updateView(false);
+		});
+
 		this.unlockRecipesAction = this.addActionType({ name: "Unlock Recipes", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			const itemTypes = Utilities.Enums.getValues(ItemType);
+			const itemTypes = Enums.values(ItemType);
 
 			for (const itemType of itemTypes) {
 				const description = Items[itemType];
@@ -255,11 +290,11 @@ export default class DebugTools extends Mod {
 			game.updateTablesAndWeight();
 		});
 
-		this.reloadShadersAction = this.addActionType({ name: "Reload Shaders", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			Shaders.loadShaders(() => {
-				Shaders.compileShaders();
-				game.updateView(true);
-			});
+		this.reloadShadersAction = this.addActionType({ name: "Reload Shaders", usableAsGhost: true }, async (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
+			await Shaders.loadShaders();
+
+			Shaders.compileShaders();
+			game.updateView(true);
 		});
 
 		this.noclipAction = this.addActionType({ name: "Noclip" }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
@@ -277,7 +312,7 @@ export default class DebugTools extends Mod {
 			const { x, y, z } = player.getFacingPoint();
 			const tile = game.getTile(x, y, z);
 
-			const tileType = Utilities.TileHelpers.getType(tile);
+			const tileType = TileHelpers.getType(tile);
 			if (!Terrains[tileType].tillable) {
 				return;
 			}
@@ -297,7 +332,7 @@ export default class DebugTools extends Mod {
 				tileData[0].tilled = tileData[0].tilled ? false : true;
 			}
 
-			Utilities.TileHelpers.setTilled(tile, tileData[0].tilled);
+			TileHelpers.setTilled(tile, tileData[0].tilled);
 
 			world.updateTile(x, y, z, tile);
 
@@ -311,7 +346,7 @@ export default class DebugTools extends Mod {
 			}
 
 			// assume host is pid 0
-			const nearbyOpenTile = Utilities.TileHelpers.findMatchingTile(players[0], Utilities.TileHelpers.isOpenTile);
+			const nearbyOpenTile = TileHelpers.findMatchingTile(players[0], TileHelpers.isOpenTile);
 
 			player.x = player.fromX = nearbyOpenTile.x;
 			player.y = player.fromY = nearbyOpenTile.y;
@@ -335,9 +370,9 @@ export default class DebugTools extends Mod {
 
 			creature.queueSoundEffect(SfxType.CreatureNoise);
 
-			creature.happiness = 9999999;
+			creature.setStat(Stat.Happiness, 9999999);
 
-			Utilities.Console.log(Source.Mod, "Tamed creature", creature);
+			log.info("Tamed creature", creature);
 		});
 
 		this.toggleLightsAction = this.addActionType({ name: "Toggle Lighting", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
@@ -355,22 +390,30 @@ export default class DebugTools extends Mod {
 	///////////////////////////////////////////////////
 	// Hooks
 
-	public onGameStart(isLoadingSave: boolean): void {
-		// disable hints/notes
-		saveDataGlobal.options.openNotesAutomatically = false;
-	}
-
+	@HookMethod
 	public isPlayerSwimming(player: IPlayer, isSwimming: boolean): boolean {
 		return player.moveType === MoveType.Flying ? false : undefined;
 	}
 
-	public onShowInGameScreen(): void {
+	@HookMethod
+	public getPlayerStrength(strength: number, player: IPlayer) {
+		return strength + this.data.weightBonus;
+	}
+
+	@HookMethod
+	public getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer) {
+		return player.moveType === MoveType.Flying ? SpriteBatchLayer.CreatureFlying : undefined;
+	}
+
+	@HookMethod
+	public onGameScreenVisible(): void {
 		this.elementContainer = $("<div></div>");
 		this.elementInner = $('<div class="inner"></div>');
 		this.elementContainer.append(this.elementInner);
 
 		let html = this.generateSelect(TerrainType, Terrains, "change-tile", "Change Tile");
 		html += this.generateSelect(CreatureType, Creatures, "spawn-creature", "Spawn Creature");
+		html += this.generateSelect(NPCType, undefined, "spawn-npc", "Spawn NPC");
 		html += this.generateSelect(ItemType, Items, "item-get", "Get Item");
 		html += this.generateSelect(DoodadType, Doodads, "place-env-item", "Place Doodad");
 		html += this.generateSelect(TileEventType, TileEvents, "place-tile-event", "Place Tile Event");
@@ -447,6 +490,7 @@ export default class DebugTools extends Mod {
 			$("<button>Inspect</button>").click(() => this.inspection.queryInspection()),
 			$("<button>Refresh Stats</button>").click(() => actionManager.execute(localPlayer, this.refreshStatsAction)),
 			$("<button>Kill All Creatures</button>").click(() => actionManager.execute(localPlayer, this.killAllCreaturesAction)),
+			$("<button>Kill All NPCs</button>").click(() => actionManager.execute(localPlayer, this.killAllNPCsAction)),
 			$("<button>Unlock Recipes</button>").click(() => actionManager.execute(localPlayer, this.unlockRecipesAction)),
 			$("<button>Reload Shaders</button>").click(() => actionManager.execute(localPlayer, this.reloadShadersAction)),
 			$("<button>Noclip</button>").click(() => actionManager.execute(localPlayer, this.noclipAction)),
@@ -473,7 +517,7 @@ export default class DebugTools extends Mod {
 					for (let y = 0; y < game.mapSize; y++) {
 						for (let x = 0; x < game.mapSize; x++) {
 							const tile = game.getTile(x, y, WorldZ.Overworld);
-							if (Utilities.TileHelpers.getType(tile) === TerrainType.DeepSeawater) {
+							if (TileHelpers.getType(tile) === TerrainType.DeepSeawater) {
 								localPlayer.x = localPlayer.fromX = x;
 								localPlayer.y = localPlayer.fromY = y;
 								localPlayer.z = WorldZ.Overworld;
@@ -524,11 +568,13 @@ export default class DebugTools extends Mod {
 		});
 	}
 
+	@HookMethod
 	public onGameTickEnd() {
 		this.inspection.update();
 		this.updateSliders();
 	}
 
+	@HookMethod
 	public canClientMove(): false | undefined {
 		if (this.inspection.isQueryingInspection() || this.isPlayingAudio || this.isCreatingParticle) {
 			return false;
@@ -537,19 +583,20 @@ export default class DebugTools extends Mod {
 		return undefined;
 	}
 
-	public onBindLoop(bindPressed: true | undefined, api: BindCatcherApi): true | undefined {
+	@HookMethod
+	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable {
 		if (api.wasPressed(this.keyBindDialog) && !bindPressed) {
 			ui.toggleDialog(this.elementDialog);
-			bindPressed = true;
+			bindPressed = this.keyBindDialog;
 		}
 
 		if (api.wasPressed(this.keyBindSelectLocation) && !bindPressed) {
 			if (this.inspection.isQueryingInspection()) {
-				bindPressed = true;
+				bindPressed = this.keyBindSelectLocation;
 				this.inspection.inspect(api.mouseX, api.mouseY, this.createDialog);
 
 			} else if (this.isPlayingAudio) {
-				bindPressed = true;
+				bindPressed = this.keyBindSelectLocation;
 				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
 
 				if (tilePosition.x < 0) {
@@ -563,7 +610,7 @@ export default class DebugTools extends Mod {
 				audio.queueEffect(this.audioToPlay, tilePosition.x, tilePosition.y, localPlayer.z);
 
 			} else if (this.isCreatingParticle) {
-				bindPressed = true;
+				bindPressed = this.keyBindSelectLocation;
 				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
 				if (tilePosition.x < 0) {
 					tilePosition.x += game.mapSize;
@@ -580,11 +627,13 @@ export default class DebugTools extends Mod {
 		return bindPressed;
 	}
 
+	@HookMethod
 	public canCreatureAttack(creature: ICreature, enemy: IPlayer | ICreature): boolean {
-		return (enemy as any).moveType === MoveType.Flying ? false : null;
+		return (enemy as any).moveType === MoveType.Flying ? false : undefined;
 	}
 
-	public onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: FacingDirection): boolean | undefined {
+	@HookMethod
+	public onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined {
 		if (player.moveType !== MoveType.Flying) {
 			return undefined;
 		}
@@ -625,6 +674,7 @@ export default class DebugTools extends Mod {
 		return false;
 	}
 
+	@HookMethod
 	public onNoInputReceived(player: IPlayer): void {
 		if (player.moveType !== MoveType.Flying) {
 			return;
@@ -636,6 +686,7 @@ export default class DebugTools extends Mod {
 		}
 	}
 
+	@HookMethod
 	public getAmbientColor(colors: number[]): number[] | undefined {
 		if (this.data.disableLights) {
 			return [1, 1, 1];
@@ -644,6 +695,7 @@ export default class DebugTools extends Mod {
 		return undefined;
 	}
 
+	@HookMethod
 	public getAmbientLightLevel(ambientLight: number, z: number): number | undefined {
 		if (this.data.disableLights) {
 			return 1;
@@ -652,6 +704,7 @@ export default class DebugTools extends Mod {
 		return undefined;
 	}
 
+	@HookMethod
 	public getTileLightLevel(tile: ITile, x: number, y: number, z: number): number | undefined {
 		if (this.data.disableLights) {
 			return 0;
@@ -663,11 +716,15 @@ export default class DebugTools extends Mod {
 	///////////////////////////////////////////////////
 	// Helper functions
 
-	private generateSelect(enums: any, objects: SaferDescription<any> | undefined, className: string, labelName: string): string {
+	private generateSelect(enums: any, objects: Description<any> | undefined, className: string, labelName: string): string {
 		let html = `<select class="${className}" data-selectid="${className}"><option selected disabled>${labelName}</option>`;
 
 		const sorted = new Array<any>();
-		const makePretty = (str: string): string => {
+		const makePretty = (str: string, value: number): string => {
+			if (objects && objects[value] && objects[value].name) {
+				return Strings.formatSentenceCase(objects[value].name, SentenceCaseStyle.Title);
+			}
+
 			let result = str[0];
 			for (let i = 1; i < str.length; i++) {
 				if (str[i] === str[i].toUpperCase()) {
@@ -680,11 +737,11 @@ export default class DebugTools extends Mod {
 			return result;
 		};
 
-		Utilities.Enums.forEach(enums, (name, value) => {
+		for (const [name, value] of Enums.entries(enums)) {
 			if (objects === undefined || objects[value]) {
-				sorted.push({ id: value, name: makePretty(name) });
+				sorted.push({ id: value, name: makePretty(name, value) });
 			}
-		});
+		}
 
 		sorted.sort((a: any, b: any): number => a.name.localeCompare(b.name));
 
@@ -704,14 +761,14 @@ export default class DebugTools extends Mod {
 			return;
 		}
 
-		this.elementDayNightTime.text(game.time.getTimeFormat(time));
+		this.elementDayNightTime.text(Translation.getString(game.time.getTranslation(time)));
 		this.elementReputationValue.text(localPlayer.getReputation());
-		this.elementWeightBonusValue.text(localPlayer.weightBonus);
+		this.elementWeightBonusValue.text(this.data.weightBonus);
 		document.getElementById("daynightslider")
 			.style.setProperty("--percent", `${game.time.getTime() * 100}`);
 		document.getElementById("reputationslider")
 			.style.setProperty("--percent", `${(localPlayer.getReputation() + 64000) / 128000 * 100}`);
 		document.getElementById("weightbonusslider")
-			.style.setProperty("--percent", `${(localPlayer.weightBonus / 2500 * 100)}`);
+			.style.setProperty("--percent", `${(this.data.weightBonus / 2500 * 100)}`);
 	}
 }

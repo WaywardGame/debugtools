@@ -1,9 +1,9 @@
 import { ICreature } from "creature/ICreature";
-import { FacingDirection } from "Enums";
+import { Bindable, Direction, SpriteBatchLayer } from "Enums";
 import Mod from "mod/Mod";
+import { BindCatcherApi } from "newui/BindingManager";
 import IPlayer from "Player/IPlayer";
 import { ITile } from "tile/ITerrain";
-import { BindCatcherApi } from "newui/BindingManager";
 export default class DebugTools extends Mod {
     private elementDialog;
     private keyBindDialog;
@@ -25,6 +25,7 @@ export default class DebugTools extends Mod {
     private setWeightBonusAction;
     private refreshStatsAction;
     private killAllCreaturesAction;
+    private killAllNPCsAction;
     private unlockRecipesAction;
     private reloadShadersAction;
     private noclipAction;
@@ -38,18 +39,19 @@ export default class DebugTools extends Mod {
     onUninitialize(): any;
     onLoad(saveData: any): void;
     onSave(): any;
-    onGameStart(isLoadingSave: boolean): void;
     isPlayerSwimming(player: IPlayer, isSwimming: boolean): boolean;
-    onShowInGameScreen(): void;
+    getPlayerStrength(strength: number, player: IPlayer): number;
+    getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer): SpriteBatchLayer;
+    onGameScreenVisible(): void;
     onGameTickEnd(): void;
     canClientMove(): false | undefined;
-    onBindLoop(bindPressed: true | undefined, api: BindCatcherApi): true | undefined;
+    onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     canCreatureAttack(creature: ICreature, enemy: IPlayer | ICreature): boolean;
-    onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: FacingDirection): boolean | undefined;
+    onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined;
     onNoInputReceived(player: IPlayer): void;
     getAmbientColor(colors: number[]): number[] | undefined;
     getAmbientLightLevel(ambientLight: number, z: number): number | undefined;
     getTileLightLevel(tile: ITile, x: number, y: number, z: number): number | undefined;
-    private generateSelect(enums, objects, className, labelName);
-    private updateSliders();
+    private generateSelect;
+    private updateSliders;
 }

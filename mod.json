@@ -4,23 +4,9 @@
 	"version": "1.4",
 	"author": "Spacetech",
 	"compatibleMinorVersions": [
-		5
+		6
 	],
 	"multiplayerCompatible": true,
-	"hooks": [
-		"CanClientMove",
-		"CanCreatureAttack",
-		"GetAmbientColor",
-		"GetAmbientLightLevel",
-		"GetTileLightLevel",
-		"IsPlayerSwimming",
-		"OnBindLoop",
-		"OnGameStart",
-		"OnGameTickEnd",
-		"OnMove",
-		"OnNoInputReceived",
-		"OnShowInGameScreen"
-	],
 	"file": "out/DebugTools",
 	"unloadable": true,
 	"stylesheets": [
