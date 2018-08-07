@@ -49,7 +49,7 @@ export default class DebugTools extends Mod {
     canCreatureAttack(creature: ICreature, enemy: IPlayer | ICreature): boolean;
     onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined;
     onNoInputReceived(player: IPlayer): void;
-    getAmbientColor(colors: number[]): number[] | undefined;
+    getAmbientColor(colors: [number, number, number]): [number, number, number] | undefined;
     getAmbientLightLevel(ambientLight: number, z: number): number | undefined;
     getTileLightLevel(tile: ITile, x: number, y: number, z: number): number | undefined;
     private generateSelect;

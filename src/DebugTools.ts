@@ -4,7 +4,7 @@ import Creatures from "creature/Creatures";
 import { ICreature } from "creature/ICreature";
 import Doodads from "doodad/Doodads";
 import { IStatMax, Stat } from "entity/IStats";
-import { ActionType, Bindable, CreatureType, Delay, DoodadType, Direction, ItemType, MoveType, NPCType, PlayerState, SentenceCaseStyle, SfxType, SpriteBatchLayer, StatusType, TerrainType, WorldZ } from "Enums";
+import { ActionType, Bindable, CreatureType, Delay, Direction, DoodadType, ItemType, MoveType, NPCType, PlayerState, SentenceCaseStyle, SfxType, SpriteBatchLayer, StatusType, TerrainType, WorldZ } from "Enums";
 import Items from "item/Items";
 import Translation from "language/Translation";
 import * as MapGenHelpers from "mapgen/MapGenHelpers";
@@ -687,7 +687,7 @@ export default class DebugTools extends Mod {
 	}
 
 	@HookMethod
-	public getAmbientColor(colors: number[]): number[] | undefined {
+	public getAmbientColor(colors: [number, number, number]): [number, number, number] | undefined {
 		if (this.data.disableLights) {
 			return [1, 1, 1];
 		}

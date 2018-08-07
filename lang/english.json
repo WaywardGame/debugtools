@@ -8,7 +8,8 @@
 		"debugTools": {
 			"queryInspection": "Choose an object to inspect by clicking on its tile.",
 			"queryObjectNotFound": "The selected tile contains no object that can be inspected.",
-			"optionsAutoOpen": "Open Dialog on Load"
+			"optionsAutoOpen": "Open Dialog on Load",
+			"dialogTitle": "Debug Tools"
 		}
 	}
 }
