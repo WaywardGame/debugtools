@@ -196,7 +196,7 @@ export default class DebugTools extends Mod {
 			result.updateView = true;
 		});
 
-		this.setTimeAction = this.addActionType({ name: "Set Time", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
+		this.setTimeAction = this.addActionType({ name: "Set Time", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument<number>, result: IActionResult) => {
 			game.time.setTime(argument.object);
 
 			game.updateRender = true;
@@ -208,7 +208,7 @@ export default class DebugTools extends Mod {
 			}
 		});
 
-		this.setReputationAction = this.addActionType({ name: "Set Reputation", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
+		this.setReputationAction = this.addActionType({ name: "Set Reputation", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument<number>, result: IActionResult) => {
 			player.setStat(Stat.Benignity, 0);
 			player.setStat(Stat.Malignity, 0);
 
@@ -219,7 +219,7 @@ export default class DebugTools extends Mod {
 			}
 		});
 
-		this.setWeightBonusAction = this.addActionType({ name: "Set Weight Bonus", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
+		this.setWeightBonusAction = this.addActionType({ name: "Set Weight Bonus", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument<number>, result: IActionResult) => {
 
 			this.data.weightBonus = argument.object;
 			player.updateStrength();
@@ -737,7 +737,7 @@ export default class DebugTools extends Mod {
 			return result;
 		};
 
-		for (const [name, value] of Enums.entries(enums)) {
+		for (const [name, value] of Enums.entries<any, string>(enums)) {
 			if (objects === undefined || objects[value]) {
 				sorted.push({ id: value, name: makePretty(name, value) });
 			}
