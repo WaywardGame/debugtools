@@ -1,22 +1,37 @@
-#daynighttime, #reputationslidervalue, #weightbonusvalue {
-    display: inline-block; 
-    position: absolute; 
-    color: white;
-    text-shadow: 1px 1px 0 #000, 1px 1px 1px #000;
-    background: rgba(0,0,0,.5);
-    left: 50%; 
-    transform: translateX(-50%); 
-    margin-top: 19px; 
-    padding: 0 6px;
-    pointer-events: none;
-    z-index: 1;
+[data-dialog-id="ModDebugTools_Main"] > .game-dialog-body {
+    display: grid;
+    grid-template-columns: calc(150px * var(--scale-floor)) 1fr;
 }
 
-#daynightslider {
-    margin: 0 0 5px 0;
+[data-dialog-id="ModDebugTools_Main"] > .game-dialog-body > * {
+    position: relative;
 }
 
-.select-control.active {
-    border-color: #aaa;
-    background-color: #000
+[data-dialog-id="ModDebugTools_Main"] > .game-dialog-body > * > .game-dialog-scrollable-wrapper {
+    --scroll-height: calc(10px * var(--scale-floor));
+    --negative-margin: var(--scroll-height);
+}
+
+.debug-tools-subpanel-link.active {
+    --button-active-background: #353132;
+}
+
+.debug-tools-range-row-no-default-button {
+    grid-template-columns: auto 1fr;
+}
+
+[data-dialog-id="ModDebugTools_Inspect"] .paragraph {
+    padding-bottom: calc(5px * var(--scale-floor)) !important;
+}
+
+.debug-tools-inspect-dialog-inspect-section {
+    margin-top: calc(20px * var(--scale-floor));
+}
+
+.debug-tools-inspect-entity-sub-section {
+    margin-top: calc(10px * var(--scale-floor));
+}
+
+.dropdown-label > .label {
+    margin-top: calc(3px * var(--scale-floor));
 }

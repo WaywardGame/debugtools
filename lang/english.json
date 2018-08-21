@@ -2,14 +2,108 @@
 	"extends": "English",
 	"dictionaries": {
 		"bindable": {
-			"modDebugToolsToggle": "Toggle Debug Tools",
-			"modDebugToolsSelectLocation": "Select Location"
+			"modDebugToolsToggleDialog": "Toggle Tools Dialog",
+			"modDebugToolsSelectLocation": "Select Location",
+			"modDebugToolsCancelSelectLocation": "Cancel Location Select",
+			"modDebugToolsInspectTile": "Inspect Tile",
+			"modDebugToolsToggleCameraLock": "Toggle Camera Lock",
+			"modDebugToolsCameraMoveUp": "Camera Up",
+			"modDebugToolsCameraMoveDown": "Camera Down",
+			"modDebugToolsCameraMoveLeft": "Camera Left",
+			"modDebugToolsCameraMoveRight": "Camera Right",
+			"modDebugToolsPaint": "Paint",
+			"modDebugToolsErasePaint": "Erase Paint",
+			"modDebugToolsClearPaint": "Clear Paint",
+			"modDebugToolsCancelPaint": "Turn Off Paint Mode",
+			"modDebugToolsCompletePaint": "Complete/Commit Paint"
 		},
 		"debugTools": {
-			"queryInspection": "Choose an object to inspect by clicking on its tile.",
-			"queryObjectNotFound": "The selected tile contains no object that can be inspected.",
 			"optionsAutoOpen": "Open Dialog on Load",
-			"dialogTitle": "Debug Tools"
+			
+			
+			"dialogTitleMain": "Debug Tools",
+			
+			
+			"panelGeneral": "General",
+			
+			"labelTime": "Time",
+			"buttonInspect": "Inspect",
+			"buttonInspectLocalPlayer": "Inspect Local Player",
+			"buttonUnlockRecipes": "Unlock Recipes",
+			"interruptConfirmationUnlockRecipes": "Are you sure you want\nto unlock all recipes?",
+			"interruptConfirmationUnlockRecipesDescription": "There's no undo besides erasing  /all/ \nrecipe progress in the Options Menu.",
+			"buttonRemoveAllCreatures": "Remove All Creatures",
+			"buttonRemoveAllNPCs": "Remove All NPCs",
+			
+			
+			"panelDisplay": "Display",
+			
+			"buttonToggleFog": "Fog",
+			"buttonToggleLighting": "Lighting",
+			"labelZoomLevel": "Zoom Level",
+			"zoomLevel": "{0}x",
+			"buttonUnlockCamera": "Unlock Camera",
+			"buttonResetWebGL": "Reset WebGL",
+			"buttonReloadShaders": "Reload Shaders",
+			
+			
+			"panelPaint": "Tile Paint",
+			
+			"buttonPaint": "Paint",
+			"paintNoChange": "No Change",
+			"paintRemove": "Remove",
+			"labelTerrain": "{#--text-color-faded:Terrain:}",
+			"labelCreature": "{#--text-color-faded:Creature:}",
+			"buttonPaintClear": "Clear {#--text-color-faded:({Bindable.ModDebugToolsClearPaint})}",
+			"buttonPaintComplete": "Complete {#--text-color-faded:({Bindable.ModDebugToolsCompletePaint})}",
+			"buttonToggleAberrant": "Aberrant",
+			"labelNPC": "{#--text-color-faded:NPC:}",
+			"labelDoodad": "{#--text-color-faded:Doodad:}",
+			"labelCorpse": "{#--text-color-faded:Corpse:}",
+			"labelTileEvent": "{#--text-color-faded:Tile Event:}",
+			"buttonReplaceExisting": "Replace Existing",
+			
+			
+			"dialogTitleInspect": "Inspect",
+			
+			"inspectTileTitle": "{#--text-color-faded:x:} {0} {#--text-color-faded:y:} {1} {#--text-color-faded:z:} {2}",
+			"inspectTerrain": "{#--text-color-faded:Terrain:} {0}",
+			"buttonChangeTerrain": "Change",
+			"entityName": "{#--text-color-faded:{0}:} {1}",
+			"buttonKillEntity": "Kill",
+			"buttonHealEntity": "Heal",
+			"buttonCloneEntity": "Clone",
+			"killEntityDeathMessage": "by l33t h4x0r",
+			"corpseName": "{#--text-color-faded:Corpse:} {1}",
+			"buttonResurrectCorpse": "Resurrect",
+			"buttonRemoveThing": "Remove",
+			"buttonTameCreature": "Tamed",
+			"labelWeightBonus": "Weight Bonus",
+			"buttonToggleTilled": "Tilled",
+			"labelItem": "Item",
+			"labelQuality": "Quality",
+			"labelBenignity": "Benignity",
+			"labelMalignity": "Malignity",
+			"buttonTeleportEntity": "Teleport",
+			"optionTeleportSelectLocation": "To Location",
+			"optionTeleportToLocalPlayer": "To Local Player",
+			"optionTeleportToHost": "To Host",
+			"optionTeleportToPlayer": "To Player",
+			"buttonToggleInvulnerable": "Invulnerable",
+			"buttonToggleNoClip": "Noclip",
+			"labelSkill": "Skill",
+			"none": "None",
+			"addToInventory": "Add to Inventory",
+			
+			
+			"actionResurrect": "resurrect {0}",
+			"actionClone": "clone {0}"
+		},
+		"message": {
+			"failureTileBlocked": "Cannot {0}, the tile is blocked."
+		},
+		"source": {
+			"modDebugToolsDebugTools": "Debug Tools"
 		}
 	}
 }
