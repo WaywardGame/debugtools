@@ -14,12 +14,12 @@ export default class EntityInformation extends Component implements IInspectInfo
     update(position: IVector2, tile: ITile): this | undefined;
     private addEntityDisplay;
     private onStatChange;
-    private kill;
-    private cloneEntity;
     private openTeleportMenu;
     private createTeleportToPlayerMenu;
     private selectTeleportLocation;
     private teleport;
+    private kill;
+    private cloneEntity;
     private heal;
     private setStat;
 }

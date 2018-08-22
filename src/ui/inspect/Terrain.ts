@@ -12,6 +12,7 @@ import terrainDescriptions from "tile/Terrains";
 import Collectors, { PassStrategy } from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
 import { IVector2 } from "utilities/math/IVector";
+import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
 import Actions from "../../Actions";
@@ -20,7 +21,7 @@ import { DebugToolsTranslation } from "../../IDebugTools";
 import { IInspectInformationSection } from "../InspectDialog";
 
 export default class TerrainInformation extends Component implements IInspectInformationSection {
-	private position: IVector2;
+	private position: Vector3;
 	private tile: ITile;
 	private terrainType: string;
 
@@ -48,7 +49,7 @@ export default class TerrainInformation extends Component implements IInspectInf
 	}
 
 	public update(position: IVector2, tile: ITile) {
-		this.position = position;
+		this.position = new Vector3(position.x, position.y, localPlayer.z);
 		this.tile = tile;
 
 		const terrainType = TerrainType[TileHelpers.getType(this.tile!)];
@@ -66,7 +67,7 @@ export default class TerrainInformation extends Component implements IInspectInf
 
 	@Bound
 	private toggleTilled(_: any, tilled: boolean) {
-		actionManager.execute(localPlayer, Actions.get("toggleTilled"), { point: this.position, object: tilled });
+		Actions.get("toggleTilled").execute({ position: this.position, object: tilled });
 	}
 
 	@Bound
@@ -96,7 +97,7 @@ export default class TerrainInformation extends Component implements IInspectInf
 
 	private changeTerrain(terrain: TerrainType) {
 		return () => {
-			actionManager.execute(localPlayer, Actions.get("changeTerrain"), { point: this.position, object: terrain });
+			Actions.get("changeTerrain").execute({ position: this.position, object: terrain });
 			this.update(this.position, this.tile);
 		};
 	}

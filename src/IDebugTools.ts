@@ -95,6 +95,7 @@ export enum DebugToolsTranslation {
 
 	ActionResurrect,
 	ActionClone,
+	ActionTeleport,
 }
 
 export interface ISaveData {

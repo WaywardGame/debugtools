@@ -63,7 +63,8 @@ export declare enum DebugToolsTranslation {
     LabelQuality = 60,
     AddToInventory = 61,
     ActionResurrect = 62,
-    ActionClone = 63
+    ActionClone = 63,
+    ActionTeleport = 64
 }
 export interface ISaveData {
     lighting: boolean;

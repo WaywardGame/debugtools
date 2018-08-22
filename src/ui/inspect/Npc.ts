@@ -19,6 +19,6 @@ export default class NpcInformation extends HumanInformation {
 
 	@Bound
 	private removeNPC() {
-		actionManager.execute(localPlayer, Actions.get("remove"), { npc: this.npc });
+		Actions.get("remove").execute({ npc: this.npc });
 	}
 }

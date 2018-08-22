@@ -5,10 +5,9 @@ import IBaseEntity from "entity/IBaseEntity";
 import IBaseHumanEntity from "entity/IBaseHumanEntity";
 import { AiType, EntityType } from "entity/IEntity";
 import { IStatMax, Stat } from "entity/IStats";
-import { ActionType, CreatureType, DamageType, Delay, ItemQuality, ItemType, MoveType, NPCType, PlayerState, SentenceCaseStyle, SkillType, StatusType, TerrainType } from "Enums";
+import { CreatureType, DamageType, Delay, ItemQuality, ItemType, MoveType, NPCType, PlayerState, SentenceCaseStyle, SkillType, StatusType, TerrainType } from "Enums";
 import itemDescriptions from "item/Items";
 import { Message, MessageType } from "language/IMessages";
-import { spawnTemplate } from "mapgen/MapGenHelpers";
 import Register, { Registry } from "mod/ModRegistry";
 import { TranslationGenerator } from "newui/component/IComponent";
 import Text from "newui/component/Text";
@@ -33,15 +32,23 @@ function description(name: string): IActionDescription {
 	return { name, usableAsGhost: true, usableWhenPaused: true, ignoreHasDelay: true };
 }
 
+type ExecuteFunction<F extends any> = F extends (player: IPlayer, argument: IActionArgument<infer X>, result: IActionResult) => void ? (undefined extends Extract<X, undefined> ?
+	(argument?: IActionArgument<X>) => void : (argument: IActionArgument<X>) => void) : never;
+
 export default class Actions {
 
-	public static get<K extends keyof Actions>(name: K): ActionType {
-		const action = DebugTools.INSTANCE.actions[name];
-		if (typeof action !== "function") {
-			return undefined as any;
-		}
+	public static get<K extends keyof Actions, F extends Actions[K]>(name: K): { execute: ExecuteFunction<F> } {
+		return {
+			execute: (argument: IActionArgument) => {
+				const action = DebugTools.INSTANCE.actions[name];
+				if (typeof action !== "function") {
+					DebugTools.LOG.error(`Action ${name} is invalid`);
+					return;
+				}
 
-		return Registry.id(action as ActionCallback) as any;
+				actionManager.execute(localPlayer, Registry.id(action as ActionCallback), argument);
+			},
+		} as any;
 	}
 
 	@Register.message("FailureTileBlocked")
@@ -49,6 +56,7 @@ export default class Actions {
 
 	public constructor(private readonly mod: DebugTools) { }
 
+	/*
 	@Register.action<any>(description("Select"))
 	public select(player: IPlayer, argument: IActionArgument<any>, result: IActionResult) {
 		const selectAction = argument.object as {
@@ -103,20 +111,18 @@ export default class Actions {
 
 		result.updateView = true;
 	}
+	*/
 
 	////////////////////////////////////
 	// New Actions
 	//
 
-	@Register.action<[number, number, number]>(description("Teleport Entity"))
-	public teleport(player: IPlayer, { object: xyz, creature, npc }: IActionArgument<[number, number, number]>, result: IActionResult) {
-		const entity = creature || npc || player;
+	@Register.action(description("Teleport Entity"))
+	public teleport(executor: IPlayer, { entity, position }: IActionArgument, result: IActionResult) {
+		position = this.getPosition(position!, () => translation(DebugToolsTranslation.ActionTeleport)
+			.get(game.getName(entity)));
 
-		let position: IVector3 = new Vector3(xyz);
-
-		if (!TileHelpers.isOpenTile(position, game.getTile(...new Vector3(position).xyz))) {
-			position = TileHelpers.findMatchingTile(position, TileHelpers.isOpenTile)!;
-		}
+		if (!entity || !position) return;
 
 		if (entity.entityType === EntityType.Creature) {
 			const tile = game.getTile(entity.x, entity.y, entity.z);
@@ -131,6 +137,10 @@ export default class Actions {
 		entity.x = entity.fromX = position.x;
 		entity.y = entity.fromY = position.y;
 		entity.z = position.z;
+
+		if (entity.entityType === EntityType.Player) {
+			entity.setPosition(new Vector3(entity));
+		}
 
 		if (entity.entityType === EntityType.Creature) {
 			const tile = game.getTile(entity.x, entity.y, entity.z);
@@ -171,26 +181,9 @@ export default class Actions {
 		game.updateView(false);
 	}
 
-	@Register.action(description("Update Stats and Attributes"))
-	public updateStatsAndAttributes(player: IPlayer, argument: IActionArgument, result: IActionResult) {
-		player.updateStatsAndAttributes();
-	}
-
-	@Register.action<[boolean, PlayerState?]>(description("Toggle Spectating"))
-	public toggleSpectating(player: IPlayer, { object: [isSpectating, playerState] }: IActionArgument<[boolean, PlayerState?]>, result: IActionResult) {
-		if (isSpectating) {
-			player.state = PlayerState.Ghost;
-
-		} else {
-			player.state = playerState!;
-		}
-	}
-
 	@Register.action(description("Kill"))
-	public kill(player: IPlayer, { creature, npc }: IActionArgument, result: IActionResult) {
-		const entity = creature || npc || player;
-
-		entity.damage({
+	public kill(executor: IPlayer, { entity }: IActionArgument, result: IActionResult) {
+		entity!.damage({
 			type: DamageType.True,
 			amount: Infinity,
 			damageMessage: translation(DebugToolsTranslation.KillEntityDeathMessage).getString(),
@@ -201,17 +194,17 @@ export default class Actions {
 	}
 
 	@Register.action(description("Clone"))
-	public clone(player: IPlayer, { creature, npc, point }: IActionArgument, result: IActionResult) {
+	public clone(executor: IPlayer, { creature, npc, player, position }: IActionArgument, result: IActionResult) {
 		const entity = creature || npc || player;
 		let clone: ICreature | INPC | IPlayer;
 
-		const pos = this.getPosition(new Vector3(point!.x, point!.y, entity.z), () => translation(DebugToolsTranslation.ActionClone)
+		position = this.getPosition(position!, () => translation(DebugToolsTranslation.ActionClone)
 			.get(game.getName(entity)));
 
-		if (!pos) return;
+		if (!entity || !position) return;
 
 		if (entity.entityType === EntityType.Creature) {
-			clone = creatureManager.spawn(entity.type, pos.x, pos.y, pos.z, true, entity.aberrant)!;
+			clone = creatureManager.spawn(entity.type, position.x, position.y, position.z, true, entity.aberrant)!;
 
 			if (entity.isTamed()) clone.tame(entity.getOwner()!);
 			clone.renamed = entity.renamed;
@@ -221,13 +214,13 @@ export default class Actions {
 			clone.enemyIsPlayer = entity.enemyIsPlayer;
 
 		} else {
-			clone = npcManager.spawn(NPCType.Merchant, point!.x, point!.y, entity.z)!;
+			clone = npcManager.spawn(NPCType.Merchant, position.x, position.y, position.z)!;
 			clone.customization = { ...entity.customization };
 			clone.renamed = entity.getName();
 			this.cloneInventory(entity, clone);
 		}
 
-		clone.direction = new Vector2(entity.direction);
+		clone.direction = new Vector2(entity.direction).raw();
 		clone.facingDirection = entity.facingDirection;
 
 		this.copyStats(entity, clone);
@@ -241,19 +234,17 @@ export default class Actions {
 	}
 
 	@Register.action<number>(description("Set Time"))
-	public setTime(player: IPlayer, argument: IActionArgument<number>, result: IActionResult) {
-		game.time.setTime(argument.object);
+	public setTime(player: IPlayer, { object: time }: IActionArgument<number>, result: IActionResult) {
+		game.time.setTime(time);
 		game.updateRender = true;
 		fieldOfView.compute();
 	}
 
-	@Register.action<number>(description("Heal"))
-	public heal(player: IPlayer, { creature, npc, object: corpseId }: IActionArgument<number>, result: IActionResult) {
-		const entity = creature || npc || game.corpses[corpseId] || player;
-
+	@Register.action<number | undefined>(description("Heal"))
+	public heal(executor: IPlayer, { entity, object: corpseId }: IActionArgument<number | undefined>, result: IActionResult) {
 		// resurrect corpses
-		if (!("entityType" in entity)) {
-			result.updateRender = this.resurrectCorpse(entity);
+		if (!entity) {
+			result.updateRender = this.resurrectCorpse(game.corpses[corpseId!]!);
 			return;
 		}
 
@@ -280,8 +271,8 @@ export default class Actions {
 	}
 
 	@Register.action<[Stat, number]>(description("Set Stat"))
-	public setStat(player: IPlayer, { object: [stat, value], creature, npc }: IActionArgument<[Stat, number]>, result: IActionResult) {
-		(creature || npc || player).setStat(stat, value);
+	public setStat(executor: IPlayer, { entity, object: [stat, value] }: IActionArgument<[Stat, number]>, result: IActionResult) {
+		entity!.setStat(stat, value);
 	}
 
 	@Register.action<boolean>(description("Set Tamed"))
@@ -290,8 +281,8 @@ export default class Actions {
 		else creature!.release();
 	}
 
-	@Register.action<[RemovalType, number]>(description("Remove"))
-	public remove(player: IPlayer, { creature, npc, object: otherRemoval }: IActionArgument<[RemovalType, number]>, result: IActionResult) {
+	@Register.action<[RemovalType, number] | undefined>(description("Remove"))
+	public remove(player: IPlayer, { creature, npc, object: otherRemoval }: IActionArgument<[RemovalType, number] | undefined>, result: IActionResult) {
 		this.removeInternal(otherRemoval || [] as any, creature, npc);
 
 		renderer.computeSpritesInViewport();
@@ -299,33 +290,42 @@ export default class Actions {
 	}
 
 	@Register.action<number>(description("Set Weight Bonus"))
-	public setWeightBonus(player: IPlayer, { object: weightBonus }: IActionArgument<number>, result: IActionResult) {
-		this.mod.setPlayerData(player, "weightBonus", weightBonus);
-		player.updateStrength();
+	public setWeightBonus(executor: IPlayer, { player, object: weightBonus }: IActionArgument<number>, result: IActionResult) {
+		this.mod.setPlayerData(player!, "weightBonus", weightBonus);
+		player!.updateStrength();
 
 		game.updateTablesAndWeight();
 	}
 
 	@Register.action<TerrainType>(description("Change Terrain"))
-	public changeTerrain(player: IPlayer, { object: terrain, point }: IActionArgument<TerrainType>, result: IActionResult) {
-		game.changeTile(terrain, point!.x, point!.y, player.z, false);
-		this.setTilled(point!.x, point!.y, player.z, false);
+	public changeTerrain(player: IPlayer, { object: terrain, position }: IActionArgument<TerrainType>, result: IActionResult) {
+		if (!position) return;
+
+		game.changeTile(terrain, position.x, position.y, position.z, false);
+		this.setTilled(position.x, position.y, position.z, false);
 
 		renderer.computeSpritesInViewport();
 		result.updateRender = true;
 	}
 
 	@Register.action<boolean>(description("Toggle Tilled"))
-	public toggleTilled(player: IPlayer, { object: tilled, point }: IActionArgument<boolean>, result: IActionResult) {
-		this.setTilled(point!.x, point!.y, player.z, tilled);
+	public toggleTilled(player: IPlayer, { position, object: tilled }: IActionArgument<boolean>, result: IActionResult) {
+		if (!position) return;
+
+		this.setTilled(position.x, position.y, position.z, tilled);
 
 		renderer.computeSpritesInViewport();
 		result.updateRender = true;
 	}
 
+	@Register.action(description("Update Stats and Attributes"))
+	public updateStatsAndAttributes(player: IPlayer, argument: IActionArgument, result: IActionResult) {
+		player.updateStatsAndAttributes();
+	}
+
 	@Register.action<[ItemType, ItemQuality]>(description("Add Item to Inventory"))
-	public addItemToInventory(human: IBaseHumanEntity, { object: [item, quality] }: IActionArgument<[ItemType, ItemQuality]>, result: IActionResult) {
-		human.createItemInInventory(item, quality);
+	public addItemToInventory(executor: IPlayer, { human, object: [item, quality] }: IActionArgument<[ItemType, ItemQuality]>, result: IActionResult) {
+		human!.createItemInInventory(item, quality);
 
 		game.updateTablesAndWeight();
 	}
@@ -435,18 +435,22 @@ export default class Actions {
 	}
 
 	@Register.action<boolean>(description("Toggle Invulnerable"))
-	public toggleInvulnerable(player: IPlayer, { object: invulnerable }: IActionArgument<boolean>, result: IActionResult) {
-		DebugTools.INSTANCE.setPlayerData(player, "invulnerable", invulnerable);
+	public toggleInvulnerable(executor: IPlayer, { player, object: invulnerable }: IActionArgument<boolean>, result: IActionResult) {
+		DebugTools.INSTANCE.setPlayerData(player!, "invulnerable", invulnerable);
 	}
 
 	@Register.action<[SkillType, number]>(description("Set Skill"))
-	public setSkill(player: IPlayer, { object: [skill, value] }: IActionArgument<[SkillType, number]>, result: IActionResult) {
+	public setSkill(executor: IPlayer, { player, object: [skill, value] }: IActionArgument<[SkillType, number]>, result: IActionResult) {
+		if (!player) return;
+
 		player.skills[skill].core = value;
 		player.skills[skill].percent = player.skills[skill].bonus + value;
 	}
 
 	@Register.action<boolean>(description("Toggle Noclip"))
-	public toggleNoclip(player: IPlayer, { object: noclip }: IActionArgument<boolean>, result: IActionResult) {
+	public toggleNoclip(executor: IPlayer, { player, object: noclip }: IActionArgument<boolean>, result: IActionResult) {
+		if (!player) return;
+
 		DebugTools.INSTANCE.setPlayerData(player, "noclip", noclip ? {
 			moving: false,
 			delay: Delay.Movement,
@@ -511,8 +515,8 @@ export default class Actions {
 		world.updateTile(x, y, z, tile);
 	}
 
-	private getPosition(position: Vector3, actionName: TranslationGenerator) {
-		if (TileHelpers.isOpenTile(position, game.getTile(...position.xyz))) return position;
+	private getPosition(position: IVector3, actionName: TranslationGenerator) {
+		if (TileHelpers.isOpenTile(position, game.getTile(...new Vector3(position).xyz))) return position;
 
 		const openTile = TileHelpers.findMatchingTile(position, TileHelpers.isOpenTile);
 
@@ -555,7 +559,7 @@ export default class Actions {
 		}
 
 		for (const item of from.inventory.containedItems) {
-			const clone = itemManager.create(item.type, to.inventory, item.quality);
+			const clone = to.createItemInInventory(item.type, item.quality);
 			clone.ownerIdentifier = item.ownerIdentifier;
 			clone.minDur = item.minDur;
 			clone.maxDur = item.maxDur;

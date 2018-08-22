@@ -4,7 +4,6 @@ import { EntityType } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
 import { SentenceCaseStyle } from "Enums";
 import Translation from "language/Translation";
-import { Registry } from "mod/ModRegistry";
 import { bindingManager } from "newui/BindingManager";
 import Button, { ButtonEvent } from "newui/component/Button";
 import Component from "newui/component/Component";
@@ -23,6 +22,7 @@ import { ITile } from "tile/ITerrain";
 import Collectors, { PassStrategy } from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
 import { IVector2, IVector3 } from "utilities/math/IVector";
+import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
 import DebugTools, { translation } from "../../DebugTools";
@@ -164,39 +164,6 @@ export default class EntityInformation extends Component implements IInspectInfo
 	}
 
 	@Bound
-	private kill(entity: ICreature | INPC | IPlayer) {
-		return () => {
-			actionManager.execute(
-				entity.entityType === EntityType.Player ? entity : localPlayer,
-				Actions.get("kill"),
-				entity.entityType === EntityType.Player ? {} : {
-					[entity.entityType === EntityType.Creature ? "creature" : "npc"]: entity,
-				},
-			);
-			this.triggerSync("update");
-		};
-	}
-
-	@Bound
-	private cloneEntity(entity: ICreature | INPC | IPlayer) {
-		return async () => {
-			const teleportLocation = await DebugTools.INSTANCE.selector.select();
-			if (!teleportLocation) return;
-
-			actionManager.execute(
-				entity.entityType === EntityType.Player ? entity : localPlayer,
-				Actions.get("clone"),
-				{
-					point: { x: teleportLocation.x, y: teleportLocation.y },
-					...entity.entityType === EntityType.Player ? {} : {
-						[entity.entityType === EntityType.Creature ? "creature" : "npc"]: entity,
-					},
-				},
-			);
-		};
-	}
-
-	@Bound
 	private openTeleportMenu(entity: ICreature | INPC | IPlayer) {
 		return () => {
 			const screen = this.api.getVisibleScreen();
@@ -261,30 +228,35 @@ export default class EntityInformation extends Component implements IInspectInfo
 
 	@Bound
 	private teleport(entity: ICreature | INPC | IPlayer, location: IVector2 | IVector3) {
-		actionManager.execute(
-			entity.entityType === EntityType.Player ? entity : localPlayer,
-			Actions.get("teleport"),
-			{
-				object: [location.x, location.y, "z" in location ? location.z : entity.z],
-				...entity.entityType === EntityType.Player ? {} : {
-					[entity.entityType === EntityType.Creature ? "creature" : "npc"]: entity,
-				},
-			},
-		);
+		Actions.get("teleport")
+			.execute({ entity, position: new Vector3(location.x, location.y, "z" in location ? location.z : entity.z) });
 
 		this.triggerSync("update");
 	}
 
 	@Bound
+	private kill(entity: ICreature | INPC | IPlayer) {
+		return () => {
+			Actions.get("kill").execute({ entity });
+			this.triggerSync("update");
+		};
+	}
+
+	@Bound
+	private cloneEntity(entity: ICreature | INPC | IPlayer) {
+		return async () => {
+			const teleportLocation = await DebugTools.INSTANCE.selector.select();
+			if (!teleportLocation) return;
+
+			Actions.get("clone")
+				.execute({ entity, position: new Vector3(teleportLocation.x, teleportLocation.y, localPlayer.z) });
+		};
+	}
+
+	@Bound
 	private heal(entity: ICreature | INPC | IPlayer) {
 		return () => {
-			actionManager.execute(
-				entity.entityType === EntityType.Player ? entity : localPlayer,
-				Actions.get("heal"),
-				entity.entityType === EntityType.Player ? {} : {
-					[entity.entityType === EntityType.Creature ? "creature" : "npc"]: entity,
-				},
-			);
+			Actions.get("heal").execute({ entity });
 			this.triggerSync("update");
 		};
 	}
@@ -292,15 +264,7 @@ export default class EntityInformation extends Component implements IInspectInfo
 	@Bound
 	private setStat(stat: Stat, entity: ICreature | INPC | IPlayer) {
 		return (_: any, value: number) => {
-			actionManager.execute(
-				entity.entityType === EntityType.Player ? entity : localPlayer,
-				Registry.id(DebugTools.INSTANCE.actions.setStat), {
-					object: [stat, value],
-					...entity.entityType === EntityType.Player ? {} : {
-						[entity.entityType === EntityType.Creature ? "creature" : "npc"]: entity,
-					},
-				},
-			);
+			Actions.get("setStat").execute({ entity, object: [stat, value] });
 		};
 	}
 }

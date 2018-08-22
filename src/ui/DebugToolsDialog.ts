@@ -282,7 +282,7 @@ export default class DebugToolsDialog extends Dialog implements IHookHost {
 				.setRefreshMethod(() => game.time.getTime()))
 			.setDisplayValue(time => game.time.getTranslation(time))
 			.on(RangeInputEvent.Change, (_, time: number) => {
-				actionManager.execute(localPlayer, Actions.get("setTime"), { object: time });
+				Actions.get("setTime").execute({ object: time });
 			})
 			.appendTo(component);
 
@@ -345,17 +345,17 @@ export default class DebugToolsDialog extends Dialog implements IHookHost {
 
 		if (!confirm) return;
 
-		actionManager.execute(localPlayer, Actions.get("unlockRecipes"));
+		Actions.get("unlockRecipes").execute();
 	}
 
 	@Bound
 	private removeAllCreatures() {
-		actionManager.execute(localPlayer, Actions.get("removeAllCreatures"));
+		Actions.get("removeAllCreatures").execute();
 	}
 
 	@Bound
 	private removeAllNPCs() {
-		actionManager.execute(localPlayer, Actions.get("removeAllNPCs"));
+		Actions.get("removeAllNPCs").execute();
 	}
 
 	@Bound
@@ -442,7 +442,7 @@ export default class DebugToolsDialog extends Dialog implements IHookHost {
 			Object.assign(paintData, paintSection.getTilePaintData());
 		}
 
-		actionManager.execute(localPlayer, Actions.get("paint"), { object: [this.paintTiles, paintData] });
+		Actions.get("paint").execute({ object: [this.paintTiles, paintData] });
 
 		this.clearPaint();
 	}
@@ -469,7 +469,7 @@ export default class DebugToolsDialog extends Dialog implements IHookHost {
 	@Bound
 	private toggleLighting(_: any, lighting: boolean) {
 		this.saveData.lighting = lighting;
-		actionManager.execute(localPlayer, Actions.get("updateStatsAndAttributes"));
+		Actions.get("updateStatsAndAttributes").execute();
 		game.updateView(true);
 	}
 

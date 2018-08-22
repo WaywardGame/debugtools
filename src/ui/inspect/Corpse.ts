@@ -55,7 +55,7 @@ export default class CorpseInformation extends Component implements IInspectInfo
 	@Bound
 	private resurrect(corpse: ICorpse) {
 		return () => {
-			actionManager.execute(localPlayer, Actions.get("heal"), { object: corpse.id });
+			Actions.get("heal").execute({ object: corpse.id });
 			this.triggerSync("update");
 		};
 	}
@@ -63,7 +63,7 @@ export default class CorpseInformation extends Component implements IInspectInfo
 	@Bound
 	private removeCorpse(corpse: ICorpse) {
 		return () => {
-			actionManager.execute(localPlayer, Actions.get("remove"), { object: [RemovalType.Corpse, corpse.id] });
+			Actions.get("remove").execute({ object: [RemovalType.Corpse, corpse.id] });
 			this.triggerSync("update");
 		};
 	}

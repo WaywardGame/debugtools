@@ -404,6 +404,6 @@ export default class DebugTools extends Mod {
 
 	@Register.command("heal")
 	protected heal(player: IPlayer, args: string) {
-		actionManager.execute(player, Actions.get("heal"));
+		Actions.get("heal").execute({ entity: player });
 	}
 }

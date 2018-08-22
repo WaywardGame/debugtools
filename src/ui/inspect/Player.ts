@@ -105,26 +105,26 @@ export default class PlayerInformation extends HumanInformation {
 
 	@Bound
 	private setSkill(_: any, value: number) {
-		actionManager.execute(this.player, Actions.get("setSkill"), { object: [this.skill, value] });
+		Actions.get("setSkill").execute({ player: this.player, object: [this.skill!, value] });
 	}
 
 	@Bound
 	private toggleInvulnerable(_: any, invulnerable: boolean) {
 		if (DebugTools.INSTANCE.getPlayerData(this.player, "invulnerable") === invulnerable) return;
 
-		actionManager.execute(this.player, Actions.get("toggleInvulnerable"), { object: invulnerable });
+		Actions.get("toggleInvulnerable").execute({ player: this.player, object: invulnerable });
 	}
 
 	@Bound
 	private toggleNoClip(_: any, noclip: boolean) {
 		if (DebugTools.INSTANCE.getPlayerData(this.player, "noclip") === noclip) return;
 
-		actionManager.execute(this.player, Actions.get("toggleNoclip"), { object: noclip });
+		Actions.get("toggleNoclip").execute({ player: this.player, object: noclip });
 	}
 
 	@Bound
 	private setWeightBonus(_: any, weightBonus: number) {
-		actionManager.execute(this.player, Actions.get("setWeightBonus"), { object: weightBonus });
+		Actions.get("setWeightBonus").execute({ player: this.player, object: weightBonus });
 	}
 
 	@Bound

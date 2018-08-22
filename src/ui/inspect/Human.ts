@@ -13,6 +13,8 @@ import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
 import { UiApi } from "newui/INewUi";
+import { INPC } from "npc/INPC";
+import IPlayer from "player/IPlayer";
 import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Objects";
@@ -89,7 +91,7 @@ export default class HumanInformation extends Component implements IInspectEntit
 
 	private setReputation(type: Stat.Malignity | Stat.Benignity) {
 		return (_: any, value: number) => {
-			actionManager.execute(this.human, Actions.get("setStat"), { object: [type, value] });
+			Actions.get("setStat").execute({ entity: this.human as INPC | IPlayer, object: [type, value] });
 		};
 	}
 
@@ -101,6 +103,7 @@ export default class HumanInformation extends Component implements IInspectEntit
 
 	@Bound
 	private addItem() {
-		actionManager.execute(this.human, Actions.get("addItemToInventory"), { object: [this.item, this.dropdownItemQuality.selection] });
+		Actions.get("addItemToInventory")
+			.execute({ human: this.human, object: [this.item!, this.dropdownItemQuality.selection] });
 	}
 }

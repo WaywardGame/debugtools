@@ -1,7 +1,6 @@
 import { IActionArgument, IActionResult } from "action/IAction";
-import IBaseHumanEntity from "entity/IBaseHumanEntity";
 import { Stat } from "entity/IStats";
-import { ActionType, ItemQuality, ItemType, PlayerState, SkillType, TerrainType } from "Enums";
+import { ItemQuality, ItemType, SkillType, TerrainType } from "Enums";
 import { Message } from "language/IMessages";
 import IPlayer from "player/IPlayer";
 import DebugTools from "./DebugTools";
@@ -9,33 +8,34 @@ import { IPaintData } from "./ui/DebugToolsDialog";
 export declare enum RemovalType {
     Corpse = 0
 }
+declare type ExecuteFunction<F extends any> = F extends (player: IPlayer, argument: IActionArgument<infer X>, result: IActionResult) => void ? (undefined extends Extract<X, undefined> ? (argument?: IActionArgument<X>) => void : (argument: IActionArgument<X>) => void) : never;
 export default class Actions {
     private readonly mod;
-    static get<K extends keyof Actions>(name: K): ActionType;
+    static get<K extends keyof Actions, F extends Actions[K]>(name: K): {
+        execute: ExecuteFunction<F>;
+    };
     messageFailureTileBlocked: Message;
     constructor(mod: DebugTools);
-    select(player: IPlayer, argument: IActionArgument<any>, result: IActionResult): void;
-    teleport(player: IPlayer, { object: xyz, creature, npc }: IActionArgument<[number, number, number]>, result: IActionResult): void;
+    teleport(executor: IPlayer, { entity, position }: IActionArgument, result: IActionResult): void;
     removeAllCreatures(player: IPlayer, argument: IActionArgument, result: IActionResult): void;
     removeAllNPCs(player: IPlayer, argument: IActionArgument, result: IActionResult): void;
-    updateStatsAndAttributes(player: IPlayer, argument: IActionArgument, result: IActionResult): void;
-    toggleSpectating(player: IPlayer, { object: [isSpectating, playerState] }: IActionArgument<[boolean, PlayerState?]>, result: IActionResult): void;
-    kill(player: IPlayer, { creature, npc }: IActionArgument, result: IActionResult): void;
-    clone(player: IPlayer, { creature, npc, point }: IActionArgument, result: IActionResult): void;
-    setTime(player: IPlayer, argument: IActionArgument<number>, result: IActionResult): void;
-    heal(player: IPlayer, { creature, npc, object: corpseId }: IActionArgument<number>, result: IActionResult): void;
-    setStat(player: IPlayer, { object: [stat, value], creature, npc }: IActionArgument<[Stat, number]>, result: IActionResult): void;
+    kill(executor: IPlayer, { entity }: IActionArgument, result: IActionResult): void;
+    clone(executor: IPlayer, { creature, npc, player, position }: IActionArgument, result: IActionResult): void;
+    setTime(player: IPlayer, { object: time }: IActionArgument<number>, result: IActionResult): void;
+    heal(executor: IPlayer, { entity, object: corpseId }: IActionArgument<number | undefined>, result: IActionResult): void;
+    setStat(executor: IPlayer, { entity, object: [stat, value] }: IActionArgument<[Stat, number]>, result: IActionResult): void;
     setTamed(player: IPlayer, { creature, object: tamed }: IActionArgument<boolean>, result: IActionResult): void;
-    remove(player: IPlayer, { creature, npc, object: otherRemoval }: IActionArgument<[RemovalType, number]>, result: IActionResult): void;
-    setWeightBonus(player: IPlayer, { object: weightBonus }: IActionArgument<number>, result: IActionResult): void;
-    changeTerrain(player: IPlayer, { object: terrain, point }: IActionArgument<TerrainType>, result: IActionResult): void;
-    toggleTilled(player: IPlayer, { object: tilled, point }: IActionArgument<boolean>, result: IActionResult): void;
-    addItemToInventory(human: IBaseHumanEntity, { object: [item, quality] }: IActionArgument<[ItemType, ItemQuality]>, result: IActionResult): void;
+    remove(player: IPlayer, { creature, npc, object: otherRemoval }: IActionArgument<[RemovalType, number] | undefined>, result: IActionResult): void;
+    setWeightBonus(executor: IPlayer, { player, object: weightBonus }: IActionArgument<number>, result: IActionResult): void;
+    changeTerrain(player: IPlayer, { object: terrain, position }: IActionArgument<TerrainType>, result: IActionResult): void;
+    toggleTilled(player: IPlayer, { position, object: tilled }: IActionArgument<boolean>, result: IActionResult): void;
+    updateStatsAndAttributes(player: IPlayer, argument: IActionArgument, result: IActionResult): void;
+    addItemToInventory(executor: IPlayer, { human, object: [item, quality] }: IActionArgument<[ItemType, ItemQuality]>, result: IActionResult): void;
     paint(player: IPlayer, { object: [tiles, data] }: IActionArgument<[number[], IPaintData]>, result: IActionResult): void;
     unlockRecipes(player: IPlayer, argument: IActionArgument, result: IActionResult): void;
-    toggleInvulnerable(player: IPlayer, { object: invulnerable }: IActionArgument<boolean>, result: IActionResult): void;
-    setSkill(player: IPlayer, { object: [skill, value] }: IActionArgument<[SkillType, number]>, result: IActionResult): void;
-    toggleNoclip(player: IPlayer, { object: noclip }: IActionArgument<boolean>, result: IActionResult): void;
+    toggleInvulnerable(executor: IPlayer, { player, object: invulnerable }: IActionArgument<boolean>, result: IActionResult): void;
+    setSkill(executor: IPlayer, { player, object: [skill, value] }: IActionArgument<[SkillType, number]>, result: IActionResult): void;
+    toggleNoclip(executor: IPlayer, { player, object: noclip }: IActionArgument<boolean>, result: IActionResult): void;
     private removeInternal;
     private resurrectCorpse;
     private setTilled;
@@ -43,3 +43,4 @@ export default class Actions {
     private copyStats;
     private cloneInventory;
 }
+export {};

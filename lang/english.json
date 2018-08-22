@@ -97,7 +97,8 @@
 			
 			
 			"actionResurrect": "resurrect {0}",
-			"actionClone": "clone {0}"
+			"actionClone": "clone {0}",
+			"actionTeleport": "teleport {0}"
 		},
 		"message": {
 			"failureTileBlocked": "Cannot {0}, the tile is blocked."

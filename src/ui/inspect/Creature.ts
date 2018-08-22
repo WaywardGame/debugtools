@@ -31,11 +31,11 @@ export default class CreatureInformation extends Component implements IInspectEn
 
 	@Bound
 	private setTamed(_: any, tamed: boolean) {
-		actionManager.execute(localPlayer, Actions.get("setTamed"), { object: tamed, creature: this.creature });
+		Actions.get("setTamed").execute({ creature: this.creature, object: tamed });
 	}
 
 	@Bound
 	private removeCreature() {
-		actionManager.execute(localPlayer, Actions.get("remove"), { creature: this.creature });
+		Actions.get("remove").execute({ creature: this.creature });
 	}
 }
