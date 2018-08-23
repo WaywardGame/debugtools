@@ -1,20 +1,30 @@
+import { ICreature } from "creature/ICreature";
+import { EntityType } from "entity/IEntity";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { UiApi } from "newui/INewUi";
 import { INPC } from "npc/INPC";
+import { IPlayer } from "player/IPlayer";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
 import { translation } from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
-import HumanInformation from "./Human";
+import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
-export default class NpcInformation extends HumanInformation {
-	public constructor(api: UiApi, private readonly npc: INPC) {
-		super(api, npc);
+export default class NpcInformation extends InspectEntityInformationSubsection {
+	private npc: INPC | undefined;
+
+	public constructor(api: UiApi) {
+		super(api);
 
 		new Button(api)
 			.setText(translation(DebugToolsTranslation.ButtonRemoveThing))
 			.on(ButtonEvent.Activate, this.removeNPC)
 			.appendTo(this);
+	}
+
+	public update(entity: ICreature | IPlayer | INPC) {
+		this.npc = entity.entityType === EntityType.NPC ? entity : undefined;
+		this.toggle(!!this.npc);
 	}
 
 	@Bound

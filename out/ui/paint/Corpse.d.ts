@@ -1,8 +1,9 @@
 import { CreatureType } from "Enums";
 import Component from "newui/component/Component";
 import { UiApi } from "newui/INewUi";
-import { IPaintSection } from "../DebugToolsDialog";
+import { IPaintSection } from "../panel/PaintPanel";
 export default class CorpsePaint extends Component implements IPaintSection {
+    private readonly dropdown;
     private readonly aberrantCheckButton;
     private readonly replaceExisting;
     private corpse;
@@ -14,5 +15,7 @@ export default class CorpsePaint extends Component implements IPaintSection {
             replaceExisting: boolean;
         };
     };
+    isChanging(): boolean;
+    reset(): void;
     private changeCorpse;
 }

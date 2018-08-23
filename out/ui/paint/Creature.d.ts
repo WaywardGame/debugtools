@@ -1,8 +1,9 @@
 import { CreatureType } from "Enums";
 import Component from "newui/component/Component";
 import { UiApi } from "newui/INewUi";
-import { IPaintSection } from "../DebugToolsDialog";
+import { IPaintSection } from "../panel/PaintPanel";
 export default class CreaturePaint extends Component implements IPaintSection {
+    private dropdown;
     private readonly aberrantCheckButton;
     private creature;
     constructor(api: UiApi);
@@ -12,5 +13,7 @@ export default class CreaturePaint extends Component implements IPaintSection {
             aberrant: boolean;
         };
     } | undefined;
+    isChanging(): boolean;
+    reset(): void;
     private changeCreature;
 }

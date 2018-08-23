@@ -4,51 +4,50 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "Enums", "newui/component/Button", "newui/component/Component", "newui/component/Text", "utilities/Objects", "../../Actions", "../../DebugTools", "../../IDebugTools", "../../util/Array"], function (require, exports, Enums_1, Button_1, Component_1, Text_1, Objects_1, Actions_1, DebugTools_1, IDebugTools_1, Array_1) {
+define(["require", "exports", "Enums", "newui/component/Button", "utilities/Collectors", "utilities/Objects", "../../Actions", "../../DebugTools", "../../IDebugTools", "../../util/Array", "../component/InspectInformationSection"], function (require, exports, Enums_1, Button_1, Collectors_1, Objects_1, Actions_1, DebugTools_1, IDebugTools_1, Array_1, InspectInformationSection_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class CorpseInformation extends Component_1.default {
+    class CorpseInformation extends InspectInformationSection_1.default {
         constructor(api) {
             super(api);
             this.corpses = [];
+            this.resurrectButton = new Button_1.default(this.api)
+                .setText(DebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.ButtonResurrectCorpse))
+                .on(Button_1.ButtonEvent.Activate, this.resurrect)
+                .appendTo(this);
+            new Button_1.default(this.api)
+                .setText(DebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.ButtonRemoveThing))
+                .on(Button_1.ButtonEvent.Activate, this.removeCorpse)
+                .appendTo(this);
+        }
+        getTabs() {
+            return this.corpses.entries()
+                .map(([i, corpse]) => [i, () => DebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.CorpseName)
+                    .get(game.getName(corpse, Enums_1.SentenceCaseStyle.Title, false))])
+                .collect(Collectors_1.default.toArray);
+        }
+        setTab(corpse) {
+            this.corpse = this.corpses[corpse];
+            this.resurrectButton.toggle(this.corpse.type !== Enums_1.CreatureType.Blood && this.corpse.type !== Enums_1.CreatureType.WaterBlood);
+            return this;
         }
         update(position, tile) {
             const corpses = tile.corpses || [];
-            this.toggle(!!corpses.length);
             if (Array_1.areArraysIdentical(corpses, this.corpses))
                 return;
             this.corpses = corpses;
-            this.dump();
             for (const corpse of corpses) {
                 DebugTools_1.default.LOG.info("Corpse:", corpse);
-                new Text_1.Paragraph(this.api)
-                    .setText(() => DebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.CorpseName)
-                    .get(corpse.renamed, game.getName(corpse, Enums_1.SentenceCaseStyle.Title, true)))
-                    .appendTo(this);
-                if (corpse.type !== Enums_1.CreatureType.Blood && corpse.type !== Enums_1.CreatureType.WaterBlood) {
-                    new Button_1.default(this.api)
-                        .setText(DebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.ButtonResurrectCorpse))
-                        .on(Button_1.ButtonEvent.Activate, this.resurrect(corpse))
-                        .appendTo(this);
-                }
-                new Button_1.default(this.api)
-                    .setText(DebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.ButtonRemoveThing))
-                    .on(Button_1.ButtonEvent.Activate, this.removeCorpse(corpse))
-                    .appendTo(this);
             }
             return this;
         }
-        resurrect(corpse) {
-            return () => {
-                Actions_1.default.get("heal").execute({ object: corpse.id });
-                this.triggerSync("update");
-            };
+        resurrect() {
+            Actions_1.default.get("heal").execute({ object: this.corpse.id });
+            this.triggerSync("update");
         }
-        removeCorpse(corpse) {
-            return () => {
-                Actions_1.default.get("remove").execute({ object: [Actions_1.RemovalType.Corpse, corpse.id] });
-                this.triggerSync("update");
-            };
+        removeCorpse() {
+            Actions_1.default.get("remove").execute({ object: [Actions_1.RemovalType.Corpse, this.corpse.id] });
+            this.triggerSync("update");
         }
     }
     __decorate([
@@ -59,4 +58,4 @@ define(["require", "exports", "Enums", "newui/component/Button", "newui/componen
     ], CorpseInformation.prototype, "removeCorpse", null);
     exports.default = CorpseInformation;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ29ycHNlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL2luc3BlY3QvQ29ycHNlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7OztJQWVBLE1BQXFCLGlCQUFrQixTQUFRLG1CQUFTO1FBRXZELFlBQW1CLEdBQVU7WUFDNUIsS0FBSyxDQUFDLEdBQUcsQ0FBQyxDQUFDO1lBRkosWUFBTyxHQUFjLEVBQUUsQ0FBQztRQUdoQyxDQUFDO1FBRU0sTUFBTSxDQUFDLFFBQWtCLEVBQUUsSUFBVztZQUM1QyxNQUFNLE9BQU8sR0FBRyxJQUFJLENBQUMsT0FBTyxJQUFJLEVBQUUsQ0FBQztZQUNuQyxJQUFJLENBQUMsTUFBTSxDQUFDLENBQUMsQ0FBQyxPQUFPLENBQUMsTUFBTSxDQUFDLENBQUM7WUFFOUIsSUFBSSwwQkFBa0IsQ0FBQyxPQUFPLEVBQUUsSUFBSSxDQUFDLE9BQU8sQ0FBQztnQkFBRSxPQUFPO1lBQ3RELElBQUksQ0FBQyxPQUFPLEdBQUcsT0FBTyxDQUFDO1lBRXZCLElBQUksQ0FBQyxJQUFJLEVBQUUsQ0FBQztZQUVaLEtBQUssTUFBTSxNQUFNLElBQUksT0FBTyxFQUFFO2dCQUM3QixvQkFBVSxDQUFDLEdBQUcsQ0FBQyxJQUFJLENBQUMsU0FBUyxFQUFFLE1BQU0sQ0FBQyxDQUFDO2dCQUV2QyxJQUFJLGdCQUFTLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQztxQkFDckIsT0FBTyxDQUFDLEdBQUcsRUFBRSxDQUFDLHdCQUFXLENBQUMsbUNBQXFCLENBQUMsVUFBVSxDQUFDO3FCQUMxRCxHQUFHLENBQUMsTUFBTSxDQUFDLE9BQU8sRUFBRSxJQUFJLENBQUMsT0FBTyxDQUFDLE1BQU0sRUFBRSx5QkFBaUIsQ0FBQyxLQUFLLEVBQUUsSUFBSSxDQUFDLENBQUMsQ0FBQztxQkFDMUUsUUFBUSxDQUFDLElBQUksQ0FBQyxDQUFDO2dCQUVqQixJQUFJLE1BQU0sQ0FBQyxJQUFJLEtBQUssb0JBQVksQ0FBQyxLQUFLLElBQUksTUFBTSxDQUFDLElBQUksS0FBSyxvQkFBWSxDQUFDLFVBQVUsRUFBRTtvQkFDbEYsSUFBSSxnQkFBTSxDQUFDLElBQUksQ0FBQyxHQUFHLENBQUM7eUJBQ2xCLE9BQU8sQ0FBQyx3QkFBVyxDQUFDLG1DQUFxQixDQUFDLHFCQUFxQixDQUFDLENBQUM7eUJBQ2pFLEVBQUUsQ0FBQyxvQkFBVyxDQUFDLFFBQVEsRUFBRSxJQUFJLENBQUMsU0FBUyxDQUFDLE1BQU0sQ0FBQyxDQUFDO3lCQUNoRCxRQUFRLENBQUMsSUFBSSxDQUFDLENBQUM7aUJBQ2pCO2dCQUVELElBQUksZ0JBQU0sQ0FBQyxJQUFJLENBQUMsR0FBRyxDQUFDO3FCQUNsQixPQUFPLENBQUMsd0JBQVcsQ0FBQyxtQ0FBcUIsQ0FBQyxpQkFBaUIsQ0FBQyxDQUFDO3FCQUM3RCxFQUFFLENBQUMsb0JBQVcsQ0FBQyxRQUFRLEVBQUUsSUFBSSxDQUFDLFlBQVksQ0FBQyxNQUFNLENBQUMsQ0FBQztxQkFDbkQsUUFBUSxDQUFDLElBQUksQ0FBQyxDQUFDO2FBQ2pCO1lBRUQsT0FBTyxJQUFJLENBQUM7UUFDYixDQUFDO1FBR08sU0FBUyxDQUFDLE1BQWU7WUFDaEMsT0FBTyxHQUFHLEVBQUU7Z0JBQ1gsaUJBQU8sQ0FBQyxHQUFHLENBQUMsTUFBTSxDQUFDLENBQUMsT0FBTyxDQUFDLEVBQUUsTUFBTSxFQUFFLE1BQU0sQ0FBQyxFQUFFLEVBQUUsQ0FBQyxDQUFDO2dCQUNuRCxJQUFJLENBQUMsV0FBVyxDQUFDLFFBQVEsQ0FBQyxDQUFDO1lBQzVCLENBQUMsQ0FBQztRQUNILENBQUM7UUFHTyxZQUFZLENBQUMsTUFBZTtZQUNuQyxPQUFPLEdBQUcsRUFBRTtnQkFDWCxpQkFBTyxDQUFDLEdBQUcsQ0FBQyxRQUFRLENBQUMsQ0FBQyxPQUFPLENBQUMsRUFBRSxNQUFNLEVBQUUsQ0FBQyxxQkFBVyxDQUFDLE1BQU0sRUFBRSxNQUFNLENBQUMsRUFBRSxDQUFDLEVBQUUsQ0FBQyxDQUFDO2dCQUMzRSxJQUFJLENBQUMsV0FBVyxDQUFDLFFBQVEsQ0FBQyxDQUFDO1lBQzVCLENBQUMsQ0FBQztRQUNILENBQUM7S0FDRDtJQWRBO1FBREMsZUFBSztzREFNTDtJQUdEO1FBREMsZUFBSzt5REFNTDtJQXJERixvQ0FzREMifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ29ycHNlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL2luc3BlY3QvQ29ycHNlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7OztJQWNBLE1BQXFCLGlCQUFrQixTQUFRLG1DQUF5QjtRQU12RSxZQUFtQixHQUFVO1lBQzVCLEtBQUssQ0FBQyxHQUFHLENBQUMsQ0FBQztZQUpKLFlBQU8sR0FBYyxFQUFFLENBQUM7WUFNL0IsSUFBSSxDQUFDLGVBQWUsR0FBRyxJQUFJLGdCQUFNLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQztpQkFDekMsT0FBTyxDQUFDLHdCQUFXLENBQUMsbUNBQXFCLENBQUMscUJBQXFCLENBQUMsQ0FBQztpQkFDakUsRUFBRSxDQUFDLG9CQUFXLENBQUMsUUFBUSxFQUFFLElBQUksQ0FBQyxTQUFTLENBQUM7aUJBQ3hDLFFBQVEsQ0FBQyxJQUFJLENBQUMsQ0FBQztZQUVqQixJQUFJLGdCQUFNLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQztpQkFDbEIsT0FBTyxDQUFDLHdCQUFXLENBQUMsbUNBQXFCLENBQUMsaUJBQWlCLENBQUMsQ0FBQztpQkFDN0QsRUFBRSxDQUFDLG9CQUFXLENBQUMsUUFBUSxFQUFFLElBQUksQ0FBQyxZQUFZLENBQUM7aUJBQzNDLFFBQVEsQ0FBQyxJQUFJLENBQUMsQ0FBQztRQUNsQixDQUFDO1FBRU0sT0FBTztZQUNiLE9BQU8sSUFBSSxDQUFDLE9BQU8sQ0FBQyxPQUFPLEVBQUU7aUJBQzNCLEdBQUcsQ0FBaUIsQ0FBQyxDQUFDLENBQUMsRUFBRSxNQUFNLENBQUMsRUFBRSxFQUFFLENBQUMsQ0FBQyxDQUFDLEVBQUUsR0FBRyxFQUFFLENBQUMsd0JBQVcsQ0FBQyxtQ0FBcUIsQ0FBQyxVQUFVLENBQUM7cUJBQzNGLEdBQUcsQ0FBQyxJQUFJLENBQUMsT0FBTyxDQUFDLE1BQU0sRUFBRSx5QkFBaUIsQ0FBQyxLQUFLLEVBQUUsS0FBSyxDQUFDLENBQUMsQ0FBQyxDQUFDO2lCQUM1RCxPQUFPLENBQUMsb0JBQVUsQ0FBQyxPQUFPLENBQUMsQ0FBQztRQUMvQixDQUFDO1FBRU0sTUFBTSxDQUFDLE1BQWM7WUFDM0IsSUFBSSxDQUFDLE1BQU0sR0FBRyxJQUFJLENBQUMsT0FBTyxDQUFDLE1BQU0sQ0FBQyxDQUFDO1lBRW5DLElBQUksQ0FBQyxlQUFlLENBQUMsTUFBTSxDQUFDLElBQUksQ0FBQyxNQUFNLENBQUMsSUFBSSxLQUFLLG9CQUFZLENBQUMsS0FBSyxJQUFJLElBQUksQ0FBQyxNQUFNLENBQUMsSUFBSSxLQUFLLG9CQUFZLENBQUMsVUFBVSxDQUFDLENBQUM7WUFFckgsT0FBTyxJQUFJLENBQUM7UUFDYixDQUFDO1FBRU0sTUFBTSxDQUFDLFFBQWtCLEVBQUUsSUFBVztZQUM1QyxNQUFNLE9BQU8sR0FBRyxJQUFJLENBQUMsT0FBTyxJQUFJLEVBQUUsQ0FBQztZQUVuQyxJQUFJLDBCQUFrQixDQUFDLE9BQU8sRUFBRSxJQUFJLENBQUMsT0FBTyxDQUFDO2dCQUFFLE9BQU87WUFDdEQsSUFBSSxDQUFDLE9BQU8sR0FBRyxPQUFPLENBQUM7WUFFdkIsS0FBSyxNQUFNLE1BQU0sSUFBSSxPQUFPLEVBQUU7Z0JBQzdCLG9CQUFVLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyxTQUFTLEVBQUUsTUFBTSxDQUFDLENBQUM7YUFDdkM7WUFFRCxPQUFPLElBQUksQ0FBQztRQUNiLENBQUM7UUFHTyxTQUFTO1lBQ2hCLGlCQUFPLENBQUMsR0FBRyxDQUFDLE1BQU0sQ0FBQyxDQUFDLE9BQU8sQ0FBQyxFQUFFLE1BQU0sRUFBRSxJQUFJLENBQUMsTUFBTyxDQUFDLEVBQUUsRUFBRSxDQUFDLENBQUM7WUFDekQsSUFBSSxDQUFDLFdBQVcsQ0FBQyxRQUFRLENBQUMsQ0FBQztRQUM1QixDQUFDO1FBR08sWUFBWTtZQUNuQixpQkFBTyxDQUFDLEdBQUcsQ0FBQyxRQUFRLENBQUMsQ0FBQyxPQUFPLENBQUMsRUFBRSxNQUFNLEVBQUUsQ0FBQyxxQkFBVyxDQUFDLE1BQU0sRUFBRSxJQUFJLENBQUMsTUFBTyxDQUFDLEVBQUUsQ0FBQyxFQUFFLENBQUMsQ0FBQztZQUNqRixJQUFJLENBQUMsV0FBVyxDQUFDLFFBQVEsQ0FBQyxDQUFDO1FBQzVCLENBQUM7S0FDRDtJQVZBO1FBREMsZUFBSztzREFJTDtJQUdEO1FBREMsZUFBSzt5REFJTDtJQTFERixvQ0EyREMifQ==

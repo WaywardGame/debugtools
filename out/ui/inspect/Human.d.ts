@@ -1,17 +1,21 @@
-import IBaseHumanEntity from "entity/IBaseHumanEntity";
+import { ICreature } from "creature/ICreature";
 import { Stat } from "entity/IStats";
-import Component from "newui/component/Component";
 import { UiApi } from "newui/INewUi";
-import { IInspectEntityInformationSubsection } from "./Entity";
-export default class HumanInformation extends Component implements IInspectEntityInformationSubsection {
-    private readonly human;
+import { INPC } from "npc/INPC";
+import IPlayer from "player/IPlayer";
+import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
+export default class HumanInformation extends InspectEntityInformationSubsection {
     private readonly dropdownItemQuality;
     private readonly wrapperAddItem;
     private item;
-    constructor(api: UiApi, human: IBaseHumanEntity);
+    private human;
+    private reputationSliders;
+    constructor(api: UiApi);
     getImmutableStats(): Stat[];
+    update(entity: ICreature | INPC | IPlayer): void;
     private addReputationSlider;
     private setReputation;
     private changeItem;
     private addItem;
+    private onStatChange;
 }

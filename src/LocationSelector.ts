@@ -46,6 +46,7 @@ export default class SelectLocation implements IHookHost {
 
 		if (this._selecting) {
 			const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
+			
 			const tile = this.hoverTile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
 			TileHelpers.Overlay.add(tile, { type: DebugTools.INSTANCE.overlayTarget }, isHoverTargetOverlay);
 

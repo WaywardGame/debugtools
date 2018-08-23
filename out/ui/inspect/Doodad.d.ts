@@ -1,10 +1,10 @@
-import Component from "newui/component/Component";
 import { UiApi } from "newui/INewUi";
 import { ITile } from "tile/ITerrain";
 import { IVector2 } from "utilities/math/IVector";
-import { IInspectInformationSection } from "../InspectDialog";
-export default class DoodadInformation extends Component implements IInspectInformationSection {
+import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
+export default class DoodadInformation extends InspectInformationSection {
     private doodad;
     constructor(api: UiApi);
-    update(position: IVector2, tile: ITile): this;
+    getTabs(): TabInformation[];
+    update(position: IVector2, tile: ITile): this | undefined;
 }

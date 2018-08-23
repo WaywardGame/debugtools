@@ -1,8 +1,9 @@
 import { NPCType } from "Enums";
 import Component from "newui/component/Component";
 import { UiApi } from "newui/INewUi";
-import { IPaintSection } from "../DebugToolsDialog";
+import { IPaintSection } from "../panel/PaintPanel";
 export default class NPCPaint extends Component implements IPaintSection {
+    private readonly dropdown;
     private npc;
     constructor(api: UiApi);
     getTilePaintData(): {
@@ -10,5 +11,7 @@ export default class NPCPaint extends Component implements IPaintSection {
             type: NPCType | "remove";
         };
     } | undefined;
+    isChanging(): boolean;
+    reset(): void;
     private changeNPC;
 }

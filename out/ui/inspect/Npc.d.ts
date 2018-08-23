@@ -1,8 +1,11 @@
+import { ICreature } from "creature/ICreature";
 import { UiApi } from "newui/INewUi";
 import { INPC } from "npc/INPC";
-import HumanInformation from "./Human";
-export default class NpcInformation extends HumanInformation {
-    private readonly npc;
-    constructor(api: UiApi, npc: INPC);
+import { IPlayer } from "player/IPlayer";
+import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
+export default class NpcInformation extends InspectEntityInformationSubsection {
+    private npc;
+    constructor(api: UiApi);
+    update(entity: ICreature | IPlayer | INPC): void;
     private removeNPC;
 }

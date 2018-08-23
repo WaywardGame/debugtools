@@ -1,7 +1,9 @@
-import { Stat } from "entity/IStats";
+import { ICreature } from "creature/ICreature";
+import { EntityType } from "entity/IEntity";
 import { SkillType } from "Enums";
 import { UiTranslation } from "language/ILanguage";
 import Translation from "language/Translation";
+import { BlockRow } from "newui/component/BlockRow";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
 import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdown";
 import { ComponentEvent, TranslationGenerator } from "newui/component/IComponent";
@@ -10,6 +12,7 @@ import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
 import { UiApi } from "newui/INewUi";
+import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
@@ -17,42 +20,43 @@ import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
 import DebugTools, { DebugToolsEvent, translation } from "../../DebugTools";
 import { DebugToolsTranslation, IPlayerData } from "../../IDebugTools";
-import HumanInformation from "./Human";
+import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
-export default class PlayerInformation extends HumanInformation {
+export default class PlayerInformation extends InspectEntityInformationSubsection {
 
 	private readonly rangeWeightBonus: RangeRow;
 	private readonly checkButtonInvulnerable: CheckButton;
 	private readonly checkButtonNoClip: CheckButton;
 	private readonly skillRangeRow: RangeRow;
-	private skill: SkillType | undefined;
 
-	public constructor(api: UiApi, private readonly player: IPlayer) {
-		super(api, player);
+	private skill: SkillType | undefined;
+	private player: IPlayer | undefined;
+
+	public constructor(api: UiApi) {
+		super(api);
 
 		this.until(ComponentEvent.Remove)
 			.bind(DebugTools.INSTANCE, DebugToolsEvent.PlayerDataChange, this.onPlayerDataChange);
+
+		new BlockRow(api)
+			.append(this.checkButtonNoClip = new CheckButton(api)
+				.setText(translation(DebugToolsTranslation.ButtonToggleNoClip))
+				.setRefreshMethod(() => this.player ? !!DebugTools.INSTANCE.getPlayerData(this.player, "noclip") : false)
+				.on(CheckButtonEvent.Change, this.toggleNoClip))
+			.append(this.checkButtonInvulnerable = new CheckButton(api)
+				.setText(translation(DebugToolsTranslation.ButtonToggleInvulnerable))
+				.setRefreshMethod(() => this.player ? DebugTools.INSTANCE.getPlayerData(this.player, "invulnerable") : false)
+				.on(CheckButtonEvent.Change, this.toggleInvulnerable))
+			.appendTo(this);
 
 		this.rangeWeightBonus = new RangeRow(api)
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelWeightBonus)))
 			.editRange(range => range
 				.setMin(0)
 				.setMax(1000)
-				.setRefreshMethod(() => DebugTools.INSTANCE.getPlayerData(player, "weightBonus")))
+				.setRefreshMethod(() => this.player ? DebugTools.INSTANCE.getPlayerData(this.player, "weightBonus") : 0))
 			.setDisplayValue(true)
 			.on(RangeInputEvent.Finish, this.setWeightBonus)
-			.appendTo(this);
-
-		this.checkButtonInvulnerable = new CheckButton(api)
-			.setText(translation(DebugToolsTranslation.ButtonToggleInvulnerable))
-			.setRefreshMethod(() => DebugTools.INSTANCE.getPlayerData(player, "invulnerable"))
-			.on(CheckButtonEvent.Change, this.toggleInvulnerable)
-			.appendTo(this);
-
-		this.checkButtonNoClip = new CheckButton(api)
-			.setText(translation(DebugToolsTranslation.ButtonToggleNoClip))
-			.setRefreshMethod(() => !!DebugTools.INSTANCE.getPlayerData(player, "noclip"))
-			.on(CheckButtonEvent.Change, this.toggleNoClip)
 			.appendTo(this);
 
 		new LabelledRow(api)
@@ -79,20 +83,33 @@ export default class PlayerInformation extends HumanInformation {
 			.editRange(range => range
 				.setMin(0)
 				.setMax(100)
-				.setRefreshMethod(() => this.skill !== undefined && this.skill in this.player.skills ? this.player.skills[this.skill].core : 0))
+				.setRefreshMethod(() => this.skill !== undefined && this.player && this.skill in this.player.skills ? this.player.skills[this.skill].core : 0))
 			.setDisplayValue(Translation.ui(UiTranslation.GameStatsPercentage).get)
 			.on(RangeInputEvent.Finish, this.setSkill)
 			.appendTo(this);
 	}
 
-	public getImmutableStats() {
-		return [
-			...super.getImmutableStats(),
-			Stat.Attack,
-			Stat.Defense,
-			Stat.Reputation,
-			Stat.Weight,
-		];
+	public update(entity: ICreature | INPC | IPlayer) {
+		if (this.player === entity) return;
+
+		this.player = entity.entityType === EntityType.Player ? entity : undefined;
+		this.toggle(!!this.player);
+
+		if (!this.player) return;
+
+		this.triggerSync("change");
+
+		this.refresh();
+
+		this.until([ComponentEvent.Remove, "change"])
+			.bind(DebugTools.INSTANCE, DebugToolsEvent.PlayerDataChange, this.refresh);
+	}
+
+	@Bound
+	private refresh() {
+		this.checkButtonNoClip.refresh();
+		this.checkButtonInvulnerable.refresh();
+		this.rangeWeightBonus.refresh();
 	}
 
 	@Bound
@@ -110,14 +127,14 @@ export default class PlayerInformation extends HumanInformation {
 
 	@Bound
 	private toggleInvulnerable(_: any, invulnerable: boolean) {
-		if (DebugTools.INSTANCE.getPlayerData(this.player, "invulnerable") === invulnerable) return;
+		if (DebugTools.INSTANCE.getPlayerData(this.player!, "invulnerable") === invulnerable) return;
 
 		Actions.get("toggleInvulnerable").execute({ player: this.player, object: invulnerable });
 	}
 
 	@Bound
 	private toggleNoClip(_: any, noclip: boolean) {
-		if (DebugTools.INSTANCE.getPlayerData(this.player, "noclip") === noclip) return;
+		if (DebugTools.INSTANCE.getPlayerData(this.player!, "noclip") === noclip) return;
 
 		Actions.get("toggleNoclip").execute({ player: this.player, object: noclip });
 	}
@@ -129,7 +146,7 @@ export default class PlayerInformation extends HumanInformation {
 
 	@Bound
 	private onPlayerDataChange<K extends keyof IPlayerData>(_: any, playerId: number, key: K, value: IPlayerData[K]) {
-		if (playerId !== this.player.id) return;
+		if (!this.player || playerId !== this.player.id) return;
 
 		switch (key) {
 			case "weightBonus":

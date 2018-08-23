@@ -12,9 +12,11 @@ import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Objects";
 import { translation } from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
-import { IPaintSection } from "../DebugToolsDialog";
+import { IPaintSection } from "../panel/PaintPanel";
 
 export default class DoodadPaint extends Component implements IPaintSection {
+	private readonly dropdown: Dropdown<"nochange" | "remove" | keyof typeof DoodadType>;
+
 	private doodad: DoodadType | "remove" | undefined;
 
 	public constructor(api: UiApi) {
@@ -23,19 +25,19 @@ export default class DoodadPaint extends Component implements IPaintSection {
 		new LabelledRow(api)
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDoodad)))
-			.append(new Dropdown(api)
+			.append(this.dropdown = new Dropdown<"nochange" | "remove" | keyof typeof DoodadType>(api)
 				.setRefreshMethod(() => ({
 					defaultOption: "nochange",
 					options: ([
 						["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
 						["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
-					] as IDropdownOption[]).values().include(Enums.values(DoodadType)
+					] as IDropdownOption<"nochange" | "remove" | keyof typeof DoodadType>[]).values().include(Enums.values(DoodadType)
 						.filter(type => type !== DoodadType.Item)
-						.map<[string, TranslationGenerator]>(doodad => [DoodadType[doodad], Translation.ofObjectName(doodadDescriptions[doodad]!, SentenceCaseStyle.Title, false)])
+						.map<[keyof typeof DoodadType, TranslationGenerator]>(doodad => [DoodadType[doodad] as keyof typeof DoodadType, Translation.ofObjectName(doodadDescriptions[doodad]!, SentenceCaseStyle.Title, false)])
 						.collect(Collectors.toArray)
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.values()
-						.map<IDropdownOption>(([id, t]) => [id, option => option.setText(t)])),
+						.map<IDropdownOption<"nochange" | "remove" | keyof typeof DoodadType>>(([id, t]) => [id, option => option.setText(t)])),
 				}))
 				.on(DropdownEvent.Selection, this.changeDoodad))
 			.appendTo(this);
@@ -47,6 +49,14 @@ export default class DoodadPaint extends Component implements IPaintSection {
 				type: this.doodad,
 			},
 		};
+	}
+
+	public isChanging() {
+		return this.doodad !== undefined;
+	}
+
+	public reset() {
+		this.dropdown.select("nochange");
 	}
 
 	@Bound

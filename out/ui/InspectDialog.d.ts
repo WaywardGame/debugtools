@@ -1,23 +1,36 @@
+import { ICreature } from "creature/ICreature";
+import { Bindable } from "Enums";
 import { IHookHost } from "mod/IHookHost";
-import Component from "newui/component/Component";
-import Dialog from "newui/screen/screens/game/component/Dialog";
+import { BindCatcherApi } from "newui/BindingManager";
+import Button from "newui/component/Button";
 import { DialogId, IDialogDescription } from "newui/screen/screens/game/Dialogs";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import { INPC } from "npc/INPC";
+import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
-import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-export interface IInspectInformationSection extends Component {
-    update(position: IVector2, tile: ITile): void;
-}
-export default class InspectDialog extends Dialog implements IHookHost {
+import TabDialog from "./TabDialog";
+export default class InspectDialog extends TabDialog implements IHookHost {
     static description: IDialogDescription;
-    private title;
+    private entityButtons;
     private infoSections;
+    private entityInfoSection;
     private tilePosition?;
     private tile?;
+    private inspectionLock?;
+    private inspectingTile?;
     constructor(gsapi: IGameScreenApi, id: DialogId);
+    getSubpanels(): [string | number, import("newui/component/IComponent").TranslationGenerator, (component: import("newui/component/Component").default) => any, (((button: Button) => any) | undefined)?, (Button | undefined)?][];
     getName(): import("language/Translation").default;
-    setInspectionTile(tilePosition: Vector2): this;
+    setInspection(what: Vector2 | IPlayer | ICreature | INPC): this;
+    onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     onGameTickEnd(): void;
+    onMoveComplete(player: IPlayer): void;
+    onTileUpdate(tile: ITile, x: number, y: number, z: number): void;
     private update;
+    private setInspectionTile;
+    private showInspectionLockMenu;
+    private unlockInspection;
+    private lockInspection;
+    private onClose;
 }

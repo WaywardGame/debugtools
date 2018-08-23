@@ -13,10 +13,12 @@ import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Objects";
 import { translation } from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
-import { IPaintSection } from "../DebugToolsDialog";
+import { IPaintSection } from "../panel/PaintPanel";
 
 export default class CreaturePaint extends Component implements IPaintSection {
+	private dropdown: Dropdown<"nochange" | "remove" | keyof typeof CreatureType>;
 	private readonly aberrantCheckButton: CheckButton;
+
 	private creature: CreatureType | "remove" | undefined;
 
 	public constructor(api: UiApi) {
@@ -25,19 +27,19 @@ export default class CreaturePaint extends Component implements IPaintSection {
 		new LabelledRow(api)
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelCreature)))
-			.append(new Dropdown(api)
+			.append(this.dropdown = new Dropdown<"nochange" | "remove" | keyof typeof CreatureType>(api)
 				.setRefreshMethod(() => ({
 					defaultOption: "nochange",
 					options: ([
 						["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
 						["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
-					] as IDropdownOption[]).values().include(Enums.values(CreatureType)
+					] as IDropdownOption<"nochange" | "remove" | keyof typeof CreatureType>[]).values().include(Enums.values(CreatureType)
 						.filter(creature => creatureDescriptions[creature])
-						.map<[string, TranslationGenerator]>(creature => [CreatureType[creature], Translation.ofObjectName(creatureDescriptions[creature]!, SentenceCaseStyle.Title, false)])
+						.map<[keyof typeof CreatureType, TranslationGenerator]>(creature => [CreatureType[creature] as keyof typeof CreatureType, Translation.ofObjectName(creatureDescriptions[creature]!, SentenceCaseStyle.Title, false)])
 						.collect(Collectors.toArray)
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.values()
-						.map<IDropdownOption>(([id, t]) => [id, option => option.setText(t)])),
+						.map<IDropdownOption<"nochange" | "remove" | keyof typeof CreatureType>>(([id, t]) => [id, option => option.setText(t)])),
 				}))
 				.on(DropdownEvent.Selection, this.changeCreature))
 			.appendTo(this);
@@ -55,6 +57,14 @@ export default class CreaturePaint extends Component implements IPaintSection {
 				aberrant: this.aberrantCheckButton.checked,
 			},
 		};
+	}
+
+	public isChanging() {
+		return this.creature !== undefined;
+	}
+
+	public reset() {
+		this.dropdown.select("nochange");
 	}
 
 	@Bound

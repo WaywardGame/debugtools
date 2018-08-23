@@ -3,9 +3,8 @@ import Translation from "language/Translation";
 import { bindingManager } from "newui/BindingManager";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
-import Component from "newui/component/Component";
 import ContextMenu, { ContextMenuOptionKeyValuePair } from "newui/component/ContextMenu";
-import Text, { Paragraph } from "newui/component/Text";
+import Text from "newui/component/Text";
 import { UiApi } from "newui/INewUi";
 import { ITile } from "tile/ITerrain";
 import terrainDescriptions from "tile/Terrains";
@@ -18,23 +17,17 @@ import TileHelpers from "utilities/TileHelpers";
 import Actions from "../../Actions";
 import DebugTools, { translation } from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
-import { IInspectInformationSection } from "../InspectDialog";
+import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
-export default class TerrainInformation extends Component implements IInspectInformationSection {
+export default class TerrainInformation extends InspectInformationSection {
 	private position: Vector3;
 	private tile: ITile;
 	private terrainType: string;
 
-	private readonly title: Paragraph;
 	private readonly checkButtonTilled: CheckButton;
 
 	public constructor(api: UiApi) {
 		super(api);
-
-		this.title = new Paragraph(api)
-			.setText(() => this.tile && translation(DebugToolsTranslation.InspectTerrain)
-				.get(terrainDescriptions[TileHelpers.getType(this.tile)]!.name))
-			.appendTo(this);
 
 		new Button(api)
 			.setText(translation(DebugToolsTranslation.ButtonChangeTerrain))
@@ -48,6 +41,18 @@ export default class TerrainInformation extends Component implements IInspectInf
 			.appendTo(this);
 	}
 
+	public getTabs(): TabInformation[] {
+		return [
+			[0, this.getTabTranslation],
+		];
+	}
+
+	@Bound
+	public getTabTranslation() {
+		return this.tile && translation(DebugToolsTranslation.InspectTerrain)
+			.get(terrainDescriptions[TileHelpers.getType(this.tile)]!.name);
+	}
+
 	public update(position: IVector2, tile: ITile) {
 		this.position = new Vector3(position.x, position.y, localPlayer.z);
 		this.tile = tile;
@@ -58,7 +63,6 @@ export default class TerrainInformation extends Component implements IInspectInf
 			DebugTools.LOG.info("Terrain:", this.terrainType);
 		}
 
-		this.title.refresh();
 		this.checkButtonTilled.toggle(terrainDescriptions[TileHelpers.getType(tile)]!.tillable === true)
 			.refresh();
 

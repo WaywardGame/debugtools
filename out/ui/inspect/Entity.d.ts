@@ -1,18 +1,23 @@
-import { Stat } from "entity/IStats";
-import Component from "newui/component/Component";
+import { ICreature } from "creature/ICreature";
 import { UiApi } from "newui/INewUi";
+import { INPC } from "npc/INPC";
+import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
 import { IVector2 } from "utilities/math/IVector";
-import { IInspectInformationSection } from "../InspectDialog";
-export interface IInspectEntityInformationSubsection extends Component {
-    getImmutableStats(): Stat[];
-}
-export default class EntityInformation extends Component implements IInspectInformationSection {
+import InspectInformationSection from "../component/InspectInformationSection";
+export default class EntityInformation extends InspectInformationSection {
+    private readonly subsections;
+    private readonly statWrapper;
+    private readonly statComponents;
     private entities;
-    private statComponents;
+    private entity;
     constructor(api: UiApi);
-    update(position: IVector2, tile: ITile): this | undefined;
-    private addEntityDisplay;
+    getTabs(): [number, import("newui/component/IComponent").TranslationGenerator][];
+    setTab(entity: number): this;
+    update(position: IVector2, tile: ITile): void;
+    getIndex(entity: ICreature | INPC | IPlayer): number;
+    getEntity(index: number): ICreature | INPC | IPlayer;
+    private initializeStats;
     private onStatChange;
     private openTeleportMenu;
     private createTeleportToPlayerMenu;

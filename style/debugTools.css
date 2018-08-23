@@ -1,18 +1,20 @@
-[data-dialog-id="ModDebugTools_Main"] > .game-dialog-body {
+.debug-tools-tab-dialog > .game-dialog-body {
     display: grid;
     grid-template-columns: calc(150px * var(--scale-floor)) 1fr;
 }
 
-[data-dialog-id="ModDebugTools_Main"] > .game-dialog-body > * {
+.debug-tools-tab-dialog > .game-dialog-body > * {
     position: relative;
 }
 
-[data-dialog-id="ModDebugTools_Main"] > .game-dialog-body > * > .game-dialog-scrollable-wrapper {
+.debug-tools-tab-dialog > .game-dialog-body > * > .game-dialog-scrollable-wrapper {
     --scroll-height: calc(10px * var(--scale-floor));
-    --negative-margin: var(--scroll-height);
+     --negative-margin: calc(var(--scroll-height) + 20px * var(--scale-floor));
+    --dialog-body-padding: 0px;
+     height: calc(100% - calc(20px * var(--scale)) + var(--negative-margin) * 2);
 }
 
-.debug-tools-subpanel-link.active {
+.debug-tools-tab-dialog-subpanel-link.active {
     --button-active-background: #353132;
 }
 
@@ -34,4 +36,45 @@
 
 .dropdown-label > .label {
     margin-top: calc(3px * var(--scale-floor));
+}
+
+.debug-tools-inspect-human-wrapper-add-item {
+    margin-left: calc(20px * var(--scale-floor));
+    margin-bottom: calc(10px * var(--scale-floor));
+}
+
+.debug-tools-paint-row {
+    position: absolute;
+    bottom: -10px;
+    width: calc(100% - 10px * var(--scale-floor));
+    gap: calc(4px * var(--scale));
+}
+
+.debug-tools-paint-row:not(.painting) {
+    grid-template-columns: 1fr !important;
+}
+
+.debug-tools-paint-row:not(.painting) > :not(:first-child) {
+    display: none;
+}
+
+.debug-tools-paint-panel {
+    -webkit-mask-image: linear-gradient(
+        transparent 0, 
+        #000 var(--fade-height), 
+        #000 calc(100% - 35px), 
+        transparent calc(100% - 15px)
+    );
+     height: calc(100% + 40px * var(--scale-floor));
+}
+
+.debug-tools-tab-dialog-subpanel-link.inspection-lock {
+    --border-width: 1px;
+    border: var(--border-width) solid grey !important;
+}
+
+.debug-tools-tab-dialog-subpanel-link.inspection-lock::after {
+    border: var(--border-width) solid grey;
+    margin-top: calc(var(--border-width) * -1);
+    border-left: none;
 }

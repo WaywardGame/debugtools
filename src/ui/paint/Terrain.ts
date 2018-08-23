@@ -13,11 +13,12 @@ import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Objects";
 import { translation } from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
-import { IPaintSection } from "../DebugToolsDialog";
+import { IPaintSection } from "../panel/PaintPanel";
 
 export default class TerrainPaint extends Component implements IPaintSection {
 	private readonly tilledCheckButton: CheckButton;
 	private terrain: TerrainType | undefined;
+	private dropdown: Dropdown<"nochange" | keyof typeof TerrainType>;
 
 	public constructor(api: UiApi) {
 		super(api);
@@ -25,17 +26,17 @@ export default class TerrainPaint extends Component implements IPaintSection {
 		new LabelledRow(api)
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTerrain)))
-			.append(new Dropdown(api)
+			.append(this.dropdown = new Dropdown<"nochange" | keyof typeof TerrainType>(api)
 				.setRefreshMethod(() => ({
 					defaultOption: "nochange",
 					options: ([
 						["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
-					] as IDropdownOption[]).values().include(Enums.values(TerrainType)
-						.map<[string, TranslationGenerator]>(terrain => [TerrainType[terrain], Translation.ofObjectName(terrainDescriptions[terrain]!, SentenceCaseStyle.Title, false)])
+					] as IDropdownOption<"nochange" | keyof typeof TerrainType>[]).values().include(Enums.values(TerrainType)
+						.map<[keyof typeof TerrainType, TranslationGenerator]>(terrain => [TerrainType[terrain] as keyof typeof TerrainType, Translation.ofObjectName(terrainDescriptions[terrain]!, SentenceCaseStyle.Title, false)])
 						.collect(Collectors.toArray)
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.values()
-						.map<IDropdownOption>(([id, t]) => [id, option => option.setText(t)])),
+						.map<IDropdownOption<"nochange" | keyof typeof TerrainType>>(([id, t]) => [id, option => option.setText(t)])),
 				}))
 				.on(DropdownEvent.Selection, this.changeTerrain))
 			.appendTo(this);
@@ -53,6 +54,14 @@ export default class TerrainPaint extends Component implements IPaintSection {
 				tilled: this.tilledCheckButton.checked,
 			},
 		};
+	}
+
+	public isChanging() {
+		return this.terrain !== undefined;
+	}
+
+	public reset() {
+		this.dropdown.select("nochange");
 	}
 
 	@Bound

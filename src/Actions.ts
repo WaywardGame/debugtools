@@ -21,7 +21,7 @@ import Vector3 from "utilities/math/Vector3";
 import TileHelpers from "utilities/TileHelpers";
 import DebugTools, { translation } from "./DebugTools";
 import { DebugToolsTranslation } from "./IDebugTools";
-import { IPaintData } from "./ui/DebugToolsDialog";
+import { IPaintData } from "./ui/panel/PaintPanel";
 import { getTilePosition } from "./util/TilePosition";
 
 export enum RemovalType {
@@ -119,7 +119,7 @@ export default class Actions {
 
 	@Register.action(description("Teleport Entity"))
 	public teleport(executor: IPlayer, { entity, position }: IActionArgument, result: IActionResult) {
-		position = this.getPosition(position!, () => translation(DebugToolsTranslation.ActionTeleport)
+		position = this.getPosition(executor, position!, () => translation(DebugToolsTranslation.ActionTeleport)
 			.get(game.getName(entity)));
 
 		if (!entity || !position) return;
@@ -134,12 +134,13 @@ export default class Actions {
 			delete tile.npc;
 		}
 
-		entity.x = entity.fromX = position.x;
-		entity.y = entity.fromY = position.y;
-		entity.z = position.z;
-
 		if (entity.entityType === EntityType.Player) {
-			entity.setPosition(new Vector3(entity));
+			entity.setPosition(position);
+
+		} else {
+			entity.x = entity.fromX = position.x;
+			entity.y = entity.fromY = position.y;
+			entity.z = position.z;
 		}
 
 		if (entity.entityType === EntityType.Creature) {
@@ -194,11 +195,10 @@ export default class Actions {
 	}
 
 	@Register.action(description("Clone"))
-	public clone(executor: IPlayer, { creature, npc, player, position }: IActionArgument, result: IActionResult) {
-		const entity = creature || npc || player;
+	public clone(executor: IPlayer, { entity, position }: IActionArgument, result: IActionResult) {
 		let clone: ICreature | INPC | IPlayer;
 
-		position = this.getPosition(position!, () => translation(DebugToolsTranslation.ActionClone)
+		position = this.getPosition(executor, position!, () => translation(DebugToolsTranslation.ActionClone)
 			.get(game.getName(entity)));
 
 		if (!entity || !position) return;
@@ -244,7 +244,7 @@ export default class Actions {
 	public heal(executor: IPlayer, { entity, object: corpseId }: IActionArgument<number | undefined>, result: IActionResult) {
 		// resurrect corpses
 		if (!entity) {
-			result.updateRender = this.resurrectCorpse(game.corpses[corpseId!]!);
+			result.updateRender = this.resurrectCorpse(executor, game.corpses[corpseId!]!);
 			return;
 		}
 
@@ -293,8 +293,7 @@ export default class Actions {
 	public setWeightBonus(executor: IPlayer, { player, object: weightBonus }: IActionArgument<number>, result: IActionResult) {
 		this.mod.setPlayerData(player!, "weightBonus", weightBonus);
 		player!.updateStrength();
-
-		game.updateTablesAndWeight();
+		player!.updateTablesAndWeight();
 	}
 
 	@Register.action<TerrainType>(description("Change Terrain"))
@@ -327,7 +326,9 @@ export default class Actions {
 	public addItemToInventory(executor: IPlayer, { human, object: [item, quality] }: IActionArgument<[ItemType, ItemQuality]>, result: IActionResult) {
 		human!.createItemInInventory(item, quality);
 
-		game.updateTablesAndWeight();
+		if (human!.entityType === EntityType.Player) {
+			(human as IPlayer).updateTablesAndWeight();
+		}
 	}
 
 	// tslint:disable cyclomatic-complexity
@@ -471,14 +472,14 @@ export default class Actions {
 		if (type === RemovalType.Corpse) return corpseManager.remove(game.corpses[id]!);
 	}
 
-	private resurrectCorpse(corpse: ICorpse) {
+	private resurrectCorpse(player: IPlayer, corpse: ICorpse) {
 		// blood can't be resurrected
 		if (corpse.type === CreatureType.Blood || corpse.type === CreatureType.WaterBlood) {
 			return false;
 		}
 
 		// fail if the location is blocked
-		const location = this.getPosition(new Vector3(corpse), () => translation(DebugToolsTranslation.ActionResurrect)
+		const location = this.getPosition(player, new Vector3(corpse), () => translation(DebugToolsTranslation.ActionResurrect)
 			.get(game.getName(corpse, SentenceCaseStyle.Sentence, true)));
 
 		if (!location) return false;
@@ -515,13 +516,13 @@ export default class Actions {
 		world.updateTile(x, y, z, tile);
 	}
 
-	private getPosition(position: IVector3, actionName: TranslationGenerator) {
+	private getPosition(player: IPlayer, position: IVector3, actionName: TranslationGenerator) {
 		if (TileHelpers.isOpenTile(position, game.getTile(...new Vector3(position).xyz))) return position;
 
 		const openTile = TileHelpers.findMatchingTile(position, TileHelpers.isOpenTile);
 
 		if (!openTile) {
-			localPlayer.messages.source(DebugTools.INSTANCE.source)
+			player.messages.source(DebugTools.INSTANCE.source)
 				.type(MessageType.Bad)
 				.send(this.messageFailureTileBlocked, Text.resolve(actionName));
 		}

@@ -8,9 +8,9 @@ import Mod from "mod/Mod";
 import Register from "mod/ModRegistry";
 import { BindCatcherApi, bindingManager, KeyModifier } from "newui/BindingManager";
 import { ScreenId } from "newui/screen/IScreen";
-import { DialogEvent } from "newui/screen/screens/game/component/Dialog";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
 import GameScreen from "newui/screen/screens/GameScreen";
+import { INPC } from "npc/INPC";
 import { Source } from "player/IMessageManager";
 import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
@@ -18,9 +18,8 @@ import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
-import TileHelpers from "utilities/TileHelpers";
 import Actions from "./Actions";
-import { DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal, isSelectedTargetOverlay } from "./IDebugTools";
+import { DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import MainDialog from "./ui/DebugToolsDialog";
 import InspectDialog from "./ui/InspectDialog";
@@ -96,7 +95,6 @@ export default class DebugTools extends Mod {
 
 	private upgrade = false;
 	private cameraState = CameraState.Locked;
-	private inspectingTile?: ITile;
 
 	@Register.registry(UnlockedCameraMovementHandler)
 	private unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
@@ -176,34 +174,10 @@ export default class DebugTools extends Mod {
 		this.triggerSync(DebugToolsEvent.PlayerDataChange, player.id, key, value);
 	}
 
-	public inspectTile(tilePosition: Vector2) {
-		const tile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
-
-		// remove old inspection overlay
-		if (this.inspectingTile && this.inspectingTile !== tile) {
-			TileHelpers.Overlay.remove(this.inspectingTile, isSelectedTargetOverlay);
-		}
-
-		// set new inspection overlay
-		this.inspectingTile = tile;
-		TileHelpers.Overlay.add(tile, {
-			type: DebugTools.INSTANCE.overlayTarget,
-			red: 0,
-			blue: 0,
-		}, isSelectedTargetOverlay);
-		game.updateView(false);
-
+	public inspect(what: Vector2 | ICreature | IPlayer | INPC) {
 		newui.getScreen<GameScreen>(ScreenId.Game)!
 			.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
-			.setInspectionTile(tilePosition)
-			.on(DialogEvent.Close, () => {
-				if (this.inspectingTile) {
-					TileHelpers.Overlay.remove(this.inspectingTile, isSelectedTargetOverlay);
-					delete this.inspectingTile;
-				}
-
-				game.updateView(false);
-			});
+			.setInspection(what);
 	}
 
 	///////////////////////////////////////////////////
@@ -355,7 +329,7 @@ export default class DebugTools extends Mod {
 		}
 
 		if (api.wasPressed(this.bindableInspectTile) && !bindPressed && gameScreen.isMouseWithin()) {
-			this.inspectTile(renderer.screenToTile(...bindingManager.getMouse().xy));
+			this.inspect(renderer.screenToTile(...bindingManager.getMouse().xy));
 			bindPressed = this.bindableInspectTile;
 		}
 

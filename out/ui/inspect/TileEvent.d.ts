@@ -1,9 +1,12 @@
-import Component from "newui/component/Component";
 import { UiApi } from "newui/INewUi";
 import { ITile } from "tile/ITerrain";
 import { IVector2 } from "utilities/math/IVector";
-import { IInspectInformationSection } from "../InspectDialog";
-export default class TileEventInformation extends Component implements IInspectInformationSection {
+import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
+export default class TileEventInformation extends InspectInformationSection {
+    private tileEvents;
+    private tileEvent;
     constructor(api: UiApi);
+    getTabs(): TabInformation[];
+    setTab(tileEvent: number): this;
     update(position: IVector2, tile: ITile): this;
 }

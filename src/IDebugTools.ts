@@ -45,7 +45,9 @@ export enum DebugToolsTranslation {
 	PaintRemove,
 	LabelTerrain,
 	ButtonPaintClear,
+	TooltipPaintClear,
 	ButtonPaintComplete,
+	TooltipPaintComplete,
 	LabelCreature,
 	ButtonToggleAberrant,
 	LabelNPC,
@@ -53,6 +55,7 @@ export enum DebugToolsTranslation {
 	LabelCorpse,
 	ButtonReplaceExisting,
 	LabelTileEvent,
+	ResetPaintSection,
 
 	////////////////////////////////////
 	// Inspect Dialog
@@ -88,6 +91,11 @@ export enum DebugToolsTranslation {
 	None,
 	LabelQuality,
 	AddToInventory,
+	DoodadName,
+	TabItemStack,
+	UnlockInspection,
+	LockInspection,
+	TileEventName,
 
 	////////////////////////////////////
 	// Misc
@@ -116,10 +124,6 @@ export interface IPlayerData {
 
 export interface ISaveDataGlobal {
 	lastVersion: string;
-}
-
-export enum DebugToolsEvent {
-	UpdateSpectateState = "UpdateSpectateState",
 }
 
 export function isPaintOverlay(overlay: IOverlayInfo) {

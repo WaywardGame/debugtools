@@ -1,11 +1,12 @@
 import { ICreature } from "creature/ICreature";
-import Component from "newui/component/Component";
 import { UiApi } from "newui/INewUi";
-import { IInspectEntityInformationSubsection } from "./Entity";
-export default class CreatureInformation extends Component implements IInspectEntityInformationSubsection {
-    private readonly creature;
-    constructor(api: UiApi, creature: ICreature);
-    getImmutableStats(): never[];
+import { INPC } from "npc/INPC";
+import { IPlayer } from "player/IPlayer";
+import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
+export default class CreatureInformation extends InspectEntityInformationSubsection {
+    private creature;
+    constructor(api: UiApi);
+    update(entity: ICreature | INPC | IPlayer): void;
     private setTamed;
     private removeCreature;
 }

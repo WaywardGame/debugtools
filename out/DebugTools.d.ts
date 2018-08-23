@@ -5,6 +5,7 @@ import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { BindCatcherApi } from "newui/BindingManager";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
+import { INPC } from "npc/INPC";
 import { Source } from "player/IMessageManager";
 import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
@@ -41,7 +42,6 @@ export default class DebugTools extends Mod {
     selector: LocationSelector;
     private upgrade;
     private cameraState;
-    private inspectingTile?;
     private unlockedCameraMovementHandler;
     readonly isCameraUnlocked: boolean;
     onInitialize(saveDataGlobal: ISaveDataGlobal): any;
@@ -53,7 +53,7 @@ export default class DebugTools extends Mod {
     setCameraUnlocked(unlocked: boolean): void;
     getPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K): IPlayerData[K];
     setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]): void;
-    inspectTile(tilePosition: Vector2): void;
+    inspect(what: Vector2 | ICreature | IPlayer | INPC): void;
     postFieldOfView(): void;
     getZoomLevel(): number | undefined;
     getCameraPosition(position: IVector2): IVector2 | undefined;

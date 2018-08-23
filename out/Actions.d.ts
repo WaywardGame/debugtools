@@ -4,7 +4,7 @@ import { ItemQuality, ItemType, SkillType, TerrainType } from "Enums";
 import { Message } from "language/IMessages";
 import IPlayer from "player/IPlayer";
 import DebugTools from "./DebugTools";
-import { IPaintData } from "./ui/DebugToolsDialog";
+import { IPaintData } from "./ui/panel/PaintPanel";
 export declare enum RemovalType {
     Corpse = 0
 }
@@ -20,7 +20,7 @@ export default class Actions {
     removeAllCreatures(player: IPlayer, argument: IActionArgument, result: IActionResult): void;
     removeAllNPCs(player: IPlayer, argument: IActionArgument, result: IActionResult): void;
     kill(executor: IPlayer, { entity }: IActionArgument, result: IActionResult): void;
-    clone(executor: IPlayer, { creature, npc, player, position }: IActionArgument, result: IActionResult): void;
+    clone(executor: IPlayer, { entity, position }: IActionArgument, result: IActionResult): void;
     setTime(player: IPlayer, { object: time }: IActionArgument<number>, result: IActionResult): void;
     heal(executor: IPlayer, { entity, object: corpseId }: IActionArgument<number | undefined>, result: IActionResult): void;
     setStat(executor: IPlayer, { entity, object: [stat, value] }: IActionArgument<[Stat, number]>, result: IActionResult): void;
