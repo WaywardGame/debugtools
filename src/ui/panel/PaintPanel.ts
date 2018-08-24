@@ -1,4 +1,4 @@
-import { Bindable, CreatureType, DoodadType, NPCType, TerrainType } from "Enums";
+import { Bindable, CreatureType, DoodadType, NPCType, SpriteBatchLayer, TerrainType } from "Enums";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
 import { BindCatcherApi, bindingManager } from "newui/BindingManager";
@@ -74,11 +74,14 @@ const paintSections: (new (api: UiApi) => IPaintSection)[] = [
 ];
 
 export default class PaintPanel extends DebugToolsPanel {
-	private painting = false;
-	private readonly paintTiles: number[] = [];
 	private readonly paintSections: IPaintSection[] = [];
 	private paintButton: CheckButton;
 	private paintRow: Component;
+
+	private painting = false;
+	private readonly paintTiles: number[] = [];
+	private lastPaintPosition?: Vector2;
+	private maxSprites = 1024;
 
 	public constructor(gsapi: IGameScreenApi) {
 		super(gsapi);
@@ -87,6 +90,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 		this.paintSections.push(...paintSections
 			.map(cls => new cls(this.api)
+				.on("change", this.onPaintSectionChange)
 				.appendTo(this)));
 
 		new Spacer(this.api).appendTo(this);
@@ -123,6 +127,17 @@ export default class PaintPanel extends DebugToolsPanel {
 		return undefined;
 	}
 
+	@HookMethod
+	public getMaxSpritesForLayer(layer: SpriteBatchLayer, maxSprites: number): number | undefined {
+		if (this.painting) {
+			return this.maxSprites = maxSprites + this.paintTiles.length * 4;
+		}
+
+		this.maxSprites = maxSprites;
+
+		return undefined;
+	}
+
 	// tslint:disable cyclomatic-complexity
 	@HookMethod(HookPriority.High)
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
@@ -139,16 +154,30 @@ export default class PaintPanel extends DebugToolsPanel {
 		if (this.painting) {
 			if (api.isDown(DebugTools.INSTANCE.bindablePaint) && this.gsapi.wasMouseStartWithin()) {
 				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
-				const tile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
 
-				if (TileHelpers.Overlay.add(tile, { type: DebugTools.INSTANCE.overlayPaint }, isPaintOverlay)) {
-					this.updatePaintOverlay(tile, tilePosition);
+				const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
+
+				let interpolatedPosition = new Vector2(this.lastPaintPosition);
+				for (let i = 0; i < 300; i++) { // this is only used for if it goes into an infinite loop
+					interpolatedPosition = interpolatedPosition.add(direction).clamp(this.lastPaintPosition, tilePosition);
+
+					const paintPosition = interpolatedPosition.floor(new Vector2());
+					const tile = game.getTile(paintPosition.x, paintPosition.y, localPlayer.z);
+
+					if (TileHelpers.Overlay.add(tile, { type: DebugTools.INSTANCE.overlayPaint }, isPaintOverlay)) {
+						this.updatePaintOverlay(tile, paintPosition);
+					}
+
+					const tileId = getTileId(paintPosition.x, paintPosition.y, localPlayer.z);
+
+					if (!this.paintTiles.includes(tileId)) this.paintTiles.push(tileId);
+
+					if (paintPosition.equals(tilePosition)) break;
 				}
 
-				const tileId = getTileId(tilePosition.x, tilePosition.y, localPlayer.z);
+				this.lastPaintPosition = tilePosition;
 
-				if (!this.paintTiles.includes(tileId)) this.paintTiles.push(tileId);
-
+				this.updateOverlayBatch();
 				game.updateView(false);
 
 				bindPressed = DebugTools.INSTANCE.bindablePaint;
@@ -156,21 +185,37 @@ export default class PaintPanel extends DebugToolsPanel {
 
 			if (api.isDown(DebugTools.INSTANCE.bindableErasePaint) && this.gsapi.wasMouseStartWithin()) {
 				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
-				const tile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
 
-				if (TileHelpers.Overlay.remove(tile, isPaintOverlay)) {
-					this.updatePaintOverlay(tile, tilePosition);
+				const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
+
+				let interpolatedPosition = new Vector2(this.lastPaintPosition);
+				for (let i = 0; i < 300; i++) { // this is only used for if it goes into an infinite loop
+					interpolatedPosition = interpolatedPosition.add(direction).clamp(this.lastPaintPosition, tilePosition);
+
+					const paintPosition = interpolatedPosition.floor(new Vector2());
+					const tile = game.getTile(paintPosition.x, paintPosition.y, localPlayer.z);
+
+					if (TileHelpers.Overlay.remove(tile, isPaintOverlay)) {
+						this.updatePaintOverlay(tile, paintPosition);
+					}
+
+					const tileId = getTileId(paintPosition.x, paintPosition.y, localPlayer.z);
+
+					const index = this.paintTiles.indexOf(tileId);
+					if (index > -1) this.paintTiles.splice(index, 1);
+
+					if (paintPosition.equals(tilePosition)) break;
 				}
 
-				const tileId = getTileId(tilePosition.x, tilePosition.y, localPlayer.z);
+				this.lastPaintPosition = tilePosition;
 
-				const index = this.paintTiles.indexOf(tileId);
-				if (index > -1) this.paintTiles.splice(index, 1);
-
+				this.updateOverlayBatch();
 				game.updateView(false);
 
 				bindPressed = DebugTools.INSTANCE.bindableErasePaint;
 			}
+
+			if (!bindPressed) delete this.lastPaintPosition;
 
 			if (api.wasPressed(DebugTools.INSTANCE.bindableCancelPaint)) {
 				this.paintButton.setChecked(false);
@@ -192,6 +237,12 @@ export default class PaintPanel extends DebugToolsPanel {
 	}
 	// tslint:enable cyclomatic-complexity
 
+	private updateOverlayBatch() {
+		if (this.paintTiles.length * 4 - 512 < this.maxSprites || this.paintTiles.length * 4 + 512 > this.maxSprites) {
+			renderer.initializeSpriteBatch(SpriteBatchLayer.Overlay, true);
+		}
+	}
+
 	@Bound
 	private onSwitchTo() {
 		this.parent.classes.add("debug-tools-paint-panel");
@@ -206,6 +257,13 @@ export default class PaintPanel extends DebugToolsPanel {
 		this.painting = false;
 		this.paintRow.store();
 		this.parent.classes.remove("debug-tools-paint-panel");
+	}
+
+	@Bound
+	private onPaintSectionChange(paintSection: IPaintSection) {
+		if (paintSection.isChanging() && !this.painting) {
+			this.paintButton.setChecked(true);
+		}
 	}
 
 	@Bound
@@ -241,6 +299,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 		this.paintTiles.splice(0, Infinity);
 
+		this.updateOverlayBatch();
 		game.updateView(false);
 	}
 

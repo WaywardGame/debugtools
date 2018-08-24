@@ -1,4 +1,4 @@
-import { Bindable, CreatureType, DoodadType, NPCType, TerrainType } from "Enums";
+import { Bindable, CreatureType, DoodadType, NPCType, SpriteBatchLayer, TerrainType } from "Enums";
 import { BindCatcherApi } from "newui/BindingManager";
 import Component from "newui/component/Component";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
@@ -36,17 +36,22 @@ export interface IPaintSection extends Component {
     getTilePaintData(): Partial<IPaintData> | undefined;
 }
 export default class PaintPanel extends DebugToolsPanel {
-    private painting;
-    private readonly paintTiles;
     private readonly paintSections;
     private paintButton;
     private paintRow;
+    private painting;
+    private readonly paintTiles;
+    private lastPaintPosition?;
+    private maxSprites;
     constructor(gsapi: IGameScreenApi);
     getTranslation(): DebugToolsTranslation;
     canClientMove(api: BindCatcherApi): false | undefined;
+    getMaxSpritesForLayer(layer: SpriteBatchLayer, maxSprites: number): number | undefined;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
+    private updateOverlayBatch;
     private onSwitchTo;
     private onSwitchAway;
+    private onPaintSectionChange;
     private showPaintSectionResetMenu;
     private completePaint;
     private clearPaint;

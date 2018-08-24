@@ -71,5 +71,7 @@ export default class TerrainPaint extends Component implements IPaintSection {
 		const tillable = terrain !== "nochange" && terrainDescriptions[TerrainType[terrain]]!.tillable === true;
 		this.tilledCheckButton.toggle(tillable);
 		if (!tillable) this.tilledCheckButton.setChecked(false);
+
+		this.triggerSync("change");
 	}
 }

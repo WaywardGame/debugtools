@@ -67,7 +67,8 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 
 			this.activePanel = showPanel.appendTo(component)
 				.on(ComponentEvent.WillRemove, panel => {
-					panel.store().triggerSync(DebugToolsPanelEvent.SwitchAway);
+					panel.triggerSync(DebugToolsPanelEvent.SwitchAway);
+					panel.store();
 					return false;
 				});
 

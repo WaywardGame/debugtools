@@ -85,5 +85,7 @@ export default class CorpsePaint extends Component implements IPaintSection {
 		this.aberrantCheckButton.toggle(isReplaceable);
 		this.replaceExisting.toggle(isReplaceable);
 		if (!isReplaceable) this.replaceExisting.setChecked(false);
+
+		this.triggerSync("change");
 	}
 }

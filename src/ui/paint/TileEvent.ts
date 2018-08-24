@@ -77,5 +77,7 @@ export default class TileEventPaint extends Component implements IPaintSection {
 		const isReplaceable = this.tileEvent !== undefined && this.tileEvent !== "remove";
 		this.replaceExisting.toggle(isReplaceable);
 		if (!isReplaceable) this.replaceExisting.setChecked(false);
+
+		this.triggerSync("change");
 	}
 }
