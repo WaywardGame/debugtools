@@ -17,4 +17,5 @@ export default class GeneralPanel extends DebugToolsPanel {
     private unlockRecipes;
     private removeAllCreatures;
     private removeAllNPCs;
+    private travelAway;
 }

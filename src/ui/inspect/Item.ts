@@ -4,6 +4,7 @@ import { ITile } from "tile/ITerrain";
 import { IVector2 } from "utilities/math/IVector";
 import DebugTools, { translation } from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
+import { areArraysIdentical } from "../../util/Array";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
 export default class ItemInformation extends InspectInformationSection {
@@ -20,12 +21,17 @@ export default class ItemInformation extends InspectInformationSection {
 	}
 
 	public update(position: IVector2, tile: ITile) {
-		this.items = tile.containedItems || [];
+		const items = tile.containedItems || [];
 
-		if (this.items.length) {
-			DebugTools.LOG.info("Items:", tile.containedItems);
-		}
+		if (areArraysIdentical(items, this.items)) return;
+		this.items = items;
 
-		return this;
+		if (!this.items.length) return;
+
+		this.setShouldLog();
+	}
+
+	public logUpdate() {
+		DebugTools.LOG.info("Items:", this.items);
 	}
 }

@@ -25,6 +25,8 @@ export enum DebugToolsTranslation {
 	InterruptConfirmationUnlockRecipesDescription,
 	ButtonRemoveAllCreatures,
 	ButtonRemoveAllNPCs,
+	ButtonTravelAway,
+	InterruptChoiceTravelAway,
 
 	// Display
 	PanelDisplay,

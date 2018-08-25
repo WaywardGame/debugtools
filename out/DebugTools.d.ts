@@ -1,10 +1,11 @@
 import { ICreature, IDamageInfo } from "creature/ICreature";
 import { Bindable, Direction, OverlayType, SpriteBatchLayer } from "Enums";
-import { Dictionary } from "language/ILanguage";
+import { Dictionary, InterruptChoice } from "language/ILanguage";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { BindCatcherApi } from "newui/BindingManager";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
+import { MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
 import { INPC } from "npc/INPC";
 import { Source } from "player/IMessageManager";
 import IPlayer from "player/IPlayer";
@@ -15,6 +16,7 @@ import Vector2 from "utilities/math/Vector2";
 import Actions from "./Actions";
 import { DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
+import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
 export declare function translation(id: DebugToolsTranslation): Translation;
 export declare enum DebugToolsEvent {
     PlayerDataChange = 0
@@ -22,13 +24,9 @@ export declare enum DebugToolsEvent {
 export default class DebugTools extends Mod {
     static INSTANCE: DebugTools;
     static LOG: Log;
-    data: ISaveData;
-    globalData: ISaveDataGlobal;
     actions: Actions;
-    dialogMain: DialogId;
-    dialogInspect: DialogId;
-    overlayTarget: OverlayType;
-    overlayPaint: OverlayType;
+    selector: LocationSelector;
+    unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
     bindableToggleDialog: Bindable;
     bindableInspectTile: Bindable;
     bindableToggleCameraLock: Bindable;
@@ -39,11 +37,20 @@ export default class DebugTools extends Mod {
     bindableCompletePaint: Bindable;
     dictionary: Dictionary;
     source: Source;
-    selector: LocationSelector;
+    choiceSailToCivilization: InterruptChoice;
+    choiceTravelAway: InterruptChoice;
+    dialogMain: DialogId;
+    dialogInspect: DialogId;
+    menuBarButton: MenuBarButtonType;
+    overlayTarget: OverlayType;
+    overlayPaint: OverlayType;
+    data: ISaveData;
+    globalData: ISaveDataGlobal;
     private upgrade;
     private cameraState;
-    private unlockedCameraMovementHandler;
     readonly isCameraUnlocked: boolean;
+    getPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K): IPlayerData[K];
+    setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]): void;
     onInitialize(saveDataGlobal: ISaveDataGlobal): any;
     onUninitialize(): any;
     onLoad(saveData: ISaveData): void;
@@ -51,9 +58,8 @@ export default class DebugTools extends Mod {
     onSave(): any;
     updateFog(): void;
     setCameraUnlocked(unlocked: boolean): void;
-    getPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K): IPlayerData[K];
-    setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]): void;
     inspect(what: Vector2 | ICreature | IPlayer | INPC): void;
+    toggleDialog(): void;
     postFieldOfView(): void;
     getZoomLevel(): number | undefined;
     getCameraPosition(position: IVector2): IVector2 | undefined;

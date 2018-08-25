@@ -5,6 +5,7 @@
 		"curly": false,
 		"padding-line-between-statements": false,
 		"cyclomatic-complexity": [true, 10],
-		"array-type": [true, "array"]
+		"array-type": [true, "array"],
+		"member-ordering": false
 	}
 }

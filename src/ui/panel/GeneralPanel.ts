@@ -1,3 +1,4 @@
+import { ActionType } from "Enums";
 import { HookMethod } from "mod/IHookHost";
 import { BindCatcherApi } from "newui/BindingManager";
 import Button, { ButtonEvent } from "newui/component/Button";
@@ -80,6 +81,11 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.on(ButtonEvent.Activate, this.removeAllNPCs)
 			.appendTo(this);
 
+		new Button(this.api)
+			.setText(translation(DebugToolsTranslation.ButtonTravelAway))
+			.on(ButtonEvent.Activate, this.travelAway)
+			.appendTo(this);
+
 		this.on(DebugToolsPanelEvent.SwitchTo, this.onSwitchTo);
 		this.on(DebugToolsPanelEvent.SwitchAway, this.onSwitchAway);
 	}
@@ -120,6 +126,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 	@Bound
 	private inspectLocalPlayer() {
+		if (this.selectionPromise) this.selectionPromise.cancel();
 		DebugTools.INSTANCE.inspect(localPlayer);
 	}
 
@@ -152,5 +159,26 @@ export default class GeneralPanel extends DebugToolsPanel {
 	@Bound
 	private removeAllNPCs() {
 		Actions.get("removeAllNPCs").execute();
+	}
+
+	/**
+	 * Travels Away
+	 * 
+	 * Note: Since "traveling away" isn't possible on multiplayer, this doesn't need to be an action.
+	 */
+	@Bound
+	private async travelAway() {
+		if (multiplayer.isConnected()) {
+			return;
+		}
+
+		const choice = await this.api.interrupt(translation(DebugToolsTranslation.InterruptChoiceTravelAway))
+			.withChoice(DebugTools.INSTANCE.choiceSailToCivilization, DebugTools.INSTANCE.choiceTravelAway);
+
+		actionManager.execute(
+			localPlayer,
+			choice === DebugTools.INSTANCE.choiceSailToCivilization ? ActionType.SailToCivilization : ActionType.TraverseTheSea,
+			{ object: [true, true, true] },
+		);
 	}
 }

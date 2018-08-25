@@ -1,6 +1,6 @@
 import { ICreature } from "creature/ICreature";
 import { IEntity } from "entity/IEntity";
-import { Bindable } from "Enums";
+import { Bindable, PlayerState } from "Enums";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import { BindCatcherApi, bindingManager } from "newui/BindingManager";
 import Button from "newui/component/Button";
@@ -69,6 +69,9 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	private tile?: ITile;
 	private inspectionLock?: ICreature | IPlayer | INPC;
 	private inspectingTile?: ITile;
+	private storePanels = true;
+	private log = false;
+	private willShowSubpanel = false;
 
 	public constructor(gsapi: IGameScreenApi, id: DialogId) {
 		super(gsapi, id);
@@ -86,8 +89,12 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 			this.infoSections = informationSectionClasses.map(cls => new cls(this.api)
 				.on("update", this.update)
 				.on(ComponentEvent.WillRemove, infoSection => {
-					infoSection.store();
-					return false;
+					if (this.storePanels) {
+						infoSection.store();
+						return false;
+					}
+
+					return undefined;
 				}));
 
 			this.entityInfoSection = this.infoSections
@@ -121,7 +128,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 
 		this.update();
 
-		if (this.inspectionLock) this.showSubPanel(this.entityButtons[this.entityInfoSection.getIndex(this.inspectionLock)]);
+		if (this.inspectionLock) this.willShowSubpanel = true;
 
 		return this;
 	}
@@ -155,15 +162,32 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		this.update();
 	}
 
+	@HookMethod
+	public onGameEnd(state: PlayerState) {
+		this.close();
+	}
+
 	@Bound
 	private update() {
 		if (this.inspectionLock) this.setInspectionTile(this.inspectionLock);
 
 		for (const section of this.infoSections) {
+			section.resetWillLog();
 			section.update(this.tilePosition!, this.tile!);
 		}
 
+		this.logUpdate();
+		this.schedule(300, 300, this.updateSubpanels);
+	}
+
+	@Bound
+	private updateSubpanels() {
 		this.updateSubpanelList();
+
+		if (this.willShowSubpanel && this.inspectionLock) {
+			this.showSubPanel(this.entityButtons[this.entityInfoSection.getIndex(this.inspectionLock)]);
+			this.willShowSubpanel = false;
+		}
 
 		if (this.inspectionLock) {
 			for (const entityButton of this.entityButtons) entityButton.classes.remove("inspection-lock");
@@ -181,8 +205,8 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 
 		this.tile = game.getTile(...this.tilePosition.xyz);
 
-		DebugTools.LOG.info("Inspecting tile at", this.tilePosition!.xyz);
-		DebugTools.LOG.info("Tile:", this.tile);
+		this.log = true;
+		this.logUpdate();
 
 		// remove old inspection overlay
 		if (this.inspectingTile && this.inspectingTile !== this.tile) {
@@ -197,6 +221,20 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 			blue: 0,
 		}, isSelectedTargetOverlay);
 		game.updateView(false);
+	}
+
+	@Bound
+	private logUpdate() {
+		if (this.log) {
+			DebugTools.LOG.info("Tile:", this.tile);
+			this.log = false;
+		}
+
+		for (const infoSection of this.infoSections) {
+			if (infoSection.willLog) {
+				infoSection.logUpdate();
+			}
+		}
 	}
 
 	@Bound
@@ -235,6 +273,9 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		}
 
 		game.updateView(false);
+
+		this.storePanels = false;
+		for (const infoSection of this.infoSections) infoSection.remove();
 	}
 
 }

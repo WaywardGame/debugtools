@@ -6,5 +6,6 @@ export default class ItemInformation extends InspectInformationSection {
     private items;
     constructor(api: UiApi);
     getTabs(): TabInformation[];
-    update(position: IVector2, tile: ITile): this;
+    update(position: IVector2, tile: ITile): void;
+    logUpdate(): void;
 }

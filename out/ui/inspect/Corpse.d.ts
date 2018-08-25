@@ -9,7 +9,8 @@ export default class CorpseInformation extends InspectInformationSection {
     constructor(api: UiApi);
     getTabs(): TabInformation[];
     setTab(corpse: number): this;
-    update(position: IVector2, tile: ITile): this | undefined;
+    update(position: IVector2, tile: ITile): void;
+    logUpdate(): void;
     private resurrect;
     private removeCorpse;
 }

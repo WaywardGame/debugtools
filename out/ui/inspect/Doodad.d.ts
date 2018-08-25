@@ -6,5 +6,6 @@ export default class DoodadInformation extends InspectInformationSection {
     private doodad;
     constructor(api: UiApi);
     getTabs(): TabInformation[];
-    update(position: IVector2, tile: ITile): this | undefined;
+    update(position: IVector2, tile: ITile): void;
+    logUpdate(): void;
 }

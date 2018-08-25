@@ -1,5 +1,5 @@
 import { ICreature } from "creature/ICreature";
-import { Bindable } from "Enums";
+import { Bindable, PlayerState } from "Enums";
 import { IHookHost } from "mod/IHookHost";
 import { BindCatcherApi } from "newui/BindingManager";
 import Button from "newui/component/Button";
@@ -19,6 +19,9 @@ export default class InspectDialog extends TabDialog implements IHookHost {
     private tile?;
     private inspectionLock?;
     private inspectingTile?;
+    private storePanels;
+    private log;
+    private willShowSubpanel;
     constructor(gsapi: IGameScreenApi, id: DialogId);
     getSubpanels(): [string | number, import("newui/component/IComponent").TranslationGenerator, (component: import("newui/component/Component").default) => any, (((button: Button) => any) | undefined)?, (Button | undefined)?][];
     getName(): import("language/Translation").default;
@@ -27,8 +30,11 @@ export default class InspectDialog extends TabDialog implements IHookHost {
     onGameTickEnd(): void;
     onMoveComplete(player: IPlayer): void;
     onTileUpdate(tile: ITile, x: number, y: number, z: number): void;
+    onGameEnd(state: PlayerState): void;
     private update;
+    private updateSubpanels;
     private setInspectionTile;
+    private logUpdate;
     private showInspectionLockMenu;
     private unlockInspection;
     private lockInspection;

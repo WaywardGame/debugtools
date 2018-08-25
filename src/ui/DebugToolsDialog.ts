@@ -40,12 +40,19 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 	private subpanels: DebugToolsPanel[];
 	private activePanel: DebugToolsPanel;
 
+	private storePanels = true;
+
 	public constructor(gsapi: IGameScreenApi, id: DialogId) {
 		super(gsapi, id);
 		this.classes.add("debug-tools-dialog");
 
 		hookManager.register(this, "DebugToolsDialog")
 			.until(ComponentEvent.Remove);
+
+		this.on(ComponentEvent.WillRemove, () => {
+			this.storePanels = false;
+			for (const subpanel of this.subpanels) subpanel.remove();
+		});
 	}
 
 	public getName() {
@@ -68,8 +75,12 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 			this.activePanel = showPanel.appendTo(component)
 				.on(ComponentEvent.WillRemove, panel => {
 					panel.triggerSync(DebugToolsPanelEvent.SwitchAway);
-					panel.store();
-					return false;
+					if (this.storePanels) {
+						panel.store();
+						return false;
+					}
+
+					return undefined;
 				});
 
 			this.activePanel.triggerSync(DebugToolsPanelEvent.SwitchTo);

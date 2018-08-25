@@ -141,6 +141,8 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 	@Bound
 	private setWeightBonus(_: any, weightBonus: number) {
+		if (DebugTools.INSTANCE.getPlayerData(this.player!, "weightBonus") === weightBonus) return;
+
 		Actions.get("setWeightBonus").execute({ player: this.player, object: weightBonus });
 	}
 

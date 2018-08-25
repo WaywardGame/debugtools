@@ -34,6 +34,8 @@
 			"interruptConfirmationUnlockRecipesDescription": "There's no undo besides erasing  /all/ \nrecipe progress in the Options Menu.",
 			"buttonRemoveAllCreatures": "Remove All Creatures",
 			"buttonRemoveAllNPCs": "Remove All NPCs",
+			"buttonTravelAway": "Travel Away",
+			"interruptChoiceTravelAway": "Where would you like to travel to?",
 			
 			
 			"panelDisplay": "Display",
@@ -113,6 +115,10 @@
 		},
 		"source": {
 			"modDebugToolsDebugTools": "Debug Tools"
+		},
+		"interruptChoice": {
+			"modDebugToolsSailToCivilization": "Civilization",
+			"modDebugToolsTravelAway": "New Lands"
 		}
 	}
 }

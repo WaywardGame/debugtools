@@ -25,10 +25,12 @@ export default class DoodadInformation extends InspectInformationSection {
 		if (tile.doodad === this.doodad) return;
 		this.doodad = tile.doodad;
 
-		if (this.doodad) {
-			DebugTools.LOG.info("Doodad:", this.doodad);
-		}
+		if (!this.doodad) return;
 
-		return this;
+		this.setShouldLog();
+	}
+
+	public logUpdate() {
+		DebugTools.LOG.info("Doodad:", this.doodad);
 	}
 }

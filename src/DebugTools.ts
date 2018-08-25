@@ -1,14 +1,15 @@
 import { ICreature, IDamageInfo } from "creature/ICreature";
 import { EntityType } from "entity/IEntity";
 import { ActionType, Bindable, Delay, Direction, MoveType, OverlayType, SpriteBatchLayer } from "Enums";
-import { Dictionary } from "language/ILanguage";
+import { Dictionary, InterruptChoice } from "language/ILanguage";
 import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
 import Mod from "mod/Mod";
-import Register from "mod/ModRegistry";
+import Register, { registry } from "mod/ModRegistry";
 import { BindCatcherApi, bindingManager, KeyModifier } from "newui/BindingManager";
 import { ScreenId } from "newui/screen/IScreen";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
+import { MenuBarButtonGroup, MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
 import GameScreen from "newui/screen/screens/GameScreen";
 import { INPC } from "npc/INPC";
 import { Source } from "player/IMessageManager";
@@ -47,25 +48,27 @@ export enum DebugToolsEvent {
 
 export default class DebugTools extends Mod {
 
+	////////////////////////////////////
+	// Static
+	//
+
 	public static INSTANCE: DebugTools;
 	public static LOG: Log;
 
-	public data: ISaveData;
-	public globalData: ISaveDataGlobal;
+	////////////////////////////////////
+	// Registries
+	//
 
 	@Register.registry(Actions)
 	public actions: Actions;
+	@Register.registry(LocationSelector)
+	public selector: LocationSelector;
+	@Register.registry(UnlockedCameraMovementHandler)
+	public unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
 
-	@Register.dialog("Main", MainDialog.description, MainDialog)
-	public dialogMain: DialogId;
-	@Register.dialog("Inspect", InspectDialog.description, InspectDialog)
-	public dialogInspect: DialogId;
-
-	@Register.overlay("Target")
-	public overlayTarget: OverlayType;
-
-	@Register.overlay("Paint")
-	public overlayPaint: OverlayType;
+	////////////////////////////////////
+	// Bindables
+	//
 
 	@Register.bindable("ToggleDialog", { key: "Backslash" }, { key: "IntlBackslash" })
 	public bindableToggleDialog: Bindable;
@@ -84,24 +87,76 @@ export default class DebugTools extends Mod {
 	@Register.bindable("CompletePaint", { key: "Enter" })
 	public bindableCompletePaint: Bindable;
 
+	////////////////////////////////////
+	// Language
+	//
+
 	@Register.dictionary("DebugTools", DebugToolsTranslation)
 	public dictionary: Dictionary;
 
 	@Register.messageSource("DebugTools")
 	public source: Source;
 
-	@Register.registry(LocationSelector)
-	public selector: LocationSelector;
+	@Register.interruptChoice("SailToCivilization")
+	public choiceSailToCivilization: InterruptChoice;
+	@Register.interruptChoice("TravelAway")
+	public choiceTravelAway: InterruptChoice;
+
+	////////////////////////////////////
+	// UI
+	//
+
+	@Register.dialog("Main", MainDialog.description, MainDialog)
+	public dialogMain: DialogId;
+	@Register.dialog("Inspect", InspectDialog.description, InspectDialog)
+	public dialogInspect: DialogId;
+
+	@Register.menuBarButton("Dialog", {
+		onActivate: () => DebugTools.INSTANCE.toggleDialog(),
+		group: MenuBarButtonGroup.Meta,
+		bindable: registry<DebugTools, Bindable>().get("bindableToggleDialog"),
+		tooltip: tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.DialogTitleMain))),
+	})
+	public menuBarButton: MenuBarButtonType;
+
+	@Register.overlay("Target")
+	public overlayTarget: OverlayType;
+	@Register.overlay("Paint")
+	public overlayPaint: OverlayType;
+
+	////////////////////////////////////
+	// Fields & Other Data Storage
+	//
+
+	public data: ISaveData;
+	public globalData: ISaveDataGlobal;
 
 	private upgrade = false;
 	private cameraState = CameraState.Locked;
 
-	@Register.registry(UnlockedCameraMovementHandler)
-	private unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
-
 	public get isCameraUnlocked() {
 		return this.cameraState === CameraState.Unlocked;
 	}
+
+	public getPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K): IPlayerData[K] {
+		this.data.playerData[player.identifier] = this.data.playerData[player.identifier] || {
+			weightBonus: 0,
+			invulnerable: false,
+			noclip: false,
+		};
+
+		return this.data.playerData[player.identifier][key];
+	}
+
+	public setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]) {
+		this.getPlayerData(player, key);
+		this.data.playerData[player.identifier][key] = value;
+		this.triggerSync(DebugToolsEvent.PlayerDataChange, player.id, key, value);
+	}
+
+	////////////////////////////////////
+	// Mod Loading Cycle
+	//
 
 	public onInitialize(saveDataGlobal: ISaveDataGlobal): any {
 		DebugTools.INSTANCE = this;
@@ -139,6 +194,10 @@ export default class DebugTools extends Mod {
 		return this.data;
 	}
 
+	////////////////////////////////////
+	// Public Methods
+	//
+
 	public updateFog() {
 		fieldOfView.disabled = !this.data.fog;
 		game.updateView(true);
@@ -158,30 +217,19 @@ export default class DebugTools extends Mod {
 		}
 	}
 
-	public getPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K): IPlayerData[K] {
-		this.data.playerData[player.identifier] = this.data.playerData[player.identifier] || {
-			weightBonus: 0,
-			invulnerable: false,
-			noclip: false,
-		};
-
-		return this.data.playerData[player.identifier][key];
-	}
-
-	public setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]) {
-		this.getPlayerData(player, key);
-		this.data.playerData[player.identifier][key] = value;
-		this.triggerSync(DebugToolsEvent.PlayerDataChange, player.id, key, value);
-	}
-
 	public inspect(what: Vector2 | ICreature | IPlayer | INPC) {
 		newui.getScreen<GameScreen>(ScreenId.Game)!
 			.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
 			.setInspection(what);
 	}
 
-	///////////////////////////////////////////////////
+	public toggleDialog() {
+		newui.getScreen<GameScreen>(ScreenId.Game)!.toggleDialog(this.dialogMain);
+	}
+
+	////////////////////////////////////
 	// Hooks
+	//
 
 	@HookMethod
 	public postFieldOfView() {
@@ -363,14 +411,6 @@ export default class DebugTools extends Mod {
 
 		return undefined;
 	}
-
-	/**
-	 * Initializes the options section for Debug Tools.
-	 */
-	// @Register.optionsSection
-	// protected initializeOptionsSection(api: UiApi, section: Component) {
-	// 	section.append(new OptionsSection(api));
-	// }
 
 	////////////////////////////////////
 	// Commands

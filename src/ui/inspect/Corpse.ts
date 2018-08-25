@@ -53,11 +53,15 @@ export default class CorpseInformation extends InspectInformationSection {
 		if (areArraysIdentical(corpses, this.corpses)) return;
 		this.corpses = corpses;
 
-		for (const corpse of corpses) {
+		if (!this.corpses.length) return;
+
+		this.setShouldLog();
+	}
+
+	public logUpdate() {
+		for (const corpse of this.corpses) {
 			DebugTools.LOG.info("Corpse:", corpse);
 		}
-
-		return this;
 	}
 
 	@Bound

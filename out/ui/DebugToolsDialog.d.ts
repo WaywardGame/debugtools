@@ -6,6 +6,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
     static description: IDialogDescription;
     private subpanels;
     private activePanel;
+    private storePanels;
     constructor(gsapi: IGameScreenApi, id: DialogId);
     getName(): import("language/Translation").default;
     getSubpanels(): SubpanelInformation[];

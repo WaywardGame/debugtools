@@ -113,9 +113,9 @@ export default class EntityInformation extends InspectInformationSection {
 
 		if (!this.entities.length) return;
 
-		for (const entity of this.entities) {
-			DebugTools.LOG.info("Entity:", entity);
+		this.setShouldLog();
 
+		for (const entity of this.entities) {
 			this.until([ComponentEvent.Remove, "change"])
 				.bind(entity as IBaseEntity, EntityEvent.StatChanged, this.onStatChange);
 		}
@@ -127,6 +127,12 @@ export default class EntityInformation extends InspectInformationSection {
 
 	public getEntity(index: number) {
 		return this.entities[index];
+	}
+
+	public logUpdate() {
+		for (const entity of this.entities) {
+			DebugTools.LOG.info("Entity:", entity);
+		}
 	}
 
 	private initializeStats() {

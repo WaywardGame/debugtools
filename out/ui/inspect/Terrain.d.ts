@@ -10,7 +10,8 @@ export default class TerrainInformation extends InspectInformationSection {
     constructor(api: UiApi);
     getTabs(): TabInformation[];
     getTabTranslation(): import("utilities/string/Interpolator").IStringSection[];
-    update(position: IVector2, tile: ITile): this;
+    update(position: IVector2, tile: ITile): this | undefined;
+    logUpdate(): void;
     private toggleTilled;
     private showTerrainContextMenu;
     private changeTerrain;

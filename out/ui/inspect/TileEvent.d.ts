@@ -8,5 +8,6 @@ export default class TileEventInformation extends InspectInformationSection {
     constructor(api: UiApi);
     getTabs(): TabInformation[];
     setTab(tileEvent: number): this;
-    update(position: IVector2, tile: ITile): this;
+    update(position: IVector2, tile: ITile): this | undefined;
+    logUpdate(): void;
 }

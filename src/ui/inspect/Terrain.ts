@@ -58,15 +58,19 @@ export default class TerrainInformation extends InspectInformationSection {
 		this.tile = tile;
 
 		const terrainType = TerrainType[TileHelpers.getType(this.tile!)];
-		if (terrainType !== this.terrainType) {
-			this.terrainType = terrainType;
-			DebugTools.LOG.info("Terrain:", this.terrainType);
-		}
+		if (terrainType === this.terrainType) return;
+
+		this.terrainType = terrainType;
+		this.setShouldLog();
 
 		this.checkButtonTilled.toggle(terrainDescriptions[TileHelpers.getType(tile)]!.tillable === true)
 			.refresh();
 
 		return this;
+	}
+
+	public logUpdate() {
+		DebugTools.LOG.info("Terrain:", this.terrainType);
 	}
 
 	@Bound
