@@ -1,14 +1,15 @@
 import { SentenceCaseStyle } from "Enums";
 import Translation from "language/Translation";
+import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
 import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdown";
-import { TranslationGenerator } from "newui/component/IComponent";
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import { UiApi } from "newui/INewUi";
 import { TileEventType } from "tile/ITileEvent";
 import tileEventDescriptions from "tile/TileEvents";
+import { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Objects";
@@ -34,15 +35,17 @@ export default class TileEventPaint extends Component implements IPaintSection {
 					options: ([
 						["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
 						["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
-					] as IDropdownOption<"nochange" | "remove" | keyof typeof TileEventType>[]).values().include(Enums.values(TileEventType)
-						.map<[keyof typeof TileEventType, TranslationGenerator]>(event => [
-							TileEventType[event] as keyof typeof TileEventType,
-							Translation.generator(game.getNameFromDescription(tileEventDescriptions[event], SentenceCaseStyle.Title)),
-						])
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
-						.map<IDropdownOption<"nochange" | "remove" | keyof typeof TileEventType>>(([id, t]) => [id, option => option.setText(t)])),
+					] as IDropdownOption<"nochange" | "remove" | keyof typeof TileEventType>[]).values()
+						.include(Enums.values(TileEventType)
+							.filter(event => event !== TileEventType.None)
+							.map(event => tuple(
+								TileEventType[event] as keyof typeof TileEventType,
+								Translation.ofDescription(tileEventDescriptions[event], SentenceCaseStyle.Title, false),
+							))
+							.collect(Collectors.toArray)
+							.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+							.values()
+							.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
 				}))
 				.on(DropdownEvent.Selection, this.changeEvent))
 			.appendTo(this);

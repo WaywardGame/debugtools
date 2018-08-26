@@ -22,6 +22,7 @@ import Vector3 from "utilities/math/Vector3";
 import Actions from "./Actions";
 import { DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
+import AddItemToInventory from "./ui/component/AddItemToInventory";
 import MainDialog from "./ui/DebugToolsDialog";
 import InspectDialog from "./ui/InspectDialog";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
@@ -184,10 +185,12 @@ export default class DebugTools extends Mod {
 		};
 
 		hookManager.register(this.selector, "DebugTools:LocationSelector");
+		AddItemToInventory.get(newui);
 	}
 
 	public onUnload() {
 		hookManager.deregister(this.selector);
+		AddItemToInventory.get(newui).releaseAndRemove();
 	}
 
 	public onSave(): any {

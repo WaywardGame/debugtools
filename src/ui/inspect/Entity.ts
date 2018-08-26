@@ -8,7 +8,7 @@ import { bindingManager } from "newui/BindingManager";
 import { BlockRow } from "newui/component/BlockRow";
 import Button, { ButtonEvent } from "newui/component/Button";
 import Component from "newui/component/Component";
-import ContextMenu, { ContextMenuOptionKeyValuePair } from "newui/component/ContextMenu";
+import ContextMenu from "newui/component/ContextMenu";
 import { ComponentEvent } from "newui/component/IComponent";
 import Input, { InputEvent } from "newui/component/Input";
 import { LabelledRow } from "newui/component/LabelledRow";
@@ -20,6 +20,7 @@ import { UiApi } from "newui/INewUi";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
+import { tuple } from "utilities/Arrays";
 import Collectors, { PassStrategy } from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
 import { IVector2, IVector3 } from "utilities/math/IVector";
@@ -29,8 +30,9 @@ import Actions from "../../Actions";
 import DebugTools, { translation } from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
+import { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
-import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
+import InspectInformationSection from "../component/InspectInformationSection";
 import CreatureInformation from "./Creature";
 import HumanInformation from "./Human";
 import NpcInformation from "./Npc";
@@ -79,12 +81,17 @@ export default class EntityInformation extends InspectInformationSection {
 		this.statWrapper = new Component(this.api)
 			.classes.add("debug-tools-inspect-entity-sub-section")
 			.appendTo(this);
+
+		this.on(DebugToolsPanelEvent.SwitchTo, () => this.subsections
+			.forEach(subsection => subsection.triggerSync(DebugToolsPanelEvent.SwitchTo)));
+		this.on(DebugToolsPanelEvent.SwitchAway, () => this.subsections
+			.forEach(subsection => subsection.triggerSync(DebugToolsPanelEvent.SwitchAway)));
 	}
 
 	public getTabs() {
 		return this.entities.entries()
-			.map<TabInformation>(([i, entity]) => [i, () => translation(DebugToolsTranslation.EntityName)
-				.get(EntityType[entity.entityType], game.getName(entity, SentenceCaseStyle.Title))])
+			.map(([i, entity]) => tuple(i, () => translation(DebugToolsTranslation.EntityName)
+				.get(EntityType[entity.entityType], game.getName(entity, SentenceCaseStyle.Title))))
 			.collect(Collectors.toArray);
 	}
 
@@ -225,10 +232,10 @@ export default class EntityInformation extends InspectInformationSection {
 	private createTeleportToPlayerMenu() {
 		return players.values()
 			.filter(player => player !== this.entity)
-			.map<ContextMenuOptionKeyValuePair>(player => [player.name, {
+			.map(player => tuple(player.name, {
 				translation: Translation.generator(player.name),
 				onActivate: () => this.teleport(player),
-			}])
+			}))
 			.collect(Collectors.toArray)
 			.sort(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))
 			.values()

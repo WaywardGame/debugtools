@@ -55,7 +55,4 @@ export default class PaintPanel extends DebugToolsPanel {
     private showPaintSectionResetMenu;
     private completePaint;
     private clearPaint;
-    private updatePaintOverlay;
-    private getNeighborTiles;
-    private getPaintOverlayConnections;
 }

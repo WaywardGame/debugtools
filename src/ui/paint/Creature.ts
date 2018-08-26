@@ -1,13 +1,14 @@
 import { creatureDescriptions } from "creature/Creatures";
 import { CreatureType, SentenceCaseStyle } from "Enums";
 import Translation from "language/Translation";
+import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
 import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdown";
-import { TranslationGenerator } from "newui/component/IComponent";
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import { UiApi } from "newui/INewUi";
+import { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Objects";
@@ -35,11 +36,11 @@ export default class CreaturePaint extends Component implements IPaintSection {
 						["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
 					] as IDropdownOption<"nochange" | "remove" | keyof typeof CreatureType>[]).values().include(Enums.values(CreatureType)
 						.filter(creature => creatureDescriptions[creature])
-						.map<[keyof typeof CreatureType, TranslationGenerator]>(creature => [CreatureType[creature] as keyof typeof CreatureType, Translation.ofObjectName(creatureDescriptions[creature]!, SentenceCaseStyle.Title, false)])
+						.map(creature => tuple(CreatureType[creature] as keyof typeof CreatureType, Translation.ofDescription(creatureDescriptions[creature]!, SentenceCaseStyle.Title, false)))
 						.collect(Collectors.toArray)
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.values()
-						.map<IDropdownOption<"nochange" | "remove" | keyof typeof CreatureType>>(([id, t]) => [id, option => option.setText(t)])),
+						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
 				}))
 				.on(DropdownEvent.Selection, this.changeCreature))
 			.appendTo(this);

@@ -3,6 +3,7 @@ import { CreatureType, SentenceCaseStyle } from "Enums";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { UiApi } from "newui/INewUi";
 import { ITile } from "tile/ITerrain";
+import { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
@@ -34,8 +35,8 @@ export default class CorpseInformation extends InspectInformationSection {
 
 	public getTabs(): TabInformation[] {
 		return this.corpses.entries()
-			.map<TabInformation>(([i, corpse]) => [i, () => translation(DebugToolsTranslation.CorpseName)
-				.get(game.getName(corpse, SentenceCaseStyle.Title, false))])
+			.map(([i, corpse]) => tuple(i, () => translation(DebugToolsTranslation.CorpseName)
+				.get(game.getName(corpse, SentenceCaseStyle.Title, false))))
 			.collect(Collectors.toArray);
 	}
 
@@ -48,7 +49,7 @@ export default class CorpseInformation extends InspectInformationSection {
 	}
 
 	public update(position: IVector2, tile: ITile) {
-		const corpses = tile.corpses || [];
+		const corpses = [...tile.corpses || []];
 
 		if (areArraysIdentical(corpses, this.corpses)) return;
 		this.corpses = corpses;

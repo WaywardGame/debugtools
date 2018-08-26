@@ -4,6 +4,7 @@ import { Bindable, PlayerState } from "Enums";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import { BindCatcherApi, bindingManager } from "newui/BindingManager";
 import Button from "newui/component/Button";
+import Component from "newui/component/Component";
 import ContextMenu from "newui/component/ContextMenu";
 import { ComponentEvent } from "newui/component/IComponent";
 import Text from "newui/component/Text";
@@ -15,6 +16,7 @@ import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
+import { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
@@ -22,7 +24,8 @@ import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
 import DebugTools, { translation } from "../DebugTools";
 import { DebugToolsTranslation, isSelectedTargetOverlay } from "../IDebugTools";
-import InspectInformationSection, { TabInformation } from "./component/InspectInformationSection";
+import { DebugToolsPanelEvent } from "./component/DebugToolsPanel";
+import InspectInformationSection from "./component/InspectInformationSection";
 import CorpseInformation from "./inspect/Corpse";
 import DoodadInformation from "./inspect/Doodad";
 import EntityInformation from "./inspect/Entity";
@@ -61,6 +64,8 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		saveOpen: false,
 	};
 
+	public static INSTANCE: InspectDialog | undefined;
+
 	private entityButtons: Button[];
 	private infoSections: InspectInformationSection[];
 	private entityInfoSection: EntityInformation;
@@ -82,6 +87,8 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 			.until(ComponentEvent.Remove);
 
 		this.on(DialogEvent.Close, this.onClose);
+
+		InspectDialog.INSTANCE = this;
 	}
 
 	public getSubpanels() {
@@ -90,6 +97,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 				.on("update", this.update)
 				.on(ComponentEvent.WillRemove, infoSection => {
 					if (this.storePanels) {
+						infoSection.triggerSync(DebugToolsPanelEvent.SwitchAway);
 						infoSection.store();
 						return false;
 					}
@@ -104,15 +112,17 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		this.entityButtons = [];
 
 		return this.infoSections.values()
-			.map<[InspectInformationSection, TabInformation[]]>(section => [section, section.getTabs()])
+			.map(section => tuple(section, section.getTabs()))
 			.filter(([, tabs]) => !!tabs.length)
-			.map<SubpanelInformation[]>(([section, tabs]) => tabs
-				.map<SubpanelInformation>(([index, getTabTranslation]) => [
+			.map(([section, tabs]) => tabs
+				.map(([index, getTabTranslation]) => tuple(
 					Text.toString(getTabTranslation),
 					getTabTranslation,
-					component => section.setTab(index).appendTo(component),
-					button => !(section instanceof EntityInformation) ? undefined : this.entityButtons[index] = button,
-				]))
+					(component: Component) => section.setTab(index)
+						.appendTo(component)
+						.triggerSync(DebugToolsPanelEvent.SwitchTo),
+					(button: Button) => !(section instanceof EntityInformation) ? undefined : this.entityButtons[index] = button,
+				)))
 			.flat<SubpanelInformation>(1)
 			.collect(Collectors.toArray);
 	}
@@ -131,6 +141,19 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		if (this.inspectionLock) this.willShowSubpanel = true;
 
 		return this;
+	}
+
+	@Bound
+	public update() {
+		if (this.inspectionLock) this.setInspectionTile(this.inspectionLock);
+
+		for (const section of this.infoSections) {
+			section.resetWillLog();
+			section.update(this.tilePosition!, this.tile!);
+		}
+
+		this.logUpdate();
+		this.schedule(300, 300, this.updateSubpanels);
 	}
 
 	@HookMethod
@@ -165,19 +188,6 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	@HookMethod
 	public onGameEnd(state: PlayerState) {
 		this.close();
-	}
-
-	@Bound
-	private update() {
-		if (this.inspectionLock) this.setInspectionTile(this.inspectionLock);
-
-		for (const section of this.infoSections) {
-			section.resetWillLog();
-			section.update(this.tilePosition!, this.tile!);
-		}
-
-		this.logUpdate();
-		this.schedule(300, 300, this.updateSubpanels);
 	}
 
 	@Bound
@@ -276,6 +286,8 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 
 		this.storePanels = false;
 		for (const infoSection of this.infoSections) infoSection.remove();
+
+		delete InspectDialog.INSTANCE;
 	}
 
 }

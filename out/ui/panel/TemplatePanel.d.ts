@@ -3,23 +3,25 @@ import { BindCatcherApi } from "newui/BindingManager";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
-export default class GeneralPanel extends DebugToolsPanel {
-    private readonly timeRange;
-    private readonly inspectButton;
-    private readonly checkButtonAudio;
-    private readonly dropdownAudio;
-    private readonly dropdownParticle;
-    private readonly checkButtonParticle;
-    private selectionPromise;
+export default class TemplatePanel extends DebugToolsPanel {
+    private readonly dropdownType;
+    private readonly dropdownTemplate;
+    private readonly mirrorVertically;
+    private readonly mirrorHorizontally;
+    private readonly rotate;
+    private readonly degrade;
+    private readonly place;
+    private readonly previewTiles;
+    private selectHeld;
     constructor(gsapi: IGameScreenApi);
     getTranslation(): DebugToolsTranslation;
     canClientMove(api: BindCatcherApi): false | undefined;
-    onGameTickEnd(): void;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
+    private getTemplate;
+    private templateHasTile;
+    private getTemplateOptions;
     private onSwitchTo;
     private onSwitchAway;
-    private inspectLocalPlayer;
-    private inspectTile;
-    private unlockRecipes;
-    private travelAway;
+    private changeTemplateType;
+    private placeTemplate;
 }

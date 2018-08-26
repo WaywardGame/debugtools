@@ -3,18 +3,23 @@ import Component from "newui/component/Component";
 import { ComponentEvent } from "newui/component/IComponent";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import { tuple } from "utilities/Arrays";
 import { translation } from "../DebugTools";
 import { DebugToolsTranslation } from "../IDebugTools";
 import DebugToolsPanel, { DebugToolsPanelEvent } from "./component/DebugToolsPanel";
 import DisplayPanel from "./panel/DisplayPanel";
 import GeneralPanel from "./panel/GeneralPanel";
 import PaintPanel from "./panel/PaintPanel";
+import SelectionPanel from "./panel/SelectionPanel";
+import TemplatePanel from "./panel/TemplatePanel";
 import TabDialog, { SubpanelInformation } from "./TabDialog";
 
 const subpanelClasses: (new (gsapi: IGameScreenApi) => DebugToolsPanel)[] = [
 	GeneralPanel,
 	DisplayPanel,
 	PaintPanel,
+	SelectionPanel,
+	TemplatePanel,
 ];
 
 export default class DebugToolsDialog extends TabDialog implements IHookHost {
@@ -65,7 +70,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 		}
 
 		return this.subpanels
-			.map<SubpanelInformation>(subpanel => [subpanel.getTranslation(), translation(subpanel.getTranslation()), this.onShowSubpanel(subpanel)]);
+			.map(subpanel => tuple(subpanel.getTranslation(), translation(subpanel.getTranslation()), this.onShowSubpanel(subpanel)));
 	}
 
 	private onShowSubpanel(showPanel: DebugToolsPanel) {

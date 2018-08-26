@@ -4,7 +4,7 @@ export default class CancelablePromise<T = void> extends ResolvablePromise<T | u
 	private _cancelled = false;
 	public get cancelled() { return this._cancelled; }
 
-	private cancelCallbacks: Array<() => void> = [];
+	private cancelCallbacks: (() => void)[] = [];
 
 	public constructor(executor?: (resolve: IResolve<T>, reject: IReject) => void) {
 		super(executor);

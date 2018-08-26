@@ -8,11 +8,13 @@ import { IStatMax, Stat } from "entity/IStats";
 import { CreatureType, DamageType, Delay, ItemQuality, ItemType, MoveType, NPCType, PlayerState, SentenceCaseStyle, SkillType, StatusType, TerrainType } from "Enums";
 import itemDescriptions from "item/Items";
 import { Message, MessageType } from "language/IMessages";
+import { ITemplateOptions, spawnTemplate } from "mapgen/MapGenHelpers";
 import Register, { Registry } from "mod/ModRegistry";
 import { TranslationGenerator } from "newui/component/IComponent";
 import Text from "newui/component/Text";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
+import { TileTemplateType } from "tile/ITerrain";
 import terrainDescriptions from "tile/Terrains";
 import Enums from "utilities/enum/Enums";
 import { IVector3 } from "utilities/math/IVector";
@@ -21,6 +23,7 @@ import Vector3 from "utilities/math/Vector3";
 import TileHelpers from "utilities/TileHelpers";
 import DebugTools, { translation } from "./DebugTools";
 import { DebugToolsTranslation } from "./IDebugTools";
+import InspectDialog from "./ui/InspectDialog";
 import { IPaintData } from "./ui/panel/PaintPanel";
 import { getTilePosition } from "./util/TilePosition";
 
@@ -56,66 +59,58 @@ export default class Actions {
 
 	public constructor(private readonly mod: DebugTools) { }
 
-	/*
-	@Register.action<any>(description("Select"))
-	public select(player: IPlayer, argument: IActionArgument<any>, result: IActionResult) {
-		const selectAction = argument.object as {
-			type: string;
-			id: number;
-		};
-
-		const { x, y, z } = player.getFacingPoint();
-
-		switch (selectAction.type) {
-			case "change-tile":
-				game.changeTile({ type: selectAction.id }, x, y, z, false);
-				break;
-
-			case "spawn-creature":
-				creatureManager.spawn(selectAction.id, x, y, z, true);
-				break;
-
-			case "spawn-npc":
-				npcManager.spawn(selectAction.id, x, y, z);
-				break;
-
-			case "item-get":
-				player.createItemInInventory(selectAction.id);
-				player.updateTablesAndWeight();
-				break;
-
-			case "place-env-item":
-				// Remove if Doodad already there
-				const tile = game.getTile(x, y, z);
-				if (tile.doodad) {
-					doodadManager.remove(tile.doodad);
-				}
-
-				doodadManager.create(selectAction.id, x, y, z);
-				break;
-
-			case "place-tile-event":
-				tileEventManager.create(selectAction.id, x, y, z);
-				break;
-
-			case "place-corpse":
-				corpseManager.create(selectAction.id, x, y, z);
-				break;
-
-			case "spawn-template":
-				spawnTemplate(selectAction.id, x, y, z);
-				break;
-		}
-
-		player.updateStatsAndAttributes();
-
-		result.updateView = true;
-	}
-	*/
-
 	////////////////////////////////////
 	// New Actions
 	//
+
+	@Register.action(description("Remove Item"))
+	public removeItem(executor: IPlayer, { item }: IActionArgument, result: IActionResult) {
+		const container = item!.containedWithin;
+		itemManager.remove(item!);
+
+		if (container) {
+			if ("data" in container) {
+				result.updateView = true; // we removed the item from a tile
+
+			} else if ("entityType" in container) {
+				const entity = container as IBaseEntity;
+				if (entity.entityType === EntityType.Player) {
+					(entity as IPlayer).updateTablesAndWeight();
+				}
+			}
+		}
+
+		if (InspectDialog.INSTANCE) InspectDialog.INSTANCE.update();
+	}
+
+	@Register.action<[TileTemplateType, ITemplateOptions]>(description("Place Template"))
+	public placeTemplate(executor: IPlayer, { point, object: [type, options] }: IActionArgument<[TileTemplateType, ITemplateOptions]>, result: IActionResult) {
+		spawnTemplate(type, point!.x, point!.y, executor.z, options);
+
+		result.updateView = true;
+	}
+
+	@Register.action<[DebugToolsTranslation, [EntityType, number][]]>(description("Execute on Selection"))
+	public executeOnSelection(executor: IPlayer, { object: [action, selection] }: IActionArgument<[DebugToolsTranslation, [EntityType, number][]]>, result: IActionResult) {
+		for (const [type, id] of selection) {
+			const executeArgument: IActionArgument = {};
+
+			switch (type) {
+				case EntityType.Creature:
+					executeArgument.creature = game.creatures[id]!;
+					break;
+				case EntityType.NPC:
+					executeArgument.npc = game.npcs[id]!;
+					break;
+			}
+
+			switch (action) {
+				case DebugToolsTranslation.ActionRemove:
+					this.remove(executor, executeArgument, result);
+					break;
+			}
+		}
+	}
 
 	@Register.action(description("Teleport Entity"))
 	public teleport(executor: IPlayer, { entity, position }: IActionArgument, result: IActionResult) {
@@ -154,32 +149,6 @@ export default class Actions {
 		}
 
 		game.updateView(true);
-	}
-
-	@Register.action(description("Remove All Creatures"))
-	public removeAllCreatures(player: IPlayer, argument: IActionArgument, result: IActionResult) {
-		for (let i = 0; i < game.creatures.length; i++) {
-			if (game.creatures[i] !== undefined) {
-				creatureManager.remove(game.creatures[i]!);
-			}
-		}
-
-		game.creatures = [];
-
-		game.updateView(false);
-	}
-
-	@Register.action(description("Remove All NPCs"))
-	public removeAllNPCs(player: IPlayer, argument: IActionArgument, result: IActionResult) {
-		for (let i = 0; i < game.npcs.length; i++) {
-			if (game.npcs[i] !== undefined) {
-				npcManager.remove(game.npcs[i]!);
-			}
-		}
-
-		game.npcs = [];
-
-		game.updateView(false);
 	}
 
 	@Register.action(description("Kill"))
@@ -323,12 +292,20 @@ export default class Actions {
 	}
 
 	@Register.action<[ItemType, ItemQuality]>(description("Add Item to Inventory"))
-	public addItemToInventory(executor: IPlayer, { human, object: [item, quality] }: IActionArgument<[ItemType, ItemQuality]>, result: IActionResult) {
-		human!.createItemInInventory(item, quality);
+	public addItemToInventory(executor: IPlayer, { human, point, object: [item, quality] }: IActionArgument<[ItemType, ItemQuality]>, result: IActionResult) {
+		if (human) {
+			human!.createItemInInventory(item, quality);
 
-		if (human!.entityType === EntityType.Player) {
-			(human as IPlayer).updateTablesAndWeight();
+			if (human!.entityType === EntityType.Player) {
+				(human as IPlayer).updateTablesAndWeight();
+			}
+
+		} else if (point) {
+			itemManager.create(item, itemManager.getTileContainer(point.x, point.y, executor.z), quality);
+			result.updateView = true;
 		}
+
+		if (InspectDialog.INSTANCE) InspectDialog.INSTANCE.update();
 	}
 
 	// tslint:disable cyclomatic-complexity
@@ -466,7 +443,7 @@ export default class Actions {
 	// Helpers
 	//
 
-	private removeInternal([type, id]: [RemovalType, number], creature?: ICreature, npc?: INPC) {
+	private removeInternal([type, id]: [RemovalType, number], creature?: ICreature | false, npc?: INPC | false) {
 		if (creature) return creatureManager.remove(creature);
 		if (npc) return npcManager.remove(npc);
 		if (type === RemovalType.Corpse) return corpseManager.remove(game.corpses[id]!);

@@ -1,9 +1,13 @@
 import { IActionArgument, IActionResult } from "action/IAction";
+import { EntityType } from "entity/IEntity";
 import { Stat } from "entity/IStats";
 import { ItemQuality, ItemType, SkillType, TerrainType } from "Enums";
 import { Message } from "language/IMessages";
+import { ITemplateOptions } from "mapgen/MapGenHelpers";
 import IPlayer from "player/IPlayer";
+import { TileTemplateType } from "tile/ITerrain";
 import DebugTools from "./DebugTools";
+import { DebugToolsTranslation } from "./IDebugTools";
 import { IPaintData } from "./ui/panel/PaintPanel";
 export declare enum RemovalType {
     Corpse = 0
@@ -16,9 +20,10 @@ export default class Actions {
     };
     messageFailureTileBlocked: Message;
     constructor(mod: DebugTools);
+    removeItem(executor: IPlayer, { item }: IActionArgument, result: IActionResult): void;
+    placeTemplate(executor: IPlayer, { point, object: [type, options] }: IActionArgument<[TileTemplateType, ITemplateOptions]>, result: IActionResult): void;
+    executeOnSelection(executor: IPlayer, { object: [action, selection] }: IActionArgument<[DebugToolsTranslation, [EntityType, number][]]>, result: IActionResult): void;
     teleport(executor: IPlayer, { entity, position }: IActionArgument, result: IActionResult): void;
-    removeAllCreatures(player: IPlayer, argument: IActionArgument, result: IActionResult): void;
-    removeAllNPCs(player: IPlayer, argument: IActionArgument, result: IActionResult): void;
     kill(executor: IPlayer, { entity }: IActionArgument, result: IActionResult): void;
     clone(executor: IPlayer, { entity, position }: IActionArgument, result: IActionResult): void;
     setTime(player: IPlayer, { object: time }: IActionArgument<number>, result: IActionResult): void;
@@ -30,7 +35,7 @@ export default class Actions {
     changeTerrain(player: IPlayer, { object: terrain, position }: IActionArgument<TerrainType>, result: IActionResult): void;
     toggleTilled(player: IPlayer, { position, object: tilled }: IActionArgument<boolean>, result: IActionResult): void;
     updateStatsAndAttributes(player: IPlayer, argument: IActionArgument, result: IActionResult): void;
-    addItemToInventory(executor: IPlayer, { human, object: [item, quality] }: IActionArgument<[ItemType, ItemQuality]>, result: IActionResult): void;
+    addItemToInventory(executor: IPlayer, { human, point, object: [item, quality] }: IActionArgument<[ItemType, ItemQuality]>, result: IActionResult): void;
     paint(player: IPlayer, { object: [tiles, data] }: IActionArgument<[number[], IPaintData]>, result: IActionResult): void;
     unlockRecipes(player: IPlayer, argument: IActionArgument, result: IActionResult): void;
     toggleInvulnerable(executor: IPlayer, { player, object: invulnerable }: IActionArgument<boolean>, result: IActionResult): void;

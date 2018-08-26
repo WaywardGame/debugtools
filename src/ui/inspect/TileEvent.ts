@@ -3,6 +3,7 @@ import { UiApi } from "newui/INewUi";
 import { ITile } from "tile/ITerrain";
 import { ITileEvent } from "tile/ITileEvent";
 import tileEventDescriptions from "tile/TileEvents";
+import { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
 import { IVector2 } from "utilities/math/IVector";
 import DebugTools, { translation } from "../../DebugTools";
@@ -21,8 +22,8 @@ export default class TileEventInformation extends InspectInformationSection {
 
 	public getTabs(): TabInformation[] {
 		return this.tileEvents.entries()
-			.map<TabInformation>(([i, tileEvent]) => [i, () => translation(DebugToolsTranslation.TileEventName)
-				.get(game.getNameFromDescription(tileEventDescriptions[tileEvent.type]!, SentenceCaseStyle.Title, false))])
+			.map(([i, tileEvent]) => tuple(i, () => translation(DebugToolsTranslation.TileEventName)
+				.get(game.getNameFromDescription(tileEventDescriptions[tileEvent.type]!, SentenceCaseStyle.Title, false))))
 			.collect(Collectors.toArray);
 	}
 
@@ -32,7 +33,7 @@ export default class TileEventInformation extends InspectInformationSection {
 	}
 
 	public update(position: IVector2, tile: ITile) {
-		const tileEvents = tile.events || [];
+		const tileEvents = [...tile.events || []];
 
 		if (areArraysIdentical(tileEvents, this.tileEvents)) return;
 		this.tileEvents = tileEvents;

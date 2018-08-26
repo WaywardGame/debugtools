@@ -1,11 +1,21 @@
-import { ActionType } from "Enums";
+import { ActionType, Bindable, SfxType } from "Enums";
+import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
+import { HookPriority } from "mod/IHookManager";
 import { BindCatcherApi } from "newui/BindingManager";
+import { BlockRow } from "newui/component/BlockRow";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
+import Dropdown from "newui/component/Dropdown";
 import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
+import Text from "newui/component/Text";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import { ParticleType } from "renderer/particle/IParticle";
+import { particles } from "renderer/particle/Particles";
+import { tuple } from "utilities/Arrays";
+import Collectors from "utilities/Collectors";
+import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
@@ -15,8 +25,12 @@ import CancelablePromise from "../../util/CancelablePromise";
 import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 
 export default class GeneralPanel extends DebugToolsPanel {
-	private timeRange: RangeRow;
-	private inspectButton: CheckButton;
+	private readonly timeRange: RangeRow;
+	private readonly inspectButton: CheckButton;
+	private readonly checkButtonAudio: CheckButton;
+	private readonly dropdownAudio: Dropdown<SfxType>;
+	private readonly dropdownParticle: Dropdown<ParticleType>;
+	private readonly checkButtonParticle: CheckButton;
 
 	private selectionPromise: CancelablePromise<Vector2> | undefined;
 
@@ -72,18 +86,40 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.appendTo(this);
 
 		new Button(this.api)
-			.setText(translation(DebugToolsTranslation.ButtonRemoveAllCreatures))
-			.on(ButtonEvent.Activate, this.removeAllCreatures)
-			.appendTo(this);
-
-		new Button(this.api)
-			.setText(translation(DebugToolsTranslation.ButtonRemoveAllNPCs))
-			.on(ButtonEvent.Activate, this.removeAllNPCs)
-			.appendTo(this);
-
-		new Button(this.api)
 			.setText(translation(DebugToolsTranslation.ButtonTravelAway))
 			.on(ButtonEvent.Activate, this.travelAway)
+			.appendTo(this);
+
+		new BlockRow(this.api)
+			.classes.add("debug-tools-dialog-checkbutton-dropdown-row")
+			.append(this.checkButtonAudio = new CheckButton(this.api)
+				.setText(translation(DebugToolsTranslation.ButtonAudio)))
+			.append(this.dropdownAudio = new Dropdown<SfxType>(this.api)
+				.setRefreshMethod(() => ({
+					defaultOption: SfxType.Click,
+					options: Enums.values(SfxType)
+						.map(sfx => tuple(sfx, Translation.generator(SfxType[sfx])))
+						.collect(Collectors.toArray)
+						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+						.values()
+						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
+				})))
+			.appendTo(this);
+
+		new BlockRow(this.api)
+			.classes.add("debug-tools-dialog-checkbutton-dropdown-row")
+			.append(this.checkButtonParticle = new CheckButton(this.api)
+				.setText(translation(DebugToolsTranslation.ButtonParticle)))
+			.append(this.dropdownParticle = new Dropdown<ParticleType>(this.api)
+				.setRefreshMethod(() => ({
+					defaultOption: ParticleType.Blood,
+					options: Enums.values(ParticleType)
+						.map(particle => tuple(particle, Translation.generator(ParticleType[particle])))
+						.collect(Collectors.toArray)
+						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+						.values()
+						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
+				})))
 			.appendTo(this);
 
 		this.on(DebugToolsPanelEvent.SwitchTo, this.onSwitchTo);
@@ -96,7 +132,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 	@HookMethod
 	public canClientMove(api: BindCatcherApi): false | undefined {
-		if (this.selectionPromise) return false;
+		if (this.selectionPromise || this.checkButtonAudio.checked || this.checkButtonParticle.checked) return false;
 
 		return undefined;
 	}
@@ -106,6 +142,25 @@ export default class GeneralPanel extends DebugToolsPanel {
 		if (this.timeRange) {
 			this.timeRange.refresh();
 		}
+	}
+
+	@HookMethod(HookPriority.High)
+	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
+		if (api.wasPressed(DebugTools.INSTANCE.selector.bindableSelectLocation) && !bindPressed) {
+			if (this.checkButtonAudio.checked) {
+				const position = renderer.screenToTile(api.mouseX, api.mouseY);
+				audio.queueEffect(this.dropdownAudio.selection, position.x, position.y, localPlayer.z);
+				bindPressed = DebugTools.INSTANCE.selector.bindableSelectLocation;
+			}
+
+			if (this.checkButtonParticle.checked) {
+				const position = renderer.screenToTile(api.mouseX, api.mouseY);
+				game.particle.create(position.x, position.y, localPlayer.z, particles[this.dropdownParticle.selection]);
+				bindPressed = DebugTools.INSTANCE.selector.bindableSelectLocation;
+			}
+		}
+
+		return bindPressed;
 	}
 
 	@Bound
@@ -149,16 +204,6 @@ export default class GeneralPanel extends DebugToolsPanel {
 		if (!confirm) return;
 
 		Actions.get("unlockRecipes").execute();
-	}
-
-	@Bound
-	private removeAllCreatures() {
-		Actions.get("removeAllCreatures").execute();
-	}
-
-	@Bound
-	private removeAllNPCs() {
-		Actions.get("removeAllNPCs").execute();
 	}
 
 	/**

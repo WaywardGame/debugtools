@@ -3,11 +3,12 @@ import Translation from "language/Translation";
 import { bindingManager } from "newui/BindingManager";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
-import ContextMenu, { ContextMenuOptionKeyValuePair } from "newui/component/ContextMenu";
+import ContextMenu from "newui/component/ContextMenu";
 import Text from "newui/component/Text";
 import { UiApi } from "newui/INewUi";
 import { ITile } from "tile/ITerrain";
 import terrainDescriptions from "tile/Terrains";
+import { tuple } from "utilities/Arrays";
 import Collectors, { PassStrategy } from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
 import { IVector2 } from "utilities/math/IVector";
@@ -89,10 +90,10 @@ export default class TerrainInformation extends InspectInformationSection {
 
 		// create the options
 		Enums.values(TerrainType)
-			.map<ContextMenuOptionKeyValuePair>(terrain => [TerrainType[terrain], {
-				translation: Translation.ofObjectName(terrainDescriptions[terrain]!, SentenceCaseStyle.Title, false),
+			.map(terrain => tuple(TerrainType[terrain], {
+				translation: Translation.ofDescription(terrainDescriptions[terrain]!, SentenceCaseStyle.Title, false),
 				onActivate: this.changeTerrain(terrain),
-			}])
+			}))
 			.collect(Collectors.toArray)
 			.sort(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))
 			.values()

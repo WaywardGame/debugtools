@@ -27,6 +27,8 @@ export enum DebugToolsTranslation {
 	ButtonRemoveAllNPCs,
 	ButtonTravelAway,
 	InterruptChoiceTravelAway,
+	ButtonAudio,
+	ButtonParticle,
 
 	// Display
 	PanelDisplay,
@@ -58,6 +60,34 @@ export enum DebugToolsTranslation {
 	ButtonReplaceExisting,
 	LabelTileEvent,
 	ResetPaintSection,
+
+	// Selection
+	PanelSelection,
+
+	SelectionMethod,
+	SelectionFilter,
+	SelectionAction,
+	SelectionMatches,
+	MethodAll,
+	MethodNearest,
+	MethodRandom,
+	FilterCreatures,
+	FilterNPCs,
+	ActionRemove,
+	ButtonExecute,
+
+	// Templates
+	PanelTemplates,
+
+	LabelTemplateType,
+	LabelTemplate,
+	ButtonMirrorVertically,
+	ButtonMirrorHorizontally,
+	ButtonPlace,
+	LabelRotate,
+	RangeRotateDegrees,
+	LabelDegrade,
+	RangeDegradeAmount,
 
 	////////////////////////////////////
 	// Inspect Dialog
@@ -98,6 +128,7 @@ export enum DebugToolsTranslation {
 	UnlockInspection,
 	LockInspection,
 	TileEventName,
+	ItemName,
 
 	////////////////////////////////////
 	// Misc

@@ -36,6 +36,8 @@
 			"buttonRemoveAllNPCs": "Remove All NPCs",
 			"buttonTravelAway": "Travel Away",
 			"interruptChoiceTravelAway": "Where would you like to travel to?",
+			"buttonAudio": "Play Sound",
+			"buttonParticle": "Spawn Particle",
 			
 			
 			"panelDisplay": "Display",
@@ -54,19 +56,47 @@
 			"buttonPaint": "Paint",
 			"paintNoChange": "No Change",
 			"paintRemove": "Remove",
-			"labelTerrain": "{#--text-color-faded:Terrain:}",
-			"labelCreature": "{#--text-color-faded:Creature:}",
+			"labelTerrain": "{#--text-color-faded:Terrain}",
+			"labelCreature": "{#--text-color-faded:Creature}",
 			"buttonPaintClear": "Clear",
 			"tooltipPaintClear": "{#--text-color-faded:({Bindable.ModDebugToolsClearPaint})}",
 			"buttonPaintComplete": "Complete",
 			"tooltipPaintComplete": "{#--text-color-faded:({Bindable.ModDebugToolsCompletePaint})}",
 			"buttonToggleAberrant": "Aberrant",
-			"labelNPC": "{#--text-color-faded:NPC:}",
-			"labelDoodad": "{#--text-color-faded:Doodad:}",
-			"labelCorpse": "{#--text-color-faded:Corpse:}",
-			"labelTileEvent": "{#--text-color-faded:Tile Event:}",
+			"labelNPC": "{#--text-color-faded:NPC}",
+			"labelDoodad": "{#--text-color-faded:Doodad}",
+			"labelCorpse": "{#--text-color-faded:Corpse}",
+			"labelTileEvent": "{#--text-color-faded:Tile Event}",
 			"buttonReplaceExisting": "Replace Existing",
 			"resetPaintSection": "Reset Section",
+			
+			
+			"panelSelection": "Selection",
+			
+			"selectionMethod": "{#--text-color-faded:Method}",
+			"selectionFilter": "{#--text-color-faded:Filter}",
+			"selectionAction": "{#--text-color-faded:Action}",
+			"selectionMatches": "Matches",
+			"methodAll": "All",
+			"methodNearest": "Nearest",
+			"methodRandom": "Random",
+			"filterCreatures": "Creatures",
+			"filterNPCs": "NPCs",
+			"actionRemove": "Remove",
+			"buttonExecute": "Execute",
+			
+			
+			"panelTemplates": "Templates",
+			
+			"labelTemplateType": "{#--text-color-faded:Type}",
+			"labelTemplate": "{#--text-color-faded:Template}",
+			"buttonMirrorVertically": "Mirror Vertically",
+			"buttonMirrorHorizontally": "Mirror Horizontally",
+			"buttonPlace": "Place",
+			"labelRotate": "Rotate",
+			"rangeRotateDegrees": "{0}°",
+			"labelDegrade": "Degradation",
+			"rangeDegradeAmount": "{0}%",
 			
 			
 			"dialogTitleInspect": "Inspect",
@@ -85,7 +115,7 @@
 			"buttonTameCreature": "Tamed",
 			"labelWeightBonus": "Weight Bonus",
 			"buttonToggleTilled": "Tilled",
-			"labelItem": "Item",
+			"labelItem": "{#--text-color-faded:Item}",
 			"labelQuality": "Quality",
 			"labelBenignity": "Benignity",
 			"labelMalignity": "Malignity",
@@ -96,7 +126,7 @@
 			"optionTeleportToPlayer": "To Player",
 			"buttonToggleInvulnerable": "Invulnerable",
 			"buttonToggleNoClip": "Noclip",
-			"labelSkill": "Skill",
+			"labelSkill": "{#--text-color-faded:Skill}",
 			"none": "None",
 			"addToInventory": "Add to Inventory",
 			"doodadName": "{#--text-color-faded:Doodad:} {0}",
@@ -104,6 +134,7 @@
 			"unlockInspection": "Unlock Inspection",
 			"lockInspection": "Lock Inspection",
 			"tileEventName": "{#--text-color-faded:Tile Event:} {0}",
+			"itemName": "{#--text-color-faded:{0}}",
 			
 			
 			"actionResurrect": "resurrect {0}",

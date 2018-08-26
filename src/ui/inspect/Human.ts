@@ -4,77 +4,41 @@ import IBaseEntity, { EntityEvent } from "entity/IBaseEntity";
 import IBaseHumanEntity from "entity/IBaseHumanEntity";
 import { EntityType } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
-import { ItemQuality, ItemType, SentenceCaseStyle } from "Enums";
-import itemDescriptions from "item/Items";
-import Translation from "language/Translation";
-import Button, { ButtonEvent } from "newui/component/Button";
+import { ItemQuality, ItemType } from "Enums";
 import Component from "newui/component/Component";
-import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdown";
-import { ComponentEvent, TranslationGenerator } from "newui/component/IComponent";
-import { LabelledRow } from "newui/component/LabelledRow";
+import { ComponentEvent } from "newui/component/IComponent";
 import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
-import Text from "newui/component/Text";
 import { UiApi } from "newui/INewUi";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
-import Collectors from "utilities/Collectors";
-import Enums from "utilities/enum/Enums";
 import Objects, { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
 import { translation } from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
+import AddItemToInventory, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
+import { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
 export default class HumanInformation extends InspectEntityInformationSubsection {
-	private readonly dropdownItemQuality: Dropdown<ItemQuality>;
-	private readonly wrapperAddItem: Component;
+	private readonly addItemContainer: Component;
+	private readonly reputationSliders: { [key in Stat.Malignity | Stat.Benignity]?: RangeRow } = {};
 
-	private item: ItemType | undefined;
 	private human: IBaseHumanEntity | undefined;
-	private reputationSliders: { [key in Stat.Malignity | Stat.Benignity]?: RangeRow } = {};
 
 	public constructor(api: UiApi) {
 		super(api);
 
-		new LabelledRow(api)
-			.classes.add("dropdown-label")
-			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelItem)))
-			.append(new Dropdown<ItemType>(api)
-				.setRefreshMethod(() => ({
-					defaultOption: ItemType.None,
-					options: Enums.values(ItemType)
-						.map<[ItemType, TranslationGenerator]>(item => [item, Translation.ofObjectName(itemDescriptions[item]!, SentenceCaseStyle.Title, false)])
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
-						.map<IDropdownOption<ItemType>>(([id, t]) => [id, option => option.setText(t)]),
-				}))
-				.on(DropdownEvent.Selection, this.changeItem))
-			.appendTo(this);
-
-		this.wrapperAddItem = new Component(api)
-			.classes.add("debug-tools-inspect-human-wrapper-add-item")
-			.hide()
-			.append(new LabelledRow(api)
-				.classes.add("dropdown-label")
-				.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelQuality)))
-				.append(this.dropdownItemQuality = new Dropdown<ItemQuality>(api)
-					.setRefreshMethod(() => ({
-						defaultOption: ItemQuality.Random,
-						options: Enums.values(ItemQuality)
-							.map<[ItemQuality, TranslationGenerator]>(quality => [quality, Translation.generator(ItemQuality[quality])])
-							.collect(Collectors.toArray)
-							.values()
-							.map<IDropdownOption<ItemQuality>>(([id, t]) => [id, option => option.setText(t)]),
-					}))))
-			.append(new Button(api)
-				.setText(translation(DebugToolsTranslation.AddToInventory))
-				.on(ButtonEvent.Activate, this.addItem))
-			.appendTo(this);
+		this.addItemContainer = new Component(api).appendTo(this);
 
 		this.addReputationSlider(DebugToolsTranslation.LabelMalignity, Stat.Malignity);
 		this.addReputationSlider(DebugToolsTranslation.LabelBenignity, Stat.Benignity);
+
+		this.on(DebugToolsPanelEvent.SwitchTo, () => {
+			const addItemToInventory = AddItemToInventory.get(this.api).appendTo(this.addItemContainer);
+			this.until(DebugToolsPanelEvent.SwitchAway)
+				.bind(addItemToInventory, AddItemToInventoryEvent.Execute, this.addItem);
+		});
 	}
 
 	public getImmutableStats() {
@@ -126,15 +90,9 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 	}
 
 	@Bound
-	private changeItem(_: any, item: ItemType) {
-		this.item = item;
-		this.wrapperAddItem.toggle(item !== ItemType.None);
-	}
-
-	@Bound
-	private addItem() {
+	private addItem(_: any, type: ItemType, quality: ItemQuality) {
 		Actions.get("addItemToInventory")
-			.execute({ human: this.human, object: [this.item!, this.dropdownItemQuality.selection] });
+			.execute({ human: this.human, object: [type, quality] });
 	}
 
 	@Bound

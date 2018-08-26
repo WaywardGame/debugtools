@@ -4,9 +4,10 @@ import { SkillType } from "Enums";
 import { UiTranslation } from "language/ILanguage";
 import Translation from "language/Translation";
 import { BlockRow } from "newui/component/BlockRow";
+import Button from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
 import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdown";
-import { ComponentEvent, TranslationGenerator } from "newui/component/IComponent";
+import { ComponentEvent } from "newui/component/IComponent";
 import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
@@ -14,6 +15,7 @@ import Text from "newui/component/Text";
 import { UiApi } from "newui/INewUi";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
+import { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Objects";
@@ -68,18 +70,18 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 					options: ([
 						["none", option => option.setText(translation(DebugToolsTranslation.None))],
 					] as IDropdownOption[]).values().include(Enums.values(SkillType)
-						.map<[string, TranslationGenerator]>(skill => [SkillType[skill], Translation.generator(SkillType[skill])])
+						.map(skill => tuple(SkillType[skill], Translation.generator(SkillType[skill])))
 						.collect(Collectors.toArray)
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.values()
-						.map<IDropdownOption>(([id, t]) => [id, option => option.setText(t)])),
+						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
 				}))
 				.on(DropdownEvent.Selection, this.changeSkill))
 			.appendTo(this);
 
 		this.skillRangeRow = new RangeRow(api)
 			.hide()
-			.setLabel(label => label.setText(() => [{ content: this.skill === undefined ? "" : SkillType[this.skill] }]))
+			.setLabel(label => label.setText(Translation.generator(() => this.skill === undefined ? "" : SkillType[this.skill])))
 			.editRange(range => range
 				.setMin(0)
 				.setMax(100)

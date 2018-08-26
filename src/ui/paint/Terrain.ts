@@ -1,13 +1,14 @@
 import { SentenceCaseStyle, TerrainType } from "Enums";
 import Translation from "language/Translation";
+import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
 import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdown";
-import { TranslationGenerator } from "newui/component/IComponent";
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import { UiApi } from "newui/INewUi";
 import { terrainDescriptions } from "tile/Terrains";
+import { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Objects";
@@ -32,11 +33,11 @@ export default class TerrainPaint extends Component implements IPaintSection {
 					options: ([
 						["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
 					] as IDropdownOption<"nochange" | keyof typeof TerrainType>[]).values().include(Enums.values(TerrainType)
-						.map<[keyof typeof TerrainType, TranslationGenerator]>(terrain => [TerrainType[terrain] as keyof typeof TerrainType, Translation.ofObjectName(terrainDescriptions[terrain]!, SentenceCaseStyle.Title, false)])
+						.map(terrain => tuple(TerrainType[terrain] as keyof typeof TerrainType, Translation.ofDescription(terrainDescriptions[terrain]!, SentenceCaseStyle.Title, false)))
 						.collect(Collectors.toArray)
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.values()
-						.map<IDropdownOption<"nochange" | keyof typeof TerrainType>>(([id, t]) => [id, option => option.setText(t)])),
+						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
 				}))
 				.on(DropdownEvent.Selection, this.changeTerrain))
 			.appendTo(this);
