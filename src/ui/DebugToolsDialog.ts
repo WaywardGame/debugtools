@@ -25,7 +25,7 @@ const subpanelClasses: (new (gsapi: IGameScreenApi) => DebugToolsPanel)[] = [
 export default class DebugToolsDialog extends TabDialog implements IHookHost {
 	public static description: IDialogDescription = {
 		minSize: {
-			x: 25,
+			x: 20,
 			y: 25,
 		},
 		size: {

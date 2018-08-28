@@ -18,7 +18,6 @@ export default class GeneralPanel extends DebugToolsPanel {
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     private onSwitchTo;
     private onSwitchAway;
-    private inspectLocalPlayer;
     private inspectTile;
     private unlockRecipes;
     private travelAway;

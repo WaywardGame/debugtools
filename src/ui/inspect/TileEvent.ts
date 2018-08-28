@@ -1,4 +1,5 @@
 import { SentenceCaseStyle } from "Enums";
+import Button, { ButtonEvent } from "newui/component/Button";
 import { UiApi } from "newui/INewUi";
 import { ITile } from "tile/ITerrain";
 import { ITileEvent } from "tile/ITileEvent";
@@ -6,6 +7,8 @@ import tileEventDescriptions from "tile/TileEvents";
 import { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
 import { IVector2 } from "utilities/math/IVector";
+import { Bound } from "utilities/Objects";
+import Actions, { RemovalType } from "../../Actions";
 import DebugTools, { translation } from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
@@ -18,6 +21,11 @@ export default class TileEventInformation extends InspectInformationSection {
 
 	public constructor(api: UiApi) {
 		super(api);
+
+		new Button(api)
+			.setText(translation(DebugToolsTranslation.ActionRemove))
+			.on(ButtonEvent.Activate, this.removeTileEvent)
+			.appendTo(this);
 	}
 
 	public getTabs(): TabInformation[] {
@@ -39,13 +47,17 @@ export default class TileEventInformation extends InspectInformationSection {
 		this.tileEvents = tileEvents;
 
 		this.setShouldLog();
-
-		return this;
 	}
 
 	public logUpdate() {
 		for (const tileEvent of this.tileEvents) {
 			DebugTools.LOG.info("Tile Event:", tileEvent);
 		}
+	}
+
+	@Bound
+	private removeTileEvent() {
+		Actions.get("remove")
+			.execute({ object: [RemovalType.TileEvent, this.tileEvent!.id] });
 	}
 }

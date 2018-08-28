@@ -2,10 +2,10 @@ import { Bindable } from "Enums";
 import { BindCatcherApi } from "newui/BindingManager";
 import Vector2 from "utilities/math/Vector2";
 export default class UnlockedCameraMovementHandler {
-    bindMoveCameraUp: Bindable;
-    bindMoveCameraLeft: Bindable;
-    bindMoveCameraDown: Bindable;
-    bindMoveCameraRight: Bindable;
+    readonly bindMoveCameraUp: Bindable;
+    readonly bindMoveCameraLeft: Bindable;
+    readonly bindMoveCameraDown: Bindable;
+    readonly bindMoveCameraRight: Bindable;
     velocity: Vector2;
     position: Vector2;
     transition?: Vector2;

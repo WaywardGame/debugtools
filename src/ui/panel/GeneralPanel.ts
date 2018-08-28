@@ -19,7 +19,7 @@ import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
-import DebugTools, { translation } from "../../DebugTools";
+import DebugTools, { DebugToolsEvent, translation } from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import CancelablePromise from "../../util/CancelablePromise";
 import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
@@ -77,7 +77,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 		new Button(this.api)
 			.setText(translation(DebugToolsTranslation.ButtonInspectLocalPlayer))
-			.on(ButtonEvent.Activate, this.inspectLocalPlayer)
+			.on(ButtonEvent.Activate, () => DebugTools.INSTANCE.inspect(localPlayer))
 			.appendTo(this);
 
 		new Button(this.api)
@@ -169,6 +169,11 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 		hookManager.register(this, "DebugToolsDialog:GeneralPanel")
 			.until(DebugToolsPanelEvent.SwitchAway);
+
+		this.until(DebugToolsPanelEvent.SwitchAway)
+			.bind(DebugTools.INSTANCE, DebugToolsEvent.Inspect, () => {
+				if (this.selectionPromise) this.selectionPromise.cancel();
+			});
 	}
 
 	@Bound
@@ -177,12 +182,6 @@ export default class GeneralPanel extends DebugToolsPanel {
 			this.selectionPromise.cancel();
 			delete this.selectionPromise;
 		}
-	}
-
-	@Bound
-	private inspectLocalPlayer() {
-		if (this.selectionPromise) this.selectionPromise.cancel();
-		DebugTools.INSTANCE.inspect(localPlayer);
 	}
 
 	@Bound

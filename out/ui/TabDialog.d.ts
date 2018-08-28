@@ -18,4 +18,5 @@ export default abstract class TabDialog extends Dialog {
     private showFirstSubpanel;
     private switchSubpanel;
     private setActiveButton;
+    private onResize;
 }

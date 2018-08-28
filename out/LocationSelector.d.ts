@@ -4,8 +4,8 @@ import { BindCatcherApi } from "newui/BindingManager";
 import Vector2 from "utilities/math/Vector2";
 import CancelablePromise from "./util/CancelablePromise";
 export default class SelectLocation implements IHookHost {
-    bindableSelectLocation: Bindable;
-    bindableCancelSelectLocation: Bindable;
+    readonly bindableSelectLocation: Bindable;
+    readonly bindableCancelSelectLocation: Bindable;
     private _selecting;
     readonly selecting: boolean;
     private hoverTile?;

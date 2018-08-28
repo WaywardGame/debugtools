@@ -1,4 +1,5 @@
 import { ICreature } from "creature/ICreature";
+import { EntityType } from "entity/IEntity";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
 import Dropdown, { DropdownEvent } from "newui/component/Dropdown";
@@ -6,6 +7,7 @@ import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeRow } from "newui/component/RangeRow";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
+import { ITileEvent } from "tile/ITileEvent";
 import Arrays, { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
 import { pipe } from "utilities/IterableIterator";
@@ -16,6 +18,21 @@ import { translation } from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 
+export enum SelectionType {
+	Creature,
+	NPC,
+	TileEvent,
+}
+
+const entityTypeToSelectionTypeMap = {
+	[EntityType.Creature]: SelectionType.Creature,
+	[EntityType.NPC]: SelectionType.NPC,
+};
+
+function getSelectionType(target: ICreature | INPC | ITileEvent) {
+	return "entityType" in target ? entityTypeToSelectionTypeMap[target.entityType] : SelectionType.TileEvent;
+}
+
 export default class SelectionPanel extends DebugToolsPanel {
 	private readonly dropdownMethod: Dropdown<string | number>;
 	private readonly rangeQuantity: RangeRow;
@@ -23,6 +40,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 	private creatures = false;
 	private npcs = false;
+	private tileEvents = false;
 	private action: DebugToolsTranslation;
 	private method: DebugToolsTranslation;
 
@@ -55,12 +73,17 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 		new CheckButton(this.api)
 			.setText(translation(DebugToolsTranslation.FilterCreatures))
-			.on<[boolean]>(CheckButtonEvent.Change, (_, creatures) => { this.creatures = creatures; })
+			.on<[boolean]>(CheckButtonEvent.Change, (_, enabled) => { this.creatures = enabled; })
 			.appendTo(this);
 
 		new CheckButton(this.api)
 			.setText(translation(DebugToolsTranslation.FilterNPCs))
-			.on<[boolean]>(CheckButtonEvent.Change, (_, npcs) => { this.npcs = npcs; })
+			.on<[boolean]>(CheckButtonEvent.Change, (_, enabled) => { this.npcs = enabled; })
+			.appendTo(this);
+
+		new CheckButton(this.api)
+			.setText(translation(DebugToolsTranslation.FilterTileEvents))
+			.on<[boolean]>(CheckButtonEvent.Change, (_, enabled) => { this.tileEvents = enabled; })
 			.appendTo(this);
 
 		new LabelledRow(this.api)
@@ -88,17 +111,17 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 	@Bound
 	public execute() {
-		if (!this.creatures && !this.npcs) return;
-
-		let quantity = Math.floor(1.2 ** this.rangeQuantity.value);
-
-		const targets = pipe<(ICreature | undefined)[] | (INPC | undefined)[] | false>(
+		const targets = pipe(
 			this.creatures && game.creatures,
 			this.npcs && game.npcs,
-		)
+			this.tileEvents && game.tileEvents)
 			.flat()
-			.filter<ICreature | INPC>(entity => entity)
+			.filter<undefined | boolean>(entity => !!entity)
 			.collect(Collectors.toArray);
+
+		if (!targets.length) return;
+
+		let quantity = Math.floor(1.2 ** this.rangeQuantity.value);
 
 		switch (this.method) {
 			case DebugToolsTranslation.MethodAll:
@@ -118,7 +141,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 			object: [
 				this.action,
 				targets.slice(0, quantity)
-					.map(target => tuple(target.entityType, target.id)),
+					.map(target => tuple(getSelectionType(target), target.id)),
 			],
 		});
 	}

@@ -17,6 +17,7 @@ import AddItemToInventory, { AddItemToInventoryEvent } from "../component/AddIte
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
 export default class ItemInformation extends InspectInformationSection {
+	private readonly wrapperAddItem: Component;
 	private readonly wrapperItems: Component;
 
 	private items: IItem[] = [];
@@ -25,6 +26,7 @@ export default class ItemInformation extends InspectInformationSection {
 	public constructor(api: UiApi) {
 		super(api);
 
+		this.wrapperAddItem = new Component(this.api).appendTo(this);
 		this.wrapperItems = new Component(this.api).appendTo(this);
 	}
 
@@ -35,7 +37,7 @@ export default class ItemInformation extends InspectInformationSection {
 	}
 
 	public setTab() {
-		const addItemToInventory = AddItemToInventory.get(this.api).appendTo(this);
+		const addItemToInventory = AddItemToInventory.get(this.api).appendTo(this.wrapperAddItem);
 		this.until(ComponentEvent.WillRemove)
 			.bind(addItemToInventory, AddItemToInventoryEvent.Execute, this.addItem);
 
@@ -80,7 +82,7 @@ export default class ItemInformation extends InspectInformationSection {
 	@Bound
 	private removeItem(item: IItem) {
 		return () => {
-			Actions.get("removeItem").execute({ item });
+			Actions.get("remove").execute({ item });
 		};
 	}
 }

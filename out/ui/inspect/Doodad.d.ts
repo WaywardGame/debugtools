@@ -8,4 +8,7 @@ export default class DoodadInformation extends InspectInformationSection {
     getTabs(): TabInformation[];
     update(position: IVector2, tile: ITile): void;
     logUpdate(): void;
+    private addItem;
+    private removeDoodad;
+    private cloneDoodad;
 }

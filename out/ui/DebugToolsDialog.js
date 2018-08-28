@@ -50,7 +50,7 @@ define(["require", "exports", "newui/component/IComponent", "newui/screen/screen
     }
     DebugToolsDialog.description = {
         minSize: {
-            x: 25,
+            x: 20,
             y: 25,
         },
         size: {

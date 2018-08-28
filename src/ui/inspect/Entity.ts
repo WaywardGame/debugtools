@@ -149,7 +149,7 @@ export default class EntityInformation extends InspectInformationSection {
 		const stats = Enums.values(Stat)
 			.filter(stat => this.entity!.hasStat(stat) && (!this.subsections.some(subsection => subsection.getImmutableStats().includes(stat))))
 			.map(stat => this.entity!.getStat(stat))
-			.filter<IStat>((stat): stat is IStat => stat !== undefined);
+			.filter<undefined>((stat): stat is IStat => stat !== undefined);
 
 		for (const stat of stats) {
 			if ("max" in stat && !stat.canExceedMax) {

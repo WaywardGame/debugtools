@@ -73,6 +73,7 @@ export enum DebugToolsTranslation {
 	MethodRandom,
 	FilterCreatures,
 	FilterNPCs,
+	FilterTileEvents,
 	ActionRemove,
 	ButtonExecute,
 
@@ -140,17 +141,44 @@ export enum DebugToolsTranslation {
 }
 
 export interface ISaveData {
+	/**
+	 * Whether lighting is enabled
+	 */
 	lighting: boolean;
+	/**
+	 * Whether the fog/field of view/fog of war is enabled
+	 */
 	fog: boolean;
-	playerData: { [key: string]: IPlayerData };
+	/**
+	 * 1 pixel in the renderer is equivalent to `this number ** 2`
+	 */
 	zoomLevel?: number;
+	/**
+	 * Data for each player in this save, indexed by their IDs.
+	 */
+	playerData: { [key: string]: IPlayerData };
 }
 
 export interface IPlayerData {
+	/**
+	 * Added to the player's strength
+	 */
 	weightBonus: number;
+	/**
+	 * Whether the player is immune to damage
+	 */
 	invulnerable: boolean;
+	/**
+	 * False if the player is not "noclipping", an object otherwise.
+	 */
 	noclip: false | {
+		/**
+		 * Whether the player is currently moving
+		 */
 		moving: boolean;
+		/**
+		 * The current delay between movements.
+		 */
 		delay: number;
 	};
 }

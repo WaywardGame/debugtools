@@ -16,9 +16,9 @@ import CancelablePromise from "./util/CancelablePromise";
 export default class SelectLocation implements IHookHost {
 
 	@Register.bindable("SelectLocation", { mouseButton: 0 })
-	public bindableSelectLocation: Bindable;
+	public readonly bindableSelectLocation: Bindable;
 	@Register.bindable("CancelSelectLocation", { mouseButton: 2 })
-	public bindableCancelSelectLocation: Bindable;
+	public readonly bindableCancelSelectLocation: Bindable;
 
 	private _selecting = false;
 	public get selecting() { return this._selecting; }
@@ -46,7 +46,7 @@ export default class SelectLocation implements IHookHost {
 
 		if (this._selecting) {
 			const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
-			
+
 			const tile = this.hoverTile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
 			TileHelpers.Overlay.add(tile, { type: DebugTools.INSTANCE.overlayTarget }, isHoverTargetOverlay);
 

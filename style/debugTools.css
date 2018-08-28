@@ -86,3 +86,34 @@
 .debug-tools-dialog-checkbutton-dropdown-row {
     grid-template-columns: auto 1fr;
 }
+
+.debug-tools-tab-dialog.tabs-drawer > .game-dialog-body {
+    grid-template-columns: calc(50px * var(--scale-floor)) 1fr;    
+}
+
+.debug-tools-tab-dialog.tabs-drawer .debug-tools-tab-dialog-subpanel-link-wrapper {
+    z-index: 1;
+    margin-top: calc(-20px * var(--scale-floor));
+    padding-top: calc(20px * var(--scale-floor));
+    box-sizing: border-box;
+    margin-bottom: calc(20px * var(--scale-floor));
+}
+
+.debug-tools-tab-dialog.tabs-drawer .debug-tools-tab-dialog-subpanel-link-wrapper:hover > * {
+    background: rgba(0,0,0,.8);
+    width: calc(170px * var(--scale-floor));
+}
+
+.debug-tools-tab-dialog.tabs-drawer .debug-tools-tab-dialog-subpanel-link-wrapper > * {
+    position: absolute;
+    width: calc(50px * var(--scale-floor));
+    overflow-x: hidden;
+    top: calc(20px * var(--scale-floor));
+    -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 20px * var(--scale-floor)), transparent calc(100% - 5px * var(--scale-floor)));
+    padding-right: calc(35px * var(--scale-floor));
+    transition: width .05s ease-in-out;
+}
+
+.debug-tools-tab-dialog.tabs-drawer .debug-tools-tab-dialog-subpanel-link-wrapper > * > * {
+    min-width: calc(130px * var(--scale-floor)) !important;
+}

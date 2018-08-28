@@ -17,33 +17,39 @@ import Actions from "./Actions";
 import { DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
-export declare function translation(id: DebugToolsTranslation): Translation;
+export declare function translation(debugToolsTranslation: DebugToolsTranslation): Translation;
 export declare enum DebugToolsEvent {
-    PlayerDataChange = 0
+    PlayerDataChange = "PlayerDataChange",
+    Inspect = "Inspect"
 }
 export default class DebugTools extends Mod {
     static INSTANCE: DebugTools;
     static LOG: Log;
-    actions: Actions;
-    selector: LocationSelector;
-    unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
-    bindableToggleDialog: Bindable;
-    bindableInspectTile: Bindable;
-    bindableToggleCameraLock: Bindable;
-    bindablePaint: Bindable;
-    bindableErasePaint: Bindable;
-    bindableClearPaint: Bindable;
-    bindableCancelPaint: Bindable;
-    bindableCompletePaint: Bindable;
-    dictionary: Dictionary;
-    source: Source;
-    choiceSailToCivilization: InterruptChoice;
-    choiceTravelAway: InterruptChoice;
-    dialogMain: DialogId;
-    dialogInspect: DialogId;
-    menuBarButton: MenuBarButtonType;
-    overlayTarget: OverlayType;
-    overlayPaint: OverlayType;
+    readonly actions: Actions;
+    readonly selector: LocationSelector;
+    readonly unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
+    readonly bindableToggleDialog: Bindable;
+    readonly bindableCloseInspectDialog: Bindable;
+    readonly bindableInspectTile: Bindable;
+    readonly bindableInspectLocalPlayer: Bindable;
+    readonly bindableHealLocalPlayer: Bindable;
+    readonly bindableTeleportLocalPlayer: Bindable;
+    readonly bindableToggleNoClipOnLocalPlayer: Bindable;
+    readonly bindableToggleCameraLock: Bindable;
+    readonly bindablePaint: Bindable;
+    readonly bindableErasePaint: Bindable;
+    readonly bindableClearPaint: Bindable;
+    readonly bindableCancelPaint: Bindable;
+    readonly bindableCompletePaint: Bindable;
+    readonly dictionary: Dictionary;
+    readonly source: Source;
+    readonly choiceSailToCivilization: InterruptChoice;
+    readonly choiceTravelAway: InterruptChoice;
+    readonly dialogMain: DialogId;
+    readonly dialogInspect: DialogId;
+    readonly menuBarButton: MenuBarButtonType;
+    readonly overlayTarget: OverlayType;
+    readonly overlayPaint: OverlayType;
     data: ISaveData;
     globalData: ISaveDataGlobal;
     private upgrade;

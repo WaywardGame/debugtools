@@ -1,8 +1,8 @@
 {
 	"name": "Debug Tools",
 	"description": "Adds a special debug tools menu into the game.",
-	"version": "1.4",
-	"author": "Spacetech",
+	"version": "2.0",
+	"author": "Yuudaari",
 	"compatibleMinorVersions": [
 		6
 	],

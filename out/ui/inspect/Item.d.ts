@@ -3,6 +3,7 @@ import { ITile } from "tile/ITerrain";
 import { IVector2 } from "utilities/math/IVector";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 export default class ItemInformation extends InspectInformationSection {
+    private readonly wrapperAddItem;
     private readonly wrapperItems;
     private items;
     private position;

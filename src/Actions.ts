@@ -1,11 +1,13 @@
-import { ActionCallback, IActionArgument, IActionDescription, IActionResult } from "action/IAction";
+import { ActionCallback, IActionArgument, IActionDescriptionNamed, IActionResult } from "action/IAction";
 import { ICorpse } from "creature/corpse/ICorpse";
 import { ICreature } from "creature/ICreature";
+import { IDoodad } from "doodad/IDoodad";
 import IBaseEntity from "entity/IBaseEntity";
 import IBaseHumanEntity from "entity/IBaseHumanEntity";
 import { AiType, EntityType } from "entity/IEntity";
 import { IStatMax, Stat } from "entity/IStats";
 import { CreatureType, DamageType, Delay, ItemQuality, ItemType, MoveType, NPCType, PlayerState, SentenceCaseStyle, SkillType, StatusType, TerrainType } from "Enums";
+import { IContainer, IItem } from "item/IItem";
 import itemDescriptions from "item/Items";
 import { Message, MessageType } from "language/IMessages";
 import { ITemplateOptions, spawnTemplate } from "mapgen/MapGenHelpers";
@@ -25,13 +27,15 @@ import DebugTools, { translation } from "./DebugTools";
 import { DebugToolsTranslation } from "./IDebugTools";
 import InspectDialog from "./ui/InspectDialog";
 import { IPaintData } from "./ui/panel/PaintPanel";
+import { SelectionType } from "./ui/panel/SelectionPanel";
 import { getTilePosition } from "./util/TilePosition";
 
 export enum RemovalType {
 	Corpse,
+	TileEvent,
 }
 
-function description(name: string): IActionDescription {
+function description(name: string): IActionDescriptionNamed {
 	return { name, usableAsGhost: true, usableWhenPaused: true, ignoreHasDelay: true };
 }
 
@@ -55,33 +59,13 @@ export default class Actions {
 	}
 
 	@Register.message("FailureTileBlocked")
-	public messageFailureTileBlocked: Message;
+	public readonly messageFailureTileBlocked: Message;
 
 	public constructor(private readonly mod: DebugTools) { }
 
 	////////////////////////////////////
 	// New Actions
 	//
-
-	@Register.action(description("Remove Item"))
-	public removeItem(executor: IPlayer, { item }: IActionArgument, result: IActionResult) {
-		const container = item!.containedWithin;
-		itemManager.remove(item!);
-
-		if (container) {
-			if ("data" in container) {
-				result.updateView = true; // we removed the item from a tile
-
-			} else if ("entityType" in container) {
-				const entity = container as IBaseEntity;
-				if (entity.entityType === EntityType.Player) {
-					(entity as IPlayer).updateTablesAndWeight();
-				}
-			}
-		}
-
-		if (InspectDialog.INSTANCE) InspectDialog.INSTANCE.update();
-	}
 
 	@Register.action<[TileTemplateType, ITemplateOptions]>(description("Place Template"))
 	public placeTemplate(executor: IPlayer, { point, object: [type, options] }: IActionArgument<[TileTemplateType, ITemplateOptions]>, result: IActionResult) {
@@ -90,26 +74,34 @@ export default class Actions {
 		result.updateView = true;
 	}
 
-	@Register.action<[DebugToolsTranslation, [EntityType, number][]]>(description("Execute on Selection"))
-	public executeOnSelection(executor: IPlayer, { object: [action, selection] }: IActionArgument<[DebugToolsTranslation, [EntityType, number][]]>, result: IActionResult) {
+	@Register.action<[DebugToolsTranslation, [SelectionType, number][]]>(description("Execute on Selection"))
+	public executeOnSelection(executor: IPlayer, { object: [action, selection] }: IActionArgument<[DebugToolsTranslation, [SelectionType, number][]]>, result: IActionResult) {
 		for (const [type, id] of selection) {
-			const executeArgument: IActionArgument = {};
+			let creature: ICreature | undefined;
+			let npc: INPC | undefined;
+			let otherRemoval: [RemovalType, number] | undefined;
 
 			switch (type) {
-				case EntityType.Creature:
-					executeArgument.creature = game.creatures[id]!;
+				case SelectionType.Creature:
+					creature = game.creatures[id]!;
 					break;
-				case EntityType.NPC:
-					executeArgument.npc = game.npcs[id]!;
+				case SelectionType.NPC:
+					npc = game.npcs[id]!;
+					break;
+				case SelectionType.TileEvent:
+					otherRemoval = [RemovalType.TileEvent, id];
 					break;
 			}
 
 			switch (action) {
 				case DebugToolsTranslation.ActionRemove:
-					this.remove(executor, executeArgument, result);
+					this.removeInternal(result, otherRemoval || [] as any, creature, npc);
 					break;
 			}
 		}
+
+		renderer.computeSpritesInViewport();
+		result.updateRender = true;
 	}
 
 	@Register.action(description("Teleport Entity"))
@@ -164,38 +156,17 @@ export default class Actions {
 	}
 
 	@Register.action(description("Clone"))
-	public clone(executor: IPlayer, { entity, position }: IActionArgument, result: IActionResult) {
-		let clone: ICreature | INPC | IPlayer;
-
+	public clone(executor: IPlayer, { entity, doodad, position }: IActionArgument, result: IActionResult) {
 		position = this.getPosition(executor, position!, () => translation(DebugToolsTranslation.ActionClone)
 			.get(game.getName(entity)));
 
-		if (!entity || !position) return;
+		if (!position) return;
 
-		if (entity.entityType === EntityType.Creature) {
-			clone = creatureManager.spawn(entity.type, position.x, position.y, position.z, true, entity.aberrant)!;
+		if (entity) {
+			this.cloneEntity(entity, position);
 
-			if (entity.isTamed()) clone.tame(entity.getOwner()!);
-			clone.renamed = entity.renamed;
-			clone.ai = entity.ai;
-			clone.enemy = entity.enemy;
-			clone.enemyAttempts = entity.enemyAttempts;
-			clone.enemyIsPlayer = entity.enemyIsPlayer;
-
-		} else {
-			clone = npcManager.spawn(NPCType.Merchant, position.x, position.y, position.z)!;
-			clone.customization = { ...entity.customization };
-			clone.renamed = entity.getName();
-			this.cloneInventory(entity, clone);
-		}
-
-		clone.direction = new Vector2(entity.direction).raw();
-		clone.facingDirection = entity.facingDirection;
-
-		this.copyStats(entity, clone);
-
-		if (clone.entityType === EntityType.NPC) {
-			clone.ai = AiType.Neutral;
+		} else if (doodad) {
+			this.cloneDoodad(doodad, position);
 		}
 
 		renderer.computeSpritesInViewport();
@@ -251,8 +222,8 @@ export default class Actions {
 	}
 
 	@Register.action<[RemovalType, number] | undefined>(description("Remove"))
-	public remove(player: IPlayer, { creature, npc, object: otherRemoval }: IActionArgument<[RemovalType, number] | undefined>, result: IActionResult) {
-		this.removeInternal(otherRemoval || [] as any, creature, npc);
+	public remove(player: IPlayer, { creature, npc, item, doodad, object: otherRemoval }: IActionArgument<[RemovalType, number] | undefined>, result: IActionResult) {
+		this.removeInternal(result, otherRemoval || [] as any, creature, npc, item, doodad);
 
 		renderer.computeSpritesInViewport();
 		result.updateRender = true;
@@ -292,13 +263,16 @@ export default class Actions {
 	}
 
 	@Register.action<[ItemType, ItemQuality]>(description("Add Item to Inventory"))
-	public addItemToInventory(executor: IPlayer, { human, point, object: [item, quality] }: IActionArgument<[ItemType, ItemQuality]>, result: IActionResult) {
+	public addItemToInventory(executor: IPlayer, { doodad, human, point, object: [item, quality] }: IActionArgument<[ItemType, ItemQuality]>, result: IActionResult) {
 		if (human) {
 			human!.createItemInInventory(item, quality);
 
 			if (human!.entityType === EntityType.Player) {
 				(human as IPlayer).updateTablesAndWeight();
 			}
+
+		} else if (doodad) {
+			itemManager.create(item, doodad as IContainer, quality);
 
 		} else if (point) {
 			itemManager.create(item, itemManager.getTileContainer(point.x, point.y, executor.z), quality);
@@ -443,10 +417,32 @@ export default class Actions {
 	// Helpers
 	//
 
-	private removeInternal([type, id]: [RemovalType, number], creature?: ICreature | false, npc?: INPC | false) {
+	private removeInternal(result: IActionResult, [type, id]: [RemovalType, number], creature?: ICreature | false, npc?: INPC | false, item?: IItem | false, doodad?: IDoodad | false) {
 		if (creature) return creatureManager.remove(creature);
 		if (npc) return npcManager.remove(npc);
+		if (doodad) return doodadManager.remove(doodad, true);
+		if (item) return this.removeItem(result, item);
 		if (type === RemovalType.Corpse) return corpseManager.remove(game.corpses[id]!);
+		if (type === RemovalType.TileEvent) return tileEventManager.remove(game.tileEvents[id]!);
+	}
+
+	private removeItem(result: IActionResult, item: IItem) {
+		const container = item!.containedWithin;
+		itemManager.remove(item!);
+
+		if (container) {
+			if ("data" in container) {
+				result.updateView = true; // we removed the item from a tile
+
+			} else if ("entityType" in container) {
+				const entity = container as IBaseEntity;
+				if (entity.entityType === EntityType.Player) {
+					(entity as IPlayer).updateTablesAndWeight();
+				}
+			}
+		}
+
+		if (InspectDialog.INSTANCE) InspectDialog.INSTANCE.update();
 	}
 
 	private resurrectCorpse(player: IPlayer, corpse: ICorpse) {
@@ -494,7 +490,7 @@ export default class Actions {
 	}
 
 	private getPosition(player: IPlayer, position: IVector3, actionName: TranslationGenerator) {
-		if (TileHelpers.isOpenTile(position, game.getTile(...new Vector3(position).xyz))) return position;
+		if (TileHelpers.isOpenTile(position, game.getTile(position.x, position.y, position.z))) return position;
 
 		const openTile = TileHelpers.findMatchingTile(position, TileHelpers.isOpenTile);
 
@@ -527,6 +523,36 @@ export default class Actions {
 		}
 	}
 
+	private cloneEntity(entity: ICreature | INPC | IPlayer, position: IVector3) {
+		let clone: ICreature | INPC | IPlayer;
+
+		if (entity.entityType === EntityType.Creature) {
+			clone = creatureManager.spawn(entity.type, position.x, position.y, position.z, true, entity.aberrant)!;
+
+			if (entity.isTamed()) clone.tame(entity.getOwner()!);
+			clone.renamed = entity.renamed;
+			clone.ai = entity.ai;
+			clone.enemy = entity.enemy;
+			clone.enemyAttempts = entity.enemyAttempts;
+			clone.enemyIsPlayer = entity.enemyIsPlayer;
+
+		} else {
+			clone = npcManager.spawn(NPCType.Merchant, position.x, position.y, position.z)!;
+			clone.customization = { ...entity.customization };
+			clone.renamed = entity.getName();
+			this.cloneInventory(entity, clone);
+		}
+
+		clone.direction = new Vector2(entity.direction).raw();
+		clone.facingDirection = entity.facingDirection;
+
+		this.copyStats(entity, clone);
+
+		if (clone.entityType === EntityType.NPC) {
+			clone.ai = AiType.Neutral;
+		}
+	}
+
 	private cloneInventory(from: IBaseHumanEntity, to: IBaseHumanEntity) {
 		for (const item of to.inventory.containedItems) {
 			itemManager.remove(item);
@@ -546,6 +572,43 @@ export default class Actions {
 			clone.weightCapacity = item.weightCapacity;
 			clone.legendary = item.legendary && { ...item.legendary };
 			if (item.isEquipped()) to.equip(clone, item.getEquipSlot()!);
+		}
+	}
+
+	private cloneDoodad(doodad: IDoodad, position: IVector3) {
+		const clone = doodadManager.create(doodad.type, position.x, position.y, position.z, {
+			gatherReady: doodad.gatherReady,
+			gfx: doodad.gfx,
+			spread: doodad.spread,
+			treasure: doodad.treasure,
+			weight: doodad.weight,
+			legendary: doodad.legendary ? { ...doodad.legendary } : undefined,
+			disassembly: !doodad.disassembly ? undefined : doodad.disassembly
+				.map(item => itemManager.createFake(item.type, item.quality)),
+			ownerIdentifier: doodad.ownerIdentifier,
+			item: !doodad.item ? undefined : itemManager.createFake(doodad.item.type, doodad.item.quality),
+			step: doodad.step,
+		});
+
+		if (!clone) return;
+
+		if (doodad.containedItems) {
+			this.cloneContainedItems(doodad, clone);
+		}
+	}
+
+	private cloneContainedItems(from: Partial<IContainer>, to: Partial<IContainer>) {
+		if (!("containedItems" in from) || !("containedItems" in to)) return;
+
+		for (const item of from.containedItems || []) {
+			const clone = itemManager.create(item.type, to as IContainer, item.quality);
+			clone.ownerIdentifier = item.ownerIdentifier;
+			clone.minDur = item.minDur;
+			clone.maxDur = item.maxDur;
+			clone.renamed = item.renamed;
+			clone.weight = item.weight;
+			clone.weightCapacity = item.weightCapacity;
+			clone.legendary = item.legendary && { ...item.legendary };
 		}
 	}
 }

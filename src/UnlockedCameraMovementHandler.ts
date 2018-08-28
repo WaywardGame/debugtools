@@ -10,13 +10,13 @@ const STOP_FRICTION = 0.9;
 export default class UnlockedCameraMovementHandler {
 
 	@Register.bindable("CameraMoveUp", { key: "KeyW", modifiers: [KeyModifier.Alt] })
-	public bindMoveCameraUp: Bindable;
+	public readonly bindMoveCameraUp: Bindable;
 	@Register.bindable("CameraMoveLeft", { key: "KeyA", modifiers: [KeyModifier.Alt] })
-	public bindMoveCameraLeft: Bindable;
+	public readonly bindMoveCameraLeft: Bindable;
 	@Register.bindable("CameraMoveDown", { key: "KeyS", modifiers: [KeyModifier.Alt] })
-	public bindMoveCameraDown: Bindable;
+	public readonly bindMoveCameraDown: Bindable;
 	@Register.bindable("CameraMoveRight", { key: "KeyD", modifiers: [KeyModifier.Alt] })
-	public bindMoveCameraRight: Bindable;
+	public readonly bindMoveCameraRight: Bindable;
 
 	public velocity = Vector2.ZERO;
 	public position: Vector2;

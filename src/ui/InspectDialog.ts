@@ -46,7 +46,7 @@ const informationSectionClasses: (new (api: UiApi) => InspectInformationSection)
 export default class InspectDialog extends TabDialog implements IHookHost {
 	public static description: IDialogDescription = {
 		minSize: {
-			x: 25,
+			x: 20,
 			y: 25,
 		},
 		size: {
@@ -158,6 +158,11 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 
 	@HookMethod
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
+		if (api.wasPressed(DebugTools.INSTANCE.bindableCloseInspectDialog) && !bindPressed) {
+			this.close();
+			bindPressed = DebugTools.INSTANCE.bindableCloseInspectDialog;
+		}
+
 		if (api.wasPressed(Bindable.MenuContextMenu) && !bindPressed) {
 			for (let i = 0; i < this.entityButtons.length; i++) {
 				if (api.isMouseWithin(this.entityButtons[i])) {

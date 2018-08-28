@@ -1,9 +1,10 @@
 import Button, { ButtonEvent } from "newui/component/Button";
 import Component from "newui/component/Component";
 import { TranslationGenerator } from "newui/component/IComponent";
-import Dialog from "newui/screen/screens/game/component/Dialog";
+import Dialog, { DialogEvent } from "newui/screen/screens/game/component/Dialog";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import { Bound } from "utilities/Objects";
 
 export type SubpanelInformation = [string | number, TranslationGenerator, (component: Component) => any, ((button: Button) => any)?, Button?];
 
@@ -21,15 +22,19 @@ export default abstract class TabDialog extends Dialog {
 		const api = gsapi.uiApi;
 
 		new Component(api)
+			.classes.add("debug-tools-tab-dialog-subpanel-link-wrapper")
 			.append(this.subpanelLinkWrapper = this.addScrollableWrapper())
 			.appendTo(this.body);
 
 		this.panelWrapper = this.addScrollableWrapper()
 			.appendTo(new Component(api)
+				.classes.add("debug-tools-tab-dialog-subpanel-wrapper")
 				.appendTo(this.body));
 
 		this.updateSubpanelList();
 		this.showFirstSubpanel();
+
+		this.on(DialogEvent.Resize, this.onResize);
 	}
 
 	protected abstract getSubpanels(): SubpanelInformation[];
@@ -98,5 +103,10 @@ export default abstract class TabDialog extends Dialog {
 		}
 
 		button.classes.add("active");
+	}
+
+	@Bound
+	private onResize() {
+		this.classes.toggle(this.getBox().width < 440, "tabs-drawer");
 	}
 }
