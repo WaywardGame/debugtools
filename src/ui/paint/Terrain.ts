@@ -73,6 +73,6 @@ export default class TerrainPaint extends Component implements IPaintSection {
 		this.tilledCheckButton.toggle(tillable);
 		if (!tillable) this.tilledCheckButton.setChecked(false);
 
-		this.triggerSync("change");
+		this.trigger("change");
 	}
 }

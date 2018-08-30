@@ -1,5 +1,7 @@
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
+import { SaveDataType } from "mod/IMod";
+import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
 import { RangeInputEvent } from "newui/component/RangeInput";
@@ -9,15 +11,14 @@ import { compileShaders, loadShaders } from "renderer/Shaders";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
 import DebugTools, { translation } from "../../DebugTools";
-import { DebugToolsTranslation } from "../../IDebugTools";
+import { DebugToolsTranslation, ISaveData } from "../../IDebugTools";
 import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 
 export default class DisplayPanel extends DebugToolsPanel {
 	private readonly zoomRange: RangeRow;
 
-	private get saveData() {
-		return DebugTools.INSTANCE.data;
-	}
+	@Mod.data(DebugTools, SaveDataType.Save)
+	public saveData: ISaveData;
 
 	public constructor(gsapi: IGameScreenApi) {
 		super(gsapi);

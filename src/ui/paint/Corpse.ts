@@ -87,6 +87,6 @@ export default class CorpsePaint extends Component implements IPaintSection {
 		this.replaceExisting.toggle(isReplaceable);
 		if (!isReplaceable) this.replaceExisting.setChecked(false);
 
-		this.triggerSync("change");
+		this.trigger("change");
 	}
 }

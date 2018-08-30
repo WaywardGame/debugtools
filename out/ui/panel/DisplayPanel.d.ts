@@ -1,9 +1,9 @@
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { DebugToolsTranslation } from "../../IDebugTools";
+import { DebugToolsTranslation, ISaveData } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 export default class DisplayPanel extends DebugToolsPanel {
     private readonly zoomRange;
-    private readonly saveData;
+    saveData: ISaveData;
     constructor(gsapi: IGameScreenApi);
     getTranslation(): DebugToolsTranslation;
     getZoomLevel(): number | undefined;

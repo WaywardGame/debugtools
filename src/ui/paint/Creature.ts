@@ -73,6 +73,6 @@ export default class CreaturePaint extends Component implements IPaintSection {
 		this.creature = creature === "nochange" ? undefined : creature === "remove" ? "remove" : CreatureType[creature];
 		this.aberrantCheckButton.toggle(this.creature !== undefined && this.creature !== "remove");
 
-		this.triggerSync("change");
+		this.trigger("change");
 	}
 }

@@ -97,7 +97,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 				.on("update", this.update)
 				.on(ComponentEvent.WillRemove, infoSection => {
 					if (this.storePanels) {
-						infoSection.triggerSync(DebugToolsPanelEvent.SwitchAway);
+						infoSection.trigger(DebugToolsPanelEvent.SwitchAway);
 						infoSection.store();
 						return false;
 					}
@@ -120,7 +120,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 					getTabTranslation,
 					(component: Component) => section.setTab(index)
 						.appendTo(component)
-						.triggerSync(DebugToolsPanelEvent.SwitchTo),
+						.trigger(DebugToolsPanelEvent.SwitchTo),
 					(button: Button) => !(section instanceof EntityInformation) ? undefined : this.entityButtons[index] = button,
 				)))
 			.flat<SubpanelInformation>(1)

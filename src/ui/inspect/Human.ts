@@ -58,7 +58,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 		this.human = entity.entityType === EntityType.Creature ? undefined : entity;
 		this.toggle(!!this.human);
 
-		this.triggerSync("change");
+		this.trigger("change");
 
 		if (!this.human) return;
 

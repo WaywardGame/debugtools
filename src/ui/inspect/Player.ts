@@ -99,7 +99,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 		if (!this.player) return;
 
-		this.triggerSync("change");
+		this.trigger("change");
 
 		this.refresh();
 

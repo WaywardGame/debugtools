@@ -62,6 +62,6 @@ export default class NPCPaint extends Component implements IPaintSection {
 	private changeNPC(_: any, npc: keyof typeof NPCType | "nochange" | "remove") {
 		this.npc = npc === "nochange" ? undefined : npc === "remove" ? "remove" : NPCType[npc];
 
-		this.triggerSync("change");
+		this.trigger("change");
 	}
 }

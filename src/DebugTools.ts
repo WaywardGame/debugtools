@@ -4,6 +4,7 @@ import { ActionType, Bindable, Delay, Direction, MoveType, OverlayType, SpriteBa
 import { Dictionary, InterruptChoice } from "language/ILanguage";
 import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
+import { SaveDataType } from "mod/IMod";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
 import { BindCatcherApi, bindingManager, KeyModifier } from "newui/BindingManager";
@@ -163,7 +164,9 @@ export default class DebugTools extends Mod {
 	// Fields & Other Data Storage
 	//
 
+	@Mod.data(DebugTools, SaveDataType.Save)
 	public data: ISaveData;
+	@Mod.data(DebugTools, SaveDataType.Global)
 	public globalData: ISaveDataGlobal;
 
 	private upgrade = false;
@@ -206,7 +209,7 @@ export default class DebugTools extends Mod {
 	public setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]) {
 		this.getPlayerData(player, key);
 		this.data.playerData[player.identifier][key] = value;
-		this.triggerSync(DebugToolsEvent.PlayerDataChange, player.id, key, value);
+		this.trigger(DebugToolsEvent.PlayerDataChange, player.id, key, value);
 	}
 
 	////////////////////////////////////
@@ -221,39 +224,34 @@ export default class DebugTools extends Mod {
 	public onInitialize(saveDataGlobal: ISaveDataGlobal): any {
 		DebugTools.INSTANCE = this;
 		DebugTools.LOG = this.getLog();
+	}
 
+	public initializeGlobalData(data?: ISaveDataGlobal) {
 		const version = new Version(modManager.getVersion(this.getIndex()));
-		const lastLoadVersion = new Version((saveDataGlobal && saveDataGlobal.lastVersion) || "0.0.0");
+		const lastLoadVersion = new Version((data && data.lastVersion) || "0.0.0");
 
-		this.upgrade = !saveDataGlobal || lastLoadVersion.isOlderThan(version);
+		this.upgrade = !data || lastLoadVersion.isOlderThan(version);
 
-		this.globalData = !this.upgrade ? saveDataGlobal : {
+		return !this.upgrade ? data : {
 			lastVersion: version.getString(),
 		};
 	}
 
-	/**
-	 * Called when Debug Tools uninitializes (is disabled)
-	 * - Saves the global data for Debug Tools.
-	 */
-	public onUninitialize(): any {
-		return this.globalData;
-	}
-
-	/**
-	 * Called when Debug Tools is loaded (in a save)
-	 * - If save data doesn't exist for this mod for this save, or the version is newer, the save data is reset.
-	 * - Registers the `LocationSelector` stored in `this.selector` as a hook host.
-	 * - Initializes the `AddItemToInventory` UI Component (it takes a second or two to be created, and there are multiple places in
-	 * the UI that use it. We initialize it only once so the slow initialization only happens once.)
-	 */
-	public onLoad(saveData: ISaveData): void {
-		this.data = saveData && !this.upgrade ? saveData : {
+	public initializeSaveData(data?: ISaveData) {
+		return data && !this.upgrade ? data : {
 			lighting: true,
 			playerData: {},
 			fog: true,
 		};
+	}
 
+	/**
+	 * Called when Debug Tools is loaded (in a save)
+	 * - Registers the `LocationSelector` stored in `this.selector` as a hook host.
+	 * - Initializes the `AddItemToInventory` UI Component (it takes a second or two to be created, and there are multiple places in
+	 * the UI that use it. We initialize it only once so the slow initialization only happens once.)
+	 */
+	public onLoad(): void {
 		hookManager.register(this.selector, "DebugTools:LocationSelector");
 		AddItemToInventory.get(newui);
 	}
@@ -316,7 +314,7 @@ export default class DebugTools extends Mod {
 			.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
 			.setInspection(what);
 
-		this.triggerSync(DebugToolsEvent.Inspect);
+		this.trigger(DebugToolsEvent.Inspect);
 	}
 
 	/**

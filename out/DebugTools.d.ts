@@ -58,8 +58,9 @@ export default class DebugTools extends Mod {
     getPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K): IPlayerData[K];
     setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]): void;
     onInitialize(saveDataGlobal: ISaveDataGlobal): any;
-    onUninitialize(): any;
-    onLoad(saveData: ISaveData): void;
+    initializeGlobalData(data?: ISaveDataGlobal): ISaveDataGlobal | undefined;
+    initializeSaveData(data?: ISaveData): ISaveData;
+    onLoad(): void;
     onUnload(): void;
     onSave(): any;
     updateFog(): void;

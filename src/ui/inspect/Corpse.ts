@@ -68,12 +68,12 @@ export default class CorpseInformation extends InspectInformationSection {
 	@Bound
 	private resurrect() {
 		Actions.get("heal").execute({ object: this.corpse!.id });
-		this.triggerSync("update");
+		this.trigger("update");
 	}
 
 	@Bound
 	private removeCorpse() {
 		Actions.get("remove").execute({ object: [RemovalType.Corpse, this.corpse!.id] });
-		this.triggerSync("update");
+		this.trigger("update");
 	}
 }

@@ -83,9 +83,9 @@ export default class EntityInformation extends InspectInformationSection {
 			.appendTo(this);
 
 		this.on(DebugToolsPanelEvent.SwitchTo, () => this.subsections
-			.forEach(subsection => subsection.triggerSync(DebugToolsPanelEvent.SwitchTo)));
+			.forEach(subsection => subsection.trigger(DebugToolsPanelEvent.SwitchTo)));
 		this.on(DebugToolsPanelEvent.SwitchAway, () => this.subsections
-			.forEach(subsection => subsection.triggerSync(DebugToolsPanelEvent.SwitchAway)));
+			.forEach(subsection => subsection.trigger(DebugToolsPanelEvent.SwitchAway)));
 	}
 
 	public getTabs() {
@@ -257,13 +257,13 @@ export default class EntityInformation extends InspectInformationSection {
 		Actions.get("teleport")
 			.execute({ entity: this.entity, position: new Vector3(location.x, location.y, "z" in location ? location.z : this.entity!.z) });
 
-		this.triggerSync("update");
+		this.trigger("update");
 	}
 
 	@Bound
 	private kill() {
 		Actions.get("kill").execute({ entity: this.entity });
-		this.triggerSync("update");
+		this.trigger("update");
 	}
 
 	@Bound
@@ -278,7 +278,7 @@ export default class EntityInformation extends InspectInformationSection {
 	@Bound
 	private heal() {
 		Actions.get("heal").execute({ entity: this.entity });
-		this.triggerSync("update");
+		this.trigger("update");
 	}
 
 	@Bound

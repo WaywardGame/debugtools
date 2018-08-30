@@ -94,7 +94,7 @@ export default abstract class TabDialog extends Dialog {
 
 		subpanel[2](this.panelWrapper.dump());
 
-		this.triggerSync("change-subpanel");
+		this.trigger("change-subpanel");
 	}
 
 	private setActiveButton(button: Button) {
