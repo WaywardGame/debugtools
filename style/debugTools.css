@@ -1,22 +1,119 @@
-#daynighttime, #reputationslidervalue, #weightbonusvalue {
-    display: inline-block; 
-    position: absolute; 
-    color: white;
-    text-shadow: 1px 1px 0 #000, 1px 1px 1px #000;
-    background: rgba(0,0,0,.5);
-    left: 50%; 
-    transform: translateX(-50%); 
-    margin-top: 19px; 
-    padding: 0 6px;
-    pointer-events: none;
+.debug-tools-tab-dialog > .game-dialog-body {
+    display: grid;
+    grid-template-columns: calc(150px * var(--scale-floor)) 1fr;
+}
+
+.debug-tools-tab-dialog > .game-dialog-body > * {
+    position: relative;
+}
+
+.debug-tools-tab-dialog > .game-dialog-body > * > .game-dialog-scrollable-wrapper {
+    --scroll-height: calc(10px * var(--scale-floor));
+     --negative-margin: calc(var(--scroll-height) + 20px * var(--scale-floor));
+    --dialog-body-padding: 0px;
+     height: calc(100% - calc(20px * var(--scale)) + var(--negative-margin) * 2);
+}
+
+.debug-tools-tab-dialog-subpanel-link.active {
+    --button-active-background: #353132;
+}
+
+.debug-tools-range-row-no-default-button {
+    grid-template-columns: auto 1fr;
+}
+
+[data-dialog-id="ModDebugTools_Inspect"] .paragraph {
+    padding-bottom: calc(5px * var(--scale-floor)) !important;
+}
+
+.debug-tools-inspect-dialog-inspect-section {
+    margin-top: calc(20px * var(--scale-floor));
+}
+
+.debug-tools-inspect-entity-sub-section {
+    margin-top: calc(10px * var(--scale-floor));
+}
+
+.dropdown-label > .label {
+    margin-top: calc(3px * var(--scale-floor));
+}
+
+.debug-tools-inspect-human-wrapper-add-item {
+    margin-left: calc(20px * var(--scale-floor));
+    margin-bottom: calc(10px * var(--scale-floor));
+}
+
+.debug-tools-paint-row {
+    position: absolute;
+    bottom: -10px;
+    width: calc(100% - 10px * var(--scale-floor));
+    gap: calc(4px * var(--scale));
+}
+
+.debug-tools-paint-row:not(.painting) {
+    grid-template-columns: 1fr !important;
+}
+
+.debug-tools-paint-row:not(.painting) > :not(:first-child) {
+    display: none;
+}
+
+.debug-tools-paint-panel {
+    -webkit-mask-image: linear-gradient(
+        transparent 0, 
+        #000 var(--fade-height), 
+        #000 calc(100% - 35px), 
+        transparent calc(100% - 15px)
+    );
+     height: calc(100% + 40px * var(--scale-floor));
+}
+
+.debug-tools-tab-dialog-subpanel-link.inspection-lock {
+    --border-width: 1px;
+    border: var(--border-width) solid grey !important;
+}
+
+.debug-tools-tab-dialog-subpanel-link.inspection-lock::after {
+    border: var(--border-width) solid grey;
+    margin-top: calc(var(--border-width) * -1);
+    border-left: none;
+}
+
+.debug-tools-dialog-selection-quantity {
+    gap: 0 !important;
+}
+
+.debug-tools-dialog-checkbutton-dropdown-row {
+    grid-template-columns: auto 1fr;
+}
+
+.debug-tools-tab-dialog.tabs-drawer > .game-dialog-body {
+    grid-template-columns: calc(50px * var(--scale-floor)) 1fr;    
+}
+
+.debug-tools-tab-dialog.tabs-drawer .debug-tools-tab-dialog-subpanel-link-wrapper {
     z-index: 1;
+    margin-top: calc(-20px * var(--scale-floor));
+    padding-top: calc(20px * var(--scale-floor));
+    box-sizing: border-box;
+    margin-bottom: calc(20px * var(--scale-floor));
 }
 
-#daynightslider {
-    margin: 0 0 5px 0;
+.debug-tools-tab-dialog.tabs-drawer .debug-tools-tab-dialog-subpanel-link-wrapper:hover > * {
+    background: rgba(0,0,0,.8);
+    width: calc(170px * var(--scale-floor));
 }
 
-.select-control.active {
-    border-color: #aaa;
-    background-color: #000
+.debug-tools-tab-dialog.tabs-drawer .debug-tools-tab-dialog-subpanel-link-wrapper > * {
+    position: absolute;
+    width: calc(50px * var(--scale-floor));
+    overflow-x: hidden;
+    top: calc(20px * var(--scale-floor));
+    -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 20px * var(--scale-floor)), transparent calc(100% - 5px * var(--scale-floor)));
+    padding-right: calc(35px * var(--scale-floor));
+    transition: width .05s ease-in-out;
+}
+
+.debug-tools-tab-dialog.tabs-drawer .debug-tools-tab-dialog-subpanel-link-wrapper > * > * {
+    min-width: calc(130px * var(--scale-floor)) !important;
 }

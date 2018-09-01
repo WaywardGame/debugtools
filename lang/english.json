@@ -1,14 +1,161 @@
 {
 	"extends": "English",
 	"dictionaries": {
-		"bindable": {
-			"modDebugToolsToggle": "Toggle Debug Tools",
-			"modDebugToolsSelectLocation": "Select Location"
+		"message": {
+			"modDebugToolsFailureTileBlocked": "Cannot {0}, the tile is blocked."
 		},
-		"debugTools": {
-			"queryInspection": "Choose an object to inspect by clicking on its tile.",
-			"queryObjectNotFound": "The selected tile contains no object that can be inspected.",
-			"optionsAutoOpen": "Open Dialog on Load"
+		"source": {
+			"modDebugToolsDebugTools": "Debug Tools"
+		},
+		"interruptChoice": {
+			"modDebugToolsSailToCivilization": "Civilization",
+			"modDebugToolsTravelAway": "New Lands"
+		},
+		"bindable": {
+			"modDebugToolsToggleDialog": "Toggle Tools Dialog",
+			"modDebugToolsSelectLocation": "Select Location",
+			"modDebugToolsCancelSelectLocation": "Cancel Location Select",
+			"modDebugToolsInspectTile": "Inspect Tile",
+			"modDebugToolsToggleCameraLock": "Toggle Camera Lock",
+			"modDebugToolsCameraMoveUp": "Camera Up",
+			"modDebugToolsCameraMoveDown": "Camera Down",
+			"modDebugToolsCameraMoveLeft": "Camera Left",
+			"modDebugToolsCameraMoveRight": "Camera Right",
+			"modDebugToolsPaint": "Paint",
+			"modDebugToolsErasePaint": "Erase Paint",
+			"modDebugToolsClearPaint": "Clear Paint",
+			"modDebugToolsCancelPaint": "Turn Off Paint Mode",
+			"modDebugToolsCompletePaint": "Complete/Commit Paint",
+			"modDebugToolsInspectLocalPlayer": "Inspect Local Player",
+			"modDebugToolsTeleportLocalPlayer": "Teleport Local Player",
+			"modDebugToolsHealLocalPlayer": "Heal Local Player",
+			"modDebugToolsToggleNoClip": "Toggle No-clip",
+			"modDebugToolsCloseInspectDialog": "Cancel Inspection"
+		},
+		"modDebugToolsDebugTools": {
+			"optionsAutoOpen": "Open Dialog on Load",
+			
+			
+			"dialogTitleMain": "Debug Tools",
+			
+			
+			"panelGeneral": "General",
+			
+			"labelTime": "Time",
+			"buttonInspect": "Inspect",
+			"buttonInspectLocalPlayer": "Inspect Local Player",
+			"buttonUnlockRecipes": "Unlock Recipes",
+			"interruptConfirmationUnlockRecipes": "Are you sure you want\nto unlock all recipes?",
+			"interruptConfirmationUnlockRecipesDescription": "There's no undo besides erasing  /all/ \nrecipe progress in the Options Menu.",
+			"buttonRemoveAllCreatures": "Remove All Creatures",
+			"buttonRemoveAllNPCs": "Remove All NPCs",
+			"buttonTravelAway": "Travel Away",
+			"interruptChoiceTravelAway": "Where would you like to travel to?",
+			"buttonAudio": "Play Sound",
+			"buttonParticle": "Spawn Particle",
+			
+			
+			"panelDisplay": "Display",
+			
+			"buttonToggleFog": "Fog",
+			"buttonToggleLighting": "Lighting",
+			"labelZoomLevel": "Zoom Level",
+			"zoomLevel": "{0}x",
+			"buttonUnlockCamera": "Unlock Camera",
+			"buttonResetWebGL": "Reset WebGL",
+			"buttonReloadShaders": "Reload Shaders",
+			
+			
+			"panelPaint": "Tile Paint",
+			
+			"buttonPaint": "Paint",
+			"paintNoChange": "No Change",
+			"paintRemove": "Remove",
+			"labelTerrain": "{#--text-color-faded:Terrain}",
+			"labelCreature": "{#--text-color-faded:Creature}",
+			"buttonPaintClear": "Clear",
+			"tooltipPaintClear": "{#--text-color-faded:({Bindable.ModDebugToolsClearPaint})}",
+			"buttonPaintComplete": "Complete",
+			"tooltipPaintComplete": "{#--text-color-faded:({Bindable.ModDebugToolsCompletePaint})}",
+			"buttonToggleAberrant": "Aberrant",
+			"labelNPC": "{#--text-color-faded:NPC}",
+			"labelDoodad": "{#--text-color-faded:Doodad}",
+			"labelCorpse": "{#--text-color-faded:Corpse}",
+			"labelTileEvent": "{#--text-color-faded:Tile Event}",
+			"buttonReplaceExisting": "Replace Existing",
+			"resetPaintSection": "Reset Section",
+			
+			
+			"panelSelection": "Selection",
+			
+			"selectionMethod": "{#--text-color-faded:Method}",
+			"selectionFilter": "{#--text-color-faded:Filter}",
+			"selectionAction": "{#--text-color-faded:Action}",
+			"selectionMatches": "Matches",
+			"methodAll": "All",
+			"methodNearest": "Nearest",
+			"methodRandom": "Random",
+			"filterCreatures": "Creatures",
+			"filterNPCs": "NPCs",
+			"filterTileEvents": "Tile Events",
+			"actionRemove": "Remove",
+			"buttonExecute": "Execute",
+			
+			
+			"panelTemplates": "Templates",
+			
+			"labelTemplateType": "{#--text-color-faded:Type}",
+			"labelTemplate": "{#--text-color-faded:Template}",
+			"buttonMirrorVertically": "Mirror Vertically",
+			"buttonMirrorHorizontally": "Mirror Horizontally",
+			"buttonPlace": "Place",
+			"labelRotate": "Rotate",
+			"rangeRotateDegrees": "{0}°",
+			"labelDegrade": "Degradation",
+			"rangeDegradeAmount": "{0}%",
+			
+			
+			"dialogTitleInspect": "Inspect",
+			
+			"inspectTileTitle": "{#--text-color-faded:x:} {0} {#--text-color-faded:y:} {1} {#--text-color-faded:z:} {2}",
+			"inspectTerrain": "{#--text-color-faded:Terrain:} {0}",
+			"buttonChangeTerrain": "Change",
+			"entityName": "{#--text-color-faded:{0}:} {1}",
+			"buttonKillEntity": "Kill",
+			"buttonHealEntity": "Heal",
+			"buttonCloneEntity": "Clone",
+			"killEntityDeathMessage": "by l33t h4x0r",
+			"corpseName": "{#--text-color-faded:Corpse:} {0}",
+			"buttonResurrectCorpse": "Resurrect",
+			"buttonRemoveThing": "Remove",
+			"buttonTameCreature": "Tamed",
+			"labelWeightBonus": "Weight Bonus",
+			"buttonToggleTilled": "Tilled",
+			"labelItem": "{#--text-color-faded:Item}",
+			"labelQuality": "Quality",
+			"labelBenignity": "Benignity",
+			"labelMalignity": "Malignity",
+			"buttonTeleportEntity": "Teleport",
+			"optionTeleportSelectLocation": "To Location",
+			"optionTeleportToLocalPlayer": "To Local Player",
+			"optionTeleportToHost": "To Host",
+			"optionTeleportToPlayer": "To Player",
+			"buttonToggleInvulnerable": "Invulnerable",
+			"buttonToggleNoClip": "Noclip",
+			"labelSkill": "{#--text-color-faded:Skill}",
+			"none": "None",
+			"addToInventory": "Add to Inventory",
+			"doodadName": "{#--text-color-faded:Doodad:} {0}",
+			"tabItemStack": "Item Stack",
+			"unlockInspection": "Unlock Inspection",
+			"lockInspection": "Lock Inspection",
+			"tileEventName": "{#--text-color-faded:Tile Event:} {0}",
+			"itemName": "{#--text-color-faded:{0}}",
+			
+			
+			"actionResurrect": "resurrect {0}",
+			"actionClone": "clone {0}",
+			"actionTeleport": "teleport {0}"
 		}
 	}
 }

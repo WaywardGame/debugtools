@@ -1,774 +1,587 @@
-import { IActionArgument, IActionResult } from "action/IAction";
-import Corpses from "creature/corpse/Corpses";
-import Creatures from "creature/Creatures";
-import { ICreature } from "creature/ICreature";
-import Doodads from "doodad/Doodads";
-import { IStatMax, Stat } from "entity/IStats";
-import { ActionType, Bindable, CreatureType, Delay, DoodadType, Direction, ItemType, MoveType, NPCType, PlayerState, SentenceCaseStyle, SfxType, SpriteBatchLayer, StatusType, TerrainType, WorldZ } from "Enums";
-import Items from "item/Items";
+import { ICreature, IDamageInfo } from "creature/ICreature";
+import { EntityType } from "entity/IEntity";
+import { ActionType, Bindable, Delay, Direction, MoveType, OverlayType, SpriteBatchLayer } from "Enums";
+import { Dictionary, InterruptChoice } from "language/ILanguage";
 import Translation from "language/Translation";
-import * as MapGenHelpers from "mapgen/MapGenHelpers";
-import Mod from "mod/Mod";
-import { BindCatcherApi } from "newui/BindingManager";
-import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
-import IPlayer from "Player/IPlayer";
-import { ParticleType } from "renderer/particle/IParticle";
-import Particles from "renderer/particle/Particles";
-import * as Shaders from "renderer/Shaders";
-import { ITile, TileTemplateType } from "tile/ITerrain";
-import { TileEventType } from "tile/ITileEvent";
-import Terrains from "tile/Terrains";
-import TerrainTemplates from "tile/TerrainTemplates";
-import TileEvents from "tile/TileEvents";
-import Enums from "utilities/enum/Enums";
-import Log from "utilities/Log";
-import Strings from "utilities/string/Strings";
-import TileHelpers from "utilities/TileHelpers";
-
 import { HookMethod } from "mod/IHookHost";
-import { DebugToolsMessage } from "./IDebugTools";
-import { Inspection } from "./Inspection";
+import Mod from "mod/Mod";
+import Register, { Registry } from "mod/ModRegistry";
+import { BindCatcherApi, bindingManager, KeyModifier } from "newui/BindingManager";
+import { ScreenId } from "newui/screen/IScreen";
+import { DialogId } from "newui/screen/screens/game/Dialogs";
+import { MenuBarButtonGroup, MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
+import GameScreen from "newui/screen/screens/GameScreen";
+import { INPC } from "npc/INPC";
+import { Source } from "player/IMessageManager";
+import IPlayer from "player/IPlayer";
+import { ITile } from "tile/ITerrain";
+import Log from "utilities/Log";
+import { IVector2 } from "utilities/math/IVector";
+import Vector2 from "utilities/math/Vector2";
+import Vector3 from "utilities/math/Vector3";
+import Actions from "./Actions";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal } from "./IDebugTools";
+import LocationSelector from "./LocationSelector";
+import AddItemToInventory from "./ui/component/AddItemToInventory";
+import MainDialog from "./ui/DebugToolsDialog";
+import InspectDialog from "./ui/InspectDialog";
+import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
+import Version from "./util/Version";
 
-interface SelectAction {
-	type: string;
-	id: number;
+/**
+ * Returns a translation object using the `DebugToolsTranslation` dictionary
+ * @param debugToolsTranslation The `DebugToolsTranslation` to get a `Translation` instance of
+ */
+export function translation(debugToolsTranslation: DebugToolsTranslation) {
+	return new Translation(DebugTools.INSTANCE.dictionary, debugToolsTranslation);
 }
 
-interface ISaveData {
-	loadedCount: number;
-	disableLights: boolean;
-	playerData: { [index: string]: IPlayerData };
-	weightBonus: number;
+/**
+ * An enum representing the possible states of the camera
+ */
+enum CameraState {
+	/**
+	 * For when the camera is locked to the player
+	 */
+	Locked,
+	/**
+	 * For when the camera is unlocked and free to roam wherever
+	 */
+	Unlocked,
+	/**
+	 * For when the camera is in the process of moving back to the player
+	 */
+	Transition,
 }
 
-interface IPlayerData {
-	inMove: boolean;
-	noclipDelay: number;
+export enum DebugToolsEvent {
+	/**
+	 * Emitted when the data of the player is changing.
+	 * @param playerId The ID of the player whose data is changing
+	 * @param property The name of the property of the player's data which is changing
+	 * @param newValue The new value of the changed property in the player's data
+	 */
+	PlayerDataChange = "PlayerDataChange",
+	/**
+	 * Emitted when a tile or object is inspected.
+	 */
+	Inspect = "Inspect",
 }
-
-interface ISaveDataGlobal {
-	initializedCount: number;
-	autoOpen: boolean;
-}
-
-let log: Log;
 
 export default class DebugTools extends Mod {
-	private elementDialog: JQuery;
-	private keyBindDialog: number;
-	private keyBindSelectLocation: number;
-	private elementContainer: JQuery;
-	private elementInner: JQuery;
-	private elementDayNightTime: JQuery;
-	private elementReputationValue: JQuery;
-	private elementWeightBonusValue: JQuery;
-	private inspection: Inspection;
-	private isPlayingAudio = false;
-	private audioToPlay: number;
-	private isCreatingParticle = false;
-	private particleToCreate: number;
 
-	private dictionary: number;
+	////////////////////////////////////
+	// Static
+	//
 
-	private selectAction: number;
-	private setTimeAction: number;
-	private setReputationAction: number;
-	private setWeightBonusAction: number;
-	private refreshStatsAction: number;
-	private killAllCreaturesAction: number;
-	private killAllNPCsAction: number;
-	private unlockRecipesAction: number;
-	private reloadShadersAction: number;
-	private noclipAction: number;
-	private toggleTilledAction: number;
-	private teleportToHostAction: number;
-	private tameCreatureAction: number;
-	private toggleLightsAction: number;
+	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
+	public static readonly INSTANCE: DebugTools;
+	@Mod.log(DEBUG_TOOLS_ID)
+	public static readonly LOG: Log;
 
-	private data: ISaveData;
-	private globalData: ISaveDataGlobal;
+	////////////////////////////////////
+	// Registries
+	//
 
-	public onInitialize(saveDataGlobal: any): any {
-		this.keyBindDialog = this.addBindable("Toggle", [{ key: "Backslash" }, { key: "IntlBackslash" }]);
-		this.keyBindSelectLocation = this.addBindable("SelectLocation", { mouseButton: 0 });
-		this.dictionary = this.addDictionary("DebugTools", DebugToolsMessage);
+	@Register.registry(Actions)
+	public readonly actions: Actions;
+	@Register.registry(LocationSelector)
+	public readonly selector: LocationSelector;
+	@Register.registry(UnlockedCameraMovementHandler)
+	public readonly unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
 
-		this.globalData = saveDataGlobal ? saveDataGlobal : {
-			initializedCount: 0,
-			autoOpen: false
+	////////////////////////////////////
+	// Bindables
+	//
+
+	@Register.bindable("ToggleDialog", { key: "Backslash" }, { key: "IntlBackslash" })
+	public readonly bindableToggleDialog: Bindable;
+	@Register.bindable("CloseInspectDialog", { key: "KeyI", modifiers: [KeyModifier.Alt] })
+	public readonly bindableCloseInspectDialog: Bindable;
+
+	@Register.bindable("InspectTile", { mouseButton: 2, modifiers: [KeyModifier.Alt] })
+	public readonly bindableInspectTile: Bindable;
+	@Register.bindable("InspectLocalPlayer", { key: "KeyP", modifiers: [KeyModifier.Alt] })
+	public readonly bindableInspectLocalPlayer: Bindable;
+	@Register.bindable("HealLocalPlayer", { key: "KeyH", modifiers: [KeyModifier.Alt] })
+	public readonly bindableHealLocalPlayer: Bindable;
+	@Register.bindable("TeleportLocalPlayer", { mouseButton: 0, modifiers: [KeyModifier.Alt] })
+	public readonly bindableTeleportLocalPlayer: Bindable;
+	@Register.bindable("ToggleNoClip", { key: "KeyN", modifiers: [KeyModifier.Alt] })
+	public readonly bindableToggleNoClipOnLocalPlayer: Bindable;
+
+	@Register.bindable("ToggleCameraLock", { key: "KeyC", modifiers: [KeyModifier.Alt] })
+	public readonly bindableToggleCameraLock: Bindable;
+
+	@Register.bindable("Paint", { mouseButton: 0 })
+	public readonly bindablePaint: Bindable;
+	@Register.bindable("ErasePaint", { mouseButton: 2 })
+	public readonly bindableErasePaint: Bindable;
+	@Register.bindable("ClearPaint", { key: "Backspace" })
+	public readonly bindableClearPaint: Bindable;
+	@Register.bindable("CancelPaint", { key: "Escape" })
+	public readonly bindableCancelPaint: Bindable;
+	@Register.bindable("CompletePaint", { key: "Enter" })
+	public readonly bindableCompletePaint: Bindable;
+
+	////////////////////////////////////
+	// Language
+	//
+
+	@Register.dictionary("DebugTools", DebugToolsTranslation)
+	public readonly dictionary: Dictionary;
+
+	@Register.messageSource("DebugTools")
+	public readonly source: Source;
+
+	@Register.interruptChoice("SailToCivilization")
+	public readonly choiceSailToCivilization: InterruptChoice;
+	@Register.interruptChoice("TravelAway")
+	public readonly choiceTravelAway: InterruptChoice;
+
+	////////////////////////////////////
+	// UI
+	//
+
+	@Register.dialog("Main", MainDialog.description, MainDialog)
+	public readonly dialogMain: DialogId;
+	@Register.dialog("Inspect", InspectDialog.description, InspectDialog)
+	public readonly dialogInspect: DialogId;
+
+	@Register.menuBarButton("Dialog", {
+		onActivate: () => DebugTools.INSTANCE.toggleDialog(),
+		group: MenuBarButtonGroup.Meta,
+		bindable: Registry<DebugTools, Bindable>().get("bindableToggleDialog"),
+		tooltip: tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.DialogTitleMain))),
+	})
+	public readonly menuBarButton: MenuBarButtonType;
+
+	@Register.overlay("Target")
+	public readonly overlayTarget: OverlayType;
+	@Register.overlay("Paint")
+	public readonly overlayPaint: OverlayType;
+
+	////////////////////////////////////
+	// Fields & Other Data Storage
+	//
+
+	@Mod.saveData<DebugTools>(DEBUG_TOOLS_ID)
+	public data: ISaveData;
+	@Mod.globalData<DebugTools>(DEBUG_TOOLS_ID)
+	public globalData: ISaveDataGlobal;
+
+	private cameraState = CameraState.Locked;
+
+	/**
+	 * Retruns true if the camera state is `CameraState.Unlocked`. `CameraState.Transition` is considered "locked"
+	 */
+	public get isCameraUnlocked() {
+		return this.cameraState === CameraState.Unlocked;
+	}
+
+	/**
+	 * Returns a value from the debug tools player data.
+	 * @param player The player to get the data of.
+	 * @param key A key in `IPlayerData`, which is the index of the data that will be returned.
+	 * 
+	 * Note: If the player data doesn't yet exist, it will be created.
+	 */
+	public getPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K): IPlayerData[K] {
+		this.data.playerData[player.identifier] = this.data.playerData[player.identifier] || {
+			weightBonus: 0,
+			invulnerable: false,
+			noclip: false,
 		};
-		this.globalData.initializedCount++;
 
-		log = this.getLog();
-
-		log.info(`Initialized debug tools ${this.globalData.initializedCount} times.`);
-
-		this.registerOptionsSection((api, section) => section
-			.append(new CheckButton(api)
-				.setText(() => new Translation(this.dictionary, DebugToolsMessage.OptionsAutoOpen))
-				.setRefreshMethod(() => !!this.globalData.autoOpen)
-				.on(CheckButtonEvent.Change, (_, checked) => {
-					this.globalData.autoOpen = checked;
-				})
-				.appendTo(section)));
+		return this.data.playerData[player.identifier][key];
 	}
 
-	public onUninitialize(): any {
-		log.info("Uninitialized debug tools!");
-
-		return this.globalData;
+	/**
+	 * Sets debug tools player data.
+	 * @param player The player to set data for.
+	 * @param key The key in `IPlayerData` to set data to.
+	 * @param value The value which should be stored in this key on the player data.
+	 * 
+	 * Note: If the player doesn't have data stored yet, it's created first.
+	 * 
+	 * Note: Emits `DebugToolsEvent.PlayerDataChange` with the id of the player, the key of the changing data, and the new value.
+	 */
+	public setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]) {
+		this.getPlayerData(player, key);
+		this.data.playerData[player.identifier][key] = value;
+		this.trigger(DebugToolsEvent.PlayerDataChange, player.id, key, value);
 	}
 
-	public onLoad(saveData: any): void {
-		this.data = saveData;
-
-		if (!this.data || !this.data.loadedCount) {
-			this.data = {
-				loadedCount: 0,
-				disableLights: false,
-				playerData: {},
-				weightBonus: 0
-			};
-		}
-
-		if (this.data.weightBonus === undefined) {
-			this.data.weightBonus = 0;
-		}
-
-		this.data.playerData = this.data.playerData || {};
-
-		this.inspection = new Inspection(this.dictionary, log);
-
-		log.info(`Loaded debug tools ${this.data.loadedCount} times.`, this.data);
-
-		this.addCommand("refresh", (player: IPlayer) => {
-			actionManager.execute(player, this.refreshStatsAction);
-		});
-
-		this.selectAction = this.addActionType({ name: "Select", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			const selectAction = argument.object as SelectAction;
-
-			const { x, y, z } = player.getFacingPoint();
-
-			switch (selectAction.type) {
-				case "change-tile":
-					game.changeTile({ type: selectAction.id }, x, y, z, false);
-					break;
-
-				case "spawn-creature":
-					creatureManager.spawn(selectAction.id, x, y, z, true);
-					break;
-
-				case "spawn-npc":
-					npcManager.spawn(selectAction.id, x, y, z);
-					break;
-
-				case "item-get":
-					player.createItemInInventory(selectAction.id);
-					player.updateTablesAndWeight();
-					break;
-
-				case "place-env-item":
-					// Remove if Doodad already there
-					const tile = game.getTile(x, y, z);
-					if (tile.doodad) {
-						doodadManager.remove(tile.doodad);
-					}
-
-					doodadManager.create(selectAction.id, x, y, z);
-					break;
-
-				case "place-tile-event":
-					tileEventManager.create(selectAction.id, x, y, z);
-					break;
-
-				case "place-corpse":
-					corpseManager.create(selectAction.id, x, y, z);
-					break;
-
-				case "spawn-template":
-					MapGenHelpers.spawnTemplate(selectAction.id, x, y, z);
-					break;
-			}
-
-			player.updateStatsAndAttributes();
-
-			result.updateView = true;
-		});
-
-		this.setTimeAction = this.addActionType({ name: "Set Time", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			game.time.setTime(argument.object);
-
-			game.updateRender = true;
-
-			fieldOfView.compute();
-
-			if (player.isLocalPlayer()) {
-				this.updateSliders();
-			}
-		});
-
-		this.setReputationAction = this.addActionType({ name: "Set Reputation", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			player.setStat(Stat.Benignity, 0);
-			player.setStat(Stat.Malignity, 0);
-
-			player.updateReputation(argument.object);
-
-			if (player.isLocalPlayer()) {
-				this.updateSliders();
-			}
-		});
-
-		this.setWeightBonusAction = this.addActionType({ name: "Set Weight Bonus", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-
-			this.data.weightBonus = argument.object;
-			player.updateStrength();
-
-			if (player.isLocalPlayer()) {
-				this.updateSliders();
-			}
-
-			game.updateTablesAndWeight();
-		});
-
-		this.refreshStatsAction = this.addActionType({ name: "Refresh Stats", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			const health = player.getStat<IStatMax>(Stat.Health);
-			const stamina = player.getStat<IStatMax>(Stat.Stamina);
-			const hunger = player.getStat<IStatMax>(Stat.Hunger);
-			const thirst = player.getStat<IStatMax>(Stat.Thirst);
-
-			player.setStat(health, player.getMaxHealth());
-			player.setStat(stamina, stamina.max);
-			player.setStat(hunger, hunger.max);
-			player.setStat(thirst, thirst.max);
-
-			player.setStatus(StatusType.Bleeding, false);
-			player.setStatus(StatusType.Burned, false);
-			player.setStatus(StatusType.Poisoned, false);
-
-			player.state = PlayerState.None;
-			player.updateStatsAndAttributes();
-		});
-
-		this.killAllCreaturesAction = this.addActionType({ name: "Kill All Creatures", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			for (let i = 0; i < game.creatures.length; i++) {
-				if (game.creatures[i] !== undefined) {
-					creatureManager.remove(game.creatures[i]);
-				}
-			}
-
-			game.creatures = [];
-
-			game.updateView(false);
-		});
-
-		this.killAllNPCsAction = this.addActionType({ name: "Kill All NPCs", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			for (let i = 0; i < game.npcs.length; i++) {
-				if (game.npcs[i] !== undefined) {
-					npcManager.remove(game.npcs[i]);
-				}
-			}
-
-			game.npcs = [];
-
-			game.updateView(false);
-		});
-
-		this.unlockRecipesAction = this.addActionType({ name: "Unlock Recipes", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			const itemTypes = Enums.values(ItemType);
-
-			for (const itemType of itemTypes) {
-				const description = Items[itemType];
-				if (description && description.recipe && description.craftable !== false && !game.crafted[itemType]) {
-					game.crafted[itemType] = {
-						newUnlock: true,
-						unlockTime: Date.now()
-					};
-				}
-			}
-
-			game.updateTablesAndWeight();
-		});
-
-		this.reloadShadersAction = this.addActionType({ name: "Reload Shaders", usableAsGhost: true }, async (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			await Shaders.loadShaders();
-
-			Shaders.compileShaders();
-			game.updateView(true);
-		});
-
-		this.noclipAction = this.addActionType({ name: "Noclip" }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			if (player.moveType === MoveType.Flying) {
-				player.moveType = MoveType.Land;
-
-			} else {
-				player.moveType = MoveType.Flying;
-			}
-
-			game.updateView(true);
-		});
-
-		this.toggleTilledAction = this.addActionType({ name: "Toggle Tilled", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			const { x, y, z } = player.getFacingPoint();
-			const tile = game.getTile(x, y, z);
-
-			const tileType = TileHelpers.getType(tile);
-			if (!Terrains[tileType].tillable) {
-				return;
-			}
-
-			game.tileData[x] = game.tileData[x] || [];
-			game.tileData[x][y] = game.tileData[x][y] || [];
-			game.tileData[x][y][player.z] = game.tileData[x][y][z] || [];
-
-			const tileData = game.tileData[x][y][z];
-			if (tileData.length === 0) {
-				tileData.push({
-					type: tileType,
-					tilled: true
-				});
-
-			} else {
-				tileData[0].tilled = tileData[0].tilled ? false : true;
-			}
-
-			TileHelpers.setTilled(tile, tileData[0].tilled);
-
-			world.updateTile(x, y, z, tile);
-
-			renderer.computeSpritesInViewport();
-			game.updateRender = true;
-		});
-
-		this.teleportToHostAction = this.addActionType({ name: "Teleport to Host", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			if (players.length < 0) {
-				return;
-			}
-
-			// assume host is pid 0
-			const nearbyOpenTile = TileHelpers.findMatchingTile(players[0], TileHelpers.isOpenTile);
-
-			player.x = player.fromX = nearbyOpenTile.x;
-			player.y = player.fromY = nearbyOpenTile.y;
-			player.z = nearbyOpenTile.z;
-
-			game.updateView(true);
-		});
-
-		this.tameCreatureAction = this.addActionType({ name: "Force Tame Creature", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			const tile = player.getFacingTile();
-			if (!tile) {
-				return;
-			}
-
-			const creature = tile.creature;
-			if (creature === undefined) {
-				return;
-			}
-
-			creature.tame(player);
-
-			creature.queueSoundEffect(SfxType.CreatureNoise);
-
-			creature.setStat(Stat.Happiness, 9999999);
-
-			log.info("Tamed creature", creature);
-		});
-
-		this.toggleLightsAction = this.addActionType({ name: "Toggle Lighting", usableAsGhost: true }, (player: IPlayer, argument: IActionArgument, result: IActionResult) => {
-			this.data.disableLights = !this.data.disableLights;
-			player.updateStatsAndAttributes();
-			game.updateView(true);
-		});
+	////////////////////////////////////
+	// Mod Loading Cycle
+	//
+
+	/**
+	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
+	 */
+	public initializeGlobalData(data?: ISaveDataGlobal) {
+		const version = new Version(modManager.getVersion(this.getIndex()));
+		const lastLoadVersion = new Version((data && data.lastVersion) || "0.0.0");
+
+		const upgrade = !data || lastLoadVersion.isOlderThan(version);
+
+		return !upgrade ? data : {
+			lastVersion: version.getString(),
+		};
 	}
 
+	/**
+	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
+	 */
+	public initializeSaveData(data?: ISaveData) {
+		const version = new Version(modManager.getVersion(this.getIndex()));
+		const lastLoadVersion = new Version((data && data.lastVersion) || "0.0.0");
+
+		const upgrade = !data || lastLoadVersion.isOlderThan(version);
+
+		return !upgrade ? data : {
+			lighting: true,
+			playerData: {},
+			fog: true,
+			lastVersion: version.getString(),
+		};
+	}
+
+	/**
+	 * Called when Debug Tools is loaded (in a save)
+	 * - Registers the `LocationSelector` stored in `this.selector` as a hook host.
+	 * - Initializes the `AddItemToInventory` UI Component (it takes a second or two to be created, and there are multiple places in
+	 * the UI that use it. We initialize it only once so the slow initialization only happens once.)
+	 */
+	public onLoad(): void {
+		hookManager.register(this.selector, "DebugTools:LocationSelector");
+		AddItemToInventory.get(newui);
+	}
+
+	/**
+	 * Called when Debug Tools is unloaded (a save is exited)
+	 * - Deregisters `this.selector` as a hook host.
+	 * - Removes the `AddItemToInventory` UI Component.
+	 */
+	public onUnload() {
+		hookManager.deregister(this.selector);
+		AddItemToInventory.get(newui).releaseAndRemove();
+	}
+
+	/**
+	 * Saves the save data for Debug Tools
+	 */
 	public onSave(): any {
-		this.data.loadedCount++;
 		return this.data;
 	}
 
-	///////////////////////////////////////////////////
+	////////////////////////////////////
+	// Public Methods
+	//
+
+	/**
+	 * Updates the field of view based on whether it's disabled in the mod.
+	 */
+	public updateFog() {
+		fieldOfView.disabled = !this.data.fog;
+		game.updateView(true);
+	}
+
+	/**
+	 * Sets the camera state.
+	 * @param unlocked If true, unlocks the camera. Otherwise, sets the camera state to `CameraState.Transition`, allowing the camera
+	 * movement handler to transition it back to the player so it can be locked.
+	 */
+	public setCameraUnlocked(unlocked: boolean) {
+		if (unlocked) {
+			this.cameraState = CameraState.Unlocked;
+			this.unlockedCameraMovementHandler.position = new Vector2(localPlayer);
+			this.unlockedCameraMovementHandler.velocity = Vector2.ZERO;
+			this.unlockedCameraMovementHandler.transition = undefined;
+			this.unlockedCameraMovementHandler.homingVelocity = 0;
+
+		} else {
+			this.cameraState = CameraState.Transition;
+			this.unlockedCameraMovementHandler.transition = new Vector2(localPlayer);
+		}
+	}
+
+	/**
+	 * Inspects a tile, creature, player, or NPC.
+	 * - Opens the `InspectDialog`.
+	 * - Emits `DebugToolsEvent.Inspect`
+	 */
+	public inspect(what: Vector2 | ICreature | IPlayer | INPC) {
+		newui.getScreen<GameScreen>(ScreenId.Game)!
+			.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
+			.setInspection(what);
+
+		this.trigger(DebugToolsEvent.Inspect);
+	}
+
+	/**
+	 * Toggles the main dialog.
+	 */
+	public toggleDialog() {
+		newui.getScreen<GameScreen>(ScreenId.Game)!
+			.toggleDialog(this.dialogMain);
+	}
+
+	////////////////////////////////////
 	// Hooks
+	//
 
+	/**
+	 * When the field of view has initialized, we update the fog (enables/disables it based on the mod save data)
+	 */
 	@HookMethod
-	public isPlayerSwimming(player: IPlayer, isSwimming: boolean): boolean {
-		return player.moveType === MoveType.Flying ? false : undefined;
+	public postFieldOfView() {
+		this.updateFog();
 	}
 
+	/**
+	 * We allow zooming out much further than normal. To facilitate this we use this hook.
+	 * - If the zoom level hasn't been set by this mod, we return `undefined`, let another mod or the base game handle it.
+	 * - If our internal zoom level is more than `3`, we subtract 3 and use them as default zoom scales.
+	 * - If our internal zoom level is `3`: `0.5`
+	 * - If our internal zoom level is `2`: `0.25`
+	 * - If our internal zoom level is `1`: `0.125`
+	 * - If our internal zoom level is `0`: `0.0625`
+	 */
 	@HookMethod
-	public getPlayerStrength(strength: number, player: IPlayer) {
-		return strength + this.data.weightBonus;
+	public getZoomLevel() {
+		if (this.data.zoomLevel === undefined) {
+			return undefined;
+		}
+
+		if (this.data.zoomLevel > 3) {
+			return this.data.zoomLevel - 3;
+		}
+
+		return 1 / 2 ** (4 - this.data.zoomLevel);
 	}
 
+	/**
+	 * - If the camera state is `Locked`, we return `undefined` — let another mod or the base game handle the camera.
+	 * - If the camera state is `Transition`, we:
+	 * 	- Update the transition location on the camera movement handler.
+	 * 	- Check if the distance between the transition camera position and the local player (locked position) is less than half a tile.
+	 * 		- If it is, we lock the camera again and return `undefined`.
+	 * 		- Otherwise, we return the transition camera position.
+	 */
 	@HookMethod
-	public getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer) {
-		return player.moveType === MoveType.Flying ? SpriteBatchLayer.CreatureFlying : undefined;
-	}
+	public getCameraPosition(position: IVector2): IVector2 | undefined {
+		if (this.cameraState === CameraState.Locked) {
+			return undefined;
+		}
 
-	@HookMethod
-	public onGameScreenVisible(): void {
-		this.elementContainer = $("<div></div>");
-		this.elementInner = $('<div class="inner"></div>');
-		this.elementContainer.append(this.elementInner);
-
-		let html = this.generateSelect(TerrainType, Terrains, "change-tile", "Change Tile");
-		html += this.generateSelect(CreatureType, Creatures, "spawn-creature", "Spawn Creature");
-		html += this.generateSelect(NPCType, undefined, "spawn-npc", "Spawn NPC");
-		html += this.generateSelect(ItemType, Items, "item-get", "Get Item");
-		html += this.generateSelect(DoodadType, Doodads, "place-env-item", "Place Doodad");
-		html += this.generateSelect(TileEventType, TileEvents, "place-tile-event", "Place Tile Event");
-		html += this.generateSelect(CreatureType, Corpses, "place-corpse", "Place Corpse");
-		html += this.generateSelect(TileTemplateType, TerrainTemplates, "spawn-template", "Spawn Template");
-		html += this.generateSelect(SfxType, undefined, "play-audio", "Play Audio");
-		html += this.generateSelect(ParticleType, undefined, "create-particle", "Create Particle");
-
-		html += '<br />Time: <div id="daynighttime"></div><input id="daynightslider" type="range" min="0.0" max="1.0" step="0.01" data-range-id="daynight" />';
-
-		html += '<br />Reputation: <div id="reputationslidervalue"></div><input id="reputationslider" type="range" min="-64000" max="64000" step="1" data-range-id="reputation" />';
-
-		html += '<br />Weight Bonus: <div id="weightbonusvalue"></div><input id="weightbonusslider" type="range" min="0" max="2500" step="1" data-range-id="weightbonus" />';
-
-		this.elementInner.append(html);
-		this.elementDayNightTime = this.elementInner.find("#daynighttime");
-		this.elementReputationValue = this.elementInner.find("#reputationslidervalue");
-		this.elementWeightBonusValue = this.elementInner.find("#weightbonusvalue");
-
-		this.elementInner.on("click", ".select-control", function () {
-			$(`.${$(this).data("control")}`).trigger("change");
-		});
-
-		const self = this;
-
-		this.elementInner.on("input change", "#daynightslider", function () {
-			actionManager.execute(localPlayer, self.setTimeAction, {
-				object: parseFloat($(this).val())
-			});
-		});
-
-		this.elementInner.on("input change", "#reputationslider", function () {
-			actionManager.execute(localPlayer, self.setReputationAction, {
-				object: parseFloat($(this).val())
-			});
-		});
-
-		this.elementInner.on("input change", "#weightbonusslider", function () {
-			actionManager.execute(localPlayer, self.setWeightBonusAction, {
-				object: parseFloat($(this).val())
-			});
-		});
-
-		this.elementInner.on("change", "select", function () {
-			const id = parseInt($(this).find("option:selected").data("id"), 10);
-			if (id < 0) {
-				return;
+		if (this.cameraState === CameraState.Transition) {
+			this.unlockedCameraMovementHandler.transition = new Vector2(localPlayer);
+			if (Vector2.isDistanceWithin(this.unlockedCameraMovementHandler.position, localPlayer, 0.5)) {
+				this.cameraState = CameraState.Locked;
+				return undefined;
 			}
+		}
 
-			const selectId = $(this).data("selectid");
-			if (selectId) {
-				if (selectId === "play-audio") {
-					self.isPlayingAudio = !self.isPlayingAudio;
-					$("[data-control='play-audio']").toggleClass("active", self.isPlayingAudio);
-					self.audioToPlay = id;
-
-				} else if (selectId === "create-particle") {
-					self.isCreatingParticle = !self.isCreatingParticle;
-					$("[data-control='create-particle']").toggleClass("active", self.isCreatingParticle);
-					self.particleToCreate = id;
-
-				} else {
-					actionManager.execute(localPlayer, self.selectAction, {
-						object: {
-							type: selectId,
-							id: id
-						} as SelectAction
-					});
-				}
-			}
-		});
-
-		this.elementInner.append(
-			$("<button>Inspect</button>").click(() => this.inspection.queryInspection()),
-			$("<button>Refresh Stats</button>").click(() => actionManager.execute(localPlayer, this.refreshStatsAction)),
-			$("<button>Kill All Creatures</button>").click(() => actionManager.execute(localPlayer, this.killAllCreaturesAction)),
-			$("<button>Kill All NPCs</button>").click(() => actionManager.execute(localPlayer, this.killAllNPCsAction)),
-			$("<button>Unlock Recipes</button>").click(() => actionManager.execute(localPlayer, this.unlockRecipesAction)),
-			$("<button>Reload Shaders</button>").click(() => actionManager.execute(localPlayer, this.reloadShadersAction)),
-			$("<button>Noclip</button>").click(() => actionManager.execute(localPlayer, this.noclipAction)),
-
-			$("<button>Toggle FOV</button>").click(() => {
-				fieldOfView.disabled = !fieldOfView.disabled;
-				game.updateView(true);
-			}),
-
-			$("<button>Zoom Out</button>").click(() => {
-				renderer.setTileScale(0.15);
-				renderer.computeSpritesInViewport();
-				game.updateRender = true;
-			}),
-
-			$("<button>Toggle Tilled</button>").click(() => actionManager.execute(localPlayer, this.toggleTilledAction)),
-
-			$("<button>Travel Away</button>").click(() => {
-				if (multiplayer.isConnected()) {
-					return;
-				}
-
-				const teleportToSea = () => {
-					for (let y = 0; y < game.mapSize; y++) {
-						for (let x = 0; x < game.mapSize; x++) {
-							const tile = game.getTile(x, y, WorldZ.Overworld);
-							if (TileHelpers.getType(tile) === TerrainType.DeepSeawater) {
-								localPlayer.x = localPlayer.fromX = x;
-								localPlayer.y = localPlayer.fromY = y;
-								localPlayer.z = WorldZ.Overworld;
-
-								game.updateView(true);
-								return;
-							}
-						}
-					}
-				};
-
-				teleportToSea();
-
-				localPlayer.createItemInInventory(ItemType.GoldCoins);
-				localPlayer.createItemInInventory(ItemType.GoldenChalice);
-				localPlayer.createItemInInventory(ItemType.GoldenKey);
-				localPlayer.createItemInInventory(ItemType.GoldenRing);
-				localPlayer.createItemInInventory(ItemType.GoldenSword);
-
-				const boat = localPlayer.createItemInInventory(ItemType.Sailboat);
-
-				actionManager.execute(localPlayer, ActionType.TraverseTheSea, { item: boat });
-			}),
-
-			$("<button>Teleport to Host</button>").click(() => actionManager.execute(localPlayer, this.teleportToHostAction)),
-
-			$("<button>Tame</button>").click(() => actionManager.execute(localPlayer, this.tameCreatureAction)),
-
-			$("<button>Reset WebGL</button>").click(() => {
-				game.resetWebGL();
-			}),
-
-			$("<button>Toggle Lighting</button>").click(() => actionManager.execute(localPlayer, this.toggleLightsAction))
-		);
-
-		this.elementDialog = this.createDialog(this.elementContainer, {
-			id: this.getName(),
-			title: "Debug Tools",
-			open: this.globalData.autoOpen,
-			x: 20,
-			y: 180,
-			width: 490,
-			height: "auto",
-			resizable: false,
-			onOpen: () => {
-				this.updateSliders();
-			}
-		});
+		return this.unlockedCameraMovementHandler.position;
 	}
 
+	/**
+	 * We cancel damage to the player if they're set as "invulnerable"
+	 */
 	@HookMethod
-	public onGameTickEnd() {
-		this.inspection.update();
-		this.updateSliders();
+	public onPlayerDamage(player: IPlayer, info: IDamageInfo): number | undefined {
+		if (this.getPlayerData(player, "invulnerable")) return 0;
+		return undefined;
 	}
 
+	/**
+	 * We prevent creatures attacking the enemy if the enemy is a player who is set as "invulnerable" or "noclipping"
+	 */
 	@HookMethod
-	public canClientMove(): false | undefined {
-		if (this.inspection.isQueryingInspection() || this.isPlayingAudio || this.isCreatingParticle) {
-			return false;
+	public canCreatureAttack(creature: ICreature, enemy: IPlayer | ICreature): boolean | undefined {
+		if (enemy.entityType === EntityType.Player) {
+			if (this.getPlayerData(enemy, "invulnerable")) return false;
+			if (this.getPlayerData(enemy, "noclip")) return false;
 		}
 
 		return undefined;
 	}
 
-	@HookMethod
-	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable {
-		if (api.wasPressed(this.keyBindDialog) && !bindPressed) {
-			ui.toggleDialog(this.elementDialog);
-			bindPressed = this.keyBindDialog;
-		}
-
-		if (api.wasPressed(this.keyBindSelectLocation) && !bindPressed) {
-			if (this.inspection.isQueryingInspection()) {
-				bindPressed = this.keyBindSelectLocation;
-				this.inspection.inspect(api.mouseX, api.mouseY, this.createDialog);
-
-			} else if (this.isPlayingAudio) {
-				bindPressed = this.keyBindSelectLocation;
-				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
-
-				if (tilePosition.x < 0) {
-					tilePosition.x += game.mapSize;
-				}
-
-				if (tilePosition.y < 0) {
-					tilePosition.y += game.mapSize;
-				}
-
-				audio.queueEffect(this.audioToPlay, tilePosition.x, tilePosition.y, localPlayer.z);
-
-			} else if (this.isCreatingParticle) {
-				bindPressed = this.keyBindSelectLocation;
-				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
-				if (tilePosition.x < 0) {
-					tilePosition.x += game.mapSize;
-				}
-
-				if (tilePosition.y < 0) {
-					tilePosition.y += game.mapSize;
-				}
-
-				game.particle.create(tilePosition.x, tilePosition.y, localPlayer.z, Particles[this.particleToCreate]);
-			}
-		}
-
-		return bindPressed;
-	}
-
-	@HookMethod
-	public canCreatureAttack(creature: ICreature, enemy: IPlayer | ICreature): boolean {
-		return (enemy as any).moveType === MoveType.Flying ? false : undefined;
-	}
-
+	/**
+	 * If the player isn't "noclipping", returns `undefined`.
+	 * 
+	 * Otherwise: 
+	 * - The delay before the next movement is calculated based on the last movement (it goes faster the further you go, with a cap)
+	 * - Moves the player to the next tile instantly, then adds the calculated delay.
+	 * - Cancels the default movement by returning `false`.
+	 */
 	@HookMethod
 	public onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined {
-		if (player.moveType !== MoveType.Flying) {
-			return undefined;
-		}
+		const noclip = this.getPlayerData(player, "noclip");
+		if (!noclip) return undefined;
 
-		// todo: convert this to use debug tools mod save data
-		let playerData = this.data.playerData[player.identifier];
-		if (!playerData) {
-			playerData = this.data.playerData[player.identifier] = {
-				inMove: false,
-				noclipDelay: Delay.Movement
-			};
-		}
+		player.moveType = MoveType.Flying;
 
-		if (playerData.inMove) {
-			playerData.noclipDelay = Math.max(playerData.noclipDelay - 1, 1);
+		if (noclip.moving) {
+			noclip.delay = Math.max(noclip.delay - 1, 1);
 
 		} else {
-			playerData.noclipDelay = Delay.Movement;
+			noclip.delay = Delay.Movement;
 		}
 
-		player.addDelay(playerData.noclipDelay, true);
+		player.addDelay(noclip.delay, true);
 
-		actionManager.execute(player, ActionType.UpdateDirection, {
-			direction: direction
-		});
+		actionManager.execute(player, ActionType.UpdateDirection, { direction });
 
 		player.isMoving = true;
 		player.isMovingClientside = true;
 		player.nextX = nextX;
 		player.nextY = nextY;
-		player.nextMoveTime = game.absoluteTime + (playerData.noclipDelay * game.interval);
+		player.nextMoveTime = game.absoluteTime + (noclip.delay * game.interval);
 
-		playerData.inMove = true;
+		noclip.moving = true;
 
 		game.passTurn(player);
 
-		// disable default movement
 		return false;
 	}
 
+	/**
+	 * Used to reset noclip movement speed.
+	 */
 	@HookMethod
 	public onNoInputReceived(player: IPlayer): void {
-		if (player.moveType !== MoveType.Flying) {
-			return;
-		}
+		const noclip = this.getPlayerData(player, "noclip");
+		if (!noclip) return;
 
-		const playerData = this.data.playerData[player.identifier];
-		if (playerData) {
-			playerData.inMove = false;
-		}
+		noclip.moving = false;
 	}
 
+	/**
+	 * If the player is "noclipping", we put them in `SpriteBatchLayer.CreatureFlying`.
+	 * Otherwise we return `undefined` and let the game or other mods handle it.
+	 */
 	@HookMethod
-	public getAmbientColor(colors: number[]): number[] | undefined {
-		if (this.data.disableLights) {
-			return [1, 1, 1];
+	public getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined {
+		return this.getPlayerData(player, "noclip") ? SpriteBatchLayer.CreatureFlying : undefined;
+	}
+
+	/**
+	 * If the player is "noclipping", we return `false` (not swimming). 
+	 * Otherwise we return `undefined` and let the game or other mods handle it. 
+	 */
+	@HookMethod
+	public isPlayerSwimming(player: IPlayer, isSwimming: boolean): boolean | undefined {
+		return this.getPlayerData(player, "noclip") ? false : undefined;
+	}
+
+	/**
+	 * We add the weight bonus from the player's save data to the existing strength.
+	 */
+	@HookMethod
+	public getPlayerStrength(strength: number, player: IPlayer) {
+		return strength + this.getPlayerData(player, "weightBonus");
+	}
+
+	// tslint:disable cyclomatic-complexity
+	@HookMethod
+	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable {
+		const gameScreen = newui.getScreen<GameScreen>(ScreenId.Game)!;
+
+		if (api.wasPressed(this.bindableToggleDialog) && !bindPressed) {
+			gameScreen.toggleDialog(this.dialogMain);
+			bindPressed = this.bindableToggleDialog;
+		}
+
+		if (api.wasPressed(Bindable.GameZoomIn) && !bindPressed && gameScreen.isMouseWithin()) {
+			this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;
+			this.data.zoomLevel = Math.min(11, ++this.data.zoomLevel);
+			game.updateZoomLevel();
+			bindPressed = Bindable.GameZoomIn;
+			api.removePressState(Bindable.GameZoomIn);
+		}
+
+		if (api.wasPressed(Bindable.GameZoomOut) && !bindPressed && gameScreen.isMouseWithin()) {
+			this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;
+			this.data.zoomLevel = Math.max(0, --this.data.zoomLevel);
+			game.updateZoomLevel();
+			bindPressed = Bindable.GameZoomOut;
+			api.removePressState(Bindable.GameZoomOut);
+		}
+
+		if (api.wasPressed(this.bindableToggleCameraLock) && !bindPressed) {
+			this.setCameraUnlocked(this.cameraState !== CameraState.Unlocked);
+			bindPressed = this.bindableToggleCameraLock;
+		}
+
+		if (api.wasPressed(this.bindableInspectTile) && !bindPressed && gameScreen.isMouseWithin()) {
+			this.inspect(renderer.screenToTile(...bindingManager.getMouse().xy));
+			bindPressed = this.bindableInspectTile;
+		}
+
+		if (api.wasPressed(this.bindableInspectLocalPlayer) && !bindPressed) {
+			this.inspect(localPlayer);
+			bindPressed = this.bindableInspectLocalPlayer;
+		}
+
+		if (api.wasPressed(this.bindableHealLocalPlayer) && !bindPressed) {
+			Actions.get("heal").execute({ entity: localPlayer });
+			bindPressed = this.bindableHealLocalPlayer;
+		}
+
+		if (api.wasPressed(this.bindableTeleportLocalPlayer) && !bindPressed) {
+			Actions.get("teleport").execute({
+				entity: localPlayer,
+				position: { ...renderer.screenToTile(api.mouseX, api.mouseY).raw(), z: localPlayer.z },
+			});
+			bindPressed = this.bindableTeleportLocalPlayer;
+		}
+
+		if (api.wasPressed(this.bindableToggleNoClipOnLocalPlayer) && !bindPressed) {
+			Actions.get("toggleNoclip")
+				.execute({ player: localPlayer, object: !this.getPlayerData(localPlayer, "noclip") });
+			bindPressed = this.bindableToggleNoClipOnLocalPlayer;
+		}
+
+		// if the camera isn't locked, we let the camera movement handler handle binds
+		return this.cameraState === CameraState.Locked ? bindPressed : this.unlockedCameraMovementHandler.handle(bindPressed, api);
+	}
+	// tslint:enable cyclomatic-complexity
+
+	/**
+	 * If lighting is disabled, we return maximum light on all channels.
+	 */
+	@HookMethod
+	public getAmbientColor(colors: [number, number, number]) {
+		if (!this.data.lighting) {
+			return Vector3.ONE.xyz;
 		}
 
 		return undefined;
 	}
 
+	/**
+	 * If lighting is disabled, we return the maximum light level.
+	 */
 	@HookMethod
 	public getAmbientLightLevel(ambientLight: number, z: number): number | undefined {
-		if (this.data.disableLights) {
+		if (!this.data.lighting) {
 			return 1;
 		}
 
 		return undefined;
 	}
 
+	/**
+	 * If lighting is disabled, we return the minimum light level.
+	 */
 	@HookMethod
 	public getTileLightLevel(tile: ITile, x: number, y: number, z: number): number | undefined {
-		if (this.data.disableLights) {
+		if (!this.data.lighting) {
 			return 0;
 		}
 
 		return undefined;
-	}
-
-	///////////////////////////////////////////////////
-	// Helper functions
-
-	private generateSelect(enums: any, objects: Description<any> | undefined, className: string, labelName: string): string {
-		let html = `<select class="${className}" data-selectid="${className}"><option selected disabled>${labelName}</option>`;
-
-		const sorted = new Array<any>();
-		const makePretty = (str: string, value: number): string => {
-			if (objects && objects[value] && objects[value].name) {
-				return Strings.formatSentenceCase(objects[value].name, SentenceCaseStyle.Title);
-			}
-
-			let result = str[0];
-			for (let i = 1; i < str.length; i++) {
-				if (str[i] === str[i].toUpperCase()) {
-					result += " ";
-				}
-
-				result += str[i];
-			}
-
-			return result;
-		};
-
-		for (const [name, value] of Enums.entries(enums)) {
-			if (objects === undefined || objects[value]) {
-				sorted.push({ id: value, name: makePretty(name, value) });
-			}
-		}
-
-		sorted.sort((a: any, b: any): number => a.name.localeCompare(b.name));
-
-		for (let i = 0; i < sorted.length; i++) {
-			html += `<option data-id="${sorted[i].id}">${sorted[i].name}</option>`;
-		}
-
-		html += `</select><button class="select-control" data-control="${className}">></button>`;
-
-		return html;
-	}
-
-	private updateSliders() {
-		const time = game.time.getTime();
-
-		if (!this.elementDayNightTime) {
-			return;
-		}
-
-		this.elementDayNightTime.text(Translation.getString(game.time.getTranslation(time)));
-		this.elementReputationValue.text(localPlayer.getReputation());
-		this.elementWeightBonusValue.text(this.data.weightBonus);
-		document.getElementById("daynightslider")
-			.style.setProperty("--percent", `${game.time.getTime() * 100}`);
-		document.getElementById("reputationslider")
-			.style.setProperty("--percent", `${(localPlayer.getReputation() + 64000) / 128000 * 100}`);
-		document.getElementById("weightbonusslider")
-			.style.setProperty("--percent", `${(this.data.weightBonus / 2500 * 100)}`);
 	}
 }
