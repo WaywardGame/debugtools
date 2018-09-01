@@ -1,19 +1,27 @@
 import { IDoodad } from "doodad/IDoodad";
 import { ItemQuality, ItemType, SentenceCaseStyle } from "Enums";
+import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { UiApi } from "newui/INewUi";
 import { ITile } from "tile/ITerrain";
+import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
 import DebugTools, { translation } from "../../DebugTools";
-import { DebugToolsTranslation } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
 import AddItemToInventory, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
 import { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
 export default class DoodadInformation extends InspectInformationSection {
+
+	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
+	public readonly DEBUG_TOOLS: DebugTools;
+	@Mod.log(DEBUG_TOOLS_ID)
+	public readonly LOG: Log;
+
 	private doodad: IDoodad | undefined;
 
 	public constructor(api: UiApi) {
@@ -55,7 +63,7 @@ export default class DoodadInformation extends InspectInformationSection {
 	}
 
 	public logUpdate() {
-		DebugTools.LOG.info("Doodad:", this.doodad);
+		this.LOG.info("Doodad:", this.doodad);
 	}
 
 	@Bound
@@ -71,7 +79,7 @@ export default class DoodadInformation extends InspectInformationSection {
 
 	@Bound
 	private async cloneDoodad() {
-		const teleportLocation = await DebugTools.INSTANCE.selector.select();
+		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
 		if (!teleportLocation) return;
 
 		Actions.get("clone")

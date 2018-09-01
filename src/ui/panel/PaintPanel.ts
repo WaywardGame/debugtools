@@ -1,6 +1,7 @@
 import { Bindable, CreatureType, DoodadType, NPCType, SpriteBatchLayer, TerrainType } from "Enums";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
+import Mod from "mod/Mod";
 import { BindCatcherApi, bindingManager } from "newui/BindingManager";
 import { BlockRow } from "newui/component/BlockRow";
 import Button, { ButtonEvent } from "newui/component/Button";
@@ -17,7 +18,8 @@ import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
 import Actions from "../../Actions";
 import DebugTools, { translation } from "../../DebugTools";
-import { DebugToolsTranslation, isPaintOverlay } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
+import Overlays from "../../overlay/Overlays";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
 import { getTileId, getTilePosition } from "../../util/TilePosition";
 import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
@@ -70,6 +72,10 @@ const paintSections: (new (api: UiApi) => IPaintSection)[] = [
 ];
 
 export default class PaintPanel extends DebugToolsPanel {
+
+	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
+	public readonly DEBUG_TOOLS: DebugTools;
+
 	private readonly paintSections: IPaintSection[] = [];
 	private paintButton: CheckButton;
 	private paintRow: Component;
@@ -148,7 +154,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		}
 
 		if (this.painting) {
-			if (api.isDown(DebugTools.INSTANCE.bindablePaint) && this.gsapi.wasMouseStartWithin()) {
+			if (api.isDown(this.DEBUG_TOOLS.bindablePaint) && this.gsapi.wasMouseStartWithin()) {
 				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
 
 				const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
@@ -173,10 +179,10 @@ export default class PaintPanel extends DebugToolsPanel {
 				this.updateOverlayBatch();
 				game.updateView(false);
 
-				bindPressed = DebugTools.INSTANCE.bindablePaint;
+				bindPressed = this.DEBUG_TOOLS.bindablePaint;
 			}
 
-			if (api.isDown(DebugTools.INSTANCE.bindableErasePaint) && this.gsapi.wasMouseStartWithin()) {
+			if (api.isDown(this.DEBUG_TOOLS.bindableErasePaint) && this.gsapi.wasMouseStartWithin()) {
 				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
 
 				const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
@@ -202,24 +208,24 @@ export default class PaintPanel extends DebugToolsPanel {
 				this.updateOverlayBatch();
 				game.updateView(false);
 
-				bindPressed = DebugTools.INSTANCE.bindableErasePaint;
+				bindPressed = this.DEBUG_TOOLS.bindableErasePaint;
 			}
 
 			if (!bindPressed) delete this.lastPaintPosition;
 
-			if (api.wasPressed(DebugTools.INSTANCE.bindableCancelPaint)) {
+			if (api.wasPressed(this.DEBUG_TOOLS.bindableCancelPaint)) {
 				this.paintButton.setChecked(false);
-				bindPressed = DebugTools.INSTANCE.bindableCancelPaint;
+				bindPressed = this.DEBUG_TOOLS.bindableCancelPaint;
 			}
 
-			if (api.wasPressed(DebugTools.INSTANCE.bindableClearPaint)) {
+			if (api.wasPressed(this.DEBUG_TOOLS.bindableClearPaint)) {
 				this.clearPaint();
-				bindPressed = DebugTools.INSTANCE.bindableClearPaint;
+				bindPressed = this.DEBUG_TOOLS.bindableClearPaint;
 			}
 
-			if (api.wasPressed(DebugTools.INSTANCE.bindableCompletePaint)) {
+			if (api.wasPressed(this.DEBUG_TOOLS.bindableCompletePaint)) {
 				this.completePaint();
-				bindPressed = DebugTools.INSTANCE.bindableCompletePaint;
+				bindPressed = this.DEBUG_TOOLS.bindableCompletePaint;
 			}
 		}
 
@@ -285,7 +291,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		for (const tileId of this.paintTiles) {
 			const position = getTilePosition(tileId);
 			const tile = game.getTile(...position);
-			TileHelpers.Overlay.remove(tile, isPaintOverlay);
+			TileHelpers.Overlay.remove(tile, Overlays.isPaint);
 		}
 
 		this.paintTiles.splice(0, Infinity);

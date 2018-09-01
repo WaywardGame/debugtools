@@ -80,6 +80,7 @@ export default class AddItemToInventory extends Component {
 	public releaseAndRemove() {
 		this.cancel(ComponentEvent.WillRemove, this.willRemove);
 		this.remove();
+		delete AddItemToInventory.INSTANCE;
 	}
 
 	@Bound

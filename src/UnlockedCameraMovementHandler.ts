@@ -9,6 +9,10 @@ const STOP_FRICTION = 0.9;
 
 export default class UnlockedCameraMovementHandler {
 
+	////////////////////////////////////
+	// Registrations
+	//
+
 	@Register.bindable("CameraMoveUp", { key: "KeyW", modifiers: [KeyModifier.Alt] })
 	public readonly bindMoveCameraUp: Bindable;
 	@Register.bindable("CameraMoveLeft", { key: "KeyA", modifiers: [KeyModifier.Alt] })
@@ -18,11 +22,18 @@ export default class UnlockedCameraMovementHandler {
 	@Register.bindable("CameraMoveRight", { key: "KeyD", modifiers: [KeyModifier.Alt] })
 	public readonly bindMoveCameraRight: Bindable;
 
+	////////////////////////////////////
+	// Fields
+	//
+
 	public velocity = Vector2.ZERO;
 	public position: Vector2;
 	public transition?: Vector2;
 	public homingVelocity = 0;
 
+	/**
+	 * Simple velocity movement implementation
+	 */
 	public handle(bindPressed: Bindable, api: BindCatcherApi) {
 		let friction = STOP_FRICTION;
 
@@ -52,6 +63,7 @@ export default class UnlockedCameraMovementHandler {
 
 		this.position.add(this.velocity).mod(game.mapSize);
 
+		// homes in on the player again if in the 'transition' state
 		if (this.transition) {
 			this.homingVelocity += 0.01;
 			this.homingVelocity *= 0.98;

@@ -1,3 +1,4 @@
+import Mod from "mod/Mod";
 import { ITile } from "tile/ITerrain";
 import { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
@@ -8,34 +9,45 @@ import Vector3 from "utilities/math/Vector3";
 import Objects from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
 import DebugTools from "../DebugTools";
-import { isPaintOverlay } from "../IDebugTools";
+import { DEBUG_TOOLS_ID } from "../IDebugTools";
+import Overlays from "./Overlays";
 
-module SelectionOverlay {
-	export function add(tilePosition: IVector2 | IVector3, tile = getTile(tilePosition)) {
-		if (TileHelpers.Overlay.add(tile, { type: DebugTools.INSTANCE.overlayPaint }, isPaintOverlay)) {
+export default class SelectionOverlay {
+
+	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
+	public static readonly debugTools: DebugTools;
+
+	public static add(tilePosition: IVector2 | IVector3, tile = getTile(tilePosition)) {
+		if (TileHelpers.Overlay.add(tile, { type: this.debugTools.overlayPaint }, Overlays.isPaint)) {
 			updateSelectionOverlay(tile, tilePosition);
 		}
 	}
 
-	export function remove(tilePosition: IVector2 | IVector3, tile = getTile(tilePosition)) {
-		if (TileHelpers.Overlay.remove(tile, isPaintOverlay)) {
+	public static remove(tilePosition: IVector2 | IVector3, tile = getTile(tilePosition)) {
+		if (TileHelpers.Overlay.remove(tile, Overlays.isPaint)) {
 			updateSelectionOverlay(tile, tilePosition);
 		}
 	}
 }
-
-export default SelectionOverlay;
 
 function getTile(tilePosition: IVector2 | IVector3) {
 	return game.getTile(tilePosition.x, tilePosition.y, "z" in tilePosition ? tilePosition.z : localPlayer.z);
 }
 
+/**
+ * Selection overlay tilemapping
+ * @param tile The tile to update
+ * @param tilePosition The position of this tile
+ * @param updateNeighbors Whether to update the tile's neighbours. Defaults to `true`. This method calls itself to update its neighbours,
+ * but doesn't update neighbours in the recursive call.
+ */
 function updateSelectionOverlay(tile: ITile, tilePosition: IVector2, updateNeighbors = true) {
 	let neighborTiles: INeighborTiles | undefined;
 	let connections: NeighborPosition[] | undefined;
 
-	const isTilePainted = TileHelpers.Overlay.remove(tile, isPaintOverlay);
+	const isTilePainted = TileHelpers.Overlay.remove(tile, Overlays.isPaint);
 
+	// if this tile is painted (has the selection overlay), we tilemap this tile based on its neighbours
 	if (isTilePainted) {
 		neighborTiles = getNeighborTiles(tilePosition);
 		connections = getPaintOverlayConnections(neighborTiles);
@@ -52,7 +64,7 @@ function updateSelectionOverlay(tile: ITile, tilePosition: IVector2, updateNeigh
 
 			if (mappedTile[subTilePosition] === 4) {
 				TileHelpers.Overlay.add(tile, {
-					type: DebugTools.INSTANCE.overlayPaint,
+					type: SelectionOverlay.debugTools.overlayPaint,
 					size: 8,
 					offsetX: 20,
 					offsetY: 4,
@@ -63,7 +75,7 @@ function updateSelectionOverlay(tile: ITile, tilePosition: IVector2, updateNeigh
 			}
 
 			TileHelpers.Overlay.add(tile, {
-				type: DebugTools.INSTANCE.overlayPaint,
+				type: SelectionOverlay.debugTools.overlayPaint,
 				size: 8,
 				offsetX: mappedTile[subTilePosition] * 16 + offset.x,
 				offsetY: offset.y,
@@ -83,6 +95,9 @@ function updateSelectionOverlay(tile: ITile, tilePosition: IVector2, updateNeigh
 	}
 }
 
+/**
+ * Returns the neighbor tiles for the given tile position.
+ */
 function getNeighborTiles(tilePosition: IVector2): INeighborTiles {
 	const vectors = getNeighborVectors(tilePosition);
 	return Enums.values(NeighborPosition)
@@ -90,12 +105,18 @@ function getNeighborTiles(tilePosition: IVector2): INeighborTiles {
 		.collect(Objects.create);
 }
 
+/**
+ * Returns an array of neighbor positions that are painted/selected
+ */
 function getPaintOverlayConnections(neighbors: INeighborTiles) {
 	return Objects.keys(neighbors)
-		.filter(neighborPosition => TileHelpers.Overlay.has(neighbors[neighborPosition][1], isPaintOverlay))
+		.filter(neighborPosition => TileHelpers.Overlay.has(neighbors[neighborPosition][1], Overlays.isPaint))
 		.collect(Collectors.toArray);
 }
 
+/**
+ * Returns a map of neighbor positions to their corresponding tile position.
+ */
 function getNeighborVectors(tilePosition: IVector2) {
 	return {
 		[NeighborPosition.TopLeft]: new Vector3(tilePosition.x - 1, tilePosition.y - 1, localPlayer.z),
@@ -131,6 +152,9 @@ enum SubTilePosition {
 	BottomRight,
 }
 
+/**
+ * The master tilemap-map, mapping subtile positions to their position in the tilesheet
+ */
 const paintTileMap = {
 	[SubTilePosition.TopLeft]: {
 		[""]: 0,
@@ -174,12 +198,18 @@ const paintTileMap = {
 	},
 };
 
+/**
+ * Returns an ID from a list of neighbor positions, fitlered by ones that are actually relevant to the sub tile position (quadrant of a tile)
+ */
 function getId(relevantFor: SubTilePosition, ...positions: (NeighborPosition | undefined)[]) {
 	return positions.filter((p): p is NeighborPosition => p !== undefined && isRelevant(relevantFor, p))
 		.sort((a, b) => a.localeCompare(b))
 		.join("");
 }
 
+/**
+ * Returns whether the given neighbor position is relevant for the given sub tile position (EG: when the sub tile sprite is affected by the neighbor)
+ */
 // tslint:disable cyclomatic-complexity
 function isRelevant(subTilePosition: SubTilePosition, neighborPosition: NeighborPosition) {
 	switch (subTilePosition) {

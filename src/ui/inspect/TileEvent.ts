@@ -1,4 +1,5 @@
 import { SentenceCaseStyle } from "Enums";
+import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { UiApi } from "newui/INewUi";
 import { ITile } from "tile/ITerrain";
@@ -6,15 +7,20 @@ import { ITileEvent } from "tile/ITileEvent";
 import tileEventDescriptions from "tile/TileEvents";
 import { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
+import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
 import Actions, { RemovalType } from "../../Actions";
-import DebugTools, { translation } from "../../DebugTools";
-import { DebugToolsTranslation } from "../../IDebugTools";
+import { translation } from "../../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
 export default class TileEventInformation extends InspectInformationSection {
+
+	@Mod.log(DEBUG_TOOLS_ID)
+	public readonly LOG: Log;
+
 	private tileEvents: ITileEvent[] = [];
 	// @ts-ignore
 	private tileEvent: ITileEvent | undefined;
@@ -51,7 +57,7 @@ export default class TileEventInformation extends InspectInformationSection {
 
 	public logUpdate() {
 		for (const tileEvent of this.tileEvents) {
-			DebugTools.LOG.info("Tile Event:", tileEvent);
+			this.LOG.info("Tile Event:", tileEvent);
 		}
 	}
 

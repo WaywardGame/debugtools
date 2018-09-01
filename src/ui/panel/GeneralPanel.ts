@@ -2,6 +2,7 @@ import { ActionType, Bindable, SfxType } from "Enums";
 import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
+import Mod from "mod/Mod";
 import { BindCatcherApi } from "newui/BindingManager";
 import { BlockRow } from "newui/component/BlockRow";
 import Button, { ButtonEvent } from "newui/component/Button";
@@ -20,11 +21,15 @@ import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
 import DebugTools, { DebugToolsEvent, translation } from "../../DebugTools";
-import { DebugToolsTranslation } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
 import CancelablePromise from "../../util/CancelablePromise";
 import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 
 export default class GeneralPanel extends DebugToolsPanel {
+
+	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
+	public readonly DEBUG_TOOLS: DebugTools;
+
 	private readonly timeRange: RangeRow;
 	private readonly inspectButton: CheckButton;
 	private readonly checkButtonAudio: CheckButton;
@@ -56,7 +61,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.setRefreshMethod(() => !!this.selectionPromise)
 			.on(CheckButtonEvent.Change, (_, checked: boolean) => {
 				if (!!this.selectionPromise !== checked) {
-					if (checked && DebugTools.INSTANCE.selector.selecting) return false;
+					if (checked && this.DEBUG_TOOLS.selector.selecting) return false;
 
 					if (!checked) {
 						if (this.selectionPromise && !this.selectionPromise.isResolved) {
@@ -66,7 +71,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 						delete this.selectionPromise;
 
 					} else {
-						this.selectionPromise = DebugTools.INSTANCE.selector.select();
+						this.selectionPromise = this.DEBUG_TOOLS.selector.select();
 						this.selectionPromise.then(this.inspectTile);
 					}
 				}
@@ -77,7 +82,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 		new Button(this.api)
 			.setText(translation(DebugToolsTranslation.ButtonInspectLocalPlayer))
-			.on(ButtonEvent.Activate, () => DebugTools.INSTANCE.inspect(localPlayer))
+			.on(ButtonEvent.Activate, () => this.DEBUG_TOOLS.inspect(localPlayer))
 			.appendTo(this);
 
 		new Button(this.api)
@@ -146,17 +151,17 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 	@HookMethod(HookPriority.High)
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
-		if (api.wasPressed(DebugTools.INSTANCE.selector.bindableSelectLocation) && !bindPressed) {
+		if (api.wasPressed(this.DEBUG_TOOLS.selector.bindableSelectLocation) && !bindPressed) {
 			if (this.checkButtonAudio.checked) {
 				const position = renderer.screenToTile(api.mouseX, api.mouseY);
 				audio.queueEffect(this.dropdownAudio.selection, position.x, position.y, localPlayer.z);
-				bindPressed = DebugTools.INSTANCE.selector.bindableSelectLocation;
+				bindPressed = this.DEBUG_TOOLS.selector.bindableSelectLocation;
 			}
 
 			if (this.checkButtonParticle.checked) {
 				const position = renderer.screenToTile(api.mouseX, api.mouseY);
 				game.particle.create(position.x, position.y, localPlayer.z, particles[this.dropdownParticle.selection]);
-				bindPressed = DebugTools.INSTANCE.selector.bindableSelectLocation;
+				bindPressed = this.DEBUG_TOOLS.selector.bindableSelectLocation;
 			}
 		}
 
@@ -171,7 +176,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.until(DebugToolsPanelEvent.SwitchAway);
 
 		this.until(DebugToolsPanelEvent.SwitchAway)
-			.bind(DebugTools.INSTANCE, DebugToolsEvent.Inspect, () => {
+			.bind(this.DEBUG_TOOLS, DebugToolsEvent.Inspect, () => {
 				if (this.selectionPromise) this.selectionPromise.cancel();
 			});
 	}
@@ -191,7 +196,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 		if (!tilePosition) return;
 
-		DebugTools.INSTANCE.inspect(tilePosition);
+		this.DEBUG_TOOLS.inspect(tilePosition);
 	}
 
 	@Bound
@@ -217,11 +222,11 @@ export default class GeneralPanel extends DebugToolsPanel {
 		}
 
 		const choice = await this.api.interrupt(translation(DebugToolsTranslation.InterruptChoiceTravelAway))
-			.withChoice(DebugTools.INSTANCE.choiceSailToCivilization, DebugTools.INSTANCE.choiceTravelAway);
+			.withChoice(this.DEBUG_TOOLS.choiceSailToCivilization, this.DEBUG_TOOLS.choiceTravelAway);
 
 		actionManager.execute(
 			localPlayer,
-			choice === DebugTools.INSTANCE.choiceSailToCivilization ? ActionType.SailToCivilization : ActionType.TraverseTheSea,
+			choice === this.DEBUG_TOOLS.choiceSailToCivilization ? ActionType.SailToCivilization : ActionType.TraverseTheSea,
 			{ object: [true, true, true] },
 		);
 	}

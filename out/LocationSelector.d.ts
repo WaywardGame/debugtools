@@ -2,8 +2,10 @@ import { Bindable } from "Enums";
 import { IHookHost } from "mod/IHookHost";
 import { BindCatcherApi } from "newui/BindingManager";
 import Vector2 from "utilities/math/Vector2";
+import DebugTools from "./DebugTools";
 import CancelablePromise from "./util/CancelablePromise";
 export default class SelectLocation implements IHookHost {
+    readonly DEBUG_TOOLS: DebugTools;
     readonly bindableSelectLocation: Bindable;
     readonly bindableCancelSelectLocation: Bindable;
     private _selecting;

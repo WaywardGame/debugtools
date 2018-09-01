@@ -1,19 +1,25 @@
 import { ICorpse } from "creature/corpse/ICorpse";
 import { CreatureType, SentenceCaseStyle } from "Enums";
+import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { UiApi } from "newui/INewUi";
 import { ITile } from "tile/ITerrain";
 import { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
+import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
 import Actions, { RemovalType } from "../../Actions";
-import DebugTools, { translation } from "../../DebugTools";
-import { DebugToolsTranslation } from "../../IDebugTools";
+import { translation } from "../../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
 export default class CorpseInformation extends InspectInformationSection {
+
+	@Mod.log(DEBUG_TOOLS_ID)
+	public readonly LOG: Log;
+
 	private readonly resurrectButton: Button;
 
 	private corpses: ICorpse[] = [];
@@ -61,7 +67,7 @@ export default class CorpseInformation extends InspectInformationSection {
 
 	public logUpdate() {
 		for (const corpse of this.corpses) {
-			DebugTools.LOG.info("Corpse:", corpse);
+			this.LOG.info("Corpse:", corpse);
 		}
 	}
 

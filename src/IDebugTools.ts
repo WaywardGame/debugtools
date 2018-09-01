@@ -1,6 +1,3 @@
-import { IOverlayInfo } from "tile/ITerrain";
-import DebugTools from "./DebugTools";
-
 export enum DebugToolsTranslation {
 	////////////////////////////////////
 	// Options
@@ -141,6 +138,7 @@ export enum DebugToolsTranslation {
 }
 
 export interface ISaveData {
+	lastVersion: string;
 	/**
 	 * Whether lighting is enabled
 	 */
@@ -187,14 +185,4 @@ export interface ISaveDataGlobal {
 	lastVersion: string;
 }
 
-export function isPaintOverlay(overlay: IOverlayInfo) {
-	return overlay.type === DebugTools.INSTANCE.overlayPaint;
-}
-
-export function isHoverTargetOverlay(overlay: IOverlayInfo) {
-	return overlay.type === DebugTools.INSTANCE.overlayTarget && !("red" in overlay);
-}
-
-export function isSelectedTargetOverlay(overlay: IOverlayInfo) {
-	return overlay.type === DebugTools.INSTANCE.overlayTarget && "red" in overlay;
-}
+export const DEBUG_TOOLS_ID = "Debug Tools";

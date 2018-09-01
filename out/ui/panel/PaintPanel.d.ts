@@ -3,6 +3,7 @@ import { BindCatcherApi } from "newui/BindingManager";
 import Component from "newui/component/Component";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { TileEventType } from "tile/ITileEvent";
+import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 export interface IPaintData {
@@ -36,6 +37,7 @@ export interface IPaintSection extends Component {
     getTilePaintData(): Partial<IPaintData> | undefined;
 }
 export default class PaintPanel extends DebugToolsPanel {
+    readonly DEBUG_TOOLS: DebugTools;
     private readonly paintSections;
     private paintButton;
     private paintRow;

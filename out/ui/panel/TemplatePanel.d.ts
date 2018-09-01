@@ -1,9 +1,11 @@
 import { Bindable } from "Enums";
 import { BindCatcherApi } from "newui/BindingManager";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 export default class TemplatePanel extends DebugToolsPanel {
+    readonly DEBUG_TOOLS: DebugTools;
     private readonly dropdownType;
     private readonly dropdownTemplate;
     private readonly mirrorVertically;
@@ -24,4 +26,5 @@ export default class TemplatePanel extends DebugToolsPanel {
     private onSwitchAway;
     private changeTemplateType;
     private placeTemplate;
+    private clearPreview;
 }

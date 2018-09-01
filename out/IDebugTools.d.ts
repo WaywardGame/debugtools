@@ -1,4 +1,3 @@
-import { IOverlayInfo } from "tile/ITerrain";
 export declare enum DebugToolsTranslation {
     OptionsAutoOpen = 0,
     DialogTitleMain = 1,
@@ -103,6 +102,7 @@ export declare enum DebugToolsTranslation {
     ActionTeleport = 100
 }
 export interface ISaveData {
+    lastVersion: string;
     lighting: boolean;
     fog: boolean;
     zoomLevel?: number;
@@ -121,6 +121,4 @@ export interface IPlayerData {
 export interface ISaveDataGlobal {
     lastVersion: string;
 }
-export declare function isPaintOverlay(overlay: IOverlayInfo): boolean;
-export declare function isHoverTargetOverlay(overlay: IOverlayInfo): boolean;
-export declare function isSelectedTargetOverlay(overlay: IOverlayInfo): boolean;
+export declare const DEBUG_TOOLS_ID = "Debug Tools";

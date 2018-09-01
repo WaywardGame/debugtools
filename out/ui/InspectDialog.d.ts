@@ -9,11 +9,15 @@ import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
+import Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
+import DebugTools from "../DebugTools";
 import TabDialog from "./TabDialog";
 export default class InspectDialog extends TabDialog implements IHookHost {
     static description: IDialogDescription;
     static INSTANCE: InspectDialog | undefined;
+    readonly DEBUG_TOOLS: DebugTools;
+    readonly LOG: Log;
     private entityButtons;
     private infoSections;
     private entityInfoSection;
@@ -22,7 +26,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
     private inspectionLock?;
     private inspectingTile?;
     private storePanels;
-    private log;
+    private shouldLog;
     private willShowSubpanel;
     constructor(gsapi: IGameScreenApi, id: DialogId);
     getSubpanels(): [string | number, import("newui/component/IComponent").TranslationGenerator, (component: Component) => any, (((button: Button) => any) | undefined)?, (Button | undefined)?][];
@@ -30,10 +34,10 @@ export default class InspectDialog extends TabDialog implements IHookHost {
     setInspection(what: Vector2 | IPlayer | ICreature | INPC): this;
     update(): void;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
+    onGameEnd(state: PlayerState): void;
     onGameTickEnd(): void;
     onMoveComplete(player: IPlayer): void;
     onTileUpdate(tile: ITile, x: number, y: number, z: number): void;
-    onGameEnd(state: PlayerState): void;
     private updateSubpanels;
     private setInspectionTile;
     private logUpdate;

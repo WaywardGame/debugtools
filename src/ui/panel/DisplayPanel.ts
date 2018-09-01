@@ -1,6 +1,5 @@
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
-import { SaveDataType } from "mod/IMod";
 import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
@@ -17,7 +16,10 @@ import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPa
 export default class DisplayPanel extends DebugToolsPanel {
 	private readonly zoomRange: RangeRow;
 
-	@Mod.data(DebugTools, SaveDataType.Save)
+	@Mod.instance<DebugTools>("Debug Tools")
+	public readonly DEBUG_TOOLS: DebugTools;
+
+	@Mod.saveData<DebugTools>("Debug Tools")
 	public saveData: ISaveData;
 
 	public constructor(gsapi: IGameScreenApi) {
@@ -43,7 +45,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 				.setMax(11)
 				.setRefreshMethod(() => this.saveData.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.saveData.zoomLevel))
 			.setDisplayValue(() => translation(DebugToolsTranslation.ZoomLevel)
-				.get(DebugTools.INSTANCE.getZoomLevel() || saveDataGlobal.options.zoomLevel))
+				.get(this.DEBUG_TOOLS.getZoomLevel() || saveDataGlobal.options.zoomLevel))
 			.on(RangeInputEvent.Change, (_, value: number) => {
 				this.saveData.zoomLevel = value;
 				game.updateZoomLevel();
@@ -52,8 +54,8 @@ export default class DisplayPanel extends DebugToolsPanel {
 
 		new CheckButton(this.api)
 			.setText(translation(DebugToolsTranslation.ButtonUnlockCamera))
-			.setRefreshMethod(() => DebugTools.INSTANCE.isCameraUnlocked)
-			.on(CheckButtonEvent.Change, (_, checked: boolean) => DebugTools.INSTANCE.setCameraUnlocked(checked))
+			.setRefreshMethod(() => this.DEBUG_TOOLS.isCameraUnlocked)
+			.on(CheckButtonEvent.Change, (_, checked: boolean) => this.DEBUG_TOOLS.setCameraUnlocked(checked))
 			.appendTo(this);
 
 		new Button(this.api)
@@ -99,7 +101,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 	@Bound
 	private toggleFog(_: any, fog: boolean) {
 		this.saveData.fog = fog;
-		DebugTools.INSTANCE.updateFog();
+		this.DEBUG_TOOLS.updateFog();
 	}
 
 	@Bound

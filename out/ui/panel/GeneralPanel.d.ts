@@ -1,9 +1,11 @@
 import { Bindable } from "Enums";
 import { BindCatcherApi } from "newui/BindingManager";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 export default class GeneralPanel extends DebugToolsPanel {
+    readonly DEBUG_TOOLS: DebugTools;
     private readonly timeRange;
     private readonly inspectButton;
     private readonly checkButtonAudio;

@@ -11,6 +11,7 @@ import { IContainer, IItem } from "item/IItem";
 import itemDescriptions from "item/Items";
 import { Message, MessageType } from "language/IMessages";
 import { ITemplateOptions, spawnTemplate } from "mapgen/MapGenHelpers";
+import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
 import { TranslationGenerator } from "newui/component/IComponent";
 import Text from "newui/component/Text";
@@ -19,12 +20,13 @@ import IPlayer from "player/IPlayer";
 import { TileTemplateType } from "tile/ITerrain";
 import terrainDescriptions from "tile/Terrains";
 import Enums from "utilities/enum/Enums";
+import Log from "utilities/Log";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import TileHelpers from "utilities/TileHelpers";
 import DebugTools, { translation } from "./DebugTools";
-import { DebugToolsTranslation } from "./IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "./IDebugTools";
 import InspectDialog from "./ui/InspectDialog";
 import { IPaintData } from "./ui/panel/PaintPanel";
 import { SelectionType } from "./ui/panel/SelectionPanel";
@@ -44,12 +46,20 @@ type ExecuteFunction<F extends any> = F extends (player: IPlayer, argument: IAct
 
 export default class Actions {
 
+	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
+	public static readonly debugTools: DebugTools;
+	@Mod.log(DEBUG_TOOLS_ID)
+	public static readonly log: Log;
+
+	/**
+	 * Returns an action by its method name.
+	 */
 	public static get<K extends keyof Actions, F extends Actions[K]>(name: K): { execute: ExecuteFunction<F> } {
 		return {
 			execute: (argument: IActionArgument) => {
-				const action = DebugTools.INSTANCE.actions[name];
+				const action = this.debugTools.actions[name];
 				if (typeof action !== "function") {
-					DebugTools.LOG.error(`Action ${name} is invalid`);
+					this.log.error(`Action ${name} is invalid`);
 					return;
 				}
 
@@ -58,13 +68,17 @@ export default class Actions {
 		} as any;
 	}
 
+	////////////////////////////////////
+	// Registrations
+	//
+
 	@Register.message("FailureTileBlocked")
 	public readonly messageFailureTileBlocked: Message;
 
 	public constructor(private readonly mod: DebugTools) { }
 
 	////////////////////////////////////
-	// New Actions
+	// Actions
 	//
 
 	@Register.action<[TileTemplateType, ITemplateOptions]>(description("Place Template"))
@@ -74,6 +88,11 @@ export default class Actions {
 		result.updateView = true;
 	}
 
+	/**
+	 * Runs a miscellaneous command on a selection of things.
+	 * @param actionArgument.object[0] A `DebugToolsTranslation` naming what command to perform.
+	 * @param actionArgument.object[1] An array of `[SelectionType, number]` tuples. Each represents a selected thing, such as a creature and its ID. 
+	 */
 	@Register.action<[DebugToolsTranslation, [SelectionType, number][]]>(description("Execute on Selection"))
 	public executeOnSelection(executor: IPlayer, { object: [action, selection] }: IActionArgument<[DebugToolsTranslation, [SelectionType, number][]]>, result: IActionResult) {
 		for (const [type, id] of selection) {
@@ -104,6 +123,9 @@ export default class Actions {
 		result.updateRender = true;
 	}
 
+	/**
+	 * Teleports an entity to a position.
+	 */
 	@Register.action(description("Teleport Entity"))
 	public teleport(executor: IPlayer, { entity, position }: IActionArgument, result: IActionResult) {
 		position = this.getPosition(executor, position!, () => translation(DebugToolsTranslation.ActionTeleport)
@@ -143,6 +165,9 @@ export default class Actions {
 		game.updateView(true);
 	}
 
+	/**
+	 * Kills an entity by dealing `Infinity` true damage to it.
+	 */
 	@Register.action(description("Kill"))
 	public kill(executor: IPlayer, { entity }: IActionArgument, result: IActionResult) {
 		entity!.damage({
@@ -155,6 +180,9 @@ export default class Actions {
 		result.updateRender = true;
 	}
 
+	/**
+	 * Clones an entity or doodad to a new location. If given a player, an NPC with the appearance, items, and stats of the player is cloned.
+	 */
 	@Register.action(description("Clone"))
 	public clone(executor: IPlayer, { entity, doodad, position }: IActionArgument, result: IActionResult) {
 		position = this.getPosition(executor, position!, () => translation(DebugToolsTranslation.ActionClone)
@@ -180,6 +208,9 @@ export default class Actions {
 		fieldOfView.compute();
 	}
 
+	/**
+	 * The core stats, namely, Health, Stamina, Hunger, and Thirst, are all set to their maximum values. Any status effects are removed.
+	 */
 	@Register.action<number | undefined>(description("Heal"))
 	public heal(executor: IPlayer, { entity, object: corpseId }: IActionArgument<number | undefined>, result: IActionResult) {
 		// resurrect corpses
@@ -221,6 +252,9 @@ export default class Actions {
 		else creature!.release();
 	}
 
+	/**
+	 * Removes a creature, NPC, item, doodad, corpse, or tile event.
+	 */
 	@Register.action<[RemovalType, number] | undefined>(description("Remove"))
 	public remove(player: IPlayer, { creature, npc, item, doodad, object: otherRemoval }: IActionArgument<[RemovalType, number] | undefined>, result: IActionResult) {
 		this.removeInternal(result, otherRemoval || [] as any, creature, npc, item, doodad);
@@ -262,6 +296,9 @@ export default class Actions {
 		player.updateStatsAndAttributes();
 	}
 
+	/**
+	 * Adds an item to the inventory of a doodad, human, or tile.
+	 */
 	@Register.action<[ItemType, ItemQuality]>(description("Add Item to Inventory"))
 	public addItemToInventory(executor: IPlayer, { doodad, human, point, object: [item, quality] }: IActionArgument<[ItemType, ItemQuality]>, result: IActionResult) {
 		if (human) {
@@ -282,6 +319,11 @@ export default class Actions {
 		if (InspectDialog.INSTANCE) InspectDialog.INSTANCE.update();
 	}
 
+	/**
+	 * Places terrain, creatures, NPCs, doodads, corpses, and/or tile events on the given tiles.
+	 * @param actionArgument.object[0] An array of tile IDs
+	 * @param actionArgument.object[1] The data to paint (terrain, creature, npc, etc)
+	 */
 	// tslint:disable cyclomatic-complexity
 	@Register.action<[number[], IPaintData]>(description("Paint"))
 	public paint(player: IPlayer, { object: [tiles, data] }: IActionArgument<[number[], IPaintData]>, result: IActionResult) {
@@ -388,7 +430,7 @@ export default class Actions {
 
 	@Register.action<boolean>(description("Toggle Invulnerable"))
 	public toggleInvulnerable(executor: IPlayer, { player, object: invulnerable }: IActionArgument<boolean>, result: IActionResult) {
-		DebugTools.INSTANCE.setPlayerData(player!, "invulnerable", invulnerable);
+		Actions.debugTools.setPlayerData(player!, "invulnerable", invulnerable);
 	}
 
 	@Register.action<[SkillType, number]>(description("Set Skill"))
@@ -403,7 +445,7 @@ export default class Actions {
 	public toggleNoclip(executor: IPlayer, { player, object: noclip }: IActionArgument<boolean>, result: IActionResult) {
 		if (!player) return;
 
-		DebugTools.INSTANCE.setPlayerData(player, "noclip", noclip ? {
+		Actions.debugTools.setPlayerData(player, "noclip", noclip ? {
 			moving: false,
 			delay: Delay.Movement,
 		} : false);
@@ -489,13 +531,19 @@ export default class Actions {
 		world.updateTile(x, y, z, tile);
 	}
 
+	/**
+	 * Given a position, finds an open tile, or sends an error message to executing player.
+	 * @param player The executing player of an action.
+	 * @param position The position to start looking for an open tile.
+	 * @param actionName The name of the action the player is attempting to execute. This is printed in the error message.
+	 */
 	private getPosition(player: IPlayer, position: IVector3, actionName: TranslationGenerator) {
 		if (TileHelpers.isOpenTile(position, game.getTile(position.x, position.y, position.z))) return position;
 
 		const openTile = TileHelpers.findMatchingTile(position, TileHelpers.isOpenTile);
 
 		if (!openTile) {
-			player.messages.source(DebugTools.INSTANCE.source)
+			player.messages.source(Actions.debugTools.source)
 				.type(MessageType.Bad)
 				.send(this.messageFailureTileBlocked, Text.resolve(actionName));
 		}
@@ -503,6 +551,9 @@ export default class Actions {
 		return openTile;
 	}
 
+	/**
+	 * Copies stats and status effects from one entity to another.
+	 */
 	private copyStats(from: IBaseEntity, to: IBaseEntity) {
 		for (const statName in from.stats) {
 			const stat = Stat[statName as keyof typeof Stat];
@@ -523,6 +574,9 @@ export default class Actions {
 		}
 	}
 
+	/**
+	 * Clones an entity to another position. Given a player, clones a matching NPC.
+	 */
 	private cloneEntity(entity: ICreature | INPC | IPlayer, position: IVector3) {
 		let clone: ICreature | INPC | IPlayer;
 
@@ -553,6 +607,9 @@ export default class Actions {
 		}
 	}
 
+	/**
+	 * Clones the inventory from one human entity to another.
+	 */
 	private cloneInventory(from: IBaseHumanEntity, to: IBaseHumanEntity) {
 		for (const item of to.inventory.containedItems) {
 			itemManager.remove(item);
@@ -575,6 +632,9 @@ export default class Actions {
 		}
 	}
 
+	/**
+	 * Clones a doodad to another position.
+	 */
 	private cloneDoodad(doodad: IDoodad, position: IVector3) {
 		const clone = doodadManager.create(doodad.type, position.x, position.y, position.z, {
 			gatherReady: doodad.gatherReady,
@@ -597,6 +657,9 @@ export default class Actions {
 		}
 	}
 
+	/**
+	 * Clones the items in one container to another. If a container is empty or invalid, returns silently.
+	 */
 	private cloneContainedItems(from: Partial<IContainer>, to: Partial<IContainer>) {
 		if (!("containedItems" in from) || !("containedItems" in to)) return;
 

@@ -1,22 +1,28 @@
 import { ItemQuality, ItemType, SentenceCaseStyle } from "Enums";
 import { IItem } from "item/IItem";
 import Translation from "language/Translation";
+import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
 import Component from "newui/component/Component";
 import { ComponentEvent } from "newui/component/IComponent";
 import { Paragraph } from "newui/component/Text";
 import { UiApi } from "newui/INewUi";
 import { ITile } from "tile/ITerrain";
+import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
-import DebugTools, { translation } from "../../DebugTools";
-import { DebugToolsTranslation } from "../../IDebugTools";
+import { translation } from "../../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import AddItemToInventory, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
 export default class ItemInformation extends InspectInformationSection {
+
+	@Mod.log(DEBUG_TOOLS_ID)
+	public readonly LOG: Log;
+
 	private readonly wrapperAddItem: Component;
 	private readonly wrapperItems: Component;
 
@@ -70,7 +76,7 @@ export default class ItemInformation extends InspectInformationSection {
 	}
 
 	public logUpdate() {
-		DebugTools.LOG.info("Items:", this.items);
+		this.LOG.info("Items:", this.items);
 	}
 
 	@Bound

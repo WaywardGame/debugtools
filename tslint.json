@@ -6,6 +6,7 @@
 		"padding-line-between-statements": false,
 		"cyclomatic-complexity": [true, 10],
 		"array-type": [true, "array"],
-		"member-ordering": false
+		"member-ordering": false,
+		"no-unnecessary-class": false
 	}
 }

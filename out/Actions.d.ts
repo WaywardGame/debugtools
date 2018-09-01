@@ -5,6 +5,7 @@ import { Message } from "language/IMessages";
 import { ITemplateOptions } from "mapgen/MapGenHelpers";
 import IPlayer from "player/IPlayer";
 import { TileTemplateType } from "tile/ITerrain";
+import Log from "utilities/Log";
 import DebugTools from "./DebugTools";
 import { DebugToolsTranslation } from "./IDebugTools";
 import { IPaintData } from "./ui/panel/PaintPanel";
@@ -16,6 +17,8 @@ export declare enum RemovalType {
 declare type ExecuteFunction<F extends any> = F extends (player: IPlayer, argument: IActionArgument<infer X>, result: IActionResult) => void ? (undefined extends Extract<X, undefined> ? (argument?: IActionArgument<X>) => void : (argument: IActionArgument<X>) => void) : never;
 export default class Actions {
     private readonly mod;
+    static readonly debugTools: DebugTools;
+    static readonly log: Log;
     static get<K extends keyof Actions, F extends Actions[K]>(name: K): {
         execute: ExecuteFunction<F>;
     };

@@ -2,6 +2,7 @@ import { Bindable } from "Enums";
 import Translation from "language/Translation";
 import { ITemplateOptions, manipulateTemplates } from "mapgen/MapGenHelpers";
 import { HookMethod } from "mod/IHookHost";
+import Mod from "mod/Mod";
 import { BindCatcherApi } from "newui/BindingManager";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
@@ -21,12 +22,16 @@ import Vector3 from "utilities/math/Vector3";
 import Objects, { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
 import DebugTools, { translation } from "../../DebugTools";
-import { DebugToolsTranslation } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
 import { getTileId, getTilePosition } from "../../util/TilePosition";
 import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 
 export default class TemplatePanel extends DebugToolsPanel {
+
+	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
+	public readonly DEBUG_TOOLS: DebugTools;
+
 	private readonly dropdownType: Dropdown<TileTemplateType>;
 	private readonly dropdownTemplate: Dropdown<string>;
 	private readonly mirrorVertically: CheckButton;
@@ -121,19 +126,10 @@ export default class TemplatePanel extends DebugToolsPanel {
 	// tslint:disable cyclomatic-complexity
 	@HookMethod
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
-		const wasPlacePressed = api.wasPressed(DebugTools.INSTANCE.selector.bindableSelectLocation) && this.gsapi.isMouseWithin();
-		const wasCancelPressed = api.wasPressed(DebugTools.INSTANCE.selector.bindableCancelSelectLocation) && this.gsapi.isMouseWithin();
+		const wasPlacePressed = api.wasPressed(this.DEBUG_TOOLS.selector.bindableSelectLocation) && this.gsapi.isMouseWithin();
+		const wasCancelPressed = api.wasPressed(this.DEBUG_TOOLS.selector.bindableCancelSelectLocation) && this.gsapi.isMouseWithin();
 
-		if (this.previewTiles.length) {
-			for (const previewTile of this.previewTiles) {
-				const tile = getTilePosition(previewTile);
-				SelectionOverlay.remove(new Vector3(tile));
-			}
-
-			this.previewTiles.splice(0, Infinity);
-
-			if (!this.place.checked) game.updateView(false);
-		}
+		this.clearPreview();
 
 		if (this.place.checked) {
 			const template = this.getTemplate();
@@ -150,11 +146,11 @@ export default class TemplatePanel extends DebugToolsPanel {
 				if (wasPlacePressed) {
 					this.placeTemplate(topLeft);
 					this.selectHeld = true;
-					bindPressed = DebugTools.INSTANCE.selector.bindableSelectLocation;
+					bindPressed = this.DEBUG_TOOLS.selector.bindableSelectLocation;
 
 				} else if (wasCancelPressed) {
 					this.place.setChecked(false);
-					bindPressed = DebugTools.INSTANCE.selector.bindableCancelSelectLocation;
+					bindPressed = this.DEBUG_TOOLS.selector.bindableCancelSelectLocation;
 
 				} else {
 					for (let x = 0; x < width; x++) {
@@ -172,7 +168,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 			}
 		}
 
-		if (api.wasReleased(DebugTools.INSTANCE.selector.bindableSelectLocation) && this.selectHeld) {
+		if (api.wasReleased(this.DEBUG_TOOLS.selector.bindableSelectLocation) && this.selectHeld) {
 			this.selectHeld = false;
 		}
 
@@ -209,7 +205,8 @@ export default class TemplatePanel extends DebugToolsPanel {
 
 	@Bound
 	private onSwitchAway() {
-
+		this.place.setChecked(false);
+		this.clearPreview();
 	}
 
 	@Bound
@@ -220,5 +217,18 @@ export default class TemplatePanel extends DebugToolsPanel {
 	private placeTemplate(topLeft: Vector2) {
 		this.place.setChecked(false);
 		Actions.get("placeTemplate").execute({ point: topLeft.raw(), object: [this.dropdownType.selection, this.getTemplateOptions()] });
+	}
+
+	private clearPreview() {
+		if (!this.previewTiles.length) return;
+
+		for (const previewTile of this.previewTiles) {
+			const tile = getTilePosition(previewTile);
+			SelectionOverlay.remove(new Vector3(tile));
+		}
+
+		this.previewTiles.splice(0, Infinity);
+
+		if (!this.place.checked) game.updateView(false);
 	}
 }

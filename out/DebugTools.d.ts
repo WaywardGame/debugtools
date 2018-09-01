@@ -23,8 +23,8 @@ export declare enum DebugToolsEvent {
     Inspect = "Inspect"
 }
 export default class DebugTools extends Mod {
-    static INSTANCE: DebugTools;
-    static LOG: Log;
+    static readonly INSTANCE: DebugTools;
+    static readonly LOG: Log;
     readonly actions: Actions;
     readonly selector: LocationSelector;
     readonly unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
@@ -52,14 +52,12 @@ export default class DebugTools extends Mod {
     readonly overlayPaint: OverlayType;
     data: ISaveData;
     globalData: ISaveDataGlobal;
-    private upgrade;
     private cameraState;
     readonly isCameraUnlocked: boolean;
     getPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K): IPlayerData[K];
     setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]): void;
-    onInitialize(saveDataGlobal: ISaveDataGlobal): any;
     initializeGlobalData(data?: ISaveDataGlobal): ISaveDataGlobal | undefined;
-    initializeSaveData(data?: ISaveData): ISaveData;
+    initializeSaveData(data?: ISaveData): ISaveData | undefined;
     onLoad(): void;
     onUnload(): void;
     onSave(): any;
@@ -81,5 +79,4 @@ export default class DebugTools extends Mod {
     getAmbientColor(colors: [number, number, number]): [number, number, number] | undefined;
     getAmbientLightLevel(ambientLight: number, z: number): number | undefined;
     getTileLightLevel(tile: ITile, x: number, y: number, z: number): number | undefined;
-    protected heal(player: IPlayer, args: string): void;
 }

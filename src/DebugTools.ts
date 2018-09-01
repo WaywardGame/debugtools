@@ -4,7 +4,6 @@ import { ActionType, Bindable, Delay, Direction, MoveType, OverlayType, SpriteBa
 import { Dictionary, InterruptChoice } from "language/ILanguage";
 import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
-import { SaveDataType } from "mod/IMod";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
 import { BindCatcherApi, bindingManager, KeyModifier } from "newui/BindingManager";
@@ -21,7 +20,7 @@ import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import Actions from "./Actions";
-import { DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal } from "./IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import AddItemToInventory from "./ui/component/AddItemToInventory";
 import MainDialog from "./ui/DebugToolsDialog";
@@ -75,8 +74,10 @@ export default class DebugTools extends Mod {
 	// Static
 	//
 
-	public static INSTANCE: DebugTools;
-	public static LOG: Log;
+	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
+	public static readonly INSTANCE: DebugTools;
+	@Mod.log(DEBUG_TOOLS_ID)
+	public static readonly LOG: Log;
 
 	////////////////////////////////////
 	// Registries
@@ -164,12 +165,11 @@ export default class DebugTools extends Mod {
 	// Fields & Other Data Storage
 	//
 
-	@Mod.data(DebugTools, SaveDataType.Save)
+	@Mod.saveData<DebugTools>(DEBUG_TOOLS_ID)
 	public data: ISaveData;
-	@Mod.data(DebugTools, SaveDataType.Global)
+	@Mod.globalData<DebugTools>(DEBUG_TOOLS_ID)
 	public globalData: ISaveDataGlobal;
 
-	private upgrade = false;
 	private cameraState = CameraState.Locked;
 
 	/**
@@ -217,31 +217,33 @@ export default class DebugTools extends Mod {
 	//
 
 	/**
-	 * Called when Debug Tools is initialized (is enabled)
-	 * - Stores the INSTANCE and LOG properties.
-	 * - If the last loaded version of the mod is earlier than the current version, any save data is thrown out.
+	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
 	 */
-	public onInitialize(saveDataGlobal: ISaveDataGlobal): any {
-		DebugTools.INSTANCE = this;
-		DebugTools.LOG = this.getLog();
-	}
-
 	public initializeGlobalData(data?: ISaveDataGlobal) {
 		const version = new Version(modManager.getVersion(this.getIndex()));
 		const lastLoadVersion = new Version((data && data.lastVersion) || "0.0.0");
 
-		this.upgrade = !data || lastLoadVersion.isOlderThan(version);
+		const upgrade = !data || lastLoadVersion.isOlderThan(version);
 
-		return !this.upgrade ? data : {
+		return !upgrade ? data : {
 			lastVersion: version.getString(),
 		};
 	}
 
+	/**
+	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
+	 */
 	public initializeSaveData(data?: ISaveData) {
-		return data && !this.upgrade ? data : {
+		const version = new Version(modManager.getVersion(this.getIndex()));
+		const lastLoadVersion = new Version((data && data.lastVersion) || "0.0.0");
+
+		const upgrade = !data || lastLoadVersion.isOlderThan(version);
+
+		return !upgrade ? data : {
 			lighting: true,
 			playerData: {},
 			fog: true,
+			lastVersion: version.getString(),
 		};
 	}
 
@@ -581,17 +583,5 @@ export default class DebugTools extends Mod {
 		}
 
 		return undefined;
-	}
-
-	////////////////////////////////////
-	// Commands
-	//
-
-	/**
-	 * Runs the "heal" action on the player.
-	 */
-	@Register.command("heal")
-	protected heal(player: IPlayer, args: string) {
-		Actions.get("heal").execute({ entity: player });
 	}
 }

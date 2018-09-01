@@ -4,6 +4,7 @@ import { EntityType } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
 import { SentenceCaseStyle } from "Enums";
 import Translation from "language/Translation";
+import Mod from "mod/Mod";
 import { bindingManager } from "newui/BindingManager";
 import { BlockRow } from "newui/component/BlockRow";
 import Button, { ButtonEvent } from "newui/component/Button";
@@ -23,12 +24,13 @@ import { ITile } from "tile/ITerrain";
 import { tuple } from "utilities/Arrays";
 import Collectors, { PassStrategy } from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
+import Log from "utilities/Log";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
 import DebugTools, { translation } from "../../DebugTools";
-import { DebugToolsTranslation } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
@@ -46,6 +48,12 @@ const entitySubsectionClasses: (new (api: UiApi) => InspectEntityInformationSubs
 ];
 
 export default class EntityInformation extends InspectInformationSection {
+
+	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
+	public readonly DEBUG_TOOLS: DebugTools;
+	@Mod.log(DEBUG_TOOLS_ID)
+	public readonly LOG: Log;
+
 	private readonly subsections: InspectEntityInformationSubsection[];
 	private readonly statWrapper: Component;
 	private readonly statComponents = new Map<Stat, IRefreshable>();
@@ -138,7 +146,7 @@ export default class EntityInformation extends InspectInformationSection {
 
 	public logUpdate() {
 		for (const entity of this.entities) {
-			DebugTools.LOG.info("Entity:", entity);
+			this.LOG.info("Entity:", entity);
 		}
 	}
 
@@ -246,7 +254,7 @@ export default class EntityInformation extends InspectInformationSection {
 
 	@Bound
 	private async selectTeleportLocation() {
-		const teleportLocation = await DebugTools.INSTANCE.selector.select();
+		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
 		if (!teleportLocation) return;
 
 		this.teleport(teleportLocation);
@@ -268,7 +276,7 @@ export default class EntityInformation extends InspectInformationSection {
 
 	@Bound
 	private async cloneEntity() {
-		const teleportLocation = await DebugTools.INSTANCE.selector.select();
+		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
 		if (!teleportLocation) return;
 
 		Actions.get("clone")

@@ -3,9 +3,13 @@ import { UiApi } from "newui/INewUi";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
+import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
+import DebugTools from "../../DebugTools";
 import InspectInformationSection from "../component/InspectInformationSection";
 export default class EntityInformation extends InspectInformationSection {
+    readonly DEBUG_TOOLS: DebugTools;
+    readonly LOG: Log;
     private readonly subsections;
     private readonly statWrapper;
     private readonly statComponents;

@@ -3,6 +3,7 @@ import { EntityType } from "entity/IEntity";
 import { SkillType } from "Enums";
 import { UiTranslation } from "language/ILanguage";
 import Translation from "language/Translation";
+import Mod from "mod/Mod";
 import { BlockRow } from "newui/component/BlockRow";
 import Button from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
@@ -21,10 +22,13 @@ import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
 import DebugTools, { DebugToolsEvent, translation } from "../../DebugTools";
-import { DebugToolsTranslation, IPlayerData } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData } from "../../IDebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
 export default class PlayerInformation extends InspectEntityInformationSubsection {
+
+	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
+	public readonly DEBUG_TOOLS: DebugTools;
 
 	private readonly rangeWeightBonus: RangeRow;
 	private readonly checkButtonInvulnerable: CheckButton;
@@ -38,16 +42,16 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 		super(api);
 
 		this.until(ComponentEvent.Remove)
-			.bind(DebugTools.INSTANCE, DebugToolsEvent.PlayerDataChange, this.onPlayerDataChange);
+			.bind(this.DEBUG_TOOLS, DebugToolsEvent.PlayerDataChange, this.onPlayerDataChange);
 
 		new BlockRow(api)
 			.append(this.checkButtonNoClip = new CheckButton(api)
 				.setText(translation(DebugToolsTranslation.ButtonToggleNoClip))
-				.setRefreshMethod(() => this.player ? !!DebugTools.INSTANCE.getPlayerData(this.player, "noclip") : false)
+				.setRefreshMethod(() => this.player ? !!this.DEBUG_TOOLS.getPlayerData(this.player, "noclip") : false)
 				.on(CheckButtonEvent.Change, this.toggleNoClip))
 			.append(this.checkButtonInvulnerable = new CheckButton(api)
 				.setText(translation(DebugToolsTranslation.ButtonToggleInvulnerable))
-				.setRefreshMethod(() => this.player ? DebugTools.INSTANCE.getPlayerData(this.player, "invulnerable") : false)
+				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "invulnerable") : false)
 				.on(CheckButtonEvent.Change, this.toggleInvulnerable))
 			.appendTo(this);
 
@@ -56,7 +60,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.editRange(range => range
 				.setMin(0)
 				.setMax(1000)
-				.setRefreshMethod(() => this.player ? DebugTools.INSTANCE.getPlayerData(this.player, "weightBonus") : 0))
+				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "weightBonus") : 0))
 			.setDisplayValue(true)
 			.on(RangeInputEvent.Finish, this.setWeightBonus)
 			.appendTo(this);
@@ -104,7 +108,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 		this.refresh();
 
 		this.until([ComponentEvent.Remove, "change"])
-			.bind(DebugTools.INSTANCE, DebugToolsEvent.PlayerDataChange, this.refresh);
+			.bind(this.DEBUG_TOOLS, DebugToolsEvent.PlayerDataChange, this.refresh);
 	}
 
 	@Bound
@@ -129,21 +133,21 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 	@Bound
 	private toggleInvulnerable(_: any, invulnerable: boolean) {
-		if (DebugTools.INSTANCE.getPlayerData(this.player!, "invulnerable") === invulnerable) return;
+		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "invulnerable") === invulnerable) return;
 
 		Actions.get("toggleInvulnerable").execute({ player: this.player, object: invulnerable });
 	}
 
 	@Bound
 	private toggleNoClip(_: any, noclip: boolean) {
-		if (DebugTools.INSTANCE.getPlayerData(this.player!, "noclip") === noclip) return;
+		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "noclip") === noclip) return;
 
 		Actions.get("toggleNoclip").execute({ player: this.player, object: noclip });
 	}
 
 	@Bound
 	private setWeightBonus(_: any, weightBonus: number) {
-		if (DebugTools.INSTANCE.getPlayerData(this.player!, "weightBonus") === weightBonus) return;
+		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "weightBonus") === weightBonus) return;
 
 		Actions.get("setWeightBonus").execute({ player: this.player, object: weightBonus });
 	}

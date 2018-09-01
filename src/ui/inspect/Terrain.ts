@@ -1,5 +1,6 @@
 import { SentenceCaseStyle, TerrainType } from "Enums";
 import Translation from "language/Translation";
+import Mod from "mod/Mod";
 import { bindingManager } from "newui/BindingManager";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
@@ -11,16 +12,21 @@ import terrainDescriptions from "tile/Terrains";
 import { tuple } from "utilities/Arrays";
 import Collectors, { PassStrategy } from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
+import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
 import Actions from "../../Actions";
-import DebugTools, { translation } from "../../DebugTools";
-import { DebugToolsTranslation } from "../../IDebugTools";
+import { translation } from "../../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
 export default class TerrainInformation extends InspectInformationSection {
+
+	@Mod.log(DEBUG_TOOLS_ID)
+	public readonly LOG: Log;
+
 	private position: Vector3;
 	private tile: ITile;
 	private terrainType: string;
@@ -71,7 +77,7 @@ export default class TerrainInformation extends InspectInformationSection {
 	}
 
 	public logUpdate() {
-		DebugTools.LOG.info("Terrain:", this.terrainType);
+		this.LOG.info("Terrain:", this.terrainType);
 	}
 
 	@Bound
