@@ -85,7 +85,10 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 		if (!this.subpanels) {
 			this.subpanels = subpanelClasses.map(cls => new cls(this.gsapi)
 				.on(ComponentEvent.WillRemove, panel => {
-					panel.trigger(DebugToolsPanelEvent.SwitchAway);
+					if (panel.isVisible()) {
+						panel.trigger(DebugToolsPanelEvent.SwitchAway);
+					}
+
 					if (this.storePanels) {
 						panel.store();
 						return false;
