@@ -367,7 +367,13 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		game.updateView(false);
 
 		this.storePanels = false;
-		for (const infoSection of this.infoSections) infoSection.remove();
+		for (const infoSection of this.infoSections) {
+			if (infoSection.isVisible()) {
+				infoSection.trigger(DebugToolsPanelEvent.SwitchAway);
+			}
+
+			infoSection.remove();
+		}
 
 		delete InspectDialog.INSTANCE;
 	}
