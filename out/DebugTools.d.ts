@@ -66,6 +66,7 @@ export default class DebugTools extends Mod {
     inspect(what: Vector2 | ICreature | IPlayer | INPC): void;
     toggleDialog(): void;
     postFieldOfView(): void;
+    onGameScreenVisible(): void;
     getZoomLevel(): number | undefined;
     getCameraPosition(position: IVector2): IVector2 | undefined;
     onPlayerDamage(player: IPlayer, info: IDamageInfo): number | undefined;

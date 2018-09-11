@@ -250,12 +250,9 @@ export default class DebugTools extends Mod {
 	/**
 	 * Called when Debug Tools is loaded (in a save)
 	 * - Registers the `LocationSelector` stored in `this.selector` as a hook host.
-	 * - Initializes the `AddItemToInventory` UI Component (it takes a second or two to be created, and there are multiple places in
-	 * the UI that use it. We initialize it only once so the slow initialization only happens once.)
 	 */
 	public onLoad(): void {
 		hookManager.register(this.selector, "DebugTools:LocationSelector");
-		AddItemToInventory.get(newui);
 	}
 
 	/**
@@ -337,6 +334,16 @@ export default class DebugTools extends Mod {
 	@HookMethod
 	public postFieldOfView() {
 		this.updateFog();
+	}
+
+	/**
+	 * Called when the game screen becomes visible
+	 * - Initializes the `AddItemToInventory` UI Component (it takes a second or two to be created, and there are multiple places in
+	 * the UI that use it. We initialize it only once so the slow initialization only happens once.)
+	 */
+	@HookMethod
+	public onGameScreenVisible() {
+		AddItemToInventory.get(newui);
 	}
 
 	/**
