@@ -1,7 +1,7 @@
 import { ICreature, IDamageInfo } from "creature/ICreature";
 import { Bindable, Direction, OverlayType, SpriteBatchLayer } from "Enums";
 import { Dictionary, InterruptChoice } from "language/ILanguage";
-import Translation from "language/Translation";
+import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
 import { BindCatcherApi } from "newui/BindingManager";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
@@ -14,10 +14,9 @@ import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Actions from "./Actions";
-import { DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal } from "./IDebugTools";
+import { IPlayerData, ISaveData, ISaveDataGlobal, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
-export declare function translation(debugToolsTranslation: DebugToolsTranslation): Translation;
 export declare enum DebugToolsEvent {
     PlayerDataChange = "PlayerDataChange",
     Inspect = "Inspect"
@@ -28,6 +27,9 @@ export default class DebugTools extends Mod {
     readonly actions: Actions;
     readonly selector: LocationSelector;
     readonly unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
+    readonly modRegistryMainDialogPanels: InterModRegistry<ModRegistrationMainDialogPanel>;
+    readonly modRegistryInspectDialogPanels: InterModRegistry<ModRegistrationInspectDialogInformationSection>;
+    readonly modRegistryInspectDialogEntityInformationSubsections: InterModRegistry<ModRegistrationInspectDialogEntityInformationSubsection>;
     readonly bindableToggleDialog: Bindable;
     readonly bindableCloseInspectDialog: Bindable;
     readonly bindableInspectTile: Bindable;

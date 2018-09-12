@@ -13,7 +13,7 @@ import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
-import { UiApi } from "newui/INewUi";
+import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import { tuple } from "utilities/Arrays";
@@ -21,8 +21,8 @@ import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
-import DebugTools, { DebugToolsEvent, translation } from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData } from "../../IDebugTools";
+import DebugTools, { DebugToolsEvent } from "../../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, translation } from "../../IDebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
 export default class PlayerInformation extends InspectEntityInformationSubsection {
@@ -38,24 +38,24 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	private skill: SkillType | undefined;
 	private player: IPlayer | undefined;
 
-	public constructor(api: UiApi) {
-		super(api);
+	public constructor(gsapi: IGameScreenApi) {
+		super(gsapi);
 
 		this.until(ComponentEvent.Remove)
 			.bind(this.DEBUG_TOOLS, DebugToolsEvent.PlayerDataChange, this.onPlayerDataChange);
 
-		new BlockRow(api)
-			.append(this.checkButtonNoClip = new CheckButton(api)
+		new BlockRow(this.api)
+			.append(this.checkButtonNoClip = new CheckButton(this.api)
 				.setText(translation(DebugToolsTranslation.ButtonToggleNoClip))
 				.setRefreshMethod(() => this.player ? !!this.DEBUG_TOOLS.getPlayerData(this.player, "noclip") : false)
 				.on(CheckButtonEvent.Change, this.toggleNoClip))
-			.append(this.checkButtonInvulnerable = new CheckButton(api)
+			.append(this.checkButtonInvulnerable = new CheckButton(this.api)
 				.setText(translation(DebugToolsTranslation.ButtonToggleInvulnerable))
 				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "invulnerable") : false)
 				.on(CheckButtonEvent.Change, this.toggleInvulnerable))
 			.appendTo(this);
 
-		this.rangeWeightBonus = new RangeRow(api)
+		this.rangeWeightBonus = new RangeRow(this.api)
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelWeightBonus)))
 			.editRange(range => range
 				.setMin(0)
@@ -65,10 +65,10 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.on(RangeInputEvent.Finish, this.setWeightBonus)
 			.appendTo(this);
 
-		new LabelledRow(api)
+		new LabelledRow(this.api)
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelSkill)))
-			.append(new Dropdown(api)
+			.append(new Dropdown(this.api)
 				.setRefreshMethod(() => ({
 					defaultOption: "none",
 					options: ([
@@ -83,7 +83,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				.on(DropdownEvent.Selection, this.changeSkill))
 			.appendTo(this);
 
-		this.skillRangeRow = new RangeRow(api)
+		this.skillRangeRow = new RangeRow(this.api)
 			.hide()
 			.setLabel(label => label.setText(Translation.generator(() => this.skill === undefined ? "" : SkillType[this.skill])))
 			.editRange(range => range

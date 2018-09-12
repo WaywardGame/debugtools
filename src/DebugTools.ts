@@ -2,8 +2,8 @@ import { ICreature, IDamageInfo } from "creature/ICreature";
 import { EntityType } from "entity/IEntity";
 import { ActionType, Bindable, Delay, Direction, MoveType, OverlayType, SpriteBatchLayer } from "Enums";
 import { Dictionary, InterruptChoice } from "language/ILanguage";
-import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
+import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
 import { BindCatcherApi, bindingManager, KeyModifier } from "newui/BindingManager";
@@ -20,21 +20,13 @@ import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import Actions from "./Actions";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal } from "./IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import AddItemToInventory from "./ui/component/AddItemToInventory";
 import MainDialog from "./ui/DebugToolsDialog";
 import InspectDialog from "./ui/InspectDialog";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
 import Version from "./util/Version";
-
-/**
- * Returns a translation object using the `DebugToolsTranslation` dictionary
- * @param debugToolsTranslation The `DebugToolsTranslation` to get a `Translation` instance of
- */
-export function translation(debugToolsTranslation: DebugToolsTranslation) {
-	return new Translation(DebugTools.INSTANCE.dictionary, debugToolsTranslation);
-}
 
 /**
  * An enum representing the possible states of the camera
@@ -89,6 +81,17 @@ export default class DebugTools extends Mod {
 	public readonly selector: LocationSelector;
 	@Register.registry(UnlockedCameraMovementHandler)
 	public readonly unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
+
+	////////////////////////////////////
+	// Extension Registries
+	//
+
+	@Register.interModRegistry("MainDialogPanel")
+	public readonly modRegistryMainDialogPanels: InterModRegistry<ModRegistrationMainDialogPanel>;
+	@Register.interModRegistry("InspectDialogPanel")
+	public readonly modRegistryInspectDialogPanels: InterModRegistry<ModRegistrationInspectDialogInformationSection>;
+	@Register.interModRegistry("InspectDialogEntityInformationSubsection")
+	public readonly modRegistryInspectDialogEntityInformationSubsections: InterModRegistry<ModRegistrationInspectDialogEntityInformationSubsection>;
 
 	////////////////////////////////////
 	// Bindables

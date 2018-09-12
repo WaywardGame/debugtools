@@ -2,28 +2,27 @@ import { ICreature } from "creature/ICreature";
 import { EntityType } from "entity/IEntity";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
-import { UiApi } from "newui/INewUi";
+import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
 import { IPlayer } from "player/IPlayer";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
-import { translation } from "../../DebugTools";
-import { DebugToolsTranslation } from "../../IDebugTools";
+import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
 export default class CreatureInformation extends InspectEntityInformationSubsection {
 	private creature: ICreature | undefined;
 
-	public constructor(api: UiApi) {
-		super(api);
+	public constructor(gsapi: IGameScreenApi) {
+		super(gsapi);
 
-		new CheckButton(api)
+		new CheckButton(this.api)
 			.setText(translation(DebugToolsTranslation.ButtonTameCreature))
 			.setRefreshMethod(() => this.creature ? this.creature.isTamed() : false)
 			.on(CheckButtonEvent.Change, this.setTamed)
 			.appendTo(this);
 
-		new Button(api)
+		new Button(this.api)
 			.setText(translation(DebugToolsTranslation.ButtonRemoveThing))
 			.on(ButtonEvent.Activate, this.removeCreature)
 			.appendTo(this);

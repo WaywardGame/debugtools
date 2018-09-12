@@ -20,8 +20,8 @@ import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
-import DebugTools, { DebugToolsEvent, translation } from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
+import DebugTools, { DebugToolsEvent } from "../../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import CancelablePromise from "../../util/CancelablePromise";
 import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 

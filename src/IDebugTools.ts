@@ -1,3 +1,12 @@
+import Translation from "language/Translation";
+import DebugTools from "./DebugTools";
+import DebugToolsPanel from "./ui/component/DebugToolsPanel";
+import InspectEntityInformationSubsection from "./ui/component/InspectEntityInformationSubsection";
+import InspectInformationSection from "./ui/component/InspectInformationSection";
+import { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
+import { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect/Entity";
+import { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
+
 export enum DebugToolsTranslation {
 	////////////////////////////////////
 	// Options
@@ -185,4 +194,16 @@ export interface ISaveDataGlobal {
 	lastVersion: string;
 }
 
+export type ModRegistrationMainDialogPanel = (cls: typeof DebugToolsPanel) => DebugToolsDialogPanelClass;
+export type ModRegistrationInspectDialogInformationSection = (cls: typeof InspectInformationSection) => InspectDialogInformationSectionClass;
+export type ModRegistrationInspectDialogEntityInformationSubsection = (cls: typeof InspectEntityInformationSubsection) => InspectDialogEntityInformationSubsectionClass;
+
 export const DEBUG_TOOLS_ID = "Debug Tools";
+
+/**
+ * Returns a translation object using the `DebugToolsTranslation` dictionary
+ * @param debugToolsTranslation The `DebugToolsTranslation` to get a `Translation` instance of
+ */
+export function translation(debugToolsTranslation: DebugToolsTranslation | Translation) {
+	return typeof debugToolsTranslation === "number" ? new Translation(DebugTools.INSTANCE.dictionary, debugToolsTranslation) : debugToolsTranslation;
+}

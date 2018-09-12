@@ -17,7 +17,7 @@ import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
 import { IRefreshable } from "newui/component/Refreshable";
 import Text from "newui/component/Text";
-import { UiApi } from "newui/INewUi";
+import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
@@ -29,8 +29,8 @@ import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
-import DebugTools, { translation } from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
+import DebugTools from "../../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
@@ -40,7 +40,9 @@ import HumanInformation from "./Human";
 import NpcInformation from "./Npc";
 import PlayerInformation from "./Player";
 
-const entitySubsectionClasses: (new (api: UiApi) => InspectEntityInformationSubsection)[] = [
+export type InspectDialogEntityInformationSubsectionClass = new (gsapi: IGameScreenApi) => InspectEntityInformationSubsection;
+
+const entitySubsectionClasses: InspectDialogEntityInformationSubsectionClass[] = [
 	PlayerInformation,
 	HumanInformation,
 	NpcInformation,
@@ -61,10 +63,10 @@ export default class EntityInformation extends InspectInformationSection {
 	private entities: (IPlayer | ICreature | INPC)[] = [];
 	private entity: IPlayer | ICreature | INPC | undefined;
 
-	public constructor(api: UiApi) {
-		super(api);
+	public constructor(gsapi: IGameScreenApi) {
+		super(gsapi);
 
-		new BlockRow(api)
+		new BlockRow(this.api)
 			.append(new Button(this.api)
 				.setText(translation(DebugToolsTranslation.ButtonHealEntity))
 				.on(ButtonEvent.Activate, this.heal)
@@ -74,7 +76,7 @@ export default class EntityInformation extends InspectInformationSection {
 				.on(ButtonEvent.Activate, this.kill))
 			.appendTo(this);
 
-		new BlockRow(api)
+		new BlockRow(this.api)
 			.append(new Button(this.api)
 				.setText(translation(DebugToolsTranslation.ButtonTeleportEntity))
 				.on(ButtonEvent.Activate, this.openTeleportMenu))
@@ -83,8 +85,12 @@ export default class EntityInformation extends InspectInformationSection {
 				.on(ButtonEvent.Activate, this.cloneEntity))
 			.appendTo(this);
 
-		this.subsections = entitySubsectionClasses.map(cls => new cls(api)
-			.appendTo(this));
+		this.subsections = entitySubsectionClasses.values()
+			.include(this.DEBUG_TOOLS.modRegistryInspectDialogEntityInformationSubsections.getRegistrations()
+				.map(registration => registration.data(InspectEntityInformationSubsection)))
+			.map(cls => new cls(this.gsapi)
+				.appendTo(this))
+			.collect(Collectors.toArray);
 
 		this.statWrapper = new Component(this.api)
 			.classes.add("debug-tools-inspect-entity-sub-section")

@@ -9,8 +9,8 @@ import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { compileShaders, loadShaders } from "renderer/Shaders";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
-import DebugTools, { translation } from "../../DebugTools";
-import { DebugToolsTranslation, ISaveData } from "../../IDebugTools";
+import DebugTools from "../../DebugTools";
+import { DebugToolsTranslation, ISaveData, translation } from "../../IDebugTools";
 import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 
 export default class DisplayPanel extends DebugToolsPanel {

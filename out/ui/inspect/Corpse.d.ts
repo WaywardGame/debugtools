@@ -1,4 +1,4 @@
-import { UiApi } from "newui/INewUi";
+import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
@@ -8,7 +8,7 @@ export default class CorpseInformation extends InspectInformationSection {
     private readonly resurrectButton;
     private corpses;
     private corpse;
-    constructor(api: UiApi);
+    constructor(gsapi: IGameScreenApi);
     getTabs(): TabInformation[];
     setTab(corpse: number): this;
     update(position: IVector2, tile: ITile): void;

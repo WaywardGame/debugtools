@@ -1,4 +1,4 @@
-import { UiApi } from "newui/INewUi";
+import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
@@ -9,7 +9,7 @@ export default class ItemInformation extends InspectInformationSection {
     private readonly wrapperItems;
     private items;
     private position;
-    constructor(api: UiApi);
+    constructor(gsapi: IGameScreenApi);
     getTabs(): TabInformation[];
     setTab(): this;
     update(position: IVector2, tile: ITile): void;

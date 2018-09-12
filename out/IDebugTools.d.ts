@@ -1,3 +1,10 @@
+import Translation from "language/Translation";
+import DebugToolsPanel from "./ui/component/DebugToolsPanel";
+import InspectEntityInformationSubsection from "./ui/component/InspectEntityInformationSubsection";
+import InspectInformationSection from "./ui/component/InspectInformationSection";
+import { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
+import { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect/Entity";
+import { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
 export declare enum DebugToolsTranslation {
     OptionsAutoOpen = 0,
     DialogTitleMain = 1,
@@ -121,4 +128,8 @@ export interface IPlayerData {
 export interface ISaveDataGlobal {
     lastVersion: string;
 }
+export declare type ModRegistrationMainDialogPanel = (cls: typeof DebugToolsPanel) => DebugToolsDialogPanelClass;
+export declare type ModRegistrationInspectDialogInformationSection = (cls: typeof InspectInformationSection) => InspectDialogInformationSectionClass;
+export declare type ModRegistrationInspectDialogEntityInformationSubsection = (cls: typeof InspectEntityInformationSubsection) => InspectDialogEntityInformationSubsectionClass;
 export declare const DEBUG_TOOLS_ID = "Debug Tools";
+export declare function translation(debugToolsTranslation: DebugToolsTranslation | Translation): Translation;

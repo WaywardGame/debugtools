@@ -2,7 +2,7 @@ import { ICorpse } from "creature/corpse/ICorpse";
 import { CreatureType, SentenceCaseStyle } from "Enums";
 import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
-import { UiApi } from "newui/INewUi";
+import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
@@ -10,8 +10,7 @@ import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
 import Actions, { RemovalType } from "../../Actions";
-import { translation } from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
@@ -25,8 +24,8 @@ export default class CorpseInformation extends InspectInformationSection {
 	private corpses: ICorpse[] = [];
 	private corpse: ICorpse | undefined;
 
-	public constructor(api: UiApi) {
-		super(api);
+	public constructor(gsapi: IGameScreenApi) {
+		super(gsapi);
 
 		this.resurrectButton = new Button(this.api)
 			.setText(translation(DebugToolsTranslation.ButtonResurrectCorpse))

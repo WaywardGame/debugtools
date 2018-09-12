@@ -1,5 +1,5 @@
 import { ICreature } from "creature/ICreature";
-import { UiApi } from "newui/INewUi";
+import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import DebugTools from "../../DebugTools";
@@ -12,7 +12,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
     private readonly skillRangeRow;
     private skill;
     private player;
-    constructor(api: UiApi);
+    constructor(gsapi: IGameScreenApi);
     update(entity: ICreature | INPC | IPlayer): void;
     private refresh;
     private changeSkill;
