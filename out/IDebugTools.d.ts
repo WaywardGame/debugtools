@@ -104,9 +104,10 @@ export declare enum DebugToolsTranslation {
     LockInspection = 95,
     TileEventName = 96,
     ItemName = 97,
-    ActionResurrect = 98,
-    ActionClone = 99,
-    ActionTeleport = 100
+    ButtonTogglePermissions = 98,
+    ActionResurrect = 99,
+    ActionClone = 100,
+    ActionTeleport = 101
 }
 export interface ISaveData {
     lastVersion: string;
@@ -124,6 +125,7 @@ export interface IPlayerData {
         moving: boolean;
         delay: number;
     };
+    permissions?: boolean;
 }
 export interface ISaveDataGlobal {
     lastVersion: string;

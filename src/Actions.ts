@@ -455,6 +455,13 @@ export default class Actions {
 		game.updateView(true);
 	}
 
+	@Register.action<boolean>(description("Toggle Permissions"))
+	public togglePermissions(executor: IPlayer, { player, object: permissions }: IActionArgument<boolean>, result: IActionResult) {
+		if (!player) return;
+
+		Actions.debugTools.setPlayerData(player, "permissions", permissions);
+	}
+
 	////////////////////////////////////
 	// Helpers
 	//

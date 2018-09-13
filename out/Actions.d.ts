@@ -44,6 +44,7 @@ export default class Actions {
     toggleInvulnerable(executor: IPlayer, { player, object: invulnerable }: IActionArgument<boolean>, result: IActionResult): void;
     setSkill(executor: IPlayer, { player, object: [skill, value] }: IActionArgument<[SkillType, number]>, result: IActionResult): void;
     toggleNoclip(executor: IPlayer, { player, object: noclip }: IActionArgument<boolean>, result: IActionResult): void;
+    togglePermissions(executor: IPlayer, { player, object: permissions }: IActionArgument<boolean>, result: IActionResult): void;
     private removeInternal;
     private removeItem;
     private resurrectCorpse;

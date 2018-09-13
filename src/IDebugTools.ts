@@ -136,6 +136,7 @@ export enum DebugToolsTranslation {
 	LockInspection,
 	TileEventName,
 	ItemName,
+	ButtonTogglePermissions,
 
 	////////////////////////////////////
 	// Misc
@@ -188,6 +189,10 @@ export interface IPlayerData {
 		 */
 		delay: number;
 	};
+	/**
+	 * Whether the player can use Debug Tools.
+	 */
+	permissions?: boolean;
 }
 
 export interface ISaveDataGlobal {

@@ -1,4 +1,5 @@
 import { ICreature, IDamageInfo } from "creature/ICreature";
+import IBaseHumanEntity from "entity/IBaseHumanEntity";
 import { EntityType } from "entity/IEntity";
 import { ActionType, Bindable, Delay, Direction, MoveType, OverlayType, SpriteBatchLayer } from "Enums";
 import { Dictionary, InterruptChoice } from "language/ILanguage";
@@ -58,6 +59,10 @@ export enum DebugToolsEvent {
 	 * Emitted when a tile or object is inspected.
 	 */
 	Inspect = "Inspect",
+	/**
+	 * Emitted when permissions are changed for this player.
+	 */
+	PermissionsChange = "PermissionsChange",
 }
 
 export default class DebugTools extends Mod {
@@ -156,6 +161,10 @@ export default class DebugTools extends Mod {
 		group: MenuBarButtonGroup.Meta,
 		bindable: Registry<DebugTools, Bindable>().get("bindableToggleDialog"),
 		tooltip: tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.DialogTitleMain))),
+		onCreate: button => {
+			button.toggle(DebugTools.INSTANCE.hasPermission());
+			DebugTools.INSTANCE.on(DebugToolsEvent.PlayerDataChange, () => button.toggle(DebugTools.INSTANCE.hasPermission()));
+		},
 	})
 	public readonly menuBarButton: MenuBarButtonType;
 
@@ -194,6 +203,7 @@ export default class DebugTools extends Mod {
 			weightBonus: 0,
 			invulnerable: false,
 			noclip: false,
+			permissions: players[player.id].isServer(),
 		};
 
 		return this.data.playerData[player.identifier][key];
@@ -213,6 +223,12 @@ export default class DebugTools extends Mod {
 		this.getPlayerData(player, key);
 		this.data.playerData[player.identifier][key] = value;
 		this.trigger(DebugToolsEvent.PlayerDataChange, player.id, key, value);
+
+		if (!this.hasPermission()) {
+			const gameScreen = newui.getScreen<GameScreen>(ScreenId.Game)!;
+			gameScreen.closeDialog(this.dialogMain);
+			gameScreen.closeDialog(this.dialogInspect);
+		}
 	}
 
 	////////////////////////////////////
@@ -323,8 +339,14 @@ export default class DebugTools extends Mod {
 	 * Toggles the main dialog.
 	 */
 	public toggleDialog() {
+		if (!this.hasPermission()) return;
+
 		newui.getScreen<GameScreen>(ScreenId.Game)!
 			.toggleDialog(this.dialogMain);
+	}
+
+	public hasPermission() {
+		return !multiplayer.isConnected() || multiplayer.isServer() || this.getPlayerData(localPlayer, "permissions");
 	}
 
 	////////////////////////////////////
@@ -482,8 +504,10 @@ export default class DebugTools extends Mod {
 	 * Otherwise we return `undefined` and let the game or other mods handle it. 
 	 */
 	@HookMethod
-	public isPlayerSwimming(player: IPlayer, isSwimming: boolean): boolean | undefined {
-		return this.getPlayerData(player, "noclip") ? false : undefined;
+	public isHumanSwimming(human: IBaseHumanEntity, isSwimming: boolean): boolean | undefined {
+		if (human.entityType === EntityType.NPC) return undefined;
+
+		return this.getPlayerData(human as IPlayer, "noclip") ? false : undefined;
 	}
 
 	/**
@@ -497,12 +521,9 @@ export default class DebugTools extends Mod {
 	// tslint:disable cyclomatic-complexity
 	@HookMethod
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable {
-		const gameScreen = newui.getScreen<GameScreen>(ScreenId.Game)!;
+		if (!this.hasPermission()) return bindPressed;
 
-		if (api.wasPressed(this.bindableToggleDialog) && !bindPressed) {
-			gameScreen.toggleDialog(this.dialogMain);
-			bindPressed = this.bindableToggleDialog;
-		}
+		const gameScreen = newui.getScreen<GameScreen>(ScreenId.Game)!;
 
 		if (api.wasPressed(Bindable.GameZoomIn) && !bindPressed && gameScreen.isMouseWithin()) {
 			this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;

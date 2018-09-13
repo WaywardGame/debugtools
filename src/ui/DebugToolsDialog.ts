@@ -5,6 +5,7 @@ import { ComponentEvent } from "newui/component/IComponent";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { tuple } from "utilities/Arrays";
+import { sleep } from "utilities/Async";
 import Collectors from "utilities/Collectors";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
@@ -74,6 +75,10 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 			this.storePanels = false;
 			for (const subpanel of this.subpanels) subpanel.remove();
 		});
+
+		if (!this.DEBUG_TOOLS.hasPermission()) {
+			sleep(1).then(() => this.gsapi.closeDialog(id));
+		}
 	}
 
 	public getName() {

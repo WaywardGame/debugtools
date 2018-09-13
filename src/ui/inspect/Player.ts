@@ -34,15 +34,22 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	private readonly checkButtonInvulnerable: CheckButton;
 	private readonly checkButtonNoClip: CheckButton;
 	private readonly skillRangeRow: RangeRow;
+	private readonly checkButtonPermissions?: CheckButton;
 
-	private skill: SkillType | undefined;
-	private player: IPlayer | undefined;
+	private skill?: SkillType;
+	private player?: IPlayer;
 
 	public constructor(gsapi: IGameScreenApi) {
 		super(gsapi);
 
 		this.until(ComponentEvent.Remove)
 			.bind(this.DEBUG_TOOLS, DebugToolsEvent.PlayerDataChange, this.onPlayerDataChange);
+
+		this.checkButtonPermissions = new CheckButton(this.api)
+			.setText(translation(DebugToolsTranslation.ButtonTogglePermissions))
+			.setRefreshMethod(() => this.player ? !!this.DEBUG_TOOLS.getPlayerData(this.player, "permissions") : false)
+			.on(CheckButtonEvent.Change, this.togglePermissions)
+			.appendTo(this);
 
 		new BlockRow(this.api)
 			.append(this.checkButtonNoClip = new CheckButton(this.api)
@@ -113,6 +120,11 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 	@Bound
 	private refresh() {
+		if (this.checkButtonPermissions) {
+			this.checkButtonPermissions.toggle(multiplayer.isServer() && this.player && !this.player.isLocalPlayer())
+				.refresh();
+		}
+
 		this.checkButtonNoClip.refresh();
 		this.checkButtonInvulnerable.refresh();
 		this.rangeWeightBonus.refresh();
@@ -146,6 +158,13 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	}
 
 	@Bound
+	private togglePermissions(_: any, permissions: boolean) {
+		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "permissions") === permissions) return;
+
+		Actions.get("togglePermissions").execute({ player: this.player, object: permissions });
+	}
+
+	@Bound
 	private setWeightBonus(_: any, weightBonus: number) {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "weightBonus") === weightBonus) return;
 
@@ -162,6 +181,9 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				break;
 			case "invulnerable":
 				this.checkButtonInvulnerable.refresh();
+				break;
+			case "permissions":
+				if (this.checkButtonPermissions) this.checkButtonPermissions.refresh();
 				break;
 			case "noclip":
 				this.checkButtonNoClip.refresh();

@@ -1,4 +1,5 @@
 import { ICreature, IDamageInfo } from "creature/ICreature";
+import IBaseHumanEntity from "entity/IBaseHumanEntity";
 import { Bindable, Direction, OverlayType, SpriteBatchLayer } from "Enums";
 import { Dictionary, InterruptChoice } from "language/ILanguage";
 import InterModRegistry from "mod/InterModRegistry";
@@ -19,7 +20,8 @@ import LocationSelector from "./LocationSelector";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
 export declare enum DebugToolsEvent {
     PlayerDataChange = "PlayerDataChange",
-    Inspect = "Inspect"
+    Inspect = "Inspect",
+    PermissionsChange = "PermissionsChange"
 }
 export default class DebugTools extends Mod {
     static readonly INSTANCE: DebugTools;
@@ -67,6 +69,7 @@ export default class DebugTools extends Mod {
     setCameraUnlocked(unlocked: boolean): void;
     inspect(what: Vector2 | ICreature | IPlayer | INPC): void;
     toggleDialog(): void;
+    hasPermission(): boolean | undefined;
     postFieldOfView(): void;
     onGameScreenVisible(): void;
     getZoomLevel(): number | undefined;
@@ -76,7 +79,7 @@ export default class DebugTools extends Mod {
     onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined;
     onNoInputReceived(player: IPlayer): void;
     getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined;
-    isPlayerSwimming(player: IPlayer, isSwimming: boolean): boolean | undefined;
+    isHumanSwimming(human: IBaseHumanEntity, isSwimming: boolean): boolean | undefined;
     getPlayerStrength(strength: number, player: IPlayer): number;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     getAmbientColor(colors: [number, number, number]): [number, number, number] | undefined;

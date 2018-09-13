@@ -10,8 +10,9 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
     private readonly checkButtonInvulnerable;
     private readonly checkButtonNoClip;
     private readonly skillRangeRow;
-    private skill;
-    private player;
+    private readonly checkButtonPermissions?;
+    private skill?;
+    private player?;
     constructor(gsapi: IGameScreenApi);
     update(entity: ICreature | INPC | IPlayer): void;
     private refresh;
@@ -19,6 +20,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
     private setSkill;
     private toggleInvulnerable;
     private toggleNoClip;
+    private togglePermissions;
     private setWeightBonus;
     private onPlayerDataChange;
 }
