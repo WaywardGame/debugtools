@@ -6,7 +6,7 @@ import Button, { ButtonEvent } from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
 import ContextMenu from "newui/component/ContextMenu";
 import Text from "newui/component/Text";
-import { UiApi } from "newui/INewUi";
+import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import terrainDescriptions from "tile/Terrains";
 import { tuple } from "utilities/Arrays";
@@ -18,8 +18,7 @@ import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
 import Actions from "../../Actions";
-import { translation } from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
 export default class TerrainInformation extends InspectInformationSection {
@@ -33,15 +32,15 @@ export default class TerrainInformation extends InspectInformationSection {
 
 	private readonly checkButtonTilled: CheckButton;
 
-	public constructor(api: UiApi) {
-		super(api);
+	public constructor(gsapi: IGameScreenApi) {
+		super(gsapi);
 
-		new Button(api)
+		new Button(this.api)
 			.setText(translation(DebugToolsTranslation.ButtonChangeTerrain))
 			.on(ButtonEvent.Activate, this.showTerrainContextMenu)
 			.appendTo(this);
 
-		this.checkButtonTilled = new CheckButton(api)
+		this.checkButtonTilled = new CheckButton(this.api)
 			.setText(translation(DebugToolsTranslation.ButtonToggleTilled))
 			.setRefreshMethod(() => this.tile && TileHelpers.isTilled(this.tile))
 			.on(CheckButtonEvent.Change, this.toggleTilled)

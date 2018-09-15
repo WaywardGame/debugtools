@@ -9,13 +9,12 @@ import Component from "newui/component/Component";
 import { ComponentEvent } from "newui/component/IComponent";
 import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
-import { UiApi } from "newui/INewUi";
+import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import Objects, { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
-import { translation } from "../../DebugTools";
-import { DebugToolsTranslation } from "../../IDebugTools";
+import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import AddItemToInventory, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
 import { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
@@ -26,10 +25,10 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 	private human: IBaseHumanEntity | undefined;
 
-	public constructor(api: UiApi) {
-		super(api);
+	public constructor(gsapi: IGameScreenApi) {
+		super(gsapi);
 
-		this.addItemContainer = new Component(api).appendTo(this);
+		this.addItemContainer = new Component(this.api).appendTo(this);
 
 		this.addReputationSlider(DebugToolsTranslation.LabelMalignity, Stat.Malignity);
 		this.addReputationSlider(DebugToolsTranslation.LabelBenignity, Stat.Benignity);

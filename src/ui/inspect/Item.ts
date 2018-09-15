@@ -6,14 +6,13 @@ import Button, { ButtonEvent } from "newui/component/Button";
 import Component from "newui/component/Component";
 import { ComponentEvent } from "newui/component/IComponent";
 import { Paragraph } from "newui/component/Text";
-import { UiApi } from "newui/INewUi";
+import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
-import { translation } from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import AddItemToInventory, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
@@ -29,8 +28,8 @@ export default class ItemInformation extends InspectInformationSection {
 	private items: IItem[] = [];
 	private position: IVector2;
 
-	public constructor(api: UiApi) {
-		super(api);
+	public constructor(gsapi: IGameScreenApi) {
+		super(gsapi);
 
 		this.wrapperAddItem = new Component(this.api).appendTo(this);
 		this.wrapperItems = new Component(this.api).appendTo(this);

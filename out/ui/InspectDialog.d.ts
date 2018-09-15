@@ -12,7 +12,9 @@ import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
 import DebugTools from "../DebugTools";
+import InspectInformationSection from "./component/InspectInformationSection";
 import TabDialog from "./TabDialog";
+export declare type InspectDialogInformationSectionClass = new (gsapi: IGameScreenApi) => InspectInformationSection;
 export default class InspectDialog extends TabDialog implements IHookHost {
     static description: IDialogDescription;
     static INSTANCE: InspectDialog | undefined;

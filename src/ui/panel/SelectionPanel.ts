@@ -14,8 +14,7 @@ import { pipe } from "utilities/IterableIterator";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
-import { translation } from "../../DebugTools";
-import { DebugToolsTranslation } from "../../IDebugTools";
+import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 
 export enum SelectionType {

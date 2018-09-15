@@ -17,8 +17,8 @@ import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
 import Actions from "../../Actions";
-import DebugTools, { translation } from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
+import DebugTools from "../../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Overlays from "../../overlay/Overlays";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
 import { getTileId, getTilePosition } from "../../util/TilePosition";
@@ -253,7 +253,10 @@ export default class PaintPanel extends DebugToolsPanel {
 		this.paintButton.setChecked(false);
 
 		this.paintRow.store();
-		this.parent.classes.remove("debug-tools-paint-panel");
+
+		if (this.parent) {
+			this.parent.classes.remove("debug-tools-paint-panel");
+		}
 	}
 
 	@Bound

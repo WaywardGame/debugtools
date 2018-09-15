@@ -13,8 +13,7 @@ import { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Objects";
-import { translation } from "../../DebugTools";
-import { DebugToolsTranslation } from "../../IDebugTools";
+import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
 export default class TileEventPaint extends Component implements IPaintSection {

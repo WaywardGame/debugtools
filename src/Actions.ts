@@ -25,8 +25,8 @@ import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import TileHelpers from "utilities/TileHelpers";
-import DebugTools, { translation } from "./DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "./IDebugTools";
+import DebugTools from "./DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "./IDebugTools";
 import InspectDialog from "./ui/InspectDialog";
 import { IPaintData } from "./ui/panel/PaintPanel";
 import { SelectionType } from "./ui/panel/SelectionPanel";
@@ -38,7 +38,7 @@ export enum RemovalType {
 }
 
 function description(name: string): IActionDescriptionNamed {
-	return { name, usableAsGhost: true, usableWhenPaused: true, ignoreHasDelay: true };
+	return { name, usableAsGhost: true, usableWhenPaused: true, ignoreHasDelay: true, ignoreIsMoving: true };
 }
 
 type ExecuteFunction<F extends any> = F extends (player: IPlayer, argument: IActionArgument<infer X>, result: IActionResult) => void ? (undefined extends Extract<X, undefined> ?
@@ -453,6 +453,13 @@ export default class Actions {
 		player.moveType = noclip ? MoveType.Flying : MoveType.Land;
 
 		game.updateView(true);
+	}
+
+	@Register.action<boolean>(description("Toggle Permissions"))
+	public togglePermissions(executor: IPlayer, { player, object: permissions }: IActionArgument<boolean>, result: IActionResult) {
+		if (!player) return;
+
+		Actions.debugTools.setPlayerData(player, "permissions", permissions);
 	}
 
 	////////////////////////////////////

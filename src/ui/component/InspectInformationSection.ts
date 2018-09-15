@@ -1,5 +1,6 @@
 import Component from "newui/component/Component";
 import { TranslationGenerator } from "newui/component/IComponent";
+import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import { IVector2 } from "utilities/math/IVector";
 
@@ -8,6 +9,10 @@ export type TabInformation = [number, TranslationGenerator];
 export default abstract class InspectInformationSection extends Component {
 	private shouldLog = false;
 	public get willLog() { return this.shouldLog; }
+
+	public constructor(protected readonly gsapi: IGameScreenApi) {
+		super(gsapi.uiApi);
+	}
 
 	public setTab(tab: number) { return this; }
 	public setShouldLog() { this.shouldLog = true; }

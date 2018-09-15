@@ -1,11 +1,14 @@
 import { IHookHost } from "mod/IHookHost";
+import Mod from "mod/Mod";
 import Component from "newui/component/Component";
 import { ComponentEvent } from "newui/component/IComponent";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { tuple } from "utilities/Arrays";
-import { translation } from "../DebugTools";
-import { DebugToolsTranslation } from "../IDebugTools";
+import { sleep } from "utilities/Async";
+import Collectors from "utilities/Collectors";
+import DebugTools from "../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import DebugToolsPanel, { DebugToolsPanelEvent } from "./component/DebugToolsPanel";
 import DisplayPanel from "./panel/DisplayPanel";
 import GeneralPanel from "./panel/GeneralPanel";
@@ -14,10 +17,12 @@ import SelectionPanel from "./panel/SelectionPanel";
 import TemplatePanel from "./panel/TemplatePanel";
 import TabDialog, { SubpanelInformation } from "./TabDialog";
 
+export type DebugToolsDialogPanelClass = new (gsapi: IGameScreenApi) => DebugToolsPanel;
+
 /**
  * A list of panel classes that will appear in the dialog.
  */
-const subpanelClasses: (new (gsapi: IGameScreenApi) => DebugToolsPanel)[] = [
+const subpanelClasses: DebugToolsDialogPanelClass[] = [
 	GeneralPanel,
 	DisplayPanel,
 	PaintPanel,
@@ -48,6 +53,9 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 		],
 	};
 
+	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
+	public readonly DEBUG_TOOLS: DebugTools;
+
 	private subpanels: DebugToolsPanel[];
 	private activePanel: DebugToolsPanel;
 
@@ -65,8 +73,15 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 		// when the dialog is removed from the DOM, we force remove all of the panels (they're cached otherwise)
 		this.on(ComponentEvent.WillRemove, () => {
 			this.storePanels = false;
-			for (const subpanel of this.subpanels) subpanel.remove();
+			for (const subpanel of this.subpanels) {
+				subpanel.trigger(DebugToolsPanelEvent.SwitchAway);
+				subpanel.remove();
+			}
 		});
+
+		if (!this.DEBUG_TOOLS.hasPermission()) {
+			sleep(1).then(() => this.gsapi.closeDialog(id));
+		}
 	}
 
 	public getName() {
@@ -83,20 +98,31 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 	 */
 	public getSubpanels(): SubpanelInformation[] {
 		if (!this.subpanels) {
-			this.subpanels = subpanelClasses.map(cls => new cls(this.gsapi)
-				.on(ComponentEvent.WillRemove, panel => {
-					panel.trigger(DebugToolsPanelEvent.SwitchAway);
-					if (this.storePanels) {
-						panel.store();
-						return false;
-					}
+			this.subpanels = subpanelClasses.values()
+				.include(this.DEBUG_TOOLS.modRegistryMainDialogPanels.getRegistrations()
+					.map(registration => registration.data(DebugToolsPanel)))
+				.map(cls => new cls(this.gsapi)
+					.on(ComponentEvent.WillRemove, panel => {
+						if (panel.isVisible()) {
+							panel.trigger(DebugToolsPanelEvent.SwitchAway);
+						}
 
-					return undefined;
-				}));
+						if (this.storePanels) {
+							panel.store();
+							return false;
+						}
+
+						return undefined;
+					}))
+				.collect(Collectors.toArray);
 		}
 
 		return this.subpanels
-			.map(subpanel => tuple(subpanel.getTranslation(), translation(subpanel.getTranslation()), this.onShowSubpanel(subpanel)));
+			.map(subpanel => tuple(
+				translation(subpanel.getTranslation()).getString(),
+				translation(subpanel.getTranslation()),
+				this.onShowSubpanel(subpanel),
+			));
 	}
 
 	/**

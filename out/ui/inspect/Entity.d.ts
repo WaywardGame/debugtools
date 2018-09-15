@@ -1,12 +1,14 @@
 import { ICreature } from "creature/ICreature";
-import { UiApi } from "newui/INewUi";
+import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import DebugTools from "../../DebugTools";
+import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 import InspectInformationSection from "../component/InspectInformationSection";
+export declare type InspectDialogEntityInformationSubsectionClass = new (gsapi: IGameScreenApi) => InspectEntityInformationSubsection;
 export default class EntityInformation extends InspectInformationSection {
     readonly DEBUG_TOOLS: DebugTools;
     readonly LOG: Log;
@@ -15,7 +17,7 @@ export default class EntityInformation extends InspectInformationSection {
     private readonly statComponents;
     private entities;
     private entity;
-    constructor(api: UiApi);
+    constructor(gsapi: IGameScreenApi);
     getTabs(): [number, () => import("utilities/string/Interpolator").IStringSection[]][];
     setTab(entity: number): this;
     update(position: IVector2, tile: ITile): void;

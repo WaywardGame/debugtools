@@ -9,7 +9,6 @@ import Component from "newui/component/Component";
 import ContextMenu from "newui/component/ContextMenu";
 import { ComponentEvent } from "newui/component/IComponent";
 import Text from "newui/component/Text";
-import { UiApi } from "newui/INewUi";
 import { ScreenId } from "newui/screen/IScreen";
 import { DialogEvent } from "newui/screen/screens/game/component/Dialog";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
@@ -24,8 +23,8 @@ import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
-import DebugTools, { translation } from "../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../IDebugTools";
+import DebugTools from "../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import Overlays from "../overlay/Overlays";
 import { DebugToolsPanelEvent } from "./component/DebugToolsPanel";
 import InspectInformationSection from "./component/InspectInformationSection";
@@ -37,10 +36,12 @@ import TerrainInformation from "./inspect/Terrain";
 import TileEventInformation from "./inspect/TileEvent";
 import TabDialog, { SubpanelInformation } from "./TabDialog";
 
+export type InspectDialogInformationSectionClass = new (gsapi: IGameScreenApi) => InspectInformationSection;
+
 /**
  * A list of panel classes that will appear in the dialog.
  */
-const informationSectionClasses: (new (api: UiApi) => InspectInformationSection)[] = [
+const informationSectionClasses: InspectDialogInformationSectionClass[] = [
 	TerrainInformation,
 	EntityInformation,
 	CorpseInformation,
@@ -113,17 +114,21 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 */
 	public getSubpanels() {
 		if (!this.infoSections) {
-			this.infoSections = informationSectionClasses.map(cls => new cls(this.api)
-				.on("update", this.update)
-				.on(ComponentEvent.WillRemove, infoSection => {
-					if (this.storePanels) {
-						infoSection.trigger(DebugToolsPanelEvent.SwitchAway);
-						infoSection.store();
-						return false;
-					}
+			this.infoSections = informationSectionClasses.values()
+				.include(this.DEBUG_TOOLS.modRegistryInspectDialogPanels.getRegistrations()
+					.map(registration => registration.data(InspectInformationSection)))
+				.map(cls => new cls(this.gsapi)
+					.on("update", this.update)
+					.on(ComponentEvent.WillRemove, infoSection => {
+						if (this.storePanels) {
+							infoSection.trigger(DebugToolsPanelEvent.SwitchAway);
+							infoSection.store();
+							return false;
+						}
 
-					return undefined;
-				}));
+						return undefined;
+					}))
+				.collect(Collectors.toArray);
 
 			// we're going to need the entity information section for some other stuff
 			this.entityInfoSection = this.infoSections
@@ -367,7 +372,13 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		game.updateView(false);
 
 		this.storePanels = false;
-		for (const infoSection of this.infoSections) infoSection.remove();
+		for (const infoSection of this.infoSections) {
+			if (infoSection.isVisible()) {
+				infoSection.trigger(DebugToolsPanelEvent.SwitchAway);
+			}
+
+			infoSection.remove();
+		}
 
 		delete InspectDialog.INSTANCE;
 	}

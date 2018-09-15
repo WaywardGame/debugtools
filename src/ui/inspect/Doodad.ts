@@ -2,15 +2,15 @@ import { IDoodad } from "doodad/IDoodad";
 import { ItemQuality, ItemType, SentenceCaseStyle } from "Enums";
 import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
-import { UiApi } from "newui/INewUi";
+import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
-import DebugTools, { translation } from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
+import DebugTools from "../../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import AddItemToInventory, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
 import { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
@@ -24,10 +24,10 @@ export default class DoodadInformation extends InspectInformationSection {
 
 	private doodad: IDoodad | undefined;
 
-	public constructor(api: UiApi) {
-		super(api);
+	public constructor(gsapi: IGameScreenApi) {
+		super(gsapi);
 
-		new Button(api)
+		new Button(this.api)
 			.setText(translation(DebugToolsTranslation.ActionRemove))
 			.on(ButtonEvent.Activate, this.removeDoodad)
 			.appendTo(this);

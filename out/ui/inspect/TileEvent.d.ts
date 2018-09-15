@@ -1,4 +1,4 @@
-import { UiApi } from "newui/INewUi";
+import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
@@ -7,7 +7,7 @@ export default class TileEventInformation extends InspectInformationSection {
     readonly LOG: Log;
     private tileEvents;
     private tileEvent;
-    constructor(api: UiApi);
+    constructor(gsapi: IGameScreenApi);
     getTabs(): TabInformation[];
     setTab(tileEvent: number): this;
     update(position: IVector2, tile: ITile): void;

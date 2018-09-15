@@ -1,4 +1,5 @@
 import { ActionType, Bindable, SfxType } from "Enums";
+import { InterruptChoice } from "language/ILanguage";
 import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
@@ -20,8 +21,8 @@ import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
 import Actions from "../../Actions";
-import DebugTools, { DebugToolsEvent, translation } from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation } from "../../IDebugTools";
+import DebugTools, { DebugToolsEvent } from "../../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import CancelablePromise from "../../util/CancelablePromise";
 import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 
@@ -217,12 +218,12 @@ export default class GeneralPanel extends DebugToolsPanel {
 	 */
 	@Bound
 	private async travelAway() {
-		if (multiplayer.isConnected()) {
-			return;
-		}
+		if (multiplayer.isConnected()) return;
 
 		const choice = await this.api.interrupt(translation(DebugToolsTranslation.InterruptChoiceTravelAway))
-			.withChoice(this.DEBUG_TOOLS.choiceSailToCivilization, this.DEBUG_TOOLS.choiceTravelAway);
+			.withChoice(InterruptChoice.Cancel, this.DEBUG_TOOLS.choiceTravelAway, this.DEBUG_TOOLS.choiceSailToCivilization);
+
+		if (choice === InterruptChoice.Cancel) return;
 
 		actionManager.execute(
 			localPlayer,

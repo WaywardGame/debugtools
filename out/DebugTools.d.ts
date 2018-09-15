@@ -1,7 +1,8 @@
 import { ICreature, IDamageInfo } from "creature/ICreature";
+import IBaseHumanEntity from "entity/IBaseHumanEntity";
 import { Bindable, Direction, OverlayType, SpriteBatchLayer } from "Enums";
 import { Dictionary, InterruptChoice } from "language/ILanguage";
-import Translation from "language/Translation";
+import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
 import { BindCatcherApi } from "newui/BindingManager";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
@@ -14,13 +15,13 @@ import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Actions from "./Actions";
-import { DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal } from "./IDebugTools";
+import { IPlayerData, ISaveData, ISaveDataGlobal, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
-export declare function translation(debugToolsTranslation: DebugToolsTranslation): Translation;
 export declare enum DebugToolsEvent {
     PlayerDataChange = "PlayerDataChange",
-    Inspect = "Inspect"
+    Inspect = "Inspect",
+    PermissionsChange = "PermissionsChange"
 }
 export default class DebugTools extends Mod {
     static readonly INSTANCE: DebugTools;
@@ -28,6 +29,9 @@ export default class DebugTools extends Mod {
     readonly actions: Actions;
     readonly selector: LocationSelector;
     readonly unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
+    readonly modRegistryMainDialogPanels: InterModRegistry<ModRegistrationMainDialogPanel>;
+    readonly modRegistryInspectDialogPanels: InterModRegistry<ModRegistrationInspectDialogInformationSection>;
+    readonly modRegistryInspectDialogEntityInformationSubsections: InterModRegistry<ModRegistrationInspectDialogEntityInformationSubsection>;
     readonly bindableToggleDialog: Bindable;
     readonly bindableCloseInspectDialog: Bindable;
     readonly bindableInspectTile: Bindable;
@@ -65,7 +69,9 @@ export default class DebugTools extends Mod {
     setCameraUnlocked(unlocked: boolean): void;
     inspect(what: Vector2 | ICreature | IPlayer | INPC): void;
     toggleDialog(): void;
+    hasPermission(): boolean | undefined;
     postFieldOfView(): void;
+    onGameScreenVisible(): void;
     getZoomLevel(): number | undefined;
     getCameraPosition(position: IVector2): IVector2 | undefined;
     onPlayerDamage(player: IPlayer, info: IDamageInfo): number | undefined;
@@ -73,7 +79,7 @@ export default class DebugTools extends Mod {
     onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined;
     onNoInputReceived(player: IPlayer): void;
     getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined;
-    isPlayerSwimming(player: IPlayer, isSwimming: boolean): boolean | undefined;
+    isHumanSwimming(human: IBaseHumanEntity, isSwimming: boolean): boolean | undefined;
     getPlayerStrength(strength: number, player: IPlayer): number;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     getAmbientColor(colors: [number, number, number]): [number, number, number] | undefined;

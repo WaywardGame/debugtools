@@ -1,9 +1,10 @@
 import { ICreature, IDamageInfo } from "creature/ICreature";
+import IBaseHumanEntity from "entity/IBaseHumanEntity";
 import { EntityType } from "entity/IEntity";
 import { ActionType, Bindable, Delay, Direction, MoveType, OverlayType, SpriteBatchLayer } from "Enums";
 import { Dictionary, InterruptChoice } from "language/ILanguage";
-import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
+import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
 import { BindCatcherApi, bindingManager, KeyModifier } from "newui/BindingManager";
@@ -20,21 +21,13 @@ import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import Actions from "./Actions";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal } from "./IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import AddItemToInventory from "./ui/component/AddItemToInventory";
 import MainDialog from "./ui/DebugToolsDialog";
 import InspectDialog from "./ui/InspectDialog";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
 import Version from "./util/Version";
-
-/**
- * Returns a translation object using the `DebugToolsTranslation` dictionary
- * @param debugToolsTranslation The `DebugToolsTranslation` to get a `Translation` instance of
- */
-export function translation(debugToolsTranslation: DebugToolsTranslation) {
-	return new Translation(DebugTools.INSTANCE.dictionary, debugToolsTranslation);
-}
 
 /**
  * An enum representing the possible states of the camera
@@ -66,6 +59,10 @@ export enum DebugToolsEvent {
 	 * Emitted when a tile or object is inspected.
 	 */
 	Inspect = "Inspect",
+	/**
+	 * Emitted when permissions are changed for this player.
+	 */
+	PermissionsChange = "PermissionsChange",
 }
 
 export default class DebugTools extends Mod {
@@ -89,6 +86,17 @@ export default class DebugTools extends Mod {
 	public readonly selector: LocationSelector;
 	@Register.registry(UnlockedCameraMovementHandler)
 	public readonly unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
+
+	////////////////////////////////////
+	// Extension Registries
+	//
+
+	@Register.interModRegistry("MainDialogPanel")
+	public readonly modRegistryMainDialogPanels: InterModRegistry<ModRegistrationMainDialogPanel>;
+	@Register.interModRegistry("InspectDialogPanel")
+	public readonly modRegistryInspectDialogPanels: InterModRegistry<ModRegistrationInspectDialogInformationSection>;
+	@Register.interModRegistry("InspectDialogEntityInformationSubsection")
+	public readonly modRegistryInspectDialogEntityInformationSubsections: InterModRegistry<ModRegistrationInspectDialogEntityInformationSubsection>;
 
 	////////////////////////////////////
 	// Bindables
@@ -153,6 +161,10 @@ export default class DebugTools extends Mod {
 		group: MenuBarButtonGroup.Meta,
 		bindable: Registry<DebugTools, Bindable>().get("bindableToggleDialog"),
 		tooltip: tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.DialogTitleMain))),
+		onCreate: button => {
+			button.toggle(DebugTools.INSTANCE.hasPermission());
+			DebugTools.INSTANCE.on(DebugToolsEvent.PlayerDataChange, () => button.toggle(DebugTools.INSTANCE.hasPermission()));
+		},
 	})
 	public readonly menuBarButton: MenuBarButtonType;
 
@@ -191,6 +203,7 @@ export default class DebugTools extends Mod {
 			weightBonus: 0,
 			invulnerable: false,
 			noclip: false,
+			permissions: players[player.id].isServer(),
 		};
 
 		return this.data.playerData[player.identifier][key];
@@ -210,6 +223,12 @@ export default class DebugTools extends Mod {
 		this.getPlayerData(player, key);
 		this.data.playerData[player.identifier][key] = value;
 		this.trigger(DebugToolsEvent.PlayerDataChange, player.id, key, value);
+
+		if (!this.hasPermission()) {
+			const gameScreen = newui.getScreen<GameScreen>(ScreenId.Game)!;
+			gameScreen.closeDialog(this.dialogMain);
+			gameScreen.closeDialog(this.dialogInspect);
+		}
 	}
 
 	////////////////////////////////////
@@ -250,12 +269,9 @@ export default class DebugTools extends Mod {
 	/**
 	 * Called when Debug Tools is loaded (in a save)
 	 * - Registers the `LocationSelector` stored in `this.selector` as a hook host.
-	 * - Initializes the `AddItemToInventory` UI Component (it takes a second or two to be created, and there are multiple places in
-	 * the UI that use it. We initialize it only once so the slow initialization only happens once.)
 	 */
 	public onLoad(): void {
 		hookManager.register(this.selector, "DebugTools:LocationSelector");
-		AddItemToInventory.get(newui);
 	}
 
 	/**
@@ -323,8 +339,14 @@ export default class DebugTools extends Mod {
 	 * Toggles the main dialog.
 	 */
 	public toggleDialog() {
+		if (!this.hasPermission()) return;
+
 		newui.getScreen<GameScreen>(ScreenId.Game)!
 			.toggleDialog(this.dialogMain);
+	}
+
+	public hasPermission() {
+		return !multiplayer.isConnected() || multiplayer.isServer() || this.getPlayerData(localPlayer, "permissions");
 	}
 
 	////////////////////////////////////
@@ -337,6 +359,16 @@ export default class DebugTools extends Mod {
 	@HookMethod
 	public postFieldOfView() {
 		this.updateFog();
+	}
+
+	/**
+	 * Called when the game screen becomes visible
+	 * - Initializes the `AddItemToInventory` UI Component (it takes a second or two to be created, and there are multiple places in
+	 * the UI that use it. We initialize it only once so the slow initialization only happens once.)
+	 */
+	@HookMethod
+	public onGameScreenVisible() {
+		AddItemToInventory.get(newui);
 	}
 
 	/**
@@ -472,8 +504,10 @@ export default class DebugTools extends Mod {
 	 * Otherwise we return `undefined` and let the game or other mods handle it. 
 	 */
 	@HookMethod
-	public isPlayerSwimming(player: IPlayer, isSwimming: boolean): boolean | undefined {
-		return this.getPlayerData(player, "noclip") ? false : undefined;
+	public isHumanSwimming(human: IBaseHumanEntity, isSwimming: boolean): boolean | undefined {
+		if (human.entityType === EntityType.NPC) return undefined;
+
+		return this.getPlayerData(human as IPlayer, "noclip") ? false : undefined;
 	}
 
 	/**
@@ -487,12 +521,9 @@ export default class DebugTools extends Mod {
 	// tslint:disable cyclomatic-complexity
 	@HookMethod
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable {
-		const gameScreen = newui.getScreen<GameScreen>(ScreenId.Game)!;
+		if (!this.hasPermission()) return bindPressed;
 
-		if (api.wasPressed(this.bindableToggleDialog) && !bindPressed) {
-			gameScreen.toggleDialog(this.dialogMain);
-			bindPressed = this.bindableToggleDialog;
-		}
+		const gameScreen = newui.getScreen<GameScreen>(ScreenId.Game)!;
 
 		if (api.wasPressed(Bindable.GameZoomIn) && !bindPressed && gameScreen.isMouseWithin()) {
 			this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;
