@@ -253,7 +253,10 @@ export default class PaintPanel extends DebugToolsPanel {
 		this.paintButton.setChecked(false);
 
 		this.paintRow.store();
-		this.parent.classes.remove("debug-tools-paint-panel");
+
+		if (this.parent) {
+			this.parent.classes.remove("debug-tools-paint-panel");
+		}
 	}
 
 	@Bound

@@ -73,7 +73,10 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 		// when the dialog is removed from the DOM, we force remove all of the panels (they're cached otherwise)
 		this.on(ComponentEvent.WillRemove, () => {
 			this.storePanels = false;
-			for (const subpanel of this.subpanels) subpanel.remove();
+			for (const subpanel of this.subpanels) {
+				subpanel.trigger(DebugToolsPanelEvent.SwitchAway);
+				subpanel.remove();
+			}
 		});
 
 		if (!this.DEBUG_TOOLS.hasPermission()) {
