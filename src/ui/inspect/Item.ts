@@ -1,6 +1,7 @@
-import { ItemQuality, ItemType, SentenceCaseStyle } from "Enums";
+import { ItemQuality, ItemType } from "Enums";
 import { IItem } from "item/IItem";
-import Translation from "language/Translation";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
 import Component from "newui/component/Component";
@@ -64,7 +65,7 @@ export default class ItemInformation extends InspectInformationSection {
 		for (const item of this.items) {
 			new Paragraph(this.api)
 				.setText(() => translation(DebugToolsTranslation.ItemName)
-					.get(Translation.ofObjectName(item, SentenceCaseStyle.Title, true)))
+					.get(Translation.nameOf(Dictionary.Item, item, true).inContext(TextContext.Title)))
 				.appendTo(this.wrapperItems);
 
 			new Button(this.api)

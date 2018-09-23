@@ -61,7 +61,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 		if (!this.human) return;
 
-		for (const type of Objects.keys(this.reputationSliders)) {
+		for (const type of Objects.keys<keyof HumanInformation["reputationSliders"]>(this.reputationSliders)) {
 			this.reputationSliders[type]!.refresh();
 		}
 

@@ -1,5 +1,6 @@
-import { SentenceCaseStyle, TerrainType } from "Enums";
-import Translation from "language/Translation";
+import { TerrainType } from "Enums";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import { bindingManager } from "newui/BindingManager";
 import Button, { ButtonEvent } from "newui/component/Button";
@@ -56,7 +57,7 @@ export default class TerrainInformation extends InspectInformationSection {
 	@Bound
 	public getTabTranslation() {
 		return this.tile && translation(DebugToolsTranslation.InspectTerrain)
-			.get(terrainDescriptions[TileHelpers.getType(this.tile)]!.name);
+			.get(new Translation(Dictionary.Terrain, TileHelpers.getType(this.tile)).inContext(TextContext.Title));
 	}
 
 	public update(position: IVector2, tile: ITile) {
@@ -96,14 +97,14 @@ export default class TerrainInformation extends InspectInformationSection {
 		// create the options
 		Enums.values(TerrainType)
 			.map(terrain => tuple(TerrainType[terrain], {
-				translation: Translation.ofDescription(terrainDescriptions[terrain]!, SentenceCaseStyle.Title, false),
+				translation: new Translation(Dictionary.Terrain, terrain).inContext(TextContext.Title),
 				onActivate: this.changeTerrain(terrain),
 			}))
 			.collect(Collectors.toArray)
 			.sort(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))
 			.values()
 			// create the context menu from them
-			.collect(Collectors.passTo(ContextMenu.bind(null, this.api), PassStrategy.Splat))
+			.collect<ContextMenu>(Collectors.passTo(ContextMenu.bind(null, this.api), PassStrategy.Splat))
 			.addAllDescribedOptions()
 			.setPosition(mouse.x, mouse.y)
 			.schedule(screen.setContextMenu);

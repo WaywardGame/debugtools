@@ -1,4 +1,4 @@
-import { ActionCallback, IActionArgument, IActionDescriptionNamed, IActionResult } from "action/IAction";
+import { ActionCallback, IActionArgument, IActionBase, IActionResult } from "action/IAction";
 import { ICorpse } from "creature/corpse/ICorpse";
 import { ICreature } from "creature/ICreature";
 import { IDoodad } from "doodad/IDoodad";
@@ -6,10 +6,10 @@ import IBaseEntity from "entity/IBaseEntity";
 import IBaseHumanEntity from "entity/IBaseHumanEntity";
 import { AiType, EntityType } from "entity/IEntity";
 import { IStatMax, Stat } from "entity/IStats";
-import { CreatureType, DamageType, Delay, ItemQuality, ItemType, MoveType, NPCType, PlayerState, SentenceCaseStyle, SkillType, StatusType, TerrainType } from "Enums";
+import { CreatureType, DamageType, Delay, ItemQuality, ItemType, MoveType, NPCType, PlayerState, SkillType, StatusType, TerrainType } from "Enums";
 import { IContainer, IItem } from "item/IItem";
 import itemDescriptions from "item/Items";
-import { Message, MessageType } from "language/IMessages";
+import Message from "language/dictionary/Message";
 import { ITemplateOptions, spawnTemplate } from "mapgen/MapGenHelpers";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
@@ -17,6 +17,7 @@ import { TranslationGenerator } from "newui/component/IComponent";
 import Text from "newui/component/Text";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
+import { MessageType } from "player/MessageManager";
 import { TileTemplateType } from "tile/ITerrain";
 import terrainDescriptions from "tile/Terrains";
 import Enums from "utilities/enum/Enums";
@@ -37,9 +38,7 @@ export enum RemovalType {
 	TileEvent,
 }
 
-function description(name: string): IActionDescriptionNamed {
-	return { name, usableAsGhost: true, usableWhenPaused: true, ignoreHasDelay: true, ignoreIsMoving: true };
-}
+const defaultDescription: IActionBase = { usableAsGhost: true, usableWhenPaused: true, ignoreHasDelay: true, ignoreIsMoving: true };
 
 type ExecuteFunction<F extends any> = F extends (player: IPlayer, argument: IActionArgument<infer X>, result: IActionResult) => void ? (undefined extends Extract<X, undefined> ?
 	(argument?: IActionArgument<X>) => void : (argument: IActionArgument<X>) => void) : never;
@@ -81,7 +80,7 @@ export default class Actions {
 	// Actions
 	//
 
-	@Register.action<[TileTemplateType, ITemplateOptions]>(description("Place Template"))
+	@Register.action<[TileTemplateType, ITemplateOptions]>("PlaceTemplate", defaultDescription)
 	public placeTemplate(executor: IPlayer, { point, object: [type, options] }: IActionArgument<[TileTemplateType, ITemplateOptions]>, result: IActionResult) {
 		spawnTemplate(type, point!.x, point!.y, executor.z, options);
 
@@ -93,7 +92,7 @@ export default class Actions {
 	 * @param actionArgument.object[0] A `DebugToolsTranslation` naming what command to perform.
 	 * @param actionArgument.object[1] An array of `[SelectionType, number]` tuples. Each represents a selected thing, such as a creature and its ID. 
 	 */
-	@Register.action<[DebugToolsTranslation, [SelectionType, number][]]>(description("Execute on Selection"))
+	@Register.action<[DebugToolsTranslation, [SelectionType, number][]]>("SelectionExecute", defaultDescription)
 	public executeOnSelection(executor: IPlayer, { object: [action, selection] }: IActionArgument<[DebugToolsTranslation, [SelectionType, number][]]>, result: IActionResult) {
 		for (const [type, id] of selection) {
 			let creature: ICreature | undefined;
@@ -126,10 +125,10 @@ export default class Actions {
 	/**
 	 * Teleports an entity to a position.
 	 */
-	@Register.action(description("Teleport Entity"))
+	@Register.action("TeleportEntity", defaultDescription)
 	public teleport(executor: IPlayer, { entity, position }: IActionArgument, result: IActionResult) {
 		position = this.getPosition(executor, position!, () => translation(DebugToolsTranslation.ActionTeleport)
-			.get(game.getName(entity)));
+			.get(entity!.getName()));
 
 		if (!entity || !position) return;
 
@@ -168,12 +167,12 @@ export default class Actions {
 	/**
 	 * Kills an entity by dealing `Infinity` true damage to it.
 	 */
-	@Register.action(description("Kill"))
+	@Register.action("Kill", defaultDescription)
 	public kill(executor: IPlayer, { entity }: IActionArgument, result: IActionResult) {
 		entity!.damage({
 			type: DamageType.True,
 			amount: Infinity,
-			damageMessage: translation(DebugToolsTranslation.KillEntityDeathMessage).getString(),
+			damageMessage: translation(DebugToolsTranslation.KillEntityDeathMessage),
 		});
 
 		renderer.computeSpritesInViewport();
@@ -183,10 +182,10 @@ export default class Actions {
 	/**
 	 * Clones an entity or doodad to a new location. If given a player, an NPC with the appearance, items, and stats of the player is cloned.
 	 */
-	@Register.action(description("Clone"))
+	@Register.action("Clone", defaultDescription)
 	public clone(executor: IPlayer, { entity, doodad, position }: IActionArgument, result: IActionResult) {
 		position = this.getPosition(executor, position!, () => translation(DebugToolsTranslation.ActionClone)
-			.get(game.getName(entity)));
+			.get(entity!.getName()));
 
 		if (!position) return;
 
@@ -201,7 +200,7 @@ export default class Actions {
 		result.updateRender = true;
 	}
 
-	@Register.action<number>(description("Set Time"))
+	@Register.action<number>("SetTime", defaultDescription)
 	public setTime(player: IPlayer, { object: time }: IActionArgument<number>, result: IActionResult) {
 		game.time.setTime(time);
 		game.updateRender = true;
@@ -211,7 +210,7 @@ export default class Actions {
 	/**
 	 * The core stats, namely, Health, Stamina, Hunger, and Thirst, are all set to their maximum values. Any status effects are removed.
 	 */
-	@Register.action<number | undefined>(description("Heal"))
+	@Register.action<number | undefined>("Heal", defaultDescription)
 	public heal(executor: IPlayer, { entity, object: corpseId }: IActionArgument<number | undefined>, result: IActionResult) {
 		// resurrect corpses
 		if (!entity) {
@@ -241,12 +240,12 @@ export default class Actions {
 		result.updateRender = true;
 	}
 
-	@Register.action<[Stat, number]>(description("Set Stat"))
+	@Register.action<[Stat, number]>("SetStat", defaultDescription)
 	public setStat(executor: IPlayer, { entity, object: [stat, value] }: IActionArgument<[Stat, number]>, result: IActionResult) {
 		entity!.setStat(stat, value);
 	}
 
-	@Register.action<boolean>(description("Set Tamed"))
+	@Register.action<boolean>("SetTamed", defaultDescription)
 	public setTamed(player: IPlayer, { creature, object: tamed }: IActionArgument<boolean>, result: IActionResult) {
 		if (tamed) creature!.tame(player);
 		else creature!.release();
@@ -255,7 +254,7 @@ export default class Actions {
 	/**
 	 * Removes a creature, NPC, item, doodad, corpse, or tile event.
 	 */
-	@Register.action<[RemovalType, number] | undefined>(description("Remove"))
+	@Register.action<[RemovalType, number] | undefined>("Remove", defaultDescription)
 	public remove(player: IPlayer, { creature, npc, item, doodad, object: otherRemoval }: IActionArgument<[RemovalType, number] | undefined>, result: IActionResult) {
 		this.removeInternal(result, otherRemoval || [] as any, creature, npc, item, doodad);
 
@@ -263,14 +262,14 @@ export default class Actions {
 		result.updateRender = true;
 	}
 
-	@Register.action<number>(description("Set Weight Bonus"))
+	@Register.action<number>("SetWeightBonus", defaultDescription)
 	public setWeightBonus(executor: IPlayer, { player, object: weightBonus }: IActionArgument<number>, result: IActionResult) {
 		this.mod.setPlayerData(player!, "weightBonus", weightBonus);
 		player!.updateStrength();
 		player!.updateTablesAndWeight();
 	}
 
-	@Register.action<TerrainType>(description("Change Terrain"))
+	@Register.action<TerrainType>("ChangeTerrain", defaultDescription)
 	public changeTerrain(player: IPlayer, { object: terrain, position }: IActionArgument<TerrainType>, result: IActionResult) {
 		if (!position) return;
 
@@ -281,7 +280,7 @@ export default class Actions {
 		result.updateRender = true;
 	}
 
-	@Register.action<boolean>(description("Toggle Tilled"))
+	@Register.action<boolean>("ToggleTilled", defaultDescription)
 	public toggleTilled(player: IPlayer, { position, object: tilled }: IActionArgument<boolean>, result: IActionResult) {
 		if (!position) return;
 
@@ -291,7 +290,7 @@ export default class Actions {
 		result.updateRender = true;
 	}
 
-	@Register.action(description("Update Stats and Attributes"))
+	@Register.action("UpdateStatsAndAttributes", defaultDescription)
 	public updateStatsAndAttributes(player: IPlayer, argument: IActionArgument, result: IActionResult) {
 		player.updateStatsAndAttributes();
 	}
@@ -299,7 +298,7 @@ export default class Actions {
 	/**
 	 * Adds an item to the inventory of a doodad, human, or tile.
 	 */
-	@Register.action<[ItemType, ItemQuality]>(description("Add Item to Inventory"))
+	@Register.action<[ItemType, ItemQuality]>("AddItemToInventory", defaultDescription)
 	public addItemToInventory(executor: IPlayer, { doodad, human, point, object: [item, quality] }: IActionArgument<[ItemType, ItemQuality]>, result: IActionResult) {
 		if (human) {
 			human!.createItemInInventory(item, quality);
@@ -325,7 +324,7 @@ export default class Actions {
 	 * @param actionArgument.object[1] The data to paint (terrain, creature, npc, etc)
 	 */
 	// tslint:disable cyclomatic-complexity
-	@Register.action<[number[], IPaintData]>(description("Paint"))
+	@Register.action<[number[], IPaintData]>("Paint", defaultDescription)
 	public paint(player: IPlayer, { object: [tiles, data] }: IActionArgument<[number[], IPaintData]>, result: IActionResult) {
 		for (const tileId of tiles) {
 			const [x, y, z] = getTilePosition(tileId);
@@ -411,7 +410,7 @@ export default class Actions {
 	}
 	// tslint:enable cyclomatic-complexity
 
-	@Register.action(description("Unlock Recipes"))
+	@Register.action("UnlockRecipes", defaultDescription)
 	public unlockRecipes(player: IPlayer, argument: IActionArgument, result: IActionResult) {
 		const itemTypes = Enums.values(ItemType);
 
@@ -428,12 +427,12 @@ export default class Actions {
 		game.updateTablesAndWeight();
 	}
 
-	@Register.action<boolean>(description("Toggle Invulnerable"))
+	@Register.action<boolean>("ToggleInvulnerable", defaultDescription)
 	public toggleInvulnerable(executor: IPlayer, { player, object: invulnerable }: IActionArgument<boolean>, result: IActionResult) {
 		Actions.debugTools.setPlayerData(player!, "invulnerable", invulnerable);
 	}
 
-	@Register.action<[SkillType, number]>(description("Set Skill"))
+	@Register.action<[SkillType, number]>("SetSkill", defaultDescription)
 	public setSkill(executor: IPlayer, { player, object: [skill, value] }: IActionArgument<[SkillType, number]>, result: IActionResult) {
 		if (!player) return;
 
@@ -441,7 +440,7 @@ export default class Actions {
 		player.skills[skill].percent = player.skills[skill].bonus + value;
 	}
 
-	@Register.action<boolean>(description("Toggle Noclip"))
+	@Register.action<boolean>("ToggleNoclip", defaultDescription)
 	public toggleNoclip(executor: IPlayer, { player, object: noclip }: IActionArgument<boolean>, result: IActionResult) {
 		if (!player) return;
 
@@ -455,7 +454,7 @@ export default class Actions {
 		game.updateView(true);
 	}
 
-	@Register.action<boolean>(description("Toggle Permissions"))
+	@Register.action<boolean>("TogglePermissions", defaultDescription)
 	public togglePermissions(executor: IPlayer, { player, object: permissions }: IActionArgument<boolean>, result: IActionResult) {
 		if (!player) return;
 
@@ -502,7 +501,7 @@ export default class Actions {
 
 		// fail if the location is blocked
 		const location = this.getPosition(player, new Vector3(corpse), () => translation(DebugToolsTranslation.ActionResurrect)
-			.get(game.getName(corpse, SentenceCaseStyle.Sentence, true)));
+			.get(corpseManager.getName(corpse)));
 
 		if (!location) return false;
 

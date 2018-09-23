@@ -1,10 +1,10 @@
-import { SentenceCaseStyle } from "Enums";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import { ITileEvent } from "tile/ITileEvent";
-import tileEventDescriptions from "tile/TileEvents";
 import { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
 import Log from "utilities/Log";
@@ -36,7 +36,7 @@ export default class TileEventInformation extends InspectInformationSection {
 	public getTabs(): TabInformation[] {
 		return this.tileEvents.entries()
 			.map(([i, tileEvent]) => tuple(i, () => translation(DebugToolsTranslation.TileEventName)
-				.get(game.getNameFromDescription(tileEventDescriptions[tileEvent.type]!, SentenceCaseStyle.Title, false))))
+				.get(Translation.nameOf(Dictionary.TileEvent, tileEvent, false).inContext(TextContext.Title))))
 			.collect(Collectors.toArray);
 	}
 

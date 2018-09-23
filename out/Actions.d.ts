@@ -1,7 +1,7 @@
 import { IActionArgument, IActionResult } from "action/IAction";
 import { Stat } from "entity/IStats";
 import { ItemQuality, ItemType, SkillType, TerrainType } from "Enums";
-import { Message } from "language/IMessages";
+import Message from "language/dictionary/Message";
 import { ITemplateOptions } from "mapgen/MapGenHelpers";
 import IPlayer from "player/IPlayer";
 import { TileTemplateType } from "tile/ITerrain";

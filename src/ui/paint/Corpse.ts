@@ -1,7 +1,6 @@
-import { creatureDescriptions } from "creature/Creatures";
-import { CreatureType, SentenceCaseStyle } from "Enums";
-import { Dictionary } from "language/ILanguage";
-import Translation from "language/Translation";
+import { CreatureType } from "Enums";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { TextContext } from "language/Translation";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
@@ -38,7 +37,8 @@ export default class CorpsePaint extends Component implements IPaintSection {
 					] as IDropdownOption<"nochange" | "remove" | keyof typeof CreatureType>[]).values().include(Enums.values(CreatureType)
 						.map(creature => tuple(
 							CreatureType[creature] as keyof typeof CreatureType,
-							creatureDescriptions[creature] ? Translation.ofDescription(creatureDescriptions[creature]!, SentenceCaseStyle.Title, false) : new Translation(Dictionary.Corpse, creature),
+							Translation.nameOf(Dictionary.Creature, creature, false).inContext(TextContext.Title)
+								.setFailWith(corpseManager.getName(creature, false).inContext(TextContext.Title)),
 						))
 						.collect(Collectors.toArray)
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))

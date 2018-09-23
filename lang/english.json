@@ -74,9 +74,9 @@
 			"labelTerrain": "{#--text-color-faded:Terrain}",
 			"labelCreature": "{#--text-color-faded:Creature}",
 			"buttonPaintClear": "Clear",
-			"tooltipPaintClear": "{#--text-color-faded:({Bindable.ModDebugToolsClearPaint})}",
+			"tooltipPaintClear": "{#--text-color-faded:({Bindings:ModDebugToolsClearPaint})}",
 			"buttonPaintComplete": "Complete",
-			"tooltipPaintComplete": "{#--text-color-faded:({Bindable.ModDebugToolsCompletePaint})}",
+			"tooltipPaintComplete": "{#--text-color-faded:({Bindings:ModDebugToolsCompletePaint})}",
 			"buttonToggleAberrant": "Aberrant",
 			"labelNPC": "{#--text-color-faded:NPC}",
 			"labelDoodad": "{#--text-color-faded:Doodad}",
@@ -157,6 +157,9 @@
 			"actionResurrect": "resurrect {0}",
 			"actionClone": "clone {0}",
 			"actionTeleport": "teleport {0}"
+		},
+		"item": {
+			"none": "none"
 		}
 	}
 }

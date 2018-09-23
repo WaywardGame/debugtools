@@ -1,7 +1,7 @@
 import { ICreature } from "creature/ICreature";
 import { EntityType } from "entity/IEntity";
 import { SkillType } from "Enums";
-import { UiTranslation } from "language/ILanguage";
+import UiTranslation from "language/dictionary/UiTranslation";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { BlockRow } from "newui/component/BlockRow";

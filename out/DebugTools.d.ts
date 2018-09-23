@@ -1,7 +1,8 @@
 import { ICreature, IDamageInfo } from "creature/ICreature";
 import IBaseHumanEntity from "entity/IBaseHumanEntity";
 import { Bindable, Direction, OverlayType, SpriteBatchLayer } from "Enums";
-import { Dictionary, InterruptChoice } from "language/ILanguage";
+import { Dictionary } from "language/Dictionaries";
+import InterruptChoice from "language/dictionary/InterruptChoice";
 import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
 import { BindCatcherApi } from "newui/BindingManager";

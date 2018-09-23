@@ -1,5 +1,6 @@
 import { ICorpse } from "creature/corpse/ICorpse";
-import { CreatureType, SentenceCaseStyle } from "Enums";
+import { CreatureType } from "Enums";
+import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
@@ -41,7 +42,7 @@ export default class CorpseInformation extends InspectInformationSection {
 	public getTabs(): TabInformation[] {
 		return this.corpses.entries()
 			.map(([i, corpse]) => tuple(i, () => translation(DebugToolsTranslation.CorpseName)
-				.get(game.getName(corpse, SentenceCaseStyle.Title, false))))
+				.get(corpseManager.getName(corpse, false).inContext(TextContext.Title))))
 			.collect(Collectors.toArray);
 	}
 

@@ -1,6 +1,6 @@
-import { doodadDescriptions } from "doodad/Doodads";
-import { DoodadType, SentenceCaseStyle } from "Enums";
-import Translation from "language/Translation";
+import { DoodadType } from "Enums";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { TextContext } from "language/Translation";
 import Button from "newui/component/Button";
 import Component from "newui/component/Component";
 import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdown";
@@ -33,7 +33,10 @@ export default class DoodadPaint extends Component implements IPaintSection {
 						["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
 					] as IDropdownOption<"nochange" | "remove" | keyof typeof DoodadType>[]).values().include(Enums.values(DoodadType)
 						.filter(type => type !== DoodadType.Item)
-						.map(doodad => tuple(DoodadType[doodad] as keyof typeof DoodadType, Translation.ofDescription(doodadDescriptions[doodad]!, SentenceCaseStyle.Title, false)))
+						.map(doodad => tuple(
+							DoodadType[doodad] as keyof typeof DoodadType,
+							Translation.nameOf(Dictionary.Doodad, doodad, false).inContext(TextContext.Title),
+						))
 						.collect(Collectors.toArray)
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.values()

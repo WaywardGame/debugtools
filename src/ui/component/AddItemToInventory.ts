@@ -1,6 +1,6 @@
-import { ItemQuality, ItemType, SentenceCaseStyle } from "Enums";
-import itemDescriptions from "item/Items";
-import Translation from "language/Translation";
+import { ItemQuality, ItemType } from "Enums";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { TextContext } from "language/Translation";
 import Button, { ButtonEvent } from "newui/component/Button";
 import Component from "newui/component/Component";
 import Dropdown, { DropdownEvent } from "newui/component/Dropdown";
@@ -11,6 +11,7 @@ import { UiApi } from "newui/INewUi";
 import { tuple } from "utilities/Arrays";
 import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
+import { pipe } from "utilities/IterableIterator";
 import { Bound } from "utilities/Objects";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 
@@ -43,11 +44,13 @@ export default class AddItemToInventory extends Component {
 			.append(this.dropdownItemType = new Dropdown<ItemType>(api)
 				.setRefreshMethod(() => ({
 					defaultOption: ItemType.None,
-					options: Enums.values(ItemType)
-						.map(item => tuple(item, Translation.ofDescription(itemDescriptions[item]!, SentenceCaseStyle.Title, false)))
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
+					options: pipe(tuple(ItemType.None, Translation.nameOf(Dictionary.Item, ItemType.None, false).inContext(TextContext.Title)))
+						.include(Enums.values(ItemType)
+							.filter(item => item)
+							.map(item => tuple(item, Translation.nameOf(Dictionary.Item, item, false).inContext(TextContext.Title)))
+							.collect(Collectors.toArray)
+							.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+							.values())
 						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
 				}))
 				.on(DropdownEvent.Selection, this.changeItem))

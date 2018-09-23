@@ -2,7 +2,6 @@ import { ICreature } from "creature/ICreature";
 import IBaseEntity, { EntityEvent, IStatChangeInfo } from "entity/IBaseEntity";
 import { EntityType } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
-import { SentenceCaseStyle } from "Enums";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { bindingManager } from "newui/BindingManager";
@@ -105,7 +104,7 @@ export default class EntityInformation extends InspectInformationSection {
 	public getTabs() {
 		return this.entities.entries()
 			.map(([i, entity]) => tuple(i, () => translation(DebugToolsTranslation.EntityName)
-				.get(EntityType[entity.entityType], game.getName(entity, SentenceCaseStyle.Title))))
+				.get(EntityType[entity.entityType], entity.getName()/*.inContext(TextContext.Title)*/)))
 			.collect(Collectors.toArray);
 	}
 
@@ -254,7 +253,7 @@ export default class EntityInformation extends InspectInformationSection {
 			.sort(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))
 			.values()
 			// create the context menu from them
-			.collect(Collectors.passTo(ContextMenu.bind(null, this.api), PassStrategy.Splat))
+			.collect<ContextMenu>(Collectors.passTo(ContextMenu.bind(null, this.api), PassStrategy.Splat))
 			.addAllDescribedOptions();
 	}
 

@@ -1,6 +1,7 @@
 import { creatureDescriptions } from "creature/Creatures";
-import { CreatureType, SentenceCaseStyle } from "Enums";
-import Translation from "language/Translation";
+import { CreatureType } from "Enums";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { TextContext } from "language/Translation";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
@@ -35,7 +36,10 @@ export default class CreaturePaint extends Component implements IPaintSection {
 						["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
 					] as IDropdownOption<"nochange" | "remove" | keyof typeof CreatureType>[]).values().include(Enums.values(CreatureType)
 						.filter(creature => creatureDescriptions[creature])
-						.map(creature => tuple(CreatureType[creature] as keyof typeof CreatureType, Translation.ofDescription(creatureDescriptions[creature]!, SentenceCaseStyle.Title, false)))
+						.map(creature => tuple(
+							CreatureType[creature] as keyof typeof CreatureType,
+							Translation.nameOf(Dictionary.Creature, creature, false).inContext(TextContext.Title),
+						))
 						.collect(Collectors.toArray)
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.values()

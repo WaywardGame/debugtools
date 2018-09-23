@@ -1,5 +1,6 @@
 import { IDoodad } from "doodad/IDoodad";
-import { ItemQuality, ItemType, SentenceCaseStyle } from "Enums";
+import { ItemQuality, ItemType } from "Enums";
+import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
@@ -49,7 +50,7 @@ export default class DoodadInformation extends InspectInformationSection {
 	public getTabs(): TabInformation[] {
 		return this.doodad ? [
 			[0, () => translation(DebugToolsTranslation.DoodadName)
-				.get(game.getName(this.doodad, SentenceCaseStyle.Title, false))],
+				.get(this.doodad!.getName(false).inContext(TextContext.Title))],
 		] : [];
 	}
 

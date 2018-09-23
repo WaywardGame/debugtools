@@ -1,5 +1,6 @@
-import { SentenceCaseStyle, TerrainType } from "Enums";
-import Translation from "language/Translation";
+import { TerrainType } from "Enums";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { TextContext } from "language/Translation";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
@@ -32,7 +33,10 @@ export default class TerrainPaint extends Component implements IPaintSection {
 					options: ([
 						["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
 					] as IDropdownOption<"nochange" | keyof typeof TerrainType>[]).values().include(Enums.values(TerrainType)
-						.map(terrain => tuple(TerrainType[terrain] as keyof typeof TerrainType, Translation.ofDescription(terrainDescriptions[terrain]!, SentenceCaseStyle.Title, false)))
+						.map(terrain => tuple(
+							TerrainType[terrain] as keyof typeof TerrainType,
+							new Translation(Dictionary.Terrain, terrain).inContext(TextContext.Title),
+						))
 						.collect(Collectors.toArray)
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.values()
