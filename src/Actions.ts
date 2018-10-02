@@ -15,6 +15,8 @@ import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
 import { TranslationGenerator } from "newui/component/IComponent";
 import Text from "newui/component/Text";
+import { ScreenId } from "newui/screen/IScreen";
+import GameScreen from "newui/screen/screens/GameScreen";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import { MessageType } from "player/MessageManager";
@@ -46,9 +48,9 @@ type ExecuteFunction<F extends any> = F extends (player: IPlayer, argument: IAct
 export default class Actions {
 
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
-	public static readonly debugTools: DebugTools;
+	public static readonly DEBUG_TOOLS: DebugTools;
 	@Mod.log(DEBUG_TOOLS_ID)
-	public static readonly log: Log;
+	public static readonly LOG: Log;
 
 	/**
 	 * Returns an action by its method name.
@@ -56,9 +58,9 @@ export default class Actions {
 	public static get<K extends keyof Actions, F extends Actions[K]>(name: K): { execute: ExecuteFunction<F> } {
 		return {
 			execute: (argument: IActionArgument) => {
-				const action = this.debugTools.actions[name];
+				const action = this.DEBUG_TOOLS.actions[name];
 				if (typeof action !== "function") {
-					this.log.error(`Action ${name} is invalid`);
+					this.LOG.error(`Action ${name} is invalid`);
 					return;
 				}
 
@@ -177,6 +179,10 @@ export default class Actions {
 
 		renderer.computeSpritesInViewport();
 		result.updateRender = true;
+
+		if (!multiplayer.isConnected() && entity === localPlayer) {
+			result.passTurn = true;
+		}
 	}
 
 	/**
@@ -238,6 +244,8 @@ export default class Actions {
 		}
 
 		result.updateRender = true;
+		Actions.DEBUG_TOOLS.updateFog();
+		newui.getScreen<GameScreen>(ScreenId.Game)!.onGameTickEnd();
 	}
 
 	@Register.action<[Stat, number]>("SetStat", defaultDescription)
@@ -429,7 +437,7 @@ export default class Actions {
 
 	@Register.action<boolean>("ToggleInvulnerable", defaultDescription)
 	public toggleInvulnerable(executor: IPlayer, { player, object: invulnerable }: IActionArgument<boolean>, result: IActionResult) {
-		Actions.debugTools.setPlayerData(player!, "invulnerable", invulnerable);
+		Actions.DEBUG_TOOLS.setPlayerData(player!, "invulnerable", invulnerable);
 	}
 
 	@Register.action<[SkillType, number]>("SetSkill", defaultDescription)
@@ -444,7 +452,7 @@ export default class Actions {
 	public toggleNoclip(executor: IPlayer, { player, object: noclip }: IActionArgument<boolean>, result: IActionResult) {
 		if (!player) return;
 
-		Actions.debugTools.setPlayerData(player, "noclip", noclip ? {
+		Actions.DEBUG_TOOLS.setPlayerData(player, "noclip", noclip ? {
 			moving: false,
 			delay: Delay.Movement,
 		} : false);
@@ -458,7 +466,7 @@ export default class Actions {
 	public togglePermissions(executor: IPlayer, { player, object: permissions }: IActionArgument<boolean>, result: IActionResult) {
 		if (!player) return;
 
-		Actions.debugTools.setPlayerData(player, "permissions", permissions);
+		Actions.DEBUG_TOOLS.setPlayerData(player, "permissions", permissions);
 	}
 
 	////////////////////////////////////
@@ -549,7 +557,7 @@ export default class Actions {
 		const openTile = TileHelpers.findMatchingTile(position, TileHelpers.isOpenTile);
 
 		if (!openTile) {
-			player.messages.source(Actions.debugTools.source)
+			player.messages.source(Actions.DEBUG_TOOLS.source)
 				.type(MessageType.Bad)
 				.send(this.messageFailureTileBlocked, Text.resolve(actionName));
 		}
@@ -599,7 +607,7 @@ export default class Actions {
 		} else {
 			clone = npcManager.spawn(NPCType.Merchant, position.x, position.y, position.z)!;
 			clone.customization = { ...entity.customization };
-			clone.renamed = entity.getName();
+			clone.renamed = entity.getName().getString();
 			this.cloneInventory(entity, clone);
 		}
 

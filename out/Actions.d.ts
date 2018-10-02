@@ -17,8 +17,8 @@ export declare enum RemovalType {
 declare type ExecuteFunction<F extends any> = F extends (player: IPlayer, argument: IActionArgument<infer X>, result: IActionResult) => void ? (undefined extends Extract<X, undefined> ? (argument?: IActionArgument<X>) => void : (argument: IActionArgument<X>) => void) : never;
 export default class Actions {
     private readonly mod;
-    static readonly debugTools: DebugTools;
-    static readonly log: Log;
+    static readonly DEBUG_TOOLS: DebugTools;
+    static readonly LOG: Log;
     static get<K extends keyof Actions, F extends Actions[K]>(name: K): {
         execute: ExecuteFunction<F>;
     };
