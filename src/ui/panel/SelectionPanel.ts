@@ -33,9 +33,7 @@ function getSelectionType(target: ICreature | INPC | ITileEvent) {
 }
 
 export default class SelectionPanel extends DebugToolsPanel {
-	private readonly dropdownMethod: Dropdown<string | number>;
 	private readonly rangeQuantity: RangeRow;
-	private readonly dropdownAction: Dropdown<string | number>;
 
 	private creatures = false;
 	private npcs = false;
@@ -49,7 +47,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 		new LabelledRow(this.api)
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.SelectionMethod)))
-			.append(this.dropdownMethod = new Dropdown(this.api)
+			.append(new Dropdown(this.api)
 				.setRefreshMethod(() => ({
 					defaultOption: DebugToolsTranslation.MethodAll,
 					options: [
@@ -88,7 +86,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 		new LabelledRow(this.api)
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.SelectionAction)))
-			.append(this.dropdownAction = new Dropdown(this.api)
+			.append(new Dropdown(this.api)
 				.on<[DebugToolsTranslation]>(DropdownEvent.Selection, (_, action) => this.action = action)
 				.setRefreshMethod(() => ({
 					defaultOption: DebugToolsTranslation.ActionRemove,

@@ -12,7 +12,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
     private activePanel;
     private storePanels;
     constructor(gsapi: IGameScreenApi, id: DialogId);
-    getName(): import("language/Translation").default;
+    getName(): import("../../mod-reference/definitions/language/Translation").default;
     getSubpanels(): SubpanelInformation[];
     private onShowSubpanel;
 }

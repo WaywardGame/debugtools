@@ -7,9 +7,7 @@ export declare enum SelectionType {
     TileEvent = 2
 }
 export default class SelectionPanel extends DebugToolsPanel {
-    private readonly dropdownMethod;
     private readonly rangeQuantity;
-    private readonly dropdownAction;
     private creatures;
     private npcs;
     private tileEvents;

@@ -11,7 +11,7 @@ export default class TerrainInformation extends InspectInformationSection {
     private readonly checkButtonTilled;
     constructor(gsapi: IGameScreenApi);
     getTabs(): TabInformation[];
-    getTabTranslation(): import("utilities/string/Interpolator").IStringSection[];
+    getTabTranslation(): import("../../../mod-reference/definitions/utilities/string/Interpolator").IStringSection[];
     update(position: IVector2, tile: ITile): this | undefined;
     logUpdate(): void;
     private toggleTilled;

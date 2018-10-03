@@ -18,7 +18,7 @@ export default class EntityInformation extends InspectInformationSection {
     private entities;
     private entity;
     constructor(gsapi: IGameScreenApi);
-    getTabs(): [number, () => import("utilities/string/Interpolator").IStringSection[]][];
+    getTabs(): [number, () => import("../../../mod-reference/definitions/utilities/string/Interpolator").IStringSection[]][];
     setTab(entity: number): this;
     update(position: IVector2, tile: ITile): void;
     getIndex(entity: ICreature | INPC | IPlayer): number;

@@ -31,8 +31,8 @@ export default class InspectDialog extends TabDialog implements IHookHost {
     private shouldLog;
     private willShowSubpanel;
     constructor(gsapi: IGameScreenApi, id: DialogId);
-    getSubpanels(): [string | number, import("newui/component/IComponent").TranslationGenerator, (component: Component) => any, (((button: Button) => any) | undefined)?, (Button | undefined)?][];
-    getName(): import("language/Translation").default;
+    getSubpanels(): [string | number, import("../../mod-reference/definitions/newui/component/IComponent").TranslationGenerator, (component: Component) => any, (((button: Button) => any) | undefined)?, (Button | undefined)?][];
+    getName(): import("../../mod-reference/definitions/language/Translation").default;
     setInspection(what: Vector2 | IPlayer | ICreature | INPC): this;
     update(): void;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
