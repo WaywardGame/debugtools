@@ -1,6 +1,7 @@
 import { ICreature } from "creature/ICreature";
 import { IEntity } from "entity/IEntity";
 import { Bindable, PlayerState } from "Enums";
+import Translation from "language/Translation";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import { BindCatcherApi, bindingManager } from "newui/BindingManager";
@@ -112,7 +113,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 * Implements the abstract method in "TabDialog". Returns an array of tuples containing information used to set-up the
 	 * subpanels of this dialog.
 	 */
-	public getSubpanels() {
+	public getSubpanels(): SubpanelInformation[] {
 		if (!this.infoSections) {
 			this.infoSections = informationSectionClasses.values()
 				.include(this.DEBUG_TOOLS.modRegistryInspectDialogPanels.getRegistrations()
@@ -161,7 +162,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 			.collect(Collectors.toArray);
 	}
 
-	public getName() {
+	public getName(): Translation {
 		return translation(DebugToolsTranslation.DialogTitleInspect);
 	}
 

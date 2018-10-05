@@ -1,3 +1,4 @@
+import Translation from "language/Translation";
 import { IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import Component from "newui/component/Component";
@@ -84,7 +85,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 		}
 	}
 
-	public getName() {
+	public getName(): Translation {
 		return translation(DebugToolsTranslation.DialogTitleMain);
 	}
 
