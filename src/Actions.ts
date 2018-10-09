@@ -444,8 +444,7 @@ export default class Actions {
 	public setSkill(executor: IPlayer, { player, object: [skill, value] }: IActionArgument<[SkillType, number]>, result: IActionResult) {
 		if (!player) return;
 
-		player.skills[skill].core = value;
-		player.skills[skill].percent = player.skills[skill].bonus + value;
+		player.setSkillCore(skill, value);
 	}
 
 	@Register.action<boolean>("ToggleNoclip", defaultDescription)
