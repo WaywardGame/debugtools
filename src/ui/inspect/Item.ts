@@ -43,7 +43,7 @@ export default class ItemInformation extends InspectInformationSection {
 	}
 
 	public setTab() {
-		const addItemToInventory = AddItemToInventory.get(this.api).appendTo(this.wrapperAddItem);
+		const addItemToInventory = AddItemToInventory.init(this.api).appendTo(this.wrapperAddItem);
 		this.until(ComponentEvent.WillRemove)
 			.bind(addItemToInventory, AddItemToInventoryEvent.Execute, this.addItem);
 

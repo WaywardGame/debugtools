@@ -282,7 +282,7 @@ export default class DebugTools extends Mod {
 	 */
 	public onUnload() {
 		hookManager.deregister(this.selector);
-		AddItemToInventory.get(newui).releaseAndRemove();
+		AddItemToInventory.init(newui).releaseAndRemove();
 	}
 
 	/**
@@ -369,7 +369,7 @@ export default class DebugTools extends Mod {
 	 */
 	@HookMethod
 	public onGameScreenVisible() {
-		AddItemToInventory.get(newui);
+		AddItemToInventory.init(newui);
 	}
 
 	/**

@@ -27,7 +27,7 @@ export default class AddItemToInventory extends Component {
 
 	private static INSTANCE: AddItemToInventory | undefined;
 
-	public static get(api: UiApi) {
+	public static init(api: UiApi) {
 		return AddItemToInventory.INSTANCE = AddItemToInventory.INSTANCE || new AddItemToInventory(api);
 	}
 

@@ -5,7 +5,7 @@ export declare enum AddItemToInventoryEvent {
 }
 export default class AddItemToInventory extends Component {
     private static INSTANCE;
-    static get(api: UiApi): AddItemToInventory;
+    static init(api: UiApi): AddItemToInventory;
     private readonly dropdownItemType;
     private readonly dropdownItemQuality;
     private readonly wrapperAddItem;

@@ -34,7 +34,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 		this.addReputationSlider(DebugToolsTranslation.LabelBenignity, Stat.Benignity);
 
 		this.on(DebugToolsPanelEvent.SwitchTo, () => {
-			const addItemToInventory = AddItemToInventory.get(this.api).appendTo(this.addItemContainer);
+			const addItemToInventory = AddItemToInventory.init(this.api).appendTo(this.addItemContainer);
 			this.until(DebugToolsPanelEvent.SwitchAway)
 				.bind(addItemToInventory, AddItemToInventoryEvent.Execute, this.addItem);
 		});
