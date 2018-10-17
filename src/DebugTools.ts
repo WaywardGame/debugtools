@@ -1,7 +1,8 @@
 import { ICreature, IDamageInfo } from "creature/ICreature";
 import IBaseHumanEntity from "entity/IBaseHumanEntity";
 import { EntityType } from "entity/IEntity";
-import { ActionType, Bindable, Delay, Direction, MoveType, OverlayType, SpriteBatchLayer } from "Enums";
+import { ActionType } from "action2/IAction";
+import { Bindable, Delay, Direction, MoveType, OverlayType, SpriteBatchLayer } from "Enums";
 import { Dictionary } from "language/Dictionaries";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import { HookMethod } from "mod/IHookHost";

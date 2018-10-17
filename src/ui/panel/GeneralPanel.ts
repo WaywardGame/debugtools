@@ -1,4 +1,5 @@
-import { ActionType, Bindable, SfxType } from "Enums";
+import { ActionType } from "action2/IAction";
+import { Bindable, SfxType } from "Enums";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
