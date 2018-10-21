@@ -1,8 +1,10 @@
+import Doodad from "doodad/doodads/Doodad";
 import { IDoodad } from "doodad/IDoodad";
-import { ItemQuality, ItemType } from "Enums";
+import { GrowingStage, ItemQuality, ItemType } from "Enums";
 import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
+import EnumContextMenu, { EnumSort } from "newui/component/EnumContextMenu";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
@@ -24,6 +26,7 @@ export default class DoodadInformation extends InspectInformationSection {
 	public readonly LOG: Log;
 
 	private doodad: IDoodad | undefined;
+	private readonly buttonGrowthStage: Button;
 
 	public constructor(gsapi: IGameScreenApi) {
 		super(gsapi);
@@ -36,6 +39,11 @@ export default class DoodadInformation extends InspectInformationSection {
 		new Button(this.api)
 			.setText(translation(DebugToolsTranslation.ButtonCloneEntity))
 			.on(ButtonEvent.Activate, this.cloneDoodad)
+			.appendTo(this);
+
+		this.buttonGrowthStage = new Button(this.api)
+			.setText(translation(DebugToolsTranslation.ButtonSetGrowthStage))
+			.on(ButtonEvent.Activate, this.setGrowthStage)
 			.appendTo(this);
 
 		this.on(DebugToolsPanelEvent.SwitchTo, () => {
@@ -59,6 +67,8 @@ export default class DoodadInformation extends InspectInformationSection {
 		this.doodad = tile.doodad;
 
 		if (!this.doodad) return;
+
+		this.buttonGrowthStage.toggle(this.doodad.getGrowingStage() !== undefined);
 
 		this.setShouldLog();
 	}
@@ -85,5 +95,20 @@ export default class DoodadInformation extends InspectInformationSection {
 
 		Actions.get("clone")
 			.execute({ doodad: this.doodad, position: new Vector3(teleportLocation.x, teleportLocation.y, localPlayer.z) });
+	}
+
+	@Bound
+	private async setGrowthStage() {
+		const growthStage = await new EnumContextMenu(this.api, GrowingStage)
+			.setTranslator(stage => Doodad.getGrowingStageTranslation(stage, this.doodad!.description())!.inContext(TextContext.Title))
+			.setSort(EnumSort.Id)
+			.waitForChoice();
+
+		if (growthStage === undefined) {
+			return;
+		}
+
+		Actions.get("setGrowingStage")
+			.execute({ doodad: this.doodad, object: growthStage });
 	}
 }

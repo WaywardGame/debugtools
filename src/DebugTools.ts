@@ -493,6 +493,14 @@ export default class DebugTools extends Mod {
 	}
 
 	/**
+	 * Used to prevent the weight movement penalty while noclipping.
+	 */
+	@HookMethod
+	public getPlayerWeightMovementPenalty(player: IPlayer): number | undefined {
+		return this.getPlayerData(player, "noclip") ? 0 : undefined;
+	}	
+	
+	/**
 	 * If the player is "noclipping", we put them in `SpriteBatchLayer.CreatureFlying`.
 	 * Otherwise we return `undefined` and let the game or other mods handle it.
 	 */

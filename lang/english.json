@@ -119,7 +119,7 @@
 			
 			"inspectTileTitle": "{#--text-color-faded:x:} {0} {#--text-color-faded:y:} {1} {#--text-color-faded:z:} {2}",
 			"inspectTerrain": "{#--text-color-faded:Terrain:} {0}",
-			"buttonChangeTerrain": "Change",
+			"labelChangeTerrain": "Change",
 			"entityName": "{#--text-color-faded:{0}:} {1}",
 			"buttonKillEntity": "Kill",
 			"buttonHealEntity": "Heal",
@@ -152,6 +152,7 @@
 			"tileEventName": "{#--text-color-faded:Tile Event:} {0}",
 			"itemName": "{#--text-color-faded:{0}}",
 			"buttonTogglePermissions": "Grant Debug Permissions",
+			"buttonSetGrowthStage": "Set Growth Stage",
 			
 			
 			"actionResurrect": "resurrect {0}",

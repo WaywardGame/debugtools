@@ -1,6 +1,6 @@
 import { IActionArgument, IActionResult } from "action/IAction";
 import { Stat } from "entity/IStats";
-import { ItemQuality, ItemType, SkillType, TerrainType } from "Enums";
+import { GrowingStage, ItemQuality, ItemType, SkillType, TerrainType } from "Enums";
 import Message from "language/dictionary/Message";
 import { ITemplateOptions } from "mapgen/MapGenHelpers";
 import IPlayer from "player/IPlayer";
@@ -43,6 +43,7 @@ export default class Actions {
     unlockRecipes(player: IPlayer, argument: IActionArgument, result: IActionResult): void;
     toggleInvulnerable(executor: IPlayer, { player, object: invulnerable }: IActionArgument<boolean>, result: IActionResult): void;
     setSkill(executor: IPlayer, { player, object: [skill, value] }: IActionArgument<[SkillType, number]>, result: IActionResult): void;
+    setGrowingStage(executor: IPlayer, { doodad, object: growingStage }: IActionArgument<GrowingStage>, result: IActionResult): void;
     toggleNoclip(executor: IPlayer, { player, object: noclip }: IActionArgument<boolean>, result: IActionResult): void;
     togglePermissions(executor: IPlayer, { player, object: permissions }: IActionArgument<boolean>, result: IActionResult): void;
     private removeInternal;

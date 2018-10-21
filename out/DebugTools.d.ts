@@ -79,6 +79,7 @@ export default class DebugTools extends Mod {
     canCreatureAttack(creature: ICreature, enemy: IPlayer | ICreature): boolean | undefined;
     onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined;
     onNoInputReceived(player: IPlayer): void;
+    getPlayerWeightMovementPenalty(player: IPlayer): number | undefined;
     getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined;
     isHumanSwimming(human: IBaseHumanEntity, isSwimming: boolean): boolean | undefined;
     getPlayerStrength(strength: number, player: IPlayer): number;

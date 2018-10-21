@@ -72,7 +72,7 @@ export declare enum DebugToolsTranslation {
     DialogTitleInspect = 63,
     InspectTileTitle = 64,
     InspectTerrain = 65,
-    ButtonChangeTerrain = 66,
+    LabelChangeTerrain = 66,
     ButtonToggleTilled = 67,
     EntityName = 68,
     ButtonKillEntity = 69,
@@ -105,9 +105,10 @@ export declare enum DebugToolsTranslation {
     TileEventName = 96,
     ItemName = 97,
     ButtonTogglePermissions = 98,
-    ActionResurrect = 99,
-    ActionClone = 100,
-    ActionTeleport = 101
+    ButtonSetGrowthStage = 99,
+    ActionResurrect = 100,
+    ActionClone = 101,
+    ActionTeleport = 102
 }
 export interface ISaveData {
     lastVersion: string;

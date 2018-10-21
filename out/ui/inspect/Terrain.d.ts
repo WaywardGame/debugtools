@@ -9,12 +9,12 @@ export default class TerrainInformation extends InspectInformationSection {
     private tile;
     private terrainType;
     private readonly checkButtonTilled;
+    private readonly dropdownTerrainType;
     constructor(gsapi: IGameScreenApi);
     getTabs(): TabInformation[];
     getTabTranslation(): import("../../../mod-reference/definitions/utilities/string/Interpolator").IStringSection[];
     update(position: IVector2, tile: ITile): this | undefined;
     logUpdate(): void;
     private toggleTilled;
-    private showTerrainContextMenu;
     private changeTerrain;
 }

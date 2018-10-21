@@ -6,7 +6,7 @@ import IBaseEntity from "entity/IBaseEntity";
 import IBaseHumanEntity from "entity/IBaseHumanEntity";
 import { AiType, EntityType } from "entity/IEntity";
 import { IStatMax, Stat } from "entity/IStats";
-import { CreatureType, DamageType, Delay, ItemQuality, ItemType, MoveType, NPCType, PlayerState, SkillType, StatusType, TerrainType } from "Enums";
+import { CreatureType, DamageType, Delay, GrowingStage, ItemQuality, ItemType, MoveType, NPCType, PlayerState, SkillType, StatusType, TerrainType } from "Enums";
 import { IContainer, IItem } from "item/IItem";
 import itemDescriptions from "item/Items";
 import Message from "language/dictionary/Message";
@@ -445,6 +445,14 @@ export default class Actions {
 		if (!player) return;
 
 		player.setSkillCore(skill, value);
+	}
+
+	@Register.action<GrowingStage>("SetGrowingStage", defaultDescription)
+	public setGrowingStage(executor: IPlayer, { doodad, object: growingStage }: IActionArgument<GrowingStage>, result: IActionResult) {
+		if (!doodad) return;
+
+		doodad.setGrowingStage(growingStage, true);
+		result.updateView = true;
 	}
 
 	@Register.action<boolean>("ToggleNoclip", defaultDescription)
