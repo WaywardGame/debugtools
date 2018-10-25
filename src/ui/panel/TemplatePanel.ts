@@ -1,3 +1,4 @@
+import ActionExecutor from "action/ActionExecutor";
 import { Bindable } from "Enums";
 import Translation from "language/Translation";
 import { ITemplateOptions, manipulateTemplates } from "mapgen/MapGenHelpers";
@@ -20,7 +21,7 @@ import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import Objects, { Bound } from "utilities/Objects";
-import Actions from "../../Actions";
+import PlaceTemplate from "../../action/PlaceTemplate";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
@@ -216,7 +217,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 
 	private placeTemplate(topLeft: Vector2) {
 		this.place.setChecked(false);
-		Actions.get("placeTemplate").execute({ point: topLeft.raw(), object: [this.dropdownType.selection, this.getTemplateOptions()] });
+		ActionExecutor.get(PlaceTemplate).execute(localPlayer, this.dropdownType.selection, topLeft.raw(), this.getTemplateOptions());
 	}
 
 	private clearPreview() {

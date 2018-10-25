@@ -1,7 +1,7 @@
+import ActionExecutor from "action/ActionExecutor";
 import { ICreature } from "creature/ICreature";
 import { REPUTATION_MAX } from "entity/BaseHumanEntity";
 import IBaseEntity, { EntityEvent } from "entity/IBaseEntity";
-import IBaseHumanEntity from "entity/IBaseHumanEntity";
 import { EntityType } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
 import { ItemQuality, ItemType } from "Enums";
@@ -13,9 +13,10 @@ import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import Objects, { Bound } from "utilities/Objects";
-import Actions from "../../Actions";
+import AddItemToInventory from "../../action/AddItemToInventory";
+import SetStat from "../../action/SetStat";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
-import AddItemToInventory, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
+import AddItemToInventoryComponent, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
 import { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
@@ -23,7 +24,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 	private readonly addItemContainer: Component;
 	private readonly reputationSliders: { [key in Stat.Malignity | Stat.Benignity]?: RangeRow } = {};
 
-	private human: IBaseHumanEntity | undefined;
+	private human: IPlayer | INPC | undefined;
 
 	public constructor(gsapi: IGameScreenApi) {
 		super(gsapi);
@@ -34,7 +35,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 		this.addReputationSlider(DebugToolsTranslation.LabelBenignity, Stat.Benignity);
 
 		this.on(DebugToolsPanelEvent.SwitchTo, () => {
-			const addItemToInventory = AddItemToInventory.init(this.api).appendTo(this.addItemContainer);
+			const addItemToInventory = AddItemToInventoryComponent.init(this.api).appendTo(this.addItemContainer);
 			this.until(DebugToolsPanelEvent.SwitchAway)
 				.bind(addItemToInventory, AddItemToInventoryEvent.Execute, this.addItem);
 		});
@@ -84,14 +85,13 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 	private setReputation(type: Stat.Malignity | Stat.Benignity) {
 		return (_: any, value: number) => {
 			if (this.human!.getStatValue(type) === value) return;
-			Actions.get("setStat").execute({ entity: this.human as INPC | IPlayer, object: [type, value] });
+			ActionExecutor.get(SetStat).execute(localPlayer, this.human!, type, value);
 		};
 	}
 
 	@Bound
 	private addItem(_: any, type: ItemType, quality: ItemQuality) {
-		Actions.get("addItemToInventory")
-			.execute({ human: this.human, object: [type, quality] });
+		ActionExecutor.get(AddItemToInventory).execute(localPlayer, this.human!.entityType === EntityType.Player ? this.human as IPlayer : this.human!.inventory, type, quality);
 	}
 
 	@Bound

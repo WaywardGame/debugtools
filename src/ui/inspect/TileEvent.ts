@@ -1,3 +1,4 @@
+import ActionExecutor from "action/ActionExecutor";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
@@ -10,7 +11,7 @@ import Collectors from "utilities/Collectors";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
-import Actions, { RemovalType } from "../../Actions";
+import Remove from "../../action/Remove";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
@@ -62,7 +63,6 @@ export default class TileEventInformation extends InspectInformationSection {
 
 	@Bound
 	private removeTileEvent() {
-		Actions.get("remove")
-			.execute({ object: [RemovalType.TileEvent, this.tileEvent!.id] });
+		ActionExecutor.get(Remove).execute(localPlayer, this.tileEvent!);
 	}
 }

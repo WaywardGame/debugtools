@@ -1,4 +1,5 @@
-import { ActionType } from "action2/IAction";
+import ActionExecutor from "action/ActionExecutor";
+import { ActionType } from "action/IAction";
 import { Bindable, SfxType } from "Enums";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Translation from "language/Translation";
@@ -21,7 +22,8 @@ import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
-import Actions from "../../Actions";
+import SetTime from "../../action/SetTime";
+import UnlockRecipes from "../../action/UnlockRecipes";
 import DebugTools, { DebugToolsEvent } from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import CancelablePromise from "../../util/CancelablePromise";
@@ -54,7 +56,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 				.setRefreshMethod(() => game.time.getTime()))
 			.setDisplayValue(time => game.time.getTranslation(time))
 			.on(RangeInputEvent.Change, (_, time: number) => {
-				Actions.get("setTime").execute({ object: time });
+				ActionExecutor.get(SetTime).execute(localPlayer, time);
 			})
 			.appendTo(this);
 
@@ -209,7 +211,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 		if (!confirm) return;
 
-		Actions.get("unlockRecipes").execute();
+		ActionExecutor.get(UnlockRecipes).execute(localPlayer);
 	}
 
 	/**
@@ -226,10 +228,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 		if (choice === InterruptChoice.Cancel) return;
 
-		actionManager.execute(
-			localPlayer,
-			choice === this.DEBUG_TOOLS.choiceSailToCivilization ? ActionType.SailToCivilization : ActionType.TraverseTheSea,
-			{ object: [true, true, true] },
-		);
+		const anyExecutor = (ActionExecutor as any).get(choice === this.DEBUG_TOOLS.choiceSailToCivilization ? ActionType.SailToCivilization : ActionType.TraverseTheSea);
+		anyExecutor.execute(localPlayer, undefined, true, true, true);
 	}
 }

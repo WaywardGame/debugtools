@@ -1,6 +1,8 @@
+import ActionExecutor from "action/ActionExecutor";
 import Doodad from "doodad/doodads/Doodad";
 import { IDoodad } from "doodad/IDoodad";
 import { GrowingStage, ItemQuality, ItemType } from "Enums";
+import { IContainer } from "item/IItem";
 import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
@@ -11,10 +13,13 @@ import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
-import Actions from "../../Actions";
+import AddItemToInventory from "../../action/AddItemToInventory";
+import Clone from "../../action/Clone";
+import Remove from "../../action/Remove";
+import SetGrowingStage from "../../action/SetGrowingStage";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
-import AddItemToInventory, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
+import AddItemToInventoryComponent, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
 import { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
@@ -49,7 +54,7 @@ export default class DoodadInformation extends InspectInformationSection {
 		this.on(DebugToolsPanelEvent.SwitchTo, () => {
 			if (!this.doodad!.containedItems) return;
 
-			const addItemToInventory = AddItemToInventory.init(this.api).appendTo(this);
+			const addItemToInventory = AddItemToInventoryComponent.init(this.api).appendTo(this);
 			this.until(DebugToolsPanelEvent.SwitchAway)
 				.bind(addItemToInventory, AddItemToInventoryEvent.Execute, this.addItem);
 		});
@@ -79,13 +84,12 @@ export default class DoodadInformation extends InspectInformationSection {
 
 	@Bound
 	private addItem(_: any, type: ItemType, quality: ItemQuality) {
-		Actions.get("addItemToInventory")
-			.execute({ doodad: this.doodad, object: [type, quality] });
+		ActionExecutor.get(AddItemToInventory).execute(localPlayer, this.doodad! as IContainer, type, quality);
 	}
 
 	@Bound
 	private removeDoodad() {
-		Actions.get("remove").execute({ doodad: this.doodad });
+		ActionExecutor.get(Remove).execute(localPlayer, this.doodad!);
 	}
 
 	@Bound
@@ -93,8 +97,7 @@ export default class DoodadInformation extends InspectInformationSection {
 		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
 		if (!teleportLocation) return;
 
-		Actions.get("clone")
-			.execute({ doodad: this.doodad, position: new Vector3(teleportLocation.x, teleportLocation.y, localPlayer.z) });
+		ActionExecutor.get(Clone).execute(localPlayer, this.doodad!, new Vector3(teleportLocation, localPlayer.z));
 	}
 
 	@Bound
@@ -108,7 +111,6 @@ export default class DoodadInformation extends InspectInformationSection {
 			return;
 		}
 
-		Actions.get("setGrowingStage")
-			.execute({ doodad: this.doodad, object: growthStage });
+		ActionExecutor.get(SetGrowingStage).execute(localPlayer, this.doodad!, growthStage);
 	}
 }

@@ -1,3 +1,4 @@
+import ActionExecutor from "action/ActionExecutor";
 import { ICreature } from "creature/ICreature";
 import IBaseEntity, { EntityEvent, IStatChangeInfo } from "entity/IBaseEntity";
 import { EntityType } from "entity/IEntity";
@@ -27,7 +28,11 @@ import Log from "utilities/Log";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
-import Actions from "../../Actions";
+import Clone from "../../action/Clone";
+import Heal from "../../action/Heal";
+import Kill from "../../action/Kill";
+import SetStat from "../../action/SetStat";
+import TeleportEntity from "../../action/TeleportEntity";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
@@ -267,15 +272,14 @@ export default class EntityInformation extends InspectInformationSection {
 
 	@Bound
 	private teleport(location: IVector2 | IVector3) {
-		Actions.get("teleport")
-			.execute({ entity: this.entity, position: new Vector3(location.x, location.y, "z" in location ? location.z : this.entity!.z) });
+		ActionExecutor.get(TeleportEntity).execute(localPlayer, this.entity!, new Vector3(location, "z" in location ? location.z : this.entity!.z));
 
 		this.trigger("update");
 	}
 
 	@Bound
 	private kill() {
-		Actions.get("kill").execute({ entity: this.entity });
+		ActionExecutor.get(Kill).execute(localPlayer, this.entity!);
 		this.trigger("update");
 	}
 
@@ -284,13 +288,12 @@ export default class EntityInformation extends InspectInformationSection {
 		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
 		if (!teleportLocation) return;
 
-		Actions.get("clone")
-			.execute({ entity: this.entity, position: new Vector3(teleportLocation.x, teleportLocation.y, localPlayer.z) });
+		ActionExecutor.get(Clone).execute(localPlayer, this.entity!, new Vector3(teleportLocation, localPlayer.z));
 	}
 
 	@Bound
 	private heal() {
-		Actions.get("heal").execute({ entity: this.entity });
+		ActionExecutor.get(Heal).execute(localPlayer, this.entity!);
 		this.trigger("update");
 	}
 
@@ -298,7 +301,7 @@ export default class EntityInformation extends InspectInformationSection {
 	private setStat(stat: Stat) {
 		return (_: any, value: number) => {
 			if (this.entity!.getStatValue(stat) === value) return;
-			Actions.get("setStat").execute({ entity: this.entity, object: [stat, value] });
+			ActionExecutor.get(SetStat).execute(localPlayer, this.entity!, stat, value);
 		};
 	}
 }

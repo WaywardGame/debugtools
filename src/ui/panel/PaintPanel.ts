@@ -1,3 +1,4 @@
+import ActionExecutor from "action/ActionExecutor";
 import { Bindable, CreatureType, DoodadType, NPCType, SpriteBatchLayer, TerrainType } from "Enums";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
@@ -16,7 +17,7 @@ import { TileEventType } from "tile/ITileEvent";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
-import Actions from "../../Actions";
+import Paint from "../../action/Paint";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Overlays from "../../overlay/Overlays";
@@ -284,7 +285,7 @@ export default class PaintPanel extends DebugToolsPanel {
 			Object.assign(paintData, paintSection.getTilePaintData());
 		}
 
-		Actions.get("paint").execute({ object: [this.paintTiles, paintData] });
+		ActionExecutor.get(Paint).execute(localPlayer, this.paintTiles, paintData);
 
 		this.clearPaint();
 	}

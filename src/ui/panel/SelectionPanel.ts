@@ -1,3 +1,4 @@
+import ActionExecutor from "action/ActionExecutor";
 import { ICreature } from "creature/ICreature";
 import { EntityType } from "entity/IEntity";
 import Button, { ButtonEvent } from "newui/component/Button";
@@ -13,7 +14,7 @@ import Collectors from "utilities/Collectors";
 import { pipe } from "utilities/IterableIterator";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
-import Actions from "../../Actions";
+import SelectionExecute from "../../action/SelectionExecute";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 
@@ -134,13 +135,8 @@ export default class SelectionPanel extends DebugToolsPanel {
 				break;
 		}
 
-		Actions.get("executeOnSelection").execute({
-			object: [
-				this.action,
-				targets.slice(0, quantity)
-					.map(target => tuple(getSelectionType(target), target.id)),
-			],
-		});
+		ActionExecutor.get(SelectionExecute).execute(localPlayer, this.action, targets.slice(0, quantity)
+			.map(target => tuple(getSelectionType(target), target.id)));
 	}
 
 	@Bound

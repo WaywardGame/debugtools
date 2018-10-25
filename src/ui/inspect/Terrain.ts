@@ -1,3 +1,4 @@
+import ActionExecutor from "action/ActionExecutor";
 import { TerrainType } from "Enums";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
@@ -18,7 +19,8 @@ import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
-import Actions from "../../Actions";
+import ChangeTerrain from "../../action/ChangeTerrain";
+import ToggleTilled from "../../action/ToggleTilled";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
@@ -96,12 +98,12 @@ export default class TerrainInformation extends InspectInformationSection {
 
 	@Bound
 	private toggleTilled(_: any, tilled: boolean) {
-		Actions.get("toggleTilled").execute({ position: this.position, object: tilled });
+		ActionExecutor.get(ToggleTilled).execute(localPlayer, this.position, tilled);
 	}
 
 	@Bound
 	private changeTerrain(_: any, terrain: TerrainType) {
-		Actions.get("changeTerrain").execute({ position: this.position, object: terrain });
+		ActionExecutor.get(ChangeTerrain).execute(localPlayer, terrain, this.position);
 		this.update(this.position, this.tile);
 	}
 }

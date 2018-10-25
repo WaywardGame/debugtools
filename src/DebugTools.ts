@@ -1,10 +1,12 @@
+import ActionExecutor from "action/ActionExecutor";
+import { ActionType } from "action/IAction";
 import { ICreature, IDamageInfo } from "creature/ICreature";
 import IBaseHumanEntity from "entity/IBaseHumanEntity";
 import { EntityType } from "entity/IEntity";
-import { ActionType } from "action2/IAction";
 import { Bindable, Delay, Direction, MoveType, OverlayType, SpriteBatchLayer } from "Enums";
 import { Dictionary } from "language/Dictionaries";
 import InterruptChoice from "language/dictionary/InterruptChoice";
+import Message from "language/dictionary/Message";
 import { HookMethod } from "mod/IHookHost";
 import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
@@ -22,10 +24,32 @@ import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
+import AddItemToInventory from "./action/AddItemToInventory";
+import ChangeTerrain from "./action/ChangeTerrain";
+import Clone from "./action/Clone";
+import Heal from "./action/Heal";
+import Kill from "./action/Kill";
+import Paint from "./action/Paint";
+import PlaceTemplate from "./action/PlaceTemplate";
+import Remove from "./action/Remove";
+import SelectionExecute from "./action/SelectionExecute";
+import SetGrowingStage from "./action/SetGrowingStage";
+import SetSkill from "./action/SetSkill";
+import SetStat from "./action/SetStat";
+import SetTamed from "./action/SetTamed";
+import SetTime from "./action/SetTime";
+import SetWeightBonus from "./action/SetWeightBonus";
+import TeleportEntity from "./action/TeleportEntity";
+import ToggleInvulnerable from "./action/ToggleInvulnerable";
+import ToggleNoClip from "./action/ToggleNoClip";
+import TogglePermissions from "./action/TogglePermissions";
+import ToggleTilled from "./action/ToggleTilled";
+import UnlockRecipes from "./action/UnlockRecipes";
+import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
 import Actions from "./Actions";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
-import AddItemToInventory from "./ui/component/AddItemToInventory";
+import AddItemToInventoryComponent from "./ui/component/AddItemToInventory";
 import MainDialog from "./ui/DebugToolsDialog";
 import InspectDialog from "./ui/InspectDialog";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
@@ -141,6 +165,9 @@ export default class DebugTools extends Mod {
 	@Register.dictionary("DebugTools", DebugToolsTranslation)
 	public readonly dictionary: Dictionary;
 
+	@Register.message("FailureTileBlocked")
+	public readonly messageFailureTileBlocked: Message;
+
 	@Register.messageSource("DebugTools")
 	public readonly source: Source;
 
@@ -148,6 +175,76 @@ export default class DebugTools extends Mod {
 	public readonly choiceSailToCivilization: InterruptChoice;
 	@Register.interruptChoice("TravelAway")
 	public readonly choiceTravelAway: InterruptChoice;
+
+	////////////////////////////////////
+	// Actions
+	//
+
+	@Register.action("PlaceTemplate", PlaceTemplate)
+	public readonly actionPlaceTemplate: ActionType;
+
+	@Register.action("SelectionExecute", SelectionExecute)
+	public readonly actionSelectionExecute: ActionType;
+
+	@Register.action("TeleportEntity", TeleportEntity)
+	public readonly actionTeleportEntity: ActionType;
+
+	@Register.action("Kill", Kill)
+	public readonly actionKill: ActionType;
+
+	@Register.action("Clone", Clone)
+	public readonly actionClone: ActionType;
+
+	@Register.action("SetTime", SetTime)
+	public readonly actionSetTime: ActionType;
+
+	@Register.action("Heal", Heal)
+	public readonly actionHeal: ActionType;
+
+	@Register.action("SetStat", SetStat)
+	public readonly actionSetStat: ActionType;
+
+	@Register.action("SetTamed", SetTamed)
+	public readonly actionSetTamed: ActionType;
+
+	@Register.action("Remove", Remove)
+	public readonly actionRemove: ActionType;
+
+	@Register.action("SetWeightBonus", SetWeightBonus)
+	public readonly actionSetWeightBonus: ActionType;
+
+	@Register.action("ChangeTerrain", ChangeTerrain)
+	public readonly actionChangeTerrain: ActionType;
+
+	@Register.action("ToggleTilled", ToggleTilled)
+	public readonly actionToggleTilled: ActionType;
+
+	@Register.action("UpdateStatsAndAttributes", UpdateStatsAndAttributes)
+	public readonly actionUpdateStatsAndAttributes: ActionType;
+
+	@Register.action("AddItemToInventory", AddItemToInventory)
+	public readonly actionAddItemToInventory: ActionType;
+
+	@Register.action("Paint", Paint)
+	public readonly actionPaint: ActionType;
+
+	@Register.action("UnlockRecipes", UnlockRecipes)
+	public readonly actionUnlockRecipes: ActionType;
+
+	@Register.action("ToggleInvulnerable", ToggleInvulnerable)
+	public readonly actionToggleInvulnerable: ActionType;
+
+	@Register.action("SetSkill", SetSkill)
+	public readonly actionSetSkill: ActionType;
+
+	@Register.action("SetGrowingStage", SetGrowingStage)
+	public readonly actionSetGrowingStage: ActionType;
+
+	@Register.action("ToggleNoclip", ToggleNoClip)
+	public readonly actionToggleNoclip: ActionType;
+
+	@Register.action("TogglePermissions", TogglePermissions)
+	public readonly actionTogglePermissions: ActionType;
 
 	////////////////////////////////////
 	// UI
@@ -283,7 +380,7 @@ export default class DebugTools extends Mod {
 	 */
 	public onUnload() {
 		hookManager.deregister(this.selector);
-		AddItemToInventory.init(newui).releaseAndRemove();
+		AddItemToInventoryComponent.init(newui).releaseAndRemove();
 	}
 
 	/**
@@ -370,7 +467,7 @@ export default class DebugTools extends Mod {
 	 */
 	@HookMethod
 	public onGameScreenVisible() {
-		AddItemToInventory.init(newui);
+		AddItemToInventoryComponent.init(newui);
 	}
 
 	/**
@@ -466,7 +563,7 @@ export default class DebugTools extends Mod {
 
 		player.addDelay(noclip.delay, true);
 
-		actionManager.execute(player, ActionType.UpdateDirection, { direction });
+		ActionExecutor.get(ActionType.UpdateDirection).execute(player, direction);
 
 		player.isMoving = true;
 		player.isMovingClientside = true;
@@ -498,8 +595,8 @@ export default class DebugTools extends Mod {
 	@HookMethod
 	public getPlayerWeightMovementPenalty(player: IPlayer): number | undefined {
 		return this.getPlayerData(player, "noclip") ? 0 : undefined;
-	}	
-	
+	}
+
 	/**
 	 * If the player is "noclipping", we put them in `SpriteBatchLayer.CreatureFlying`.
 	 * Otherwise we return `undefined` and let the game or other mods handle it.
@@ -567,21 +664,17 @@ export default class DebugTools extends Mod {
 		}
 
 		if (api.wasPressed(this.bindableHealLocalPlayer) && !bindPressed) {
-			Actions.get("heal").execute({ entity: localPlayer });
+			ActionExecutor.get(Heal).execute(localPlayer, localPlayer);
 			bindPressed = this.bindableHealLocalPlayer;
 		}
 
 		if (api.wasPressed(this.bindableTeleportLocalPlayer) && !bindPressed) {
-			Actions.get("teleport").execute({
-				entity: localPlayer,
-				position: { ...renderer.screenToTile(api.mouseX, api.mouseY).raw(), z: localPlayer.z },
-			});
+			ActionExecutor.get(TeleportEntity).execute(localPlayer, localPlayer, { ...renderer.screenToTile(api.mouseX, api.mouseY).raw(), z: localPlayer.z });
 			bindPressed = this.bindableTeleportLocalPlayer;
 		}
 
 		if (api.wasPressed(this.bindableToggleNoClipOnLocalPlayer) && !bindPressed) {
-			Actions.get("toggleNoclip")
-				.execute({ player: localPlayer, object: !this.getPlayerData(localPlayer, "noclip") });
+			ActionExecutor.get(ToggleNoClip).execute(localPlayer, localPlayer, !this.getPlayerData(localPlayer, "noclip"));
 			bindPressed = this.bindableToggleNoClipOnLocalPlayer;
 		}
 

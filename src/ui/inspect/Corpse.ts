@@ -1,3 +1,4 @@
+import ActionExecutor from "action/ActionExecutor";
 import { ICorpse } from "creature/corpse/ICorpse";
 import { CreatureType } from "Enums";
 import { TextContext } from "language/Translation";
@@ -10,7 +11,8 @@ import Collectors from "utilities/Collectors";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
-import Actions, { RemovalType } from "../../Actions";
+import Heal from "../../action/Heal";
+import Remove from "../../action/Remove";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
@@ -73,13 +75,13 @@ export default class CorpseInformation extends InspectInformationSection {
 
 	@Bound
 	private resurrect() {
-		Actions.get("heal").execute({ object: this.corpse!.id });
+		ActionExecutor.get(Heal).execute(localPlayer, this.corpse!);
 		this.trigger("update");
 	}
 
 	@Bound
 	private removeCorpse() {
-		Actions.get("remove").execute({ object: [RemovalType.Corpse, this.corpse!.id] });
+		ActionExecutor.get(Remove).execute(localPlayer, this.corpse!);
 		this.trigger("update");
 	}
 }
