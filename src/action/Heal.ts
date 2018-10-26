@@ -1,9 +1,7 @@
 import { Action } from "action/Action";
 import { ActionArgument, anyOf } from "action/IAction";
-import { ICorpse } from "creature/corpse/ICorpse";
-import BaseEntity from "entity/BaseEntity";
 import { StatusEffectChangeReason } from "entity/IBaseEntity";
-import { Entity, EntityType } from "entity/IEntity";
+import { EntityType } from "entity/IEntity";
 import { IStatMax, Stat } from "entity/IStats";
 import { PlayerState, StatusType } from "Enums";
 import { ScreenId } from "newui/screen/IScreen";
@@ -17,18 +15,15 @@ import ResurrectCorpse from "./helpers/ResurrectCorpse";
 export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
-	.setHandler((action, entityOrCorpse) => {
-
+	.setHandler((action, entity) => {
 		// resurrect corpses
-		if (!(entityOrCorpse instanceof BaseEntity)) {
-			if (ResurrectCorpse(action.executor, entityOrCorpse as ICorpse)) {
+		if (action.isArgumentType(entity, 0, ActionArgument.Corpse)) {
+			if (ResurrectCorpse(action.executor, entity)) {
 				action.setUpdateRender();
 			}
 
 			return;
 		}
-
-		const entity = entityOrCorpse as Entity;
 
 		const health = entity.getStat<IStatMax>(Stat.Health);
 		const stamina = entity.getStat<IStatMax>(Stat.Stamina);
