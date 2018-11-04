@@ -563,8 +563,6 @@ export default class DebugTools extends Mod {
 
 		player.addDelay(noclip.delay, true);
 
-		ActionExecutor.get(ActionType.UpdateDirection).execute(player, direction);
-
 		player.isMoving = true;
 		player.isMovingClientside = true;
 		player.nextX = nextX;

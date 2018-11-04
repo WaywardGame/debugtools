@@ -310,7 +310,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	@Bound
 	private logUpdate() {
 		if (this.shouldLog) {
-			this.LOG.info("Tile:", this.tile);
+			this.LOG.info("Tile:", this.tile, this.tilePosition !== undefined ? this.tilePosition.toString() : undefined);
 			this.shouldLog = false;
 		}
 
