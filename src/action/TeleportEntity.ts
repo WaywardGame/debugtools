@@ -1,6 +1,8 @@
 import { Action } from "action/Action";
 import { ActionArgument } from "action/IAction";
 import { EntityType } from "entity/IEntity";
+import { ScreenId } from "newui/screen/IScreen";
+import GameScreen from "newui/screen/screens/GameScreen";
 import { IVector3 } from "utilities/math/IVector";
 import GetPosition from "../action/helpers/GetPosition";
 import { defaultUsability } from "../Actions";
@@ -46,6 +48,10 @@ export default new Action(ActionArgument.Entity, ActionArgument.Vector3)
 		if (entity.entityType === EntityType.NPC) {
 			const tile = game.getTile(entity.x, entity.y, entity.z);
 			tile.npc = entity;
+		}
+
+		if (entity === localPlayer) {
+			newui.getScreen<GameScreen>(ScreenId.Game)!.movementHandler.walkToTileHandler.reset();
 		}
 
 		game.updateView(true);
