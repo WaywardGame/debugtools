@@ -552,7 +552,7 @@ export default class DebugTools extends Mod {
 		const noclip = this.getPlayerData(player, "noclip");
 		if (!noclip) return undefined;
 
-		player.moveType = MoveType.Flying;
+		player.setMoveType(MoveType.Flying);
 
 		if (noclip.moving) {
 			noclip.delay = Math.max(noclip.delay - 1, 1);

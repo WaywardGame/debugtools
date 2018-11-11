@@ -16,7 +16,7 @@ export default new Action(ActionArgument.Player, ActionArgument.Boolean)
 			delay: Delay.Movement,
 		} : false);
 
-		player.moveType = noclip ? MoveType.Flying : MoveType.Land;
-
+		player.setMoveType(noclip ? MoveType.Flying : MoveType.Land);
+		
 		game.updateView(true);
 	});
