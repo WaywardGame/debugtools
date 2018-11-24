@@ -9,9 +9,9 @@ import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import { UiApi } from "newui/INewUi";
 import { tuple } from "utilities/Arrays";
-import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
-import { pipe } from "utilities/IterableIterator";
+import Collectors from "utilities/iterable/Collectors";
+import { pipe } from "utilities/iterable/Generators";
 import { Bound } from "utilities/Objects";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 

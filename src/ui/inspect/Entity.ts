@@ -22,8 +22,8 @@ import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
 import { tuple } from "utilities/Arrays";
-import Collectors, { PassStrategy } from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
+import Collectors from "utilities/iterable/Collectors";
 import Log from "utilities/Log";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
@@ -258,7 +258,7 @@ export default class EntityInformation extends InspectInformationSection {
 			.sort(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))
 			.values()
 			// create the context menu from them
-			.collect<ContextMenu>(Collectors.passTo(ContextMenu.bind(null, this.api), PassStrategy.Splat))
+			.collect<ContextMenu>(options => new ContextMenu(this.api, ...options))
 			.addAllDescribedOptions();
 	}
 

@@ -16,8 +16,8 @@ import Spacer from "newui/screen/screens/menu/component/Spacer";
 import { TileTemplateType } from "tile/ITerrain";
 import templateDescriptions from "tile/TerrainTemplates";
 import { tuple } from "utilities/Arrays";
-import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
+import Collectors from "utilities/iterable/Collectors";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import Objects, { Bound } from "utilities/Objects";
@@ -68,7 +68,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTemplate)))
 			.append(this.dropdownTemplate = new Dropdown<string>(this.api)
 				.setRefreshMethod(() => ({
-					defaultOption: Objects.keys<string>(templateDescriptions[this.dropdownType.selection]).first()!,
+					defaultOption: Objects.keys<string>(templateDescriptions[this.dropdownType.selection]).collect(Collectors.first())!,
 					options: Objects.keys<string>(templateDescriptions[this.dropdownType.selection])
 						.map(name => tuple(name, Translation.generator(name)))
 						.collect(Collectors.toArray)

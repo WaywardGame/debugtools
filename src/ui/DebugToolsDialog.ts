@@ -7,7 +7,7 @@ import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Di
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { tuple } from "utilities/Arrays";
 import { sleep } from "utilities/Async";
-import Collectors from "utilities/Collectors";
+import Collectors from "utilities/iterable/Collectors";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import DebugToolsPanel, { DebugToolsPanelEvent } from "./component/DebugToolsPanel";

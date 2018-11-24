@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "mod/Mod", "newui/component/IComponent", "newui/screen/screens/game/Dialogs", "utilities/Arrays", "utilities/Async", "utilities/Collectors", "../IDebugTools", "./component/DebugToolsPanel", "./panel/DisplayPanel", "./panel/GeneralPanel", "./panel/PaintPanel", "./panel/SelectionPanel", "./panel/TemplatePanel", "./TabDialog"], function (require, exports, Mod_1, IComponent_1, Dialogs_1, Arrays_1, Async_1, Collectors_1, IDebugTools_1, DebugToolsPanel_1, DisplayPanel_1, GeneralPanel_1, PaintPanel_1, SelectionPanel_1, TemplatePanel_1, TabDialog_1) {
+define(["require", "exports", "mod/Mod", "newui/component/IComponent", "newui/screen/screens/game/Dialogs", "utilities/Arrays", "utilities/Async", "utilities/iterable/Collectors", "../IDebugTools", "./component/DebugToolsPanel", "./panel/DisplayPanel", "./panel/GeneralPanel", "./panel/PaintPanel", "./panel/SelectionPanel", "./panel/TemplatePanel", "./TabDialog"], function (require, exports, Mod_1, IComponent_1, Dialogs_1, Arrays_1, Async_1, Collectors_1, IDebugTools_1, DebugToolsPanel_1, DisplayPanel_1, GeneralPanel_1, PaintPanel_1, SelectionPanel_1, TemplatePanel_1, TabDialog_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const subpanelClasses = [

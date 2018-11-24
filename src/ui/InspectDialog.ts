@@ -18,7 +18,7 @@ import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
 import { tuple } from "utilities/Arrays";
-import Collectors from "utilities/Collectors";
+import Collectors from "utilities/iterable/Collectors";
 import Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
@@ -157,7 +157,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 					(button: Button) => !(section instanceof EntityInformation) ? undefined : this.entityButtons[index] = button,
 				)))
 			// currently we have an array of `SubpanelInformation` arrays, because each tab provided an array of them, fix with `flat`
-			.flat<SubpanelInformation>(1)
+			.flatMap<SubpanelInformation>()
 			// and now return an array
 			.collect(Collectors.toArray);
 	}

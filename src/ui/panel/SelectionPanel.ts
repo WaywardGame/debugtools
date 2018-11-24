@@ -10,8 +10,8 @@ import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
 import { ITileEvent } from "tile/ITileEvent";
 import Arrays, { tuple } from "utilities/Arrays";
-import Collectors from "utilities/Collectors";
-import { pipe } from "utilities/IterableIterator";
+import Collectors from "utilities/iterable/Collectors";
+import { pipe } from "utilities/iterable/Generators";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
 import SelectionExecute from "../../action/SelectionExecute";
@@ -109,12 +109,13 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 	@Bound
 	public execute() {
-		const targets = pipe(
+		const targets = pipe<(false | (undefined | ICreature | INPC | ITileEvent)[])[]>(
 			this.creatures && game.creatures,
 			this.npcs && game.npcs,
-			this.tileEvents && game.tileEvents)
-			.flat()
-			.filter<undefined | boolean>(entity => !!entity)
+			this.tileEvents && game.tileEvents,
+		)
+			.flatMap(value => Array.isArray(value) ? value : value ? [value] : [])
+			.filter<undefined>(entity => !!entity)
 			.collect(Collectors.toArray);
 
 		if (!targets.length) return;

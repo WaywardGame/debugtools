@@ -7,7 +7,7 @@ import Button, { ButtonEvent } from "newui/component/Button";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import { tuple } from "utilities/Arrays";
-import Collectors from "utilities/Collectors";
+import Collectors from "utilities/iterable/Collectors";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
