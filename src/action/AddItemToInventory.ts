@@ -1,8 +1,8 @@
 import { Action } from "action/Action";
 import { ActionArgument, anyOf } from "action/IAction";
+import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
 import { IContainer } from "item/IItem";
-import IPlayer from "player/IPlayer";
 import Player from "player/Player";
 import { defaultUsability } from "../Actions";
 import InspectDialog from "../ui/InspectDialog";
@@ -17,8 +17,8 @@ export default new Action(anyOf(ActionArgument.Container, ActionArgument.Player)
 		if (target instanceof Player) {
 			target.createItemInInventory(item, quality);
 
-			if (target.entityType === EntityType.Player) {
-				(target as any as IPlayer).updateTablesAndWeight();
+			if (Entity.is(target, EntityType.Player)) {
+				target.updateTablesAndWeight();
 			}
 
 		} else {

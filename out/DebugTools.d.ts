@@ -1,6 +1,6 @@
 import { ActionType } from "action/IAction";
 import { ICreature, IDamageInfo } from "creature/ICreature";
-import IBaseHumanEntity from "entity/IBaseHumanEntity";
+import IHuman from "entity/IHuman";
 import { Bindable, Direction, OverlayType, SpriteBatchLayer } from "Enums";
 import { Dictionary } from "language/Dictionaries";
 import InterruptChoice from "language/dictionary/InterruptChoice";
@@ -106,8 +106,7 @@ export default class DebugTools extends Mod {
     onNoInputReceived(player: IPlayer): void;
     getPlayerWeightMovementPenalty(player: IPlayer): number | undefined;
     getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined;
-    isHumanSwimming(human: IBaseHumanEntity, isSwimming: boolean): boolean | undefined;
-    getPlayerStrength(strength: number, player: IPlayer): number;
+    isHumanSwimming(human: IHuman, isSwimming: boolean): boolean | undefined;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     getAmbientColor(colors: [number, number, number]): [number, number, number] | undefined;
     getAmbientLightLevel(ambientLight: number, z: number): number | undefined;

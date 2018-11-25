@@ -1,10 +1,10 @@
-import IBaseEntity, { StatusEffectChangeReason } from "entity/IBaseEntity";
+import IEntity, { StatusEffectChangeReason } from "entity/IEntity";
 import { Stat } from "entity/IStats";
 
 /**
  * Copies stats and status effects from one entity to another.
  */
-export default function (from: IBaseEntity, to: IBaseEntity) {
+export default function (from: IEntity, to: IEntity) {
 	for (const statName in from.stats) {
 		const stat = Stat[statName as keyof typeof Stat];
 		const statObject = from.getStat(stat)!;

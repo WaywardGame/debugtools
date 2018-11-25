@@ -1,8 +1,8 @@
 import ActionExecutor from "action/ActionExecutor";
 import { ICreature } from "creature/ICreature";
-import { REPUTATION_MAX } from "entity/BaseHumanEntity";
-import IBaseEntity, { EntityEvent } from "entity/IBaseEntity";
-import { EntityType } from "entity/IEntity";
+import Entity from "entity/Entity";
+import { REPUTATION_MAX } from "entity/Human";
+import IEntity, { EntityEvent, EntityType } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
 import { ItemQuality, ItemType } from "Enums";
 import Component from "newui/component/Component";
@@ -55,7 +55,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 	public update(entity: ICreature | INPC | IPlayer) {
 		if (this.human === entity) return;
 
-		this.human = entity.entityType === EntityType.Creature ? undefined : entity;
+		this.human = Entity.is(entity, EntityType.Creature) ? undefined : entity;
 		this.toggle(!!this.human);
 
 		this.trigger("change");
@@ -67,7 +67,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 		}
 
 		this.until([ComponentEvent.Remove, "change"])
-			.bind(entity as IBaseEntity, EntityEvent.StatChanged, this.onStatChange);
+			.bind(entity as IEntity, EntityEvent.StatChanged, this.onStatChange);
 	}
 
 	private addReputationSlider(labelTranslation: DebugToolsTranslation, type: Stat.Benignity | Stat.Malignity) {
@@ -91,7 +91,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 	@Bound
 	private addItem(_: any, type: ItemType, quality: ItemQuality) {
-		ActionExecutor.get(AddItemToInventory).execute(localPlayer, this.human!.entityType === EntityType.Player ? this.human as IPlayer : this.human!.inventory, type, quality);
+		ActionExecutor.get(AddItemToInventory).execute(localPlayer, Entity.is(this.human, EntityType.Player) ? this.human : this.human!.inventory, type, quality);
 	}
 
 	@Bound

@@ -1,2 +1,2 @@
-import IBaseHumanEntity from "entity/IBaseHumanEntity";
-export default function (from: IBaseHumanEntity, to: IBaseHumanEntity): void;
+import IHuman from "entity/IHuman";
+export default function (from: IHuman, to: IHuman): void;

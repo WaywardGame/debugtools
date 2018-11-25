@@ -1,7 +1,7 @@
 import { Action } from "action/Action";
 import { ActionArgument, anyOf } from "action/IAction";
-import { StatusEffectChangeReason } from "entity/IBaseEntity";
-import { EntityType } from "entity/IEntity";
+import Entity from "entity/Entity";
+import { EntityType, StatusEffectChangeReason } from "entity/IEntity";
 import { IStatMax, Stat } from "entity/IStats";
 import { PlayerState, StatusType } from "Enums";
 import { ScreenId } from "newui/screen/IScreen";
@@ -30,7 +30,7 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
 		const hunger = entity.getStat<IStatMax>(Stat.Hunger);
 		const thirst = entity.getStat<IStatMax>(Stat.Thirst);
 
-		entity.setStat(health, entity.entityType === EntityType.Player ? entity.getMaxHealth() : health.max);
+		entity.setStat(health, Entity.is(entity, EntityType.Player) ? entity.getMaxHealth() : health.max);
 		if (stamina) entity.setStat(stamina, stamina.max);
 		if (hunger) entity.setStat(hunger, hunger.max);
 		if (thirst) entity.setStat(thirst, thirst.max);
@@ -39,7 +39,7 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
 		entity.setStatus(StatusType.Burned, false, StatusEffectChangeReason.Passed);
 		entity.setStatus(StatusType.Poisoned, false, StatusEffectChangeReason.Passed);
 
-		if (entity.entityType === EntityType.Player) {
+		if (Entity.is(entity, EntityType.Player)) {
 			entity.state = PlayerState.None;
 			entity.updateStatsAndAttributes();
 		}

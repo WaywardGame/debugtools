@@ -1,5 +1,5 @@
 import { ICreature } from "creature/ICreature";
-import { IEntity } from "entity/IEntity";
+import IEntity from "entity/IEntity";
 import { Bindable, PlayerState } from "Enums";
 import Translation from "language/Translation";
 import { HookMethod, IHookHost } from "mod/IHookHost";

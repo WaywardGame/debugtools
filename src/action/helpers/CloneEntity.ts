@@ -1,4 +1,5 @@
 import { ICreature } from "creature/ICreature";
+import Entity from "entity/Entity";
 import { AiType, EntityType } from "entity/IEntity";
 import { NPCType } from "Enums";
 import { INPC } from "npc/INPC";
@@ -14,7 +15,7 @@ import CopyStats from "./CopyStats";
 export default function (entity: ICreature | INPC | IPlayer, position: IVector3) {
 	let clone: ICreature | INPC | IPlayer;
 
-	if (entity.entityType === EntityType.Creature) {
+	if (Entity.is(entity, EntityType.Creature)) {
 		clone = creatureManager.spawn(entity.type, position.x, position.y, position.z, true, entity.aberrant)!;
 
 		if (entity.isTamed()) clone.tame(entity.getOwner()!);
@@ -36,7 +37,7 @@ export default function (entity: ICreature | INPC | IPlayer, position: IVector3)
 
 	CopyStats(entity, clone);
 
-	if (clone.entityType === EntityType.NPC) {
+	if (Entity.is(clone, EntityType.NPC)) {
 		clone.ai = AiType.Neutral;
 	}
 }

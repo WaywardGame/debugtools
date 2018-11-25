@@ -120,7 +120,6 @@ export interface ISaveData {
     };
 }
 export interface IPlayerData {
-    weightBonus: number;
     invulnerable: boolean;
     noclip: false | {
         moving: boolean;

@@ -1,9 +1,9 @@
-import IBaseHumanEntity from "entity/IBaseHumanEntity";
+import IHuman from "entity/IHuman";
 
 /**
  * Clones the inventory from one human entity to another.
  */
-export default function (from: IBaseHumanEntity, to: IBaseHumanEntity) {
+export default function (from: IHuman, to: IHuman) {
 	for (const item of to.inventory.containedItems) {
 		itemManager.remove(item);
 	}

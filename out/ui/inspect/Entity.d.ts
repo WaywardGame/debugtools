@@ -22,7 +22,7 @@ export default class EntityInformation extends InspectInformationSection {
     setTab(entity: number): this;
     update(position: IVector2, tile: ITile): void;
     getIndex(entity: ICreature | INPC | IPlayer): number;
-    getEntity(index: number): import("../../../mod-reference/definitions/entity/IEntity").Entity;
+    getEntity(index: number): import("../../../mod-reference/definitions/entity/IEntity").EntityPlayerCreatureNpc;
     logUpdate(): void;
     private initializeStats;
     private onStatChange;

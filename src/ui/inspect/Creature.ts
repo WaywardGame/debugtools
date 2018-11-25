@@ -1,5 +1,6 @@
 import ActionExecutor from "action/ActionExecutor";
 import { ICreature } from "creature/ICreature";
+import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
@@ -31,7 +32,7 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 	}
 
 	public update(entity: ICreature | INPC | IPlayer) {
-		this.creature = entity.entityType === EntityType.Creature ? entity : undefined;
+		this.creature = Entity.is(entity, EntityType.Creature) ? entity : undefined;
 		this.toggle(!!this.creature);
 	}
 

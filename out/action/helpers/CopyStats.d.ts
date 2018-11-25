@@ -1,2 +1,2 @@
-import IBaseEntity from "entity/IBaseEntity";
-export default function (from: IBaseEntity, to: IBaseEntity): void;
+import IEntity from "entity/IEntity";
+export default function (from: IEntity, to: IEntity): void;

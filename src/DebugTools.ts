@@ -1,8 +1,9 @@
 import ActionExecutor from "action/ActionExecutor";
 import { ActionType } from "action/IAction";
 import { ICreature, IDamageInfo } from "creature/ICreature";
-import IBaseHumanEntity from "entity/IBaseHumanEntity";
+import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
+import IHuman from "entity/IHuman";
 import { Bindable, Delay, Direction, MoveType, OverlayType, SpriteBatchLayer } from "Enums";
 import { Dictionary } from "language/Dictionaries";
 import InterruptChoice from "language/dictionary/InterruptChoice";
@@ -531,7 +532,7 @@ export default class DebugTools extends Mod {
 	 */
 	@HookMethod
 	public canCreatureAttack(creature: ICreature, enemy: IPlayer | ICreature): boolean | undefined {
-		if (enemy.entityType === EntityType.Player) {
+		if (Entity.is(enemy, EntityType.Player)) {
 			if (this.getPlayerData(enemy, "invulnerable")) return false;
 			if (this.getPlayerData(enemy, "noclip")) return false;
 		}
@@ -609,18 +610,10 @@ export default class DebugTools extends Mod {
 	 * Otherwise we return `undefined` and let the game or other mods handle it. 
 	 */
 	@HookMethod
-	public isHumanSwimming(human: IBaseHumanEntity, isSwimming: boolean): boolean | undefined {
-		if (human.entityType === EntityType.NPC) return undefined;
+	public isHumanSwimming(human: IHuman, isSwimming: boolean): boolean | undefined {
+		if (Entity.is(human, EntityType.NPC)) return undefined;
 
 		return this.getPlayerData(human as IPlayer, "noclip") ? false : undefined;
-	}
-
-	/**
-	 * We add the weight bonus from the player's save data to the existing strength.
-	 */
-	@HookMethod
-	public getPlayerStrength(strength: number, player: IPlayer) {
-		return strength + this.getPlayerData(player, "weightBonus");
 	}
 
 	// tslint:disable cyclomatic-complexity

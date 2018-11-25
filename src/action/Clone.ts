@@ -1,7 +1,7 @@
 import { Action } from "action/Action";
 import { ActionArgument, anyOf } from "action/IAction";
 import Doodad from "doodad/doodads/Doodad";
-import { Entity, EntityType } from "entity/IEntity";
+import { EntityPlayerCreatureNpc, EntityType } from "entity/IEntity";
 import { IVector3 } from "utilities/math/IVector";
 import { defaultUsability } from "../Actions";
 import { DebugToolsTranslation, translation } from "../IDebugTools";
@@ -26,7 +26,7 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Doodad), A
 			CloneDoodad(toClone, position);
 
 		} else {
-			CloneEntity(toClone as Entity, position);
+			CloneEntity(toClone as EntityPlayerCreatureNpc, position);
 		}
 
 		renderer.computeSpritesInViewport();

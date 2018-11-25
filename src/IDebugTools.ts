@@ -152,10 +152,6 @@ export interface ISaveData {
 
 export interface IPlayerData {
 	/**
-	 * Added to the player's strength
-	 */
-	weightBonus: number;
-	/**
 	 * Whether the player is immune to damage
 	 */
 	invulnerable: boolean;

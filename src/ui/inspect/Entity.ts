@@ -1,7 +1,6 @@
 import ActionExecutor from "action/ActionExecutor";
 import { ICreature } from "creature/ICreature";
-import IBaseEntity, { EntityEvent, IStatChangeInfo } from "entity/IBaseEntity";
-import { EntityType } from "entity/IEntity";
+import IEntity, { EntityEvent, EntityType, IStatChangeInfo } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
@@ -142,7 +141,7 @@ export default class EntityInformation extends InspectInformationSection {
 
 		for (const entity of this.entities) {
 			this.until([ComponentEvent.Remove, "change"])
-				.bind(entity as IBaseEntity, EntityEvent.StatChanged, this.onStatChange);
+				.bind(entity as IEntity, EntityEvent.StatChanged, this.onStatChange);
 		}
 	}
 
