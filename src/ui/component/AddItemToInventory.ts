@@ -98,6 +98,6 @@ export default class AddItemToInventory extends Component {
 
 	@Bound
 	private addItem() {
-		this.trigger(AddItemToInventoryEvent.Execute, this.dropdownItemType.selection, this.dropdownItemQuality.selection);
+		this.emit(AddItemToInventoryEvent.Execute, this.dropdownItemType.selection, this.dropdownItemQuality.selection);
 	}
 }

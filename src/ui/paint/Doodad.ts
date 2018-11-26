@@ -66,6 +66,6 @@ export default class DoodadPaint extends Component implements IPaintSection {
 	private changeDoodad(_: any, doodad: keyof typeof DoodadType | "nochange" | "remove") {
 		this.doodad = doodad === "nochange" ? undefined : doodad === "remove" ? "remove" : DoodadType[doodad];
 
-		this.trigger("change");
+		this.emit("change");
 	}
 }

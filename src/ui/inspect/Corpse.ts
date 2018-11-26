@@ -76,12 +76,12 @@ export default class CorpseInformation extends InspectInformationSection {
 	@Bound
 	private resurrect() {
 		ActionExecutor.get(Heal).execute(localPlayer, this.corpse!);
-		this.trigger("update");
+		this.emit("update");
 	}
 
 	@Bound
 	private removeCorpse() {
 		ActionExecutor.get(Remove).execute(localPlayer, this.corpse!);
-		this.trigger("update");
+		this.emit("update");
 	}
 }

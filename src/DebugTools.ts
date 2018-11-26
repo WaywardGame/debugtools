@@ -322,7 +322,7 @@ export default class DebugTools extends Mod {
 	public setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]) {
 		this.getPlayerData(player, key);
 		this.data.playerData[player.identifier][key] = value;
-		this.trigger(DebugToolsEvent.PlayerDataChange, player.id, key, value);
+		this.emit(DebugToolsEvent.PlayerDataChange, player.id, key, value);
 
 		if (!this.hasPermission()) {
 			const gameScreen = newui.getScreen<GameScreen>(ScreenId.Game)!;
@@ -432,7 +432,7 @@ export default class DebugTools extends Mod {
 			.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
 			.setInspection(what);
 
-		this.trigger(DebugToolsEvent.Inspect);
+		this.emit(DebugToolsEvent.Inspect);
 	}
 
 	/**

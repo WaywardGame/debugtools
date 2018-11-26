@@ -122,7 +122,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 					.on("update", this.update)
 					.on(ComponentEvent.WillRemove, infoSection => {
 						if (this.storePanels) {
-							infoSection.trigger(DebugToolsPanelEvent.SwitchAway);
+							infoSection.emit(DebugToolsPanelEvent.SwitchAway);
 							infoSection.store();
 							return false;
 						}
@@ -152,7 +152,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 					// to show the panel, we append the section to the passed component & call a couple methods on the panel
 					(component: Component) => section.setTab(index)
 						.appendTo(component)
-						.trigger(DebugToolsPanelEvent.SwitchTo),
+						.emit(DebugToolsPanelEvent.SwitchTo),
 					// we cache all of the entity buttons
 					(button: Button) => !(section instanceof EntityInformation) ? undefined : this.entityButtons[index] = button,
 				)))
@@ -375,7 +375,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		this.storePanels = false;
 		for (const infoSection of this.infoSections) {
 			if (infoSection.isVisible()) {
-				infoSection.trigger(DebugToolsPanelEvent.SwitchAway);
+				infoSection.emit(DebugToolsPanelEvent.SwitchAway);
 			}
 
 			infoSection.remove();

@@ -100,9 +100,9 @@ export default class EntityInformation extends InspectInformationSection {
 			.appendTo(this);
 
 		this.on(DebugToolsPanelEvent.SwitchTo, () => this.subsections
-			.forEach(subsection => subsection.trigger(DebugToolsPanelEvent.SwitchTo)));
+			.forEach(subsection => subsection.emit(DebugToolsPanelEvent.SwitchTo)));
 		this.on(DebugToolsPanelEvent.SwitchAway, () => this.subsections
-			.forEach(subsection => subsection.trigger(DebugToolsPanelEvent.SwitchAway)));
+			.forEach(subsection => subsection.emit(DebugToolsPanelEvent.SwitchAway)));
 	}
 
 	public getTabs() {
@@ -133,7 +133,7 @@ export default class EntityInformation extends InspectInformationSection {
 		if (areArraysIdentical(entities, this.entities)) return;
 		this.entities = entities;
 
-		this.trigger("change");
+		this.emit("change");
 
 		if (!this.entities.length) return;
 
@@ -273,13 +273,13 @@ export default class EntityInformation extends InspectInformationSection {
 	private teleport(location: IVector2 | IVector3) {
 		ActionExecutor.get(TeleportEntity).execute(localPlayer, this.entity!, new Vector3(location, "z" in location ? location.z : this.entity!.z));
 
-		this.trigger("update");
+		this.emit("update");
 	}
 
 	@Bound
 	private kill() {
 		ActionExecutor.get(Kill).execute(localPlayer, this.entity!);
-		this.trigger("update");
+		this.emit("update");
 	}
 
 	@Bound
@@ -293,7 +293,7 @@ export default class EntityInformation extends InspectInformationSection {
 	@Bound
 	private heal() {
 		ActionExecutor.get(Heal).execute(localPlayer, this.entity!);
-		this.trigger("update");
+		this.emit("update");
 	}
 
 	@Bound

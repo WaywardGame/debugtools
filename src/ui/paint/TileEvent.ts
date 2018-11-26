@@ -79,6 +79,6 @@ export default class TileEventPaint extends Component implements IPaintSection {
 		this.replaceExisting.toggle(isReplaceable);
 		if (!isReplaceable) this.replaceExisting.setChecked(false);
 
-		this.trigger("change");
+		this.emit("change");
 	}
 }

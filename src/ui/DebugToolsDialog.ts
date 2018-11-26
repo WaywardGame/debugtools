@@ -75,7 +75,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 		this.on(ComponentEvent.WillRemove, () => {
 			this.storePanels = false;
 			for (const subpanel of this.subpanels) {
-				subpanel.trigger(DebugToolsPanelEvent.SwitchAway);
+				subpanel.emit(DebugToolsPanelEvent.SwitchAway);
 				subpanel.remove();
 			}
 		});
@@ -105,7 +105,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 				.map(cls => new cls(this.gsapi)
 					.on(ComponentEvent.WillRemove, panel => {
 						if (panel.isVisible()) {
-							panel.trigger(DebugToolsPanelEvent.SwitchAway);
+							panel.emit(DebugToolsPanelEvent.SwitchAway);
 						}
 
 						if (this.storePanels) {
@@ -135,7 +135,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 	private onShowSubpanel(showPanel: DebugToolsPanel) {
 		return (component: Component) => {
 			this.activePanel = showPanel.appendTo(component);
-			this.activePanel.trigger(DebugToolsPanelEvent.SwitchTo);
+			this.activePanel.emit(DebugToolsPanelEvent.SwitchTo);
 		};
 	}
 
