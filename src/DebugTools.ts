@@ -616,6 +616,14 @@ export default class DebugTools extends Mod {
 		return this.getPlayerData(human as IPlayer, "noclip") ? false : undefined;
 	}
 
+	/**
+	 * We add the weight bonus from the player's save data to the existing strength.
+	 */
+	@HookMethod
+	public getPlayerMaxWeight(weight: number, player: IPlayer) {
+		return weight + this.getPlayerData(player, "weightBonus");
+	}
+
 	// tslint:disable cyclomatic-complexity
 	@HookMethod
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable {

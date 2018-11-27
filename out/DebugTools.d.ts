@@ -107,6 +107,7 @@ export default class DebugTools extends Mod {
     getPlayerWeightMovementPenalty(player: IPlayer): number | undefined;
     getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined;
     isHumanSwimming(human: IHuman, isSwimming: boolean): boolean | undefined;
+    getPlayerMaxWeight(weight: number, player: IPlayer): number;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     getAmbientColor(colors: [number, number, number]): [number, number, number] | undefined;
     getAmbientLightLevel(ambientLight: number, z: number): number | undefined;

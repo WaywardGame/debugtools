@@ -2,7 +2,6 @@ import ActionExecutor from "action/ActionExecutor";
 import { ICreature } from "creature/ICreature";
 import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
-import { Stat } from "entity/IStats";
 import { SkillType } from "Enums";
 import UiTranslation from "language/dictionary/UiTranslation";
 import Translation from "language/Translation";
@@ -18,7 +17,7 @@ import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
-import IPlayer, { STRENGTH_BONUS } from "player/IPlayer";
+import IPlayer from "player/IPlayer";
 import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Collectors from "utilities/iterable/Collectors";
@@ -74,7 +73,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.editRange(range => range
 				.setMin(0)
 				.setMax(1000)
-				.setRefreshMethod(() => this.player ? this.player.getStat(Stat.Strength)!.bonus! : STRENGTH_BONUS))
+				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "weightBonus") : 0))
 			.setDisplayValue(true)
 			.on(RangeInputEvent.Finish, this.setWeightBonus)
 			.appendTo(this);
@@ -173,7 +172,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 	@Bound
 	private setWeightBonus(_: any, weightBonus: number) {
-		if (this.player!.getStat(Stat.Strength)!.bonus === weightBonus) return;
+		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "weightBonus") === weightBonus) return;
 
 		ActionExecutor.get(SetWeightBonus).execute(localPlayer, this.player!, weightBonus);
 	}
