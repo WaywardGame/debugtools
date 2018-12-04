@@ -9,9 +9,9 @@ import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdo
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import { UiApi } from "newui/INewUi";
-import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Collectors from "utilities/iterable/Collectors";
+import { tuple } from "utilities/iterable/Generators";
 import { Bound } from "utilities/Objects";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";

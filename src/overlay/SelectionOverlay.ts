@@ -1,8 +1,8 @@
 import Mod from "mod/Mod";
 import { ITile } from "tile/ITerrain";
-import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Collectors from "utilities/iterable/Collectors";
+import { tuple } from "utilities/iterable/Generators";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
