@@ -46,7 +46,7 @@
 			"buttonInspectLocalPlayer": "Inspect Local Player",
 			"buttonUnlockRecipes": "Unlock Recipes",
 			"interruptConfirmationUnlockRecipes": "Are you sure you want\nto unlock all recipes?",
-			"interruptConfirmationUnlockRecipesDescription": "There's no undo besides erasing  /all/ \nrecipe progress in the Options Menu.",
+			"interruptConfirmationUnlockRecipesDescription": "There's no undo besides erasing //all//\nrecipe progress in the Options Menu.",
 			"buttonRemoveAllCreatures": "Remove All Creatures",
 			"buttonRemoveAllNPCs": "Remove All NPCs",
 			"buttonTravelAway": "Travel Away",
