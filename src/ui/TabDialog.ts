@@ -84,7 +84,7 @@ export default abstract class TabDialog extends Dialog {
 	}
 
 	private showFirstSubpanel() {
-		const [subpanelId, , , , button] = this.subpanelInformations.collect(Collectors.first());
+		const [subpanelId, , , , button] = this.subpanelInformations.collect(Collectors.first())!;
 		this.showSubPanel(subpanelId)(button!);
 	}
 
