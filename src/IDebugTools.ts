@@ -133,14 +133,6 @@ export enum DebugToolsTranslation {
 export interface ISaveData {
 	lastVersion: string;
 	/**
-	 * Whether lighting is enabled
-	 */
-	lighting: boolean;
-	/**
-	 * Whether the fog/field of view/fog of war is enabled
-	 */
-	fog: boolean;
-	/**
 	 * 1 pixel in the renderer is equivalent to `this number ** 2`
 	 */
 	zoomLevel?: number;
@@ -160,6 +152,14 @@ export interface IPlayerData {
 	 */
 	invulnerable: boolean;
 	/**
+	 * Whether lighting is enabled
+	 */
+	lighting: boolean;
+	/**
+	 * Whether the fog/field of view/fog of war is enabled
+	 */
+	fog: boolean;
+	/**
 	 * False if the player is not "noclipping", an object otherwise.
 	 */
 	noclip: false | {
@@ -178,7 +178,7 @@ export interface IPlayerData {
 	permissions?: boolean;
 }
 
-export interface ISaveDataGlobal {
+export interface IGlobalData {
 	lastVersion: string;
 }
 

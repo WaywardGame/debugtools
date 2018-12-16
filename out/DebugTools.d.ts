@@ -18,7 +18,7 @@ import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Actions from "./Actions";
-import { IPlayerData, ISaveData, ISaveDataGlobal, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel } from "./IDebugTools";
+import { IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
 export declare enum DebugToolsEvent {
@@ -81,12 +81,12 @@ export default class DebugTools extends Mod {
     readonly overlayTarget: OverlayType;
     readonly overlayPaint: OverlayType;
     data: ISaveData;
-    globalData: ISaveDataGlobal;
+    globalData: IGlobalData;
     private cameraState;
     readonly isCameraUnlocked: boolean;
     getPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K): IPlayerData[K];
     setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]): void;
-    initializeGlobalData(data?: ISaveDataGlobal): ISaveDataGlobal | undefined;
+    initializeGlobalData(data?: IGlobalData): IGlobalData | undefined;
     initializeSaveData(data?: ISaveData): ISaveData | undefined;
     onLoad(): void;
     onUnload(): void;

@@ -242,8 +242,8 @@ export default class PaintPanel extends DebugToolsPanel {
 
 	@Bound
 	private onSwitchTo() {
-		this.parent.classes.add("debug-tools-paint-panel");
-		this.paintRow.appendTo(this.parent.parent);
+		this.getParent()!.classes.add("debug-tools-paint-panel");
+		this.paintRow.appendTo(this.getParent()!.getParent()!);
 
 		hookManager.register(this, "DebugToolsDialog:PaintPanel")
 			.until(DebugToolsPanelEvent.SwitchAway);
@@ -255,8 +255,9 @@ export default class PaintPanel extends DebugToolsPanel {
 
 		this.paintRow.store();
 
-		if (this.parent) {
-			this.parent.classes.remove("debug-tools-paint-panel");
+		const parent = this.getParent();
+		if (parent) {
+			parent.classes.remove("debug-tools-paint-panel");
 		}
 	}
 
@@ -285,7 +286,7 @@ export default class PaintPanel extends DebugToolsPanel {
 			Object.assign(paintData, paintSection.getTilePaintData());
 		}
 
-		ActionExecutor.get(Paint).execute(localPlayer, this.paintTiles, paintData);
+		ActionExecutor.get(Paint).execute(localPlayer, [...this.paintTiles], paintData);
 
 		this.clearPaint();
 	}

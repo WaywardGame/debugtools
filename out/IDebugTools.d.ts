@@ -112,8 +112,6 @@ export declare enum DebugToolsTranslation {
 }
 export interface ISaveData {
     lastVersion: string;
-    lighting: boolean;
-    fog: boolean;
     zoomLevel?: number;
     playerData: {
         [key: string]: IPlayerData;
@@ -122,13 +120,15 @@ export interface ISaveData {
 export interface IPlayerData {
     weightBonus: number;
     invulnerable: boolean;
+    lighting: boolean;
+    fog: boolean;
     noclip: false | {
         moving: boolean;
         delay: number;
     };
     permissions?: boolean;
 }
-export interface ISaveDataGlobal {
+export interface IGlobalData {
     lastVersion: string;
 }
 export declare type ModRegistrationMainDialogPanel = (cls: typeof DebugToolsPanel) => DebugToolsDialogPanelClass;

@@ -221,14 +221,21 @@ export default class GeneralPanel extends DebugToolsPanel {
 	 */
 	@Bound
 	private async travelAway() {
-		if (multiplayer.isConnected()) return;
+		if (multiplayer.isConnected() && !game.isChallenge) return;
 
-		const choice = await this.api.interrupt(translation(DebugToolsTranslation.InterruptChoiceTravelAway))
-			.withChoice(InterruptChoice.Cancel, this.DEBUG_TOOLS.choiceTravelAway, this.DEBUG_TOOLS.choiceSailToCivilization);
+		let action: ActionType;
+		if (!game.isChallenge) {
+			const choice = await this.api.interrupt(translation(DebugToolsTranslation.InterruptChoiceTravelAway))
+				.withChoice(InterruptChoice.Cancel, this.DEBUG_TOOLS.choiceTravelAway, this.DEBUG_TOOLS.choiceSailToCivilization);
 
-		if (choice === InterruptChoice.Cancel) return;
+			if (choice === InterruptChoice.Cancel) return;
+			action = choice === this.DEBUG_TOOLS.choiceSailToCivilization ? ActionType.SailToCivilization : ActionType.TraverseTheSea;
 
-		const anyExecutor = (ActionExecutor as any).get(choice === this.DEBUG_TOOLS.choiceSailToCivilization ? ActionType.SailToCivilization : ActionType.TraverseTheSea);
+		} else {
+			action = ActionType.SailToCivilization;
+		}
+
+		const anyExecutor = (ActionExecutor as any).get(action);
 		anyExecutor.execute(localPlayer, undefined, true, true, true);
 	}
 }

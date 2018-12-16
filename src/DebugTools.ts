@@ -48,7 +48,7 @@ import ToggleTilled from "./action/ToggleTilled";
 import UnlockRecipes from "./action/UnlockRecipes";
 import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
 import Actions from "./Actions";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import AddItemToInventoryComponent from "./ui/component/AddItemToInventory";
 import MainDialog from "./ui/DebugToolsDialog";
@@ -280,7 +280,7 @@ export default class DebugTools extends Mod {
 	@Mod.saveData<DebugTools>(DEBUG_TOOLS_ID)
 	public data: ISaveData;
 	@Mod.globalData<DebugTools>(DEBUG_TOOLS_ID)
-	public globalData: ISaveDataGlobal;
+	public globalData: IGlobalData;
 
 	private cameraState = CameraState.Locked;
 
@@ -304,6 +304,8 @@ export default class DebugTools extends Mod {
 			invulnerable: false,
 			noclip: false,
 			permissions: players[player.id].isServer(),
+			fog: true,
+			lighting: true,
 		};
 
 		return this.data.playerData[player.identifier][key];
@@ -338,7 +340,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
 	 */
-	public initializeGlobalData(data?: ISaveDataGlobal) {
+	public initializeGlobalData(data?: IGlobalData) {
 		const version = new Version(modManager.getVersion(this.getIndex()));
 		const lastLoadVersion = new Version((data && data.lastVersion) || "0.0.0");
 
@@ -359,9 +361,7 @@ export default class DebugTools extends Mod {
 		const upgrade = !data || lastLoadVersion.isOlderThan(version);
 
 		return !upgrade ? data : {
-			lighting: true,
 			playerData: {},
-			fog: true,
 			lastVersion: version.getString(),
 		};
 	}
@@ -399,7 +399,7 @@ export default class DebugTools extends Mod {
 	 * Updates the field of view based on whether it's disabled in the mod.
 	 */
 	public updateFog() {
-		fieldOfView.disabled = !this.data.fog;
+		fieldOfView.disabled = this.getPlayerData(localPlayer, "fog") === false;
 		game.updateView(true);
 	}
 
@@ -687,7 +687,7 @@ export default class DebugTools extends Mod {
 	 */
 	@HookMethod
 	public getAmbientColor(colors: [number, number, number]) {
-		if (!this.data.lighting) {
+		if (this.getPlayerData(localPlayer, "lighting") === false) {
 			return Vector3.ONE.xyz;
 		}
 
@@ -699,7 +699,7 @@ export default class DebugTools extends Mod {
 	 */
 	@HookMethod
 	public getAmbientLightLevel(ambientLight: number, z: number): number | undefined {
-		if (!this.data.lighting) {
+		if (this.getPlayerData(localPlayer, "lighting") === false) {
 			return 1;
 		}
 
@@ -711,7 +711,7 @@ export default class DebugTools extends Mod {
 	 */
 	@HookMethod
 	public getTileLightLevel(tile: ITile, x: number, y: number, z: number): number | undefined {
-		if (!this.data.lighting) {
+		if (this.getPlayerData(localPlayer, "lighting") === false) {
 			return 0;
 		}
 

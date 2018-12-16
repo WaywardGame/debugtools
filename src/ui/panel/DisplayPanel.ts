@@ -28,13 +28,13 @@ export default class DisplayPanel extends DebugToolsPanel {
 
 		new CheckButton(this.api)
 			.setText(translation(DebugToolsTranslation.ButtonToggleFog))
-			.setRefreshMethod(() => this.saveData.fog)
+			.setRefreshMethod(() => this.DEBUG_TOOLS.getPlayerData(localPlayer, "fog"))
 			.on(CheckButtonEvent.Change, this.toggleFog)
 			.appendTo(this);
 
 		new CheckButton(this.api)
 			.setText(translation(DebugToolsTranslation.ButtonToggleLighting))
-			.setRefreshMethod(() => this.saveData.lighting)
+			.setRefreshMethod(() => this.DEBUG_TOOLS.getPlayerData(localPlayer, "lighting"))
 			.on(CheckButtonEvent.Change, this.toggleLighting)
 			.appendTo(this);
 
@@ -101,13 +101,13 @@ export default class DisplayPanel extends DebugToolsPanel {
 
 	@Bound
 	private toggleFog(_: any, fog: boolean) {
-		this.saveData.fog = fog;
+		this.DEBUG_TOOLS.setPlayerData(localPlayer, "fog", fog);
 		this.DEBUG_TOOLS.updateFog();
 	}
 
 	@Bound
 	private toggleLighting(_: any, lighting: boolean) {
-		this.saveData.lighting = lighting;
+		this.DEBUG_TOOLS.setPlayerData(localPlayer, "lighting", lighting);
 		ActionExecutor.get(UpdateStatsAndAttributes).execute(localPlayer, localPlayer);
 		game.updateView(true);
 	}
