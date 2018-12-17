@@ -48,7 +48,7 @@ import ToggleTilled from "./action/ToggleTilled";
 import UnlockRecipes from "./action/UnlockRecipes";
 import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
 import Actions from "./Actions";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import AddItemToInventoryComponent from "./ui/component/AddItemToInventory";
 import MainDialog from "./ui/DebugToolsDialog";
