@@ -103,6 +103,10 @@ export default class TerrainInformation extends InspectInformationSection {
 
 	@Bound
 	private changeTerrain(_: any, terrain: TerrainType) {
+		if (terrain === TileHelpers.getType(this.tile)) {
+			return;
+		}
+
 		ActionExecutor.get(ChangeTerrain).execute(localPlayer, terrain, this.position);
 		this.update(this.position, this.tile);
 	}
