@@ -1,6 +1,8 @@
-import { ItemQuality, ItemType, SentenceCaseStyle } from "Enums";
+import ActionExecutor from "action/ActionExecutor";
+import { ItemQuality, ItemType } from "Enums";
 import { IItem } from "item/IItem";
-import Translation from "language/Translation";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
 import Component from "newui/component/Component";
@@ -11,10 +13,11 @@ import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
-import Actions from "../../Actions";
+import AddItemToInventory from "../../action/AddItemToInventory";
+import Remove from "../../action/Remove";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
-import AddItemToInventory, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
+import AddItemToInventoryComponent, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
 export default class ItemInformation extends InspectInformationSection {
@@ -42,7 +45,7 @@ export default class ItemInformation extends InspectInformationSection {
 	}
 
 	public setTab() {
-		const addItemToInventory = AddItemToInventory.get(this.api).appendTo(this.wrapperAddItem);
+		const addItemToInventory = AddItemToInventoryComponent.init(this.api).appendTo(this.wrapperAddItem);
 		this.until(ComponentEvent.WillRemove)
 			.bind(addItemToInventory, AddItemToInventoryEvent.Execute, this.addItem);
 
@@ -64,7 +67,7 @@ export default class ItemInformation extends InspectInformationSection {
 		for (const item of this.items) {
 			new Paragraph(this.api)
 				.setText(() => translation(DebugToolsTranslation.ItemName)
-					.get(Translation.ofObjectName(item, SentenceCaseStyle.Title, true)))
+					.get(Translation.nameOf(Dictionary.Item, item, true).inContext(TextContext.Title)))
 				.appendTo(this.wrapperItems);
 
 			new Button(this.api)
@@ -80,14 +83,13 @@ export default class ItemInformation extends InspectInformationSection {
 
 	@Bound
 	private addItem(_: any, type: ItemType, quality: ItemQuality) {
-		Actions.get("addItemToInventory")
-			.execute({ point: this.position, object: [type, quality] });
+		ActionExecutor.get(AddItemToInventory).execute(localPlayer, itemManager.getTileContainer(this.position.x, this.position.y, localPlayer.z), type, quality);
 	}
 
 	@Bound
 	private removeItem(item: IItem) {
 		return () => {
-			Actions.get("remove").execute({ item });
+			ActionExecutor.get(Remove).execute(localPlayer, item);
 		};
 	}
 }

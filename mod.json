@@ -4,7 +4,7 @@
 	"version": "2.0",
 	"author": "Yuudaari",
 	"compatibleMinorVersions": [
-		6
+		7
 	],
 	"multiplayerCompatible": true,
 	"file": "out/DebugTools",
@@ -14,6 +14,10 @@
 	],
 	"languages": [
 		"lang/english"
+	],
+	"tags": [
+		"Cheat",
+		"User Interface"
 	],
 	"publishedFileId": "474819610"
 }

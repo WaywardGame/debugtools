@@ -1,3 +1,4 @@
+import Translation from "language/Translation";
 import { IHookHost } from "mod/IHookHost";
 import { DialogId, IDialogDescription } from "newui/screen/screens/game/Dialogs";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
@@ -12,7 +13,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
     private activePanel;
     private storePanels;
     constructor(gsapi: IGameScreenApi, id: DialogId);
-    getName(): import("language/Translation").default;
+    getName(): Translation;
     getSubpanels(): SubpanelInformation[];
     private onShowSubpanel;
 }

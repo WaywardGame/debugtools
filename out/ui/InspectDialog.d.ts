@@ -1,9 +1,8 @@
 import { ICreature } from "creature/ICreature";
 import { Bindable, PlayerState } from "Enums";
+import Translation from "language/Translation";
 import { IHookHost } from "mod/IHookHost";
 import { BindCatcherApi } from "newui/BindingManager";
-import Button from "newui/component/Button";
-import Component from "newui/component/Component";
 import { DialogId, IDialogDescription } from "newui/screen/screens/game/Dialogs";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
@@ -13,7 +12,7 @@ import Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
 import DebugTools from "../DebugTools";
 import InspectInformationSection from "./component/InspectInformationSection";
-import TabDialog from "./TabDialog";
+import TabDialog, { SubpanelInformation } from "./TabDialog";
 export declare type InspectDialogInformationSectionClass = new (gsapi: IGameScreenApi) => InspectInformationSection;
 export default class InspectDialog extends TabDialog implements IHookHost {
     static description: IDialogDescription;
@@ -31,8 +30,8 @@ export default class InspectDialog extends TabDialog implements IHookHost {
     private shouldLog;
     private willShowSubpanel;
     constructor(gsapi: IGameScreenApi, id: DialogId);
-    getSubpanels(): [string | number, import("newui/component/IComponent").TranslationGenerator, (component: Component) => any, (((button: Button) => any) | undefined)?, (Button | undefined)?][];
-    getName(): import("language/Translation").default;
+    getSubpanels(): SubpanelInformation[];
+    getName(): Translation;
     setInspection(what: Vector2 | IPlayer | ICreature | INPC): this;
     update(): void;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;

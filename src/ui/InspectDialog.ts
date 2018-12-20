@@ -1,6 +1,7 @@
 import { ICreature } from "creature/ICreature";
-import { IEntity } from "entity/IEntity";
+import IEntity from "entity/IEntity";
 import { Bindable, PlayerState } from "Enums";
+import Translation from "language/Translation";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import { BindCatcherApi, bindingManager } from "newui/BindingManager";
@@ -16,8 +17,8 @@ import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
-import { tuple } from "utilities/Arrays";
-import Collectors from "utilities/Collectors";
+import Collectors from "utilities/iterable/Collectors";
+import { tuple } from "utilities/iterable/Generators";
 import Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
@@ -112,7 +113,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 * Implements the abstract method in "TabDialog". Returns an array of tuples containing information used to set-up the
 	 * subpanels of this dialog.
 	 */
-	public getSubpanels() {
+	public getSubpanels(): SubpanelInformation[] {
 		if (!this.infoSections) {
 			this.infoSections = informationSectionClasses.values()
 				.include(this.DEBUG_TOOLS.modRegistryInspectDialogPanels.getRegistrations()
@@ -121,7 +122,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 					.on("update", this.update)
 					.on(ComponentEvent.WillRemove, infoSection => {
 						if (this.storePanels) {
-							infoSection.trigger(DebugToolsPanelEvent.SwitchAway);
+							infoSection.emit(DebugToolsPanelEvent.SwitchAway);
 							infoSection.store();
 							return false;
 						}
@@ -151,17 +152,17 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 					// to show the panel, we append the section to the passed component & call a couple methods on the panel
 					(component: Component) => section.setTab(index)
 						.appendTo(component)
-						.trigger(DebugToolsPanelEvent.SwitchTo),
+						.emit(DebugToolsPanelEvent.SwitchTo),
 					// we cache all of the entity buttons
 					(button: Button) => !(section instanceof EntityInformation) ? undefined : this.entityButtons[index] = button,
 				)))
 			// currently we have an array of `SubpanelInformation` arrays, because each tab provided an array of them, fix with `flat`
-			.flat<SubpanelInformation>(1)
+			.flatMap<SubpanelInformation>()
 			// and now return an array
 			.collect(Collectors.toArray);
 	}
 
-	public getName() {
+	public getName(): Translation {
 		return translation(DebugToolsTranslation.DialogTitleInspect);
 	}
 
@@ -309,7 +310,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	@Bound
 	private logUpdate() {
 		if (this.shouldLog) {
-			this.LOG.info("Tile:", this.tile);
+			this.LOG.info("Tile:", this.tile, this.tilePosition !== undefined ? this.tilePosition.toString() : undefined);
 			this.shouldLog = false;
 		}
 
@@ -374,7 +375,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		this.storePanels = false;
 		for (const infoSection of this.infoSections) {
 			if (infoSection.isVisible()) {
-				infoSection.trigger(DebugToolsPanelEvent.SwitchAway);
+				infoSection.emit(DebugToolsPanelEvent.SwitchAway);
 			}
 
 			infoSection.remove();

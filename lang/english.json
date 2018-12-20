@@ -46,7 +46,7 @@
 			"buttonInspectLocalPlayer": "Inspect Local Player",
 			"buttonUnlockRecipes": "Unlock Recipes",
 			"interruptConfirmationUnlockRecipes": "Are you sure you want\nto unlock all recipes?",
-			"interruptConfirmationUnlockRecipesDescription": "There's no undo besides erasing  /all/ \nrecipe progress in the Options Menu.",
+			"interruptConfirmationUnlockRecipesDescription": "There's no undo besides erasing //all//\nrecipe progress in the Options Menu.",
 			"buttonRemoveAllCreatures": "Remove All Creatures",
 			"buttonRemoveAllNPCs": "Remove All NPCs",
 			"buttonTravelAway": "Travel Away",
@@ -74,9 +74,9 @@
 			"labelTerrain": "{#--text-color-faded:Terrain}",
 			"labelCreature": "{#--text-color-faded:Creature}",
 			"buttonPaintClear": "Clear",
-			"tooltipPaintClear": "{#--text-color-faded:({Bindable.ModDebugToolsClearPaint})}",
+			"tooltipPaintClear": "{#--text-color-faded:({Bindings:ModDebugToolsClearPaint})}",
 			"buttonPaintComplete": "Complete",
-			"tooltipPaintComplete": "{#--text-color-faded:({Bindable.ModDebugToolsCompletePaint})}",
+			"tooltipPaintComplete": "{#--text-color-faded:({Bindings:ModDebugToolsCompletePaint})}",
 			"buttonToggleAberrant": "Aberrant",
 			"labelNPC": "{#--text-color-faded:NPC}",
 			"labelDoodad": "{#--text-color-faded:Doodad}",
@@ -119,7 +119,7 @@
 			
 			"inspectTileTitle": "{#--text-color-faded:x:} {0} {#--text-color-faded:y:} {1} {#--text-color-faded:z:} {2}",
 			"inspectTerrain": "{#--text-color-faded:Terrain:} {0}",
-			"buttonChangeTerrain": "Change",
+			"labelChangeTerrain": "Change",
 			"entityName": "{#--text-color-faded:{0}:} {1}",
 			"buttonKillEntity": "Kill",
 			"buttonHealEntity": "Heal",
@@ -152,11 +152,15 @@
 			"tileEventName": "{#--text-color-faded:Tile Event:} {0}",
 			"itemName": "{#--text-color-faded:{0}}",
 			"buttonTogglePermissions": "Grant Debug Permissions",
+			"buttonSetGrowthStage": "Set Growth Stage",
 			
 			
 			"actionResurrect": "resurrect {0}",
 			"actionClone": "clone {0}",
 			"actionTeleport": "teleport {0}"
+		},
+		"item": {
+			"none": "none"
 		}
 	}
 }

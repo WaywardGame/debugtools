@@ -1,3 +1,4 @@
+import ActionExecutor from "action/ActionExecutor";
 import { Bindable } from "Enums";
 import Translation from "language/Translation";
 import { ITemplateOptions, manipulateTemplates } from "mapgen/MapGenHelpers";
@@ -14,13 +15,13 @@ import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import Spacer from "newui/screen/screens/menu/component/Spacer";
 import { TileTemplateType } from "tile/ITerrain";
 import templateDescriptions from "tile/TerrainTemplates";
-import { tuple } from "utilities/Arrays";
-import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
+import Collectors from "utilities/iterable/Collectors";
+import { tuple } from "utilities/iterable/Generators";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import Objects, { Bound } from "utilities/Objects";
-import Actions from "../../Actions";
+import PlaceTemplate from "../../action/PlaceTemplate";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
@@ -67,7 +68,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTemplate)))
 			.append(this.dropdownTemplate = new Dropdown<string>(this.api)
 				.setRefreshMethod(() => ({
-					defaultOption: Objects.keys<string>(templateDescriptions[this.dropdownType.selection]).first()!,
+					defaultOption: Objects.keys<string>(templateDescriptions[this.dropdownType.selection]).collect(Collectors.first())!,
 					options: Objects.keys<string>(templateDescriptions[this.dropdownType.selection])
 						.map(name => tuple(name, Translation.generator(name)))
 						.collect(Collectors.toArray)
@@ -216,7 +217,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 
 	private placeTemplate(topLeft: Vector2) {
 		this.place.setChecked(false);
-		Actions.get("placeTemplate").execute({ point: topLeft.raw(), object: [this.dropdownType.selection, this.getTemplateOptions()] });
+		ActionExecutor.get(PlaceTemplate).execute(localPlayer, this.dropdownType.selection, topLeft.raw(), this.getTemplateOptions());
 	}
 
 	private clearPreview() {

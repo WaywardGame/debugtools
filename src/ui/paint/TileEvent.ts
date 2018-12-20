@@ -1,5 +1,5 @@
-import { SentenceCaseStyle } from "Enums";
-import Translation from "language/Translation";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { TextContext } from "language/Translation";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
@@ -8,10 +8,9 @@ import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import { UiApi } from "newui/INewUi";
 import { TileEventType } from "tile/ITileEvent";
-import tileEventDescriptions from "tile/TileEvents";
-import { tuple } from "utilities/Arrays";
-import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
+import Collectors from "utilities/iterable/Collectors";
+import { tuple } from "utilities/iterable/Generators";
 import { Bound } from "utilities/Objects";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
@@ -39,7 +38,7 @@ export default class TileEventPaint extends Component implements IPaintSection {
 							.filter(event => event !== TileEventType.None)
 							.map(event => tuple(
 								TileEventType[event] as keyof typeof TileEventType,
-								Translation.ofDescription(tileEventDescriptions[event], SentenceCaseStyle.Title, false),
+								Translation.nameOf(Dictionary.TileEvent, event, false).inContext(TextContext.Title),
 							))
 							.collect(Collectors.toArray)
 							.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
@@ -80,6 +79,6 @@ export default class TileEventPaint extends Component implements IPaintSection {
 		this.replaceExisting.toggle(isReplaceable);
 		if (!isReplaceable) this.replaceExisting.setChecked(false);
 
-		this.trigger("change");
+		this.emit("change");
 	}
 }

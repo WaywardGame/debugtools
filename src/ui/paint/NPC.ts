@@ -6,9 +6,9 @@ import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdo
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import { UiApi } from "newui/INewUi";
-import { tuple } from "utilities/Arrays";
-import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
+import Collectors from "utilities/iterable/Collectors";
+import { tuple } from "utilities/iterable/Generators";
 import { Bound } from "utilities/Objects";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
@@ -61,6 +61,6 @@ export default class NPCPaint extends Component implements IPaintSection {
 	private changeNPC(_: any, npc: keyof typeof NPCType | "nochange" | "remove") {
 		this.npc = npc === "nochange" ? undefined : npc === "remove" ? "remove" : NPCType[npc];
 
-		this.trigger("change");
+		this.emit("change");
 	}
 }

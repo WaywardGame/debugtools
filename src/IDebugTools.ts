@@ -11,18 +11,13 @@ export enum DebugToolsTranslation {
 	////////////////////////////////////
 	// Options
 	//
-
 	OptionsAutoOpen,
-
 	////////////////////////////////////
 	// Main Dialog
 	//
-
 	DialogTitleMain,
-
 	// General
 	PanelGeneral,
-
 	LabelTime,
 	ButtonInspect,
 	ButtonInspectLocalPlayer,
@@ -35,10 +30,8 @@ export enum DebugToolsTranslation {
 	InterruptChoiceTravelAway,
 	ButtonAudio,
 	ButtonParticle,
-
 	// Display
 	PanelDisplay,
-
 	ButtonToggleFog,
 	ButtonToggleLighting,
 	LabelZoomLevel,
@@ -46,10 +39,8 @@ export enum DebugToolsTranslation {
 	ButtonUnlockCamera,
 	ButtonResetWebGL,
 	ButtonReloadShaders,
-
 	// Manipulation
 	PanelPaint,
-
 	ButtonPaint,
 	PaintNoChange,
 	PaintRemove,
@@ -66,10 +57,8 @@ export enum DebugToolsTranslation {
 	ButtonReplaceExisting,
 	LabelTileEvent,
 	ResetPaintSection,
-
 	// Selection
 	PanelSelection,
-
 	SelectionMethod,
 	SelectionFilter,
 	SelectionAction,
@@ -82,10 +71,8 @@ export enum DebugToolsTranslation {
 	FilterTileEvents,
 	ActionRemove,
 	ButtonExecute,
-
 	// Templates
 	PanelTemplates,
-
 	LabelTemplateType,
 	LabelTemplate,
 	ButtonMirrorVertically,
@@ -95,16 +82,13 @@ export enum DebugToolsTranslation {
 	RangeRotateDegrees,
 	LabelDegrade,
 	RangeDegradeAmount,
-
 	////////////////////////////////////
 	// Inspect Dialog
 	//
-
 	DialogTitleInspect,
-
 	InspectTileTitle,
 	InspectTerrain,
-	ButtonChangeTerrain,
+	LabelChangeTerrain,
 	ButtonToggleTilled,
 	EntityName,
 	ButtonKillEntity,
@@ -137,11 +121,10 @@ export enum DebugToolsTranslation {
 	TileEventName,
 	ItemName,
 	ButtonTogglePermissions,
-
+	ButtonSetGrowthStage,
 	////////////////////////////////////
 	// Misc
 	//
-
 	ActionResurrect,
 	ActionClone,
 	ActionTeleport,
@@ -149,14 +132,6 @@ export enum DebugToolsTranslation {
 
 export interface ISaveData {
 	lastVersion: string;
-	/**
-	 * Whether lighting is enabled
-	 */
-	lighting: boolean;
-	/**
-	 * Whether the fog/field of view/fog of war is enabled
-	 */
-	fog: boolean;
 	/**
 	 * 1 pixel in the renderer is equivalent to `this number ** 2`
 	 */
@@ -177,6 +152,14 @@ export interface IPlayerData {
 	 */
 	invulnerable: boolean;
 	/**
+	 * Whether lighting is enabled
+	 */
+	lighting: boolean;
+	/**
+	 * Whether the fog/field of view/fog of war is enabled
+	 */
+	fog: boolean;
+	/**
 	 * False if the player is not "noclipping", an object otherwise.
 	 */
 	noclip: false | {
@@ -195,7 +178,7 @@ export interface IPlayerData {
 	permissions?: boolean;
 }
 
-export interface ISaveDataGlobal {
+export interface IGlobalData {
 	lastVersion: string;
 }
 

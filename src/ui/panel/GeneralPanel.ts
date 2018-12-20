@@ -1,5 +1,7 @@
-import { ActionType, Bindable, SfxType } from "Enums";
-import { InterruptChoice } from "language/ILanguage";
+import ActionExecutor from "action/ActionExecutor";
+import { ActionType } from "action/IAction";
+import { Bindable, SfxType } from "Enums";
+import InterruptChoice from "language/dictionary/InterruptChoice";
 import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
@@ -15,12 +17,13 @@ import Text from "newui/component/Text";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ParticleType } from "renderer/particle/IParticle";
 import { particles } from "renderer/particle/Particles";
-import { tuple } from "utilities/Arrays";
-import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
+import Collectors from "utilities/iterable/Collectors";
+import { tuple } from "utilities/iterable/Generators";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
-import Actions from "../../Actions";
+import SetTime from "../../action/SetTime";
+import UnlockRecipes from "../../action/UnlockRecipes";
 import DebugTools, { DebugToolsEvent } from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import CancelablePromise from "../../util/CancelablePromise";
@@ -53,7 +56,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 				.setRefreshMethod(() => game.time.getTime()))
 			.setDisplayValue(time => game.time.getTranslation(time))
 			.on(RangeInputEvent.Change, (_, time: number) => {
-				Actions.get("setTime").execute({ object: time });
+				ActionExecutor.get(SetTime).execute(localPlayer, time);
 			})
 			.appendTo(this);
 
@@ -208,7 +211,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 		if (!confirm) return;
 
-		Actions.get("unlockRecipes").execute();
+		ActionExecutor.get(UnlockRecipes).execute(localPlayer);
 	}
 
 	/**
@@ -218,17 +221,21 @@ export default class GeneralPanel extends DebugToolsPanel {
 	 */
 	@Bound
 	private async travelAway() {
-		if (multiplayer.isConnected()) return;
+		if (multiplayer.isConnected() && !game.isChallenge) return;
 
-		const choice = await this.api.interrupt(translation(DebugToolsTranslation.InterruptChoiceTravelAway))
-			.withChoice(InterruptChoice.Cancel, this.DEBUG_TOOLS.choiceTravelAway, this.DEBUG_TOOLS.choiceSailToCivilization);
+		let action: ActionType;
+		if (!game.isChallenge) {
+			const choice = await this.api.interrupt(translation(DebugToolsTranslation.InterruptChoiceTravelAway))
+				.withChoice(InterruptChoice.Cancel, this.DEBUG_TOOLS.choiceTravelAway, this.DEBUG_TOOLS.choiceSailToCivilization);
 
-		if (choice === InterruptChoice.Cancel) return;
+			if (choice === InterruptChoice.Cancel) return;
+			action = choice === this.DEBUG_TOOLS.choiceSailToCivilization ? ActionType.SailToCivilization : ActionType.TraverseTheSea;
 
-		actionManager.execute(
-			localPlayer,
-			choice === this.DEBUG_TOOLS.choiceSailToCivilization ? ActionType.SailToCivilization : ActionType.TraverseTheSea,
-			{ object: [true, true, true] },
-		);
+		} else {
+			action = ActionType.SailToCivilization;
+		}
+
+		const anyExecutor = (ActionExecutor as any).get(action);
+		anyExecutor.execute(localPlayer, undefined, true, true, true);
 	}
 }

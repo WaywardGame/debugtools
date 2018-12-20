@@ -1,5 +1,6 @@
-import { SentenceCaseStyle, TerrainType } from "Enums";
-import Translation from "language/Translation";
+import { TerrainType } from "Enums";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { TextContext } from "language/Translation";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
@@ -8,9 +9,9 @@ import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import { UiApi } from "newui/INewUi";
 import { terrainDescriptions } from "tile/Terrains";
-import { tuple } from "utilities/Arrays";
-import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
+import Collectors from "utilities/iterable/Collectors";
+import { tuple } from "utilities/iterable/Generators";
 import { Bound } from "utilities/Objects";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
@@ -32,7 +33,10 @@ export default class TerrainPaint extends Component implements IPaintSection {
 					options: ([
 						["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
 					] as IDropdownOption<"nochange" | keyof typeof TerrainType>[]).values().include(Enums.values(TerrainType)
-						.map(terrain => tuple(TerrainType[terrain] as keyof typeof TerrainType, Translation.ofDescription(terrainDescriptions[terrain]!, SentenceCaseStyle.Title, false)))
+						.map(terrain => tuple(
+							TerrainType[terrain] as keyof typeof TerrainType,
+							new Translation(Dictionary.Terrain, terrain).inContext(TextContext.Title),
+						))
 						.collect(Collectors.toArray)
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.values()
@@ -72,6 +76,6 @@ export default class TerrainPaint extends Component implements IPaintSection {
 		this.tilledCheckButton.toggle(tillable);
 		if (!tillable) this.tilledCheckButton.setChecked(false);
 
-		this.trigger("change");
+		this.emit("change");
 	}
 }

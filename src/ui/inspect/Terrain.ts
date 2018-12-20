@@ -1,23 +1,26 @@
-import { SentenceCaseStyle, TerrainType } from "Enums";
-import Translation from "language/Translation";
+import ActionExecutor from "action/ActionExecutor";
+import { TerrainType } from "Enums";
+import { Dictionary } from "language/Dictionaries";
+import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
-import { bindingManager } from "newui/BindingManager";
-import Button, { ButtonEvent } from "newui/component/Button";
+import Button from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
-import ContextMenu from "newui/component/ContextMenu";
+import Dropdown, { DropdownEvent } from "newui/component/Dropdown";
+import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import terrainDescriptions from "tile/Terrains";
-import { tuple } from "utilities/Arrays";
-import Collectors, { PassStrategy } from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
+import Collectors from "utilities/iterable/Collectors";
+import { tuple } from "utilities/iterable/Generators";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
-import Actions from "../../Actions";
+import ChangeTerrain from "../../action/ChangeTerrain";
+import ToggleTilled from "../../action/ToggleTilled";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
@@ -31,13 +34,26 @@ export default class TerrainInformation extends InspectInformationSection {
 	private terrainType: string;
 
 	private readonly checkButtonTilled: CheckButton;
+	private readonly dropdownTerrainType: Dropdown<TerrainType>;
 
 	public constructor(gsapi: IGameScreenApi) {
 		super(gsapi);
 
-		new Button(this.api)
-			.setText(translation(DebugToolsTranslation.ButtonChangeTerrain))
-			.on(ButtonEvent.Activate, this.showTerrainContextMenu)
+		new LabelledRow(this.api)
+			.classes.add("dropdown-label")
+			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelChangeTerrain)))
+			.append(this.dropdownTerrainType = new Dropdown<TerrainType>(this.api)
+				.setRefreshMethod(() => ({
+					defaultOption: this.tile ? TileHelpers.getType(this.tile) : TerrainType.Dirt,
+					options: Enums.values(TerrainType)
+						.filter(terrain => terrain)
+						.map(terrain => tuple(terrain, new Translation(Dictionary.Terrain, terrain).inContext(TextContext.Title)))
+						.collect(Collectors.toArray)
+						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+						.values()
+						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
+				}))
+				.on(DropdownEvent.Selection, this.changeTerrain))
 			.appendTo(this);
 
 		this.checkButtonTilled = new CheckButton(this.api)
@@ -56,7 +72,7 @@ export default class TerrainInformation extends InspectInformationSection {
 	@Bound
 	public getTabTranslation() {
 		return this.tile && translation(DebugToolsTranslation.InspectTerrain)
-			.get(terrainDescriptions[TileHelpers.getType(this.tile)]!.name);
+			.get(new Translation(Dictionary.Terrain, TileHelpers.getType(this.tile)).inContext(TextContext.Title));
 	}
 
 	public update(position: IVector2, tile: ITile) {
@@ -67,6 +83,7 @@ export default class TerrainInformation extends InspectInformationSection {
 		if (terrainType === this.terrainType) return;
 
 		this.terrainType = terrainType;
+		this.dropdownTerrainType.refresh();
 		this.setShouldLog();
 
 		this.checkButtonTilled.toggle(terrainDescriptions[TileHelpers.getType(tile)]!.tillable === true)
@@ -81,38 +98,16 @@ export default class TerrainInformation extends InspectInformationSection {
 
 	@Bound
 	private toggleTilled(_: any, tilled: boolean) {
-		Actions.get("toggleTilled").execute({ position: this.position, object: tilled });
+		ActionExecutor.get(ToggleTilled).execute(localPlayer, this.position, tilled);
 	}
 
 	@Bound
-	private showTerrainContextMenu() {
-		const screen = this.api.getVisibleScreen();
-		if (!screen) {
+	private changeTerrain(_: any, terrain: TerrainType) {
+		if (terrain === TileHelpers.getType(this.tile)) {
 			return;
 		}
 
-		const mouse = bindingManager.getMouse();
-
-		// create the options
-		Enums.values(TerrainType)
-			.map(terrain => tuple(TerrainType[terrain], {
-				translation: Translation.ofDescription(terrainDescriptions[terrain]!, SentenceCaseStyle.Title, false),
-				onActivate: this.changeTerrain(terrain),
-			}))
-			.collect(Collectors.toArray)
-			.sort(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))
-			.values()
-			// create the context menu from them
-			.collect(Collectors.passTo(ContextMenu.bind(null, this.api), PassStrategy.Splat))
-			.addAllDescribedOptions()
-			.setPosition(mouse.x, mouse.y)
-			.schedule(screen.setContextMenu);
-	}
-
-	private changeTerrain(terrain: TerrainType) {
-		return () => {
-			Actions.get("changeTerrain").execute({ position: this.position, object: terrain });
-			this.update(this.position, this.tile);
-		};
+		ActionExecutor.get(ChangeTerrain).execute(localPlayer, terrain, this.position);
+		this.update(this.position, this.tile);
 	}
 }

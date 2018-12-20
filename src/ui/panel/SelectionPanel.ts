@@ -1,3 +1,4 @@
+import ActionExecutor from "action/ActionExecutor";
 import { ICreature } from "creature/ICreature";
 import { EntityType } from "entity/IEntity";
 import Button, { ButtonEvent } from "newui/component/Button";
@@ -8,12 +9,12 @@ import { RangeRow } from "newui/component/RangeRow";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
 import { ITileEvent } from "tile/ITileEvent";
-import Arrays, { tuple } from "utilities/Arrays";
-import Collectors from "utilities/Collectors";
-import { pipe } from "utilities/IterableIterator";
+import Arrays from "utilities/Arrays";
+import Collectors from "utilities/iterable/Collectors";
+import { pipe, tuple } from "utilities/iterable/Generators";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
-import Actions from "../../Actions";
+import SelectionExecute from "../../action/SelectionExecute";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 
@@ -33,9 +34,7 @@ function getSelectionType(target: ICreature | INPC | ITileEvent) {
 }
 
 export default class SelectionPanel extends DebugToolsPanel {
-	private readonly dropdownMethod: Dropdown<string | number>;
 	private readonly rangeQuantity: RangeRow;
-	private readonly dropdownAction: Dropdown<string | number>;
 
 	private creatures = false;
 	private npcs = false;
@@ -49,7 +48,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 		new LabelledRow(this.api)
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.SelectionMethod)))
-			.append(this.dropdownMethod = new Dropdown(this.api)
+			.append(new Dropdown(this.api)
 				.setRefreshMethod(() => ({
 					defaultOption: DebugToolsTranslation.MethodAll,
 					options: [
@@ -88,7 +87,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 		new LabelledRow(this.api)
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.SelectionAction)))
-			.append(this.dropdownAction = new Dropdown(this.api)
+			.append(new Dropdown(this.api)
 				.on<[DebugToolsTranslation]>(DropdownEvent.Selection, (_, action) => this.action = action)
 				.setRefreshMethod(() => ({
 					defaultOption: DebugToolsTranslation.ActionRemove,
@@ -110,12 +109,13 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 	@Bound
 	public execute() {
-		const targets = pipe(
+		const targets = pipe<(false | (undefined | ICreature | INPC | ITileEvent)[])[]>(
 			this.creatures && game.creatures,
 			this.npcs && game.npcs,
-			this.tileEvents && game.tileEvents)
-			.flat()
-			.filter<undefined | boolean>(entity => !!entity)
+			this.tileEvents && game.tileEvents,
+		)
+			.flatMap(value => Array.isArray(value) ? value : value ? [value] : [])
+			.filter<undefined>(entity => !!entity)
 			.collect(Collectors.toArray);
 
 		if (!targets.length) return;
@@ -136,13 +136,8 @@ export default class SelectionPanel extends DebugToolsPanel {
 				break;
 		}
 
-		Actions.get("executeOnSelection").execute({
-			object: [
-				this.action,
-				targets.slice(0, quantity)
-					.map(target => tuple(getSelectionType(target), target.id)),
-			],
-		});
+		ActionExecutor.get(SelectionExecute).execute(localPlayer, this.action, targets.slice(0, quantity)
+			.map(target => tuple(getSelectionType(target), target.id)));
 	}
 
 	@Bound

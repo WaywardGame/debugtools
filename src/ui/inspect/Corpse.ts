@@ -1,15 +1,18 @@
+import ActionExecutor from "action/ActionExecutor";
 import { ICorpse } from "creature/corpse/ICorpse";
-import { CreatureType, SentenceCaseStyle } from "Enums";
+import { CreatureType } from "Enums";
+import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
-import { tuple } from "utilities/Arrays";
-import Collectors from "utilities/Collectors";
+import Collectors from "utilities/iterable/Collectors";
+import { tuple } from "utilities/iterable/Generators";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
-import Actions, { RemovalType } from "../../Actions";
+import Heal from "../../action/Heal";
+import Remove from "../../action/Remove";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
@@ -41,7 +44,7 @@ export default class CorpseInformation extends InspectInformationSection {
 	public getTabs(): TabInformation[] {
 		return this.corpses.entries()
 			.map(([i, corpse]) => tuple(i, () => translation(DebugToolsTranslation.CorpseName)
-				.get(game.getName(corpse, SentenceCaseStyle.Title, false))))
+				.get(corpseManager.getName(corpse, false).inContext(TextContext.Title))))
 			.collect(Collectors.toArray);
 	}
 
@@ -72,13 +75,13 @@ export default class CorpseInformation extends InspectInformationSection {
 
 	@Bound
 	private resurrect() {
-		Actions.get("heal").execute({ object: this.corpse!.id });
-		this.trigger("update");
+		ActionExecutor.get(Heal).execute(localPlayer, this.corpse!);
+		this.emit("update");
 	}
 
 	@Bound
 	private removeCorpse() {
-		Actions.get("remove").execute({ object: [RemovalType.Corpse, this.corpse!.id] });
-		this.trigger("update");
+		ActionExecutor.get(Remove).execute(localPlayer, this.corpse!);
+		this.emit("update");
 	}
 }

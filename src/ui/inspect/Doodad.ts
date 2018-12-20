@@ -1,17 +1,25 @@
+import ActionExecutor from "action/ActionExecutor";
+import Doodad from "doodad/doodads/Doodad";
 import { IDoodad } from "doodad/IDoodad";
-import { ItemQuality, ItemType, SentenceCaseStyle } from "Enums";
+import { GrowingStage, ItemQuality, ItemType } from "Enums";
+import { IContainer } from "item/IItem";
+import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
+import EnumContextMenu, { EnumSort } from "newui/component/EnumContextMenu";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
-import Actions from "../../Actions";
+import AddItemToInventory from "../../action/AddItemToInventory";
+import Clone from "../../action/Clone";
+import Remove from "../../action/Remove";
+import SetGrowingStage from "../../action/SetGrowingStage";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
-import AddItemToInventory, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
+import AddItemToInventoryComponent, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
 import { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
@@ -23,6 +31,7 @@ export default class DoodadInformation extends InspectInformationSection {
 	public readonly LOG: Log;
 
 	private doodad: IDoodad | undefined;
+	private readonly buttonGrowthStage: Button;
 
 	public constructor(gsapi: IGameScreenApi) {
 		super(gsapi);
@@ -37,10 +46,15 @@ export default class DoodadInformation extends InspectInformationSection {
 			.on(ButtonEvent.Activate, this.cloneDoodad)
 			.appendTo(this);
 
+		this.buttonGrowthStage = new Button(this.api)
+			.setText(translation(DebugToolsTranslation.ButtonSetGrowthStage))
+			.on(ButtonEvent.Activate, this.setGrowthStage)
+			.appendTo(this);
+
 		this.on(DebugToolsPanelEvent.SwitchTo, () => {
 			if (!this.doodad!.containedItems) return;
 
-			const addItemToInventory = AddItemToInventory.get(this.api).appendTo(this);
+			const addItemToInventory = AddItemToInventoryComponent.init(this.api).appendTo(this);
 			this.until(DebugToolsPanelEvent.SwitchAway)
 				.bind(addItemToInventory, AddItemToInventoryEvent.Execute, this.addItem);
 		});
@@ -49,7 +63,7 @@ export default class DoodadInformation extends InspectInformationSection {
 	public getTabs(): TabInformation[] {
 		return this.doodad ? [
 			[0, () => translation(DebugToolsTranslation.DoodadName)
-				.get(game.getName(this.doodad, SentenceCaseStyle.Title, false))],
+				.get(this.doodad!.getName(false).inContext(TextContext.Title))],
 		] : [];
 	}
 
@@ -58,6 +72,8 @@ export default class DoodadInformation extends InspectInformationSection {
 		this.doodad = tile.doodad;
 
 		if (!this.doodad) return;
+
+		this.buttonGrowthStage.toggle(this.doodad.getGrowingStage() !== undefined);
 
 		this.setShouldLog();
 	}
@@ -68,13 +84,12 @@ export default class DoodadInformation extends InspectInformationSection {
 
 	@Bound
 	private addItem(_: any, type: ItemType, quality: ItemQuality) {
-		Actions.get("addItemToInventory")
-			.execute({ doodad: this.doodad, object: [type, quality] });
+		ActionExecutor.get(AddItemToInventory).execute(localPlayer, this.doodad! as IContainer, type, quality);
 	}
 
 	@Bound
 	private removeDoodad() {
-		Actions.get("remove").execute({ doodad: this.doodad });
+		ActionExecutor.get(Remove).execute(localPlayer, this.doodad!);
 	}
 
 	@Bound
@@ -82,7 +97,20 @@ export default class DoodadInformation extends InspectInformationSection {
 		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
 		if (!teleportLocation) return;
 
-		Actions.get("clone")
-			.execute({ doodad: this.doodad, position: new Vector3(teleportLocation.x, teleportLocation.y, localPlayer.z) });
+		ActionExecutor.get(Clone).execute(localPlayer, this.doodad!, new Vector3(teleportLocation, localPlayer.z));
+	}
+
+	@Bound
+	private async setGrowthStage() {
+		const growthStage = await new EnumContextMenu(this.api, GrowingStage)
+			.setTranslator(stage => Doodad.getGrowingStageTranslation(stage, this.doodad!.description())!.inContext(TextContext.Title))
+			.setSort(EnumSort.Id)
+			.waitForChoice();
+
+		if (growthStage === undefined) {
+			return;
+		}
+
+		ActionExecutor.get(SetGrowingStage).execute(localPlayer, this.doodad!, growthStage);
 	}
 }

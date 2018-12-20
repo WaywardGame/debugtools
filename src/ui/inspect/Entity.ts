@@ -1,8 +1,7 @@
+import ActionExecutor from "action/ActionExecutor";
 import { ICreature } from "creature/ICreature";
-import IBaseEntity, { EntityEvent, IStatChangeInfo } from "entity/IBaseEntity";
-import { EntityType } from "entity/IEntity";
+import IEntity, { EntityEvent, EntityType, IStatChangeInfo } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
-import { SentenceCaseStyle } from "Enums";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { bindingManager } from "newui/BindingManager";
@@ -21,14 +20,18 @@ import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
-import { tuple } from "utilities/Arrays";
-import Collectors, { PassStrategy } from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
+import Collectors from "utilities/iterable/Collectors";
+import { tuple } from "utilities/iterable/Generators";
 import Log from "utilities/Log";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
-import Actions from "../../Actions";
+import Clone from "../../action/Clone";
+import Heal from "../../action/Heal";
+import Kill from "../../action/Kill";
+import SetStat from "../../action/SetStat";
+import TeleportEntity from "../../action/TeleportEntity";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
@@ -97,15 +100,15 @@ export default class EntityInformation extends InspectInformationSection {
 			.appendTo(this);
 
 		this.on(DebugToolsPanelEvent.SwitchTo, () => this.subsections
-			.forEach(subsection => subsection.trigger(DebugToolsPanelEvent.SwitchTo)));
+			.forEach(subsection => subsection.emit(DebugToolsPanelEvent.SwitchTo)));
 		this.on(DebugToolsPanelEvent.SwitchAway, () => this.subsections
-			.forEach(subsection => subsection.trigger(DebugToolsPanelEvent.SwitchAway)));
+			.forEach(subsection => subsection.emit(DebugToolsPanelEvent.SwitchAway)));
 	}
 
 	public getTabs() {
 		return this.entities.entries()
 			.map(([i, entity]) => tuple(i, () => translation(DebugToolsTranslation.EntityName)
-				.get(EntityType[entity.entityType], game.getName(entity, SentenceCaseStyle.Title))))
+				.get(EntityType[entity.entityType], entity.getName()/*.inContext(TextContext.Title)*/)))
 			.collect(Collectors.toArray);
 	}
 
@@ -130,7 +133,7 @@ export default class EntityInformation extends InspectInformationSection {
 		if (areArraysIdentical(entities, this.entities)) return;
 		this.entities = entities;
 
-		this.trigger("change");
+		this.emit("change");
 
 		if (!this.entities.length) return;
 
@@ -138,7 +141,7 @@ export default class EntityInformation extends InspectInformationSection {
 
 		for (const entity of this.entities) {
 			this.until([ComponentEvent.Remove, "change"])
-				.bind(entity as IBaseEntity, EntityEvent.StatChanged, this.onStatChange);
+				.bind(entity as IEntity, EntityEvent.StatChanged, this.onStatChange);
 		}
 	}
 
@@ -254,7 +257,7 @@ export default class EntityInformation extends InspectInformationSection {
 			.sort(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))
 			.values()
 			// create the context menu from them
-			.collect(Collectors.passTo(ContextMenu.bind(null, this.api), PassStrategy.Splat))
+			.collect<ContextMenu>(options => new ContextMenu(this.api, ...options))
 			.addAllDescribedOptions();
 	}
 
@@ -268,16 +271,15 @@ export default class EntityInformation extends InspectInformationSection {
 
 	@Bound
 	private teleport(location: IVector2 | IVector3) {
-		Actions.get("teleport")
-			.execute({ entity: this.entity, position: new Vector3(location.x, location.y, "z" in location ? location.z : this.entity!.z) });
+		ActionExecutor.get(TeleportEntity).execute(localPlayer, this.entity!, new Vector3(location, "z" in location ? location.z : this.entity!.z));
 
-		this.trigger("update");
+		this.emit("update");
 	}
 
 	@Bound
 	private kill() {
-		Actions.get("kill").execute({ entity: this.entity });
-		this.trigger("update");
+		ActionExecutor.get(Kill).execute(localPlayer, this.entity!);
+		this.emit("update");
 	}
 
 	@Bound
@@ -285,21 +287,20 @@ export default class EntityInformation extends InspectInformationSection {
 		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
 		if (!teleportLocation) return;
 
-		Actions.get("clone")
-			.execute({ entity: this.entity, position: new Vector3(teleportLocation.x, teleportLocation.y, localPlayer.z) });
+		ActionExecutor.get(Clone).execute(localPlayer, this.entity!, new Vector3(teleportLocation, localPlayer.z));
 	}
 
 	@Bound
 	private heal() {
-		Actions.get("heal").execute({ entity: this.entity });
-		this.trigger("update");
+		ActionExecutor.get(Heal).execute(localPlayer, this.entity!);
+		this.emit("update");
 	}
 
 	@Bound
 	private setStat(stat: Stat) {
 		return (_: any, value: number) => {
 			if (this.entity!.getStatValue(stat) === value) return;
-			Actions.get("setStat").execute({ entity: this.entity, object: [stat, value] });
+			ActionExecutor.get(SetStat).execute(localPlayer, this.entity!, stat, value);
 		};
 	}
 }

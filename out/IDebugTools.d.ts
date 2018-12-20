@@ -72,7 +72,7 @@ export declare enum DebugToolsTranslation {
     DialogTitleInspect = 63,
     InspectTileTitle = 64,
     InspectTerrain = 65,
-    ButtonChangeTerrain = 66,
+    LabelChangeTerrain = 66,
     ButtonToggleTilled = 67,
     EntityName = 68,
     ButtonKillEntity = 69,
@@ -105,14 +105,13 @@ export declare enum DebugToolsTranslation {
     TileEventName = 96,
     ItemName = 97,
     ButtonTogglePermissions = 98,
-    ActionResurrect = 99,
-    ActionClone = 100,
-    ActionTeleport = 101
+    ButtonSetGrowthStage = 99,
+    ActionResurrect = 100,
+    ActionClone = 101,
+    ActionTeleport = 102
 }
 export interface ISaveData {
     lastVersion: string;
-    lighting: boolean;
-    fog: boolean;
     zoomLevel?: number;
     playerData: {
         [key: string]: IPlayerData;
@@ -121,13 +120,15 @@ export interface ISaveData {
 export interface IPlayerData {
     weightBonus: number;
     invulnerable: boolean;
+    lighting: boolean;
+    fog: boolean;
     noclip: false | {
         moving: boolean;
         delay: number;
     };
     permissions?: boolean;
 }
-export interface ISaveDataGlobal {
+export interface IGlobalData {
     lastVersion: string;
 }
 export declare type ModRegistrationMainDialogPanel = (cls: typeof DebugToolsPanel) => DebugToolsDialogPanelClass;

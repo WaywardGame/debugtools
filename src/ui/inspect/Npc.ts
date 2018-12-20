@@ -1,11 +1,13 @@
+import ActionExecutor from "action/ActionExecutor";
 import { ICreature } from "creature/ICreature";
+import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
 import Button, { ButtonEvent } from "newui/component/Button";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
 import { IPlayer } from "player/IPlayer";
 import { Bound } from "utilities/Objects";
-import Actions from "../../Actions";
+import Remove from "../../action/Remove";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
@@ -22,12 +24,12 @@ export default class NpcInformation extends InspectEntityInformationSubsection {
 	}
 
 	public update(entity: ICreature | IPlayer | INPC) {
-		this.npc = entity.entityType === EntityType.NPC ? entity : undefined;
+		this.npc = Entity.is(entity, EntityType.NPC) ? entity : undefined;
 		this.toggle(!!this.npc);
 	}
 
 	@Bound
 	private removeNPC() {
-		Actions.get("remove").execute({ npc: this.npc });
+		ActionExecutor.get(Remove).execute(localPlayer, this.npc!);
 	}
 }

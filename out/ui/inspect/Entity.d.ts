@@ -18,11 +18,11 @@ export default class EntityInformation extends InspectInformationSection {
     private entities;
     private entity;
     constructor(gsapi: IGameScreenApi);
-    getTabs(): [number, () => import("utilities/string/Interpolator").IStringSection[]][];
+    getTabs(): [number, () => import("../../../mod-reference/definitions/utilities/string/Interpolator").IStringSection[]][];
     setTab(entity: number): this;
     update(position: IVector2, tile: ITile): void;
     getIndex(entity: ICreature | INPC | IPlayer): number;
-    getEntity(index: number): ICreature | INPC | IPlayer;
+    getEntity(index: number): import("../../../mod-reference/definitions/entity/IEntity").EntityPlayerCreatureNpc;
     logUpdate(): void;
     private initializeStats;
     private onStatChange;

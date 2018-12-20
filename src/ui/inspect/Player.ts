@@ -1,7 +1,9 @@
+import ActionExecutor from "action/ActionExecutor";
 import { ICreature } from "creature/ICreature";
+import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
 import { SkillType } from "Enums";
-import { UiTranslation } from "language/ILanguage";
+import UiTranslation from "language/dictionary/UiTranslation";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { BlockRow } from "newui/component/BlockRow";
@@ -16,11 +18,15 @@ import Text from "newui/component/Text";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { INPC } from "npc/INPC";
 import IPlayer from "player/IPlayer";
-import { tuple } from "utilities/Arrays";
-import Collectors from "utilities/Collectors";
 import Enums from "utilities/enum/Enums";
+import Collectors from "utilities/iterable/Collectors";
+import { tuple } from "utilities/iterable/Generators";
 import { Bound } from "utilities/Objects";
-import Actions from "../../Actions";
+import SetSkill from "../../action/SetSkill";
+import SetWeightBonus from "../../action/SetWeightBonus";
+import ToggleInvulnerable from "../../action/ToggleInvulnerable";
+import ToggleNoClip from "../../action/ToggleNoClip";
+import TogglePermissions from "../../action/TogglePermissions";
 import DebugTools, { DebugToolsEvent } from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, translation } from "../../IDebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
@@ -105,12 +111,12 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	public update(entity: ICreature | INPC | IPlayer) {
 		if (this.player === entity) return;
 
-		this.player = entity.entityType === EntityType.Player ? entity : undefined;
+		this.player = Entity.is(entity, EntityType.Player) ? entity : undefined;
 		this.toggle(!!this.player);
 
 		if (!this.player) return;
 
-		this.trigger("change");
+		this.emit("change");
 
 		this.refresh();
 
@@ -140,35 +146,35 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 	@Bound
 	private setSkill(_: any, value: number) {
-		Actions.get("setSkill").execute({ player: this.player, object: [this.skill!, value] });
+		ActionExecutor.get(SetSkill).execute(localPlayer, this.player!, this.skill!, value);
 	}
 
 	@Bound
 	private toggleInvulnerable(_: any, invulnerable: boolean) {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "invulnerable") === invulnerable) return;
 
-		Actions.get("toggleInvulnerable").execute({ player: this.player, object: invulnerable });
+		ActionExecutor.get(ToggleInvulnerable).execute(localPlayer, this.player!, invulnerable);
 	}
 
 	@Bound
 	private toggleNoClip(_: any, noclip: boolean) {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "noclip") === noclip) return;
 
-		Actions.get("toggleNoclip").execute({ player: this.player, object: noclip });
+		ActionExecutor.get(ToggleNoClip).execute(localPlayer, this.player!, noclip);
 	}
 
 	@Bound
 	private togglePermissions(_: any, permissions: boolean) {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "permissions") === permissions) return;
 
-		Actions.get("togglePermissions").execute({ player: this.player, object: permissions });
+		ActionExecutor.get(TogglePermissions).execute(localPlayer, this.player!, permissions);
 	}
 
 	@Bound
 	private setWeightBonus(_: any, weightBonus: number) {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "weightBonus") === weightBonus) return;
 
-		Actions.get("setWeightBonus").execute({ player: this.player, object: weightBonus });
+		ActionExecutor.get(SetWeightBonus).execute(localPlayer, this.player!, weightBonus);
 	}
 
 	@Bound

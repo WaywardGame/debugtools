@@ -1,3 +1,4 @@
+import ActionExecutor from "action/ActionExecutor";
 import { Bindable, CreatureType, DoodadType, NPCType, SpriteBatchLayer, TerrainType } from "Enums";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
@@ -16,7 +17,7 @@ import { TileEventType } from "tile/ITileEvent";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
-import Actions from "../../Actions";
+import Paint from "../../action/Paint";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Overlays from "../../overlay/Overlays";
@@ -241,8 +242,8 @@ export default class PaintPanel extends DebugToolsPanel {
 
 	@Bound
 	private onSwitchTo() {
-		this.parent.classes.add("debug-tools-paint-panel");
-		this.paintRow.appendTo(this.parent.parent);
+		this.getParent()!.classes.add("debug-tools-paint-panel");
+		this.paintRow.appendTo(this.getParent()!.getParent()!);
 
 		hookManager.register(this, "DebugToolsDialog:PaintPanel")
 			.until(DebugToolsPanelEvent.SwitchAway);
@@ -254,8 +255,9 @@ export default class PaintPanel extends DebugToolsPanel {
 
 		this.paintRow.store();
 
-		if (this.parent) {
-			this.parent.classes.remove("debug-tools-paint-panel");
+		const parent = this.getParent();
+		if (parent) {
+			parent.classes.remove("debug-tools-paint-panel");
 		}
 	}
 
@@ -284,7 +286,7 @@ export default class PaintPanel extends DebugToolsPanel {
 			Object.assign(paintData, paintSection.getTilePaintData());
 		}
 
-		Actions.get("paint").execute({ object: [this.paintTiles, paintData] });
+		ActionExecutor.get(Paint).execute(localPlayer, [...this.paintTiles], paintData);
 
 		this.clearPaint();
 	}

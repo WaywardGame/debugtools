@@ -1,8 +1,13 @@
+import ActionExecutor from "action/ActionExecutor";
+import { ActionType } from "action/IAction";
 import { ICreature, IDamageInfo } from "creature/ICreature";
-import IBaseHumanEntity from "entity/IBaseHumanEntity";
+import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
-import { ActionType, Bindable, Delay, Direction, MoveType, OverlayType, SpriteBatchLayer } from "Enums";
-import { Dictionary, InterruptChoice } from "language/ILanguage";
+import IHuman from "entity/IHuman";
+import { Bindable, Delay, Direction, MoveType, OverlayType, SpriteBatchLayer } from "Enums";
+import { Dictionary } from "language/Dictionaries";
+import InterruptChoice from "language/dictionary/InterruptChoice";
+import Message from "language/dictionary/Message";
 import { HookMethod } from "mod/IHookHost";
 import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
@@ -20,10 +25,32 @@ import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
+import AddItemToInventory from "./action/AddItemToInventory";
+import ChangeTerrain from "./action/ChangeTerrain";
+import Clone from "./action/Clone";
+import Heal from "./action/Heal";
+import Kill from "./action/Kill";
+import Paint from "./action/Paint";
+import PlaceTemplate from "./action/PlaceTemplate";
+import Remove from "./action/Remove";
+import SelectionExecute from "./action/SelectionExecute";
+import SetGrowingStage from "./action/SetGrowingStage";
+import SetSkill from "./action/SetSkill";
+import SetStat from "./action/SetStat";
+import SetTamed from "./action/SetTamed";
+import SetTime from "./action/SetTime";
+import SetWeightBonus from "./action/SetWeightBonus";
+import TeleportEntity from "./action/TeleportEntity";
+import ToggleInvulnerable from "./action/ToggleInvulnerable";
+import ToggleNoClip from "./action/ToggleNoClip";
+import TogglePermissions from "./action/TogglePermissions";
+import ToggleTilled from "./action/ToggleTilled";
+import UnlockRecipes from "./action/UnlockRecipes";
+import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
 import Actions from "./Actions";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, ISaveData, ISaveDataGlobal, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
-import AddItemToInventory from "./ui/component/AddItemToInventory";
+import AddItemToInventoryComponent from "./ui/component/AddItemToInventory";
 import MainDialog from "./ui/DebugToolsDialog";
 import InspectDialog from "./ui/InspectDialog";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
@@ -139,6 +166,9 @@ export default class DebugTools extends Mod {
 	@Register.dictionary("DebugTools", DebugToolsTranslation)
 	public readonly dictionary: Dictionary;
 
+	@Register.message("FailureTileBlocked")
+	public readonly messageFailureTileBlocked: Message;
+
 	@Register.messageSource("DebugTools")
 	public readonly source: Source;
 
@@ -146,6 +176,76 @@ export default class DebugTools extends Mod {
 	public readonly choiceSailToCivilization: InterruptChoice;
 	@Register.interruptChoice("TravelAway")
 	public readonly choiceTravelAway: InterruptChoice;
+
+	////////////////////////////////////
+	// Actions
+	//
+
+	@Register.action("PlaceTemplate", PlaceTemplate)
+	public readonly actionPlaceTemplate: ActionType;
+
+	@Register.action("SelectionExecute", SelectionExecute)
+	public readonly actionSelectionExecute: ActionType;
+
+	@Register.action("TeleportEntity", TeleportEntity)
+	public readonly actionTeleportEntity: ActionType;
+
+	@Register.action("Kill", Kill)
+	public readonly actionKill: ActionType;
+
+	@Register.action("Clone", Clone)
+	public readonly actionClone: ActionType;
+
+	@Register.action("SetTime", SetTime)
+	public readonly actionSetTime: ActionType;
+
+	@Register.action("Heal", Heal)
+	public readonly actionHeal: ActionType;
+
+	@Register.action("SetStat", SetStat)
+	public readonly actionSetStat: ActionType;
+
+	@Register.action("SetTamed", SetTamed)
+	public readonly actionSetTamed: ActionType;
+
+	@Register.action("Remove", Remove)
+	public readonly actionRemove: ActionType;
+
+	@Register.action("SetWeightBonus", SetWeightBonus)
+	public readonly actionSetWeightBonus: ActionType;
+
+	@Register.action("ChangeTerrain", ChangeTerrain)
+	public readonly actionChangeTerrain: ActionType;
+
+	@Register.action("ToggleTilled", ToggleTilled)
+	public readonly actionToggleTilled: ActionType;
+
+	@Register.action("UpdateStatsAndAttributes", UpdateStatsAndAttributes)
+	public readonly actionUpdateStatsAndAttributes: ActionType;
+
+	@Register.action("AddItemToInventory", AddItemToInventory)
+	public readonly actionAddItemToInventory: ActionType;
+
+	@Register.action("Paint", Paint)
+	public readonly actionPaint: ActionType;
+
+	@Register.action("UnlockRecipes", UnlockRecipes)
+	public readonly actionUnlockRecipes: ActionType;
+
+	@Register.action("ToggleInvulnerable", ToggleInvulnerable)
+	public readonly actionToggleInvulnerable: ActionType;
+
+	@Register.action("SetSkill", SetSkill)
+	public readonly actionSetSkill: ActionType;
+
+	@Register.action("SetGrowingStage", SetGrowingStage)
+	public readonly actionSetGrowingStage: ActionType;
+
+	@Register.action("ToggleNoclip", ToggleNoClip)
+	public readonly actionToggleNoclip: ActionType;
+
+	@Register.action("TogglePermissions", TogglePermissions)
+	public readonly actionTogglePermissions: ActionType;
 
 	////////////////////////////////////
 	// UI
@@ -180,7 +280,7 @@ export default class DebugTools extends Mod {
 	@Mod.saveData<DebugTools>(DEBUG_TOOLS_ID)
 	public data: ISaveData;
 	@Mod.globalData<DebugTools>(DEBUG_TOOLS_ID)
-	public globalData: ISaveDataGlobal;
+	public globalData: IGlobalData;
 
 	private cameraState = CameraState.Locked;
 
@@ -204,6 +304,8 @@ export default class DebugTools extends Mod {
 			invulnerable: false,
 			noclip: false,
 			permissions: players[player.id].isServer(),
+			fog: true,
+			lighting: true,
 		};
 
 		return this.data.playerData[player.identifier][key];
@@ -222,7 +324,7 @@ export default class DebugTools extends Mod {
 	public setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]) {
 		this.getPlayerData(player, key);
 		this.data.playerData[player.identifier][key] = value;
-		this.trigger(DebugToolsEvent.PlayerDataChange, player.id, key, value);
+		this.emit(DebugToolsEvent.PlayerDataChange, player.id, key, value);
 
 		if (!this.hasPermission()) {
 			const gameScreen = newui.getScreen<GameScreen>(ScreenId.Game)!;
@@ -238,7 +340,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
 	 */
-	public initializeGlobalData(data?: ISaveDataGlobal) {
+	public initializeGlobalData(data?: IGlobalData) {
 		const version = new Version(modManager.getVersion(this.getIndex()));
 		const lastLoadVersion = new Version((data && data.lastVersion) || "0.0.0");
 
@@ -259,9 +361,7 @@ export default class DebugTools extends Mod {
 		const upgrade = !data || lastLoadVersion.isOlderThan(version);
 
 		return !upgrade ? data : {
-			lighting: true,
 			playerData: {},
-			fog: true,
 			lastVersion: version.getString(),
 		};
 	}
@@ -281,7 +381,7 @@ export default class DebugTools extends Mod {
 	 */
 	public onUnload() {
 		hookManager.deregister(this.selector);
-		AddItemToInventory.get(newui).releaseAndRemove();
+		AddItemToInventoryComponent.init(newui).releaseAndRemove();
 	}
 
 	/**
@@ -299,7 +399,7 @@ export default class DebugTools extends Mod {
 	 * Updates the field of view based on whether it's disabled in the mod.
 	 */
 	public updateFog() {
-		fieldOfView.disabled = !this.data.fog;
+		fieldOfView.disabled = this.getPlayerData(localPlayer, "fog") === false;
 		game.updateView(true);
 	}
 
@@ -332,7 +432,7 @@ export default class DebugTools extends Mod {
 			.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
 			.setInspection(what);
 
-		this.trigger(DebugToolsEvent.Inspect);
+		this.emit(DebugToolsEvent.Inspect);
 	}
 
 	/**
@@ -368,7 +468,7 @@ export default class DebugTools extends Mod {
 	 */
 	@HookMethod
 	public onGameScreenVisible() {
-		AddItemToInventory.get(newui);
+		AddItemToInventoryComponent.init(newui);
 	}
 
 	/**
@@ -432,7 +532,7 @@ export default class DebugTools extends Mod {
 	 */
 	@HookMethod
 	public canCreatureAttack(creature: ICreature, enemy: IPlayer | ICreature): boolean | undefined {
-		if (enemy.entityType === EntityType.Player) {
+		if (Entity.is(enemy, EntityType.Player)) {
 			if (this.getPlayerData(enemy, "invulnerable")) return false;
 			if (this.getPlayerData(enemy, "noclip")) return false;
 		}
@@ -453,7 +553,7 @@ export default class DebugTools extends Mod {
 		const noclip = this.getPlayerData(player, "noclip");
 		if (!noclip) return undefined;
 
-		player.moveType = MoveType.Flying;
+		player.setMoveType(MoveType.Flying);
 
 		if (noclip.moving) {
 			noclip.delay = Math.max(noclip.delay - 1, 1);
@@ -463,8 +563,6 @@ export default class DebugTools extends Mod {
 		}
 
 		player.addDelay(noclip.delay, true);
-
-		actionManager.execute(player, ActionType.UpdateDirection, { direction });
 
 		player.isMoving = true;
 		player.isMovingClientside = true;
@@ -491,6 +589,14 @@ export default class DebugTools extends Mod {
 	}
 
 	/**
+	 * Used to prevent the weight movement penalty while noclipping.
+	 */
+	@HookMethod
+	public getPlayerWeightMovementPenalty(player: IPlayer): number | undefined {
+		return this.getPlayerData(player, "noclip") ? 0 : undefined;
+	}
+
+	/**
 	 * If the player is "noclipping", we put them in `SpriteBatchLayer.CreatureFlying`.
 	 * Otherwise we return `undefined` and let the game or other mods handle it.
 	 */
@@ -504,8 +610,8 @@ export default class DebugTools extends Mod {
 	 * Otherwise we return `undefined` and let the game or other mods handle it. 
 	 */
 	@HookMethod
-	public isHumanSwimming(human: IBaseHumanEntity, isSwimming: boolean): boolean | undefined {
-		if (human.entityType === EntityType.NPC) return undefined;
+	public isHumanSwimming(human: IHuman, isSwimming: boolean): boolean | undefined {
+		if (Entity.is(human, EntityType.NPC)) return undefined;
 
 		return this.getPlayerData(human as IPlayer, "noclip") ? false : undefined;
 	}
@@ -514,8 +620,8 @@ export default class DebugTools extends Mod {
 	 * We add the weight bonus from the player's save data to the existing strength.
 	 */
 	@HookMethod
-	public getPlayerStrength(strength: number, player: IPlayer) {
-		return strength + this.getPlayerData(player, "weightBonus");
+	public getPlayerMaxWeight(weight: number, player: IPlayer) {
+		return weight + this.getPlayerData(player, "weightBonus");
 	}
 
 	// tslint:disable cyclomatic-complexity
@@ -557,21 +663,17 @@ export default class DebugTools extends Mod {
 		}
 
 		if (api.wasPressed(this.bindableHealLocalPlayer) && !bindPressed) {
-			Actions.get("heal").execute({ entity: localPlayer });
+			ActionExecutor.get(Heal).execute(localPlayer, localPlayer);
 			bindPressed = this.bindableHealLocalPlayer;
 		}
 
 		if (api.wasPressed(this.bindableTeleportLocalPlayer) && !bindPressed) {
-			Actions.get("teleport").execute({
-				entity: localPlayer,
-				position: { ...renderer.screenToTile(api.mouseX, api.mouseY).raw(), z: localPlayer.z },
-			});
+			ActionExecutor.get(TeleportEntity).execute(localPlayer, localPlayer, { ...renderer.screenToTile(api.mouseX, api.mouseY).raw(), z: localPlayer.z });
 			bindPressed = this.bindableTeleportLocalPlayer;
 		}
 
 		if (api.wasPressed(this.bindableToggleNoClipOnLocalPlayer) && !bindPressed) {
-			Actions.get("toggleNoclip")
-				.execute({ player: localPlayer, object: !this.getPlayerData(localPlayer, "noclip") });
+			ActionExecutor.get(ToggleNoClip).execute(localPlayer, localPlayer, !this.getPlayerData(localPlayer, "noclip"));
 			bindPressed = this.bindableToggleNoClipOnLocalPlayer;
 		}
 
@@ -585,7 +687,7 @@ export default class DebugTools extends Mod {
 	 */
 	@HookMethod
 	public getAmbientColor(colors: [number, number, number]) {
-		if (!this.data.lighting) {
+		if (this.getPlayerData(localPlayer, "lighting") === false) {
 			return Vector3.ONE.xyz;
 		}
 
@@ -597,7 +699,7 @@ export default class DebugTools extends Mod {
 	 */
 	@HookMethod
 	public getAmbientLightLevel(ambientLight: number, z: number): number | undefined {
-		if (!this.data.lighting) {
+		if (this.getPlayerData(localPlayer, "lighting") === false) {
 			return 1;
 		}
 
@@ -609,7 +711,7 @@ export default class DebugTools extends Mod {
 	 */
 	@HookMethod
 	public getTileLightLevel(tile: ITile, x: number, y: number, z: number): number | undefined {
-		if (!this.data.lighting) {
+		if (this.getPlayerData(localPlayer, "lighting") === false) {
 			return 0;
 		}
 

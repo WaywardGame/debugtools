@@ -1,12 +1,13 @@
+import Translation from "language/Translation";
 import { IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import Component from "newui/component/Component";
 import { ComponentEvent } from "newui/component/IComponent";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { tuple } from "utilities/Arrays";
 import { sleep } from "utilities/Async";
-import Collectors from "utilities/Collectors";
+import Collectors from "utilities/iterable/Collectors";
+import { tuple } from "utilities/iterable/Generators";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import DebugToolsPanel, { DebugToolsPanelEvent } from "./component/DebugToolsPanel";
@@ -74,7 +75,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 		this.on(ComponentEvent.WillRemove, () => {
 			this.storePanels = false;
 			for (const subpanel of this.subpanels) {
-				subpanel.trigger(DebugToolsPanelEvent.SwitchAway);
+				subpanel.emit(DebugToolsPanelEvent.SwitchAway);
 				subpanel.remove();
 			}
 		});
@@ -84,7 +85,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 		}
 	}
 
-	public getName() {
+	public getName(): Translation {
 		return translation(DebugToolsTranslation.DialogTitleMain);
 	}
 
@@ -104,7 +105,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 				.map(cls => new cls(this.gsapi)
 					.on(ComponentEvent.WillRemove, panel => {
 						if (panel.isVisible()) {
-							panel.trigger(DebugToolsPanelEvent.SwitchAway);
+							panel.emit(DebugToolsPanelEvent.SwitchAway);
 						}
 
 						if (this.storePanels) {
@@ -134,7 +135,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 	private onShowSubpanel(showPanel: DebugToolsPanel) {
 		return (component: Component) => {
 			this.activePanel = showPanel.appendTo(component);
-			this.activePanel.trigger(DebugToolsPanelEvent.SwitchTo);
+			this.activePanel.emit(DebugToolsPanelEvent.SwitchTo);
 		};
 	}
 

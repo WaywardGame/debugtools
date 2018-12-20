@@ -8,6 +8,7 @@ export default class DoodadInformation extends InspectInformationSection {
     readonly DEBUG_TOOLS: DebugTools;
     readonly LOG: Log;
     private doodad;
+    private readonly buttonGrowthStage;
     constructor(gsapi: IGameScreenApi);
     getTabs(): TabInformation[];
     update(position: IVector2, tile: ITile): void;
@@ -15,4 +16,5 @@ export default class DoodadInformation extends InspectInformationSection {
     private addItem;
     private removeDoodad;
     private cloneDoodad;
+    private setGrowthStage;
 }

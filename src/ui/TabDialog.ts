@@ -4,6 +4,7 @@ import { TranslationGenerator } from "newui/component/IComponent";
 import Dialog, { DialogEvent } from "newui/screen/screens/game/component/Dialog";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import Collectors from "utilities/iterable/Collectors";
 import { Bound } from "utilities/Objects";
 
 export type SubpanelInformation = [string | number, TranslationGenerator, (component: Component) => any, ((button: Button) => any)?, Button?];
@@ -83,7 +84,7 @@ export default abstract class TabDialog extends Dialog {
 	}
 
 	private showFirstSubpanel() {
-		const [subpanelId, , , , button] = this.subpanelInformations.first();
+		const [subpanelId, , , , button] = this.subpanelInformations.collect(Collectors.first())!;
 		this.showSubPanel(subpanelId)(button!);
 	}
 
@@ -94,7 +95,7 @@ export default abstract class TabDialog extends Dialog {
 
 		subpanel[2](this.panelWrapper.dump());
 
-		this.trigger("change-subpanel");
+		this.emit("change-subpanel");
 	}
 
 	private setActiveButton(button: Button) {
