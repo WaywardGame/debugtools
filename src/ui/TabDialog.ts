@@ -4,6 +4,7 @@ import { TranslationGenerator } from "newui/component/IComponent";
 import Dialog, { DialogEvent } from "newui/screen/screens/game/component/Dialog";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import { sleep } from "utilities/Async";
 import Collectors from "utilities/iterable/Collectors";
 import { Bound } from "utilities/Objects";
 
@@ -36,6 +37,7 @@ export default abstract class TabDialog extends Dialog {
 		this.showFirstSubpanel();
 
 		this.on(DialogEvent.Resize, this.onResize);
+		sleep(10).then(this.onResize);
 	}
 
 	protected abstract getSubpanels(): SubpanelInformation[];
