@@ -341,13 +341,8 @@ export default class DebugTools extends Mod {
 	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
 	 */
 	public initializeGlobalData(data?: IGlobalData) {
-		const version = new Version(modManager.getVersion(this.getIndex()));
-		const lastLoadVersion = new Version((data && data.lastVersion) || "0.0.0");
-
-		const upgrade = !data || lastLoadVersion.isOlderThan(version);
-
-		return !upgrade ? data : {
-			lastVersion: version.getString(),
+		return !this.needsUpgrade(data) ? data : {
+			lastVersion: modManager.getVersion(this.getIndex()),
 		};
 	}
 
@@ -355,14 +350,9 @@ export default class DebugTools extends Mod {
 	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
 	 */
 	public initializeSaveData(data?: ISaveData) {
-		const version = new Version(modManager.getVersion(this.getIndex()));
-		const lastLoadVersion = new Version((data && data.lastVersion) || "0.0.0");
-
-		const upgrade = !data || lastLoadVersion.isOlderThan(version);
-
-		return !upgrade ? data : {
+		return !this.needsUpgrade(data) ? data : {
 			playerData: {},
-			lastVersion: version.getString(),
+			lastVersion: modManager.getVersion(this.getIndex()),
 		};
 	}
 
@@ -716,5 +706,23 @@ export default class DebugTools extends Mod {
 		}
 
 		return undefined;
+	}
+
+	private needsUpgrade(data?: { lastVersion?: string }) {
+		if (!data) {
+			return true;
+		}
+
+		const versionString = modManager.getVersion(this.getIndex());
+		const lastLoadVersionString = (data && data.lastVersion) || "0.0.0";
+
+		if (versionString === lastLoadVersionString) {
+			return false;
+		}
+
+		const version = new Version(versionString);
+		const lastLoadVersion = new Version(lastLoadVersionString);
+
+		return lastLoadVersion.isOlderThan(version);
 	}
 }
