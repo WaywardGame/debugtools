@@ -299,16 +299,20 @@ export default class DebugTools extends Mod {
 	 * Note: If the player data doesn't yet exist, it will be created.
 	 */
 	public getPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K): IPlayerData[K] {
-		this.data.playerData[player.identifier] = this.data.playerData[player.identifier] || {
+		const playerData = this.data.playerData;
+		const data = playerData[player.identifier];
+		if (data) {
+			return data[key];
+		}
+
+		return (playerData[player.identifier] = {
 			weightBonus: 0,
 			invulnerable: false,
 			noclip: false,
 			permissions: players[player.id].isServer(),
 			fog: true,
 			lighting: true,
-		};
-
-		return this.data.playerData[player.identifier][key];
+		})[key];
 	}
 
 	/**
@@ -322,7 +326,7 @@ export default class DebugTools extends Mod {
 	 * Note: Emits `DebugToolsEvent.PlayerDataChange` with the id of the player, the key of the changing data, and the new value.
 	 */
 	public setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]) {
-		this.getPlayerData(player, key);
+		this.getPlayerData(player, key); // initializes it if it doesn't exist
 		this.data.playerData[player.identifier][key] = value;
 		this.emit(DebugToolsEvent.PlayerDataChange, player.id, key, value);
 
