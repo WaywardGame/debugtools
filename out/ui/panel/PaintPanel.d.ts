@@ -39,8 +39,8 @@ export interface IPaintSection extends Component {
 export default class PaintPanel extends DebugToolsPanel {
     readonly DEBUG_TOOLS: DebugTools;
     private readonly paintSections;
-    private paintButton;
-    private paintRow;
+    private readonly paintButton;
+    private readonly paintRow;
     private painting;
     private readonly paintTiles;
     private lastPaintPosition?;

@@ -1,5 +1,6 @@
 import ActionExecutor from "action/ActionExecutor";
 import { Bindable, CreatureType, DoodadType, NPCType, SpriteBatchLayer, TerrainType } from "Enums";
+import { RenderSource } from "game/IGame";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
@@ -78,8 +79,8 @@ export default class PaintPanel extends DebugToolsPanel {
 	public readonly DEBUG_TOOLS: DebugTools;
 
 	private readonly paintSections: IPaintSection[] = [];
-	private paintButton: CheckButton;
-	private paintRow: Component;
+	private readonly paintButton: CheckButton;
+	private readonly paintRow: Component;
 
 	private painting = false;
 	private readonly paintTiles: number[] = [];
@@ -119,7 +120,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		this.on(DebugToolsPanelEvent.SwitchAway, this.onSwitchAway);
 	}
 
-	public getTranslation() {
+	@Override public getTranslation() {
 		return DebugToolsTranslation.PanelPaint;
 	}
 
@@ -142,7 +143,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	}
 
 	// tslint:disable cyclomatic-complexity
-	@HookMethod(HookPriority.High)
+	@Override @HookMethod(HookPriority.High)
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
 
 		if (api.wasPressed(Bindable.MenuContextMenu) && !bindPressed) {
@@ -178,7 +179,7 @@ export default class PaintPanel extends DebugToolsPanel {
 				this.lastPaintPosition = tilePosition;
 
 				this.updateOverlayBatch();
-				game.updateView(false);
+				game.updateView(RenderSource.Mod, false);
 
 				bindPressed = this.DEBUG_TOOLS.bindablePaint;
 			}
@@ -207,7 +208,7 @@ export default class PaintPanel extends DebugToolsPanel {
 				this.lastPaintPosition = tilePosition;
 
 				this.updateOverlayBatch();
-				game.updateView(false);
+				game.updateView(RenderSource.Mod, false);
 
 				bindPressed = this.DEBUG_TOOLS.bindableErasePaint;
 			}
@@ -302,6 +303,6 @@ export default class PaintPanel extends DebugToolsPanel {
 		this.paintTiles.splice(0, Infinity);
 
 		this.updateOverlayBatch();
-		game.updateView(false);
+		game.updateView(RenderSource.Mod, false);
 	}
 }
