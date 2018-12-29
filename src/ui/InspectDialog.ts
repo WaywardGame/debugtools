@@ -1,6 +1,7 @@
 import { ICreature } from "creature/ICreature";
 import IEntity from "entity/IEntity";
 import { Bindable, PlayerState } from "Enums";
+import { RenderSource } from "game/IGame";
 import Translation from "language/Translation";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
@@ -301,7 +302,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 			red: 0,
 			blue: 0,
 		}, Overlays.isSelectedTarget);
-		game.updateView(false);
+		game.updateView(RenderSource.Mod, false);
 	}
 
 	/**
@@ -370,7 +371,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 			delete this.inspectingTile;
 		}
 
-		game.updateView(false);
+		game.updateView(RenderSource.Mod, false);
 
 		this.storePanels = false;
 		for (const infoSection of this.infoSections) {

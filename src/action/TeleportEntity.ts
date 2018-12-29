@@ -55,5 +55,5 @@ export default new Action(ActionArgument.Entity, ActionArgument.Vector3)
 			newui.getScreen<GameScreen>(ScreenId.Game)!.movementHandler.walkToTileHandler.reset();
 		}
 
-		game.updateView(true);
+		action.setUpdateView(true);
 	});

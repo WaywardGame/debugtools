@@ -1,4 +1,5 @@
 import { Bindable } from "Enums";
+import { RenderSource } from "game/IGame";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
@@ -89,7 +90,7 @@ export default class SelectLocation implements IHookHost {
 				this.selectTileHeld = true;
 			}
 
-			game.updateView(false);
+			game.updateView(RenderSource.Mod, false);
 		}
 
 		if (api.wasReleased(this.bindableSelectLocation) && this.selectTileHeld) {

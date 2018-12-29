@@ -8,6 +8,5 @@ export default new Action(ActionArgument.Number)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, time) => {
 		game.time.setTime(time);
-		game.updateRender = true;
-		fieldOfView.compute();
+		action.setUpdateView(true);
 	});

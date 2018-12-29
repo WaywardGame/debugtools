@@ -1,4 +1,5 @@
 import { Bindable } from "Enums";
+import { RenderSource } from "game/IGame";
 import Register from "mod/ModRegistry";
 import { BindCatcherApi, KeyModifier } from "newui/BindingManager";
 import Vector2 from "utilities/math/Vector2";
@@ -70,7 +71,7 @@ export default class UnlockedCameraMovementHandler {
 			this.position.add(new Vector2(this.transition).subtract(this.position).multiply(this.homingVelocity));
 		}
 
-		game.updateView(false);
+		game.updateView(RenderSource.Mod, false);
 
 		return bindPressed;
 	}

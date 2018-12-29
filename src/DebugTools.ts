@@ -5,6 +5,7 @@ import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
 import IHuman from "entity/IHuman";
 import { Bindable, Delay, Direction, MoveType, OverlayType, SpriteBatchLayer } from "Enums";
+import { RenderSource } from "game/IGame";
 import { Dictionary } from "language/Dictionaries";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Message from "language/dictionary/Message";
@@ -394,7 +395,7 @@ export default class DebugTools extends Mod {
 	 */
 	public updateFog() {
 		fieldOfView.disabled = this.getPlayerData(localPlayer, "fog") === false;
-		game.updateView(true);
+		game.updateView(RenderSource.Mod, true);
 	}
 
 	/**

@@ -1,5 +1,6 @@
 import ActionExecutor from "action/ActionExecutor";
 import { Bindable } from "Enums";
+import { RenderSource } from "game/IGame";
 import Translation from "language/Translation";
 import { ITemplateOptions, manipulateTemplates } from "mapgen/MapGenHelpers";
 import { HookMethod } from "mod/IHookHost";
@@ -113,7 +114,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 		this.on(DebugToolsPanelEvent.SwitchAway, this.onSwitchAway);
 	}
 
-	public getTranslation() {
+	@Override public getTranslation() {
 		return DebugToolsTranslation.PanelTemplates;
 	}
 
@@ -125,7 +126,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 	}
 
 	// tslint:disable cyclomatic-complexity
-	@HookMethod
+	@Override @HookMethod
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
 		const wasPlacePressed = api.wasPressed(this.DEBUG_TOOLS.selector.bindableSelectLocation) && this.gsapi.isMouseWithin();
 		const wasCancelPressed = api.wasPressed(this.DEBUG_TOOLS.selector.bindableCancelSelectLocation) && this.gsapi.isMouseWithin();
@@ -165,7 +166,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 					}
 				}
 
-				game.updateView(false);
+				game.updateView(RenderSource.Mod, false);
 			}
 		}
 
@@ -185,7 +186,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 	}
 
 	private templateHasTile(templates: [string[], string[]?], x: number, y: number) {
-		return templates[0][y][x] !== " " || (templates[1] && templates[1]![y][x] !== " ");
+		return templates[0][y][x] !== " " || (templates[1] && templates[1][y][x] !== " ");
 	}
 
 	private getTemplateOptions(): ITemplateOptions {
@@ -230,6 +231,6 @@ export default class TemplatePanel extends DebugToolsPanel {
 
 		this.previewTiles.splice(0, Infinity);
 
-		if (!this.place.checked) game.updateView(false);
+		if (!this.place.checked) game.updateView(RenderSource.Mod, false);
 	}
 }

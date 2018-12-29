@@ -1,4 +1,5 @@
 import ActionExecutor from "action/ActionExecutor";
+import { RenderSource } from "game/IGame";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
@@ -109,7 +110,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 	private toggleLighting(_: any, lighting: boolean) {
 		this.DEBUG_TOOLS.setPlayerData(localPlayer, "lighting", lighting);
 		ActionExecutor.get(UpdateStatsAndAttributes).execute(localPlayer, localPlayer);
-		game.updateView(true);
+		game.updateView(RenderSource.Mod, true);
 	}
 
 	@Bound
@@ -122,6 +123,6 @@ export default class DisplayPanel extends DebugToolsPanel {
 		await loadShaders();
 
 		compileShaders();
-		game.updateView(true);
+		game.updateView(RenderSource.Mod, true);
 	}
 }
