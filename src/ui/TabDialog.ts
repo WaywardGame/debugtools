@@ -2,9 +2,8 @@ import Button, { ButtonEvent } from "newui/component/Button";
 import Component from "newui/component/Component";
 import { TranslationGenerator } from "newui/component/IComponent";
 import Dialog, { DialogEvent } from "newui/screen/screens/game/component/Dialog";
-import { DialogId } from "newui/screen/screens/game/Dialogs";
+import { DialogId, Edge } from "newui/screen/screens/game/Dialogs";
 import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { sleep } from "utilities/Async";
 import Collectors from "utilities/iterable/Collectors";
 import { Bound } from "utilities/Objects";
 
@@ -37,7 +36,7 @@ export default abstract class TabDialog extends Dialog {
 		this.showFirstSubpanel();
 
 		this.on(DialogEvent.Resize, this.onResize);
-		sleep(10).then(this.onResize);
+		this.onResize();
 	}
 
 	protected abstract getSubpanels(): SubpanelInformation[];
@@ -110,6 +109,7 @@ export default abstract class TabDialog extends Dialog {
 
 	@Bound
 	private onResize() {
-		this.classes.toggle(this.getBox().width < 440, "tabs-drawer");
+		const dialogWidth = window.innerWidth * (this.edges[Edge.Right] - this.edges[Edge.Left]) / 100;
+		this.classes.toggle(dialogWidth < 440, "tabs-drawer");
 	}
 }
