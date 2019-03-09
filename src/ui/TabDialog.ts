@@ -109,7 +109,7 @@ export default abstract class TabDialog extends Dialog {
 
 	@Bound
 	private onResize() {
-		const dialogWidth = window.innerWidth * (this.edges[Edge.Right] - this.edges[Edge.Left]) / 100;
+		const dialogWidth = this.api.windowWidth * (this.edges[Edge.Right] - this.edges[Edge.Left]) / 100;
 		this.classes.toggle(dialogWidth < 440, "tabs-drawer");
 	}
 }

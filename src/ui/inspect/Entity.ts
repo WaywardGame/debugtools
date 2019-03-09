@@ -173,6 +173,7 @@ export default class EntityInformation extends InspectInformationSection {
 				this.statComponents.set(stat.type, new RangeRow(this.api)
 					.setLabel(label => label.setText(Translation.generator(Stat[stat.type])))
 					.editRange(range => range
+						.noClampOnRefresh()
 						.setMin(0)
 						.setMax(stat.max!)
 						.setRefreshMethod(() => this.entity ? this.entity.getStatValue(stat.type)! : 0))
@@ -300,6 +301,7 @@ export default class EntityInformation extends InspectInformationSection {
 	private setStat(stat: Stat) {
 		return (_: any, value: number) => {
 			if (this.entity!.getStatValue(stat) === value) return;
+
 			ActionExecutor.get(SetStat).execute(localPlayer, this.entity!, stat, value);
 		};
 	}
