@@ -1,7 +1,7 @@
-import { Action } from "action/Action";
-import { ActionArgument, anyOf } from "action/IAction";
+import { Action } from "entity/action/Action";
+import { ActionArgument, anyOf } from "entity/action/IAction";
 import { EntityType } from "entity/IEntity";
-import Player from "player/Player";
+import Player from "entity/player/Player";
 import { defaultUsability } from "../Actions";
 import Remove from "./helpers/Remove";
 

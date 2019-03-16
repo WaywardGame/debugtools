@@ -1,7 +1,6 @@
-import { Action } from "action/Action";
-import { ActionArgument } from "action/IAction";
-import { EntityType } from "entity/IEntity";
-import { DamageType } from "Enums";
+import { Action } from "entity/action/Action";
+import { ActionArgument } from "entity/action/IAction";
+import { DamageType, EntityType } from "entity/IEntity";
 import { defaultUsability } from "../Actions";
 import { DebugToolsTranslation, translation } from "../IDebugTools";
 

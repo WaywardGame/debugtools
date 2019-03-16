@@ -1,19 +1,20 @@
-import ActionExecutor from "action/ActionExecutor";
-import { Bindable, CreatureType, DoodadType, NPCType, SpriteBatchLayer, TerrainType } from "Enums";
+import { DoodadType } from "doodad/IDoodad";
+import ActionExecutor from "entity/action/ActionExecutor";
+import { CreatureType } from "entity/creature/ICreature";
+import { NPCType } from "entity/npc/NPCS";
 import { RenderSource } from "game/IGame";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
-import { BindCatcherApi, bindingManager } from "newui/BindingManager";
+import { Bindable, BindCatcherApi, bindingManager } from "newui/BindingManager";
 import { BlockRow } from "newui/component/BlockRow";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
 import ContextMenu from "newui/component/ContextMenu";
-import { UiApi } from "newui/INewUi";
-import { ScreenId } from "newui/screen/IScreen";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import Spacer from "newui/screen/screens/menu/component/Spacer";
+import { SpriteBatchLayer } from "renderer/IWorldRenderer";
+import { TerrainType } from "tile/ITerrain";
 import { TileEventType } from "tile/ITileEvent";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
@@ -64,7 +65,7 @@ export interface IPaintSection extends Component {
 	getTilePaintData(): Partial<IPaintData> | undefined;
 }
 
-const paintSections: (new (api: UiApi) => IPaintSection)[] = [
+const paintSections: (new () => IPaintSection)[] = [
 	TerrainPaint,
 	CreaturePaint,
 	NPCPaint,
@@ -87,31 +88,31 @@ export default class PaintPanel extends DebugToolsPanel {
 	private lastPaintPosition?: Vector2;
 	private maxSprites = 1024;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
 		this.paintSections.splice(0, Infinity);
 
 		this.paintSections.push(...paintSections
-			.map(cls => new cls(this.api)
+			.map(cls => new cls()
 				.on("change", this.onPaintSectionChange)
 				.appendTo(this)));
 
-		new Spacer(this.api).appendTo(this);
+		new Spacer().appendTo(this);
 
-		this.paintRow = new BlockRow(this.api)
+		this.paintRow = new BlockRow()
 			.classes.add("debug-tools-paint-row")
-			.append(this.paintButton = new CheckButton(this.api)
+			.append(this.paintButton = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonPaint))
 				.on<[boolean]>(CheckButtonEvent.Change, (_, paint) => {
 					this.paintRow.classes.toggle(this.painting = paint, "painting");
 					if (!paint) this.clearPaint();
 				}))
-			.append(new Button(this.api)
+			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonPaintClear))
 				.setTooltip(tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.TooltipPaintClear))))
 				.on(ButtonEvent.Activate, this.clearPaint))
-			.append(new Button(this.api)
+			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonPaintComplete))
 				.setTooltip(tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.TooltipPaintComplete))))
 				.on(ButtonEvent.Activate, this.completePaint));
@@ -156,7 +157,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		}
 
 		if (this.painting) {
-			if (api.isDown(this.DEBUG_TOOLS.bindablePaint) && this.gsapi.wasMouseStartWithin()) {
+			if (api.isDown(this.DEBUG_TOOLS.bindablePaint) && gameScreen!.wasMouseStartWithin()) {
 				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
 
 				const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
@@ -184,7 +185,7 @@ export default class PaintPanel extends DebugToolsPanel {
 				bindPressed = this.DEBUG_TOOLS.bindablePaint;
 			}
 
-			if (api.isDown(this.DEBUG_TOOLS.bindableErasePaint) && this.gsapi.wasMouseStartWithin()) {
+			if (api.isDown(this.DEBUG_TOOLS.bindableErasePaint) && gameScreen!.wasMouseStartWithin()) {
 				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
 
 				const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
@@ -271,13 +272,13 @@ export default class PaintPanel extends DebugToolsPanel {
 
 	@Bound
 	private showPaintSectionResetMenu(paintSection: IPaintSection) {
-		new ContextMenu(this.api, ["Lock Inspection", {
+		new ContextMenu(["Lock Inspection", {
 			translation: translation(DebugToolsTranslation.ResetPaintSection),
 			onActivate: () => paintSection.reset(),
 		}])
 			.addAllDescribedOptions()
 			.setPosition(...bindingManager.getMouse().xy)
-			.schedule(this.api.getScreen(ScreenId.Game)!.setContextMenu);
+			.schedule(gameScreen!.setContextMenu);
 	}
 
 	@Bound

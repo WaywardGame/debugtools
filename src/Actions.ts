@@ -1,4 +1,4 @@
-import { ActionUsability } from "action/IAction";
+import { ActionUsability } from "entity/action/IAction";
 import Mod from "mod/Mod";
 import Log from "utilities/Log";
 import DebugTools from "./DebugTools";

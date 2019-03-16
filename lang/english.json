@@ -7,6 +7,13 @@
 		"source": {
 			"modDebugToolsDebugTools": "Debug Tools"
 		},
+		"interrupt": {
+			"modDebugToolsConfirmUnlockRecipes": [
+				"Are you sure you want\nto unlock all recipes?",
+				"There's no undo besides erasing //all//\nrecipe progress in the Options Menu."
+			],
+			"modDebugToolsChoiceTravelAway": "Where would you like to travel to?"
+		},
 		"interruptChoice": {
 			"modDebugToolsSailToCivilization": "Civilization",
 			"modDebugToolsTravelAway": "New Lands"
@@ -45,12 +52,9 @@
 			"buttonInspect": "Inspect",
 			"buttonInspectLocalPlayer": "Inspect Local Player",
 			"buttonUnlockRecipes": "Unlock Recipes",
-			"interruptConfirmationUnlockRecipes": "Are you sure you want\nto unlock all recipes?",
-			"interruptConfirmationUnlockRecipesDescription": "There's no undo besides erasing //all//\nrecipe progress in the Options Menu.",
 			"buttonRemoveAllCreatures": "Remove All Creatures",
 			"buttonRemoveAllNPCs": "Remove All NPCs",
 			"buttonTravelAway": "Travel Away",
-			"interruptChoiceTravelAway": "Where would you like to travel to?",
 			"buttonAudio": "Play Sound",
 			"buttonParticle": "Spawn Particle",
 			

@@ -1,14 +1,14 @@
-import { IActionApi } from "action/IAction";
-import { ICorpse } from "creature/corpse/ICorpse";
-import Creature from "creature/Creature";
-import { ICreature } from "creature/ICreature";
 import Doodad from "doodad/doodads/Doodad";
 import { IDoodad } from "doodad/IDoodad";
+import { IActionApi } from "entity/action/IAction";
+import { ICorpse } from "entity/creature/corpse/ICorpse";
+import Creature from "entity/creature/Creature";
+import { ICreature } from "entity/creature/ICreature";
+import BaseNPC from "entity/npc/BaseNPC";
+import { INPC } from "entity/npc/INPC";
+import IPlayer from "entity/player/IPlayer";
 import { IItem } from "item/IItem";
 import Item from "item/Item";
-import BaseNPC from "npc/BaseNPC";
-import { INPC } from "npc/INPC";
-import IPlayer from "player/IPlayer";
 import { ITileEvent } from "tile/ITileEvent";
 import RemoveItem from "./RemoveItem";
 

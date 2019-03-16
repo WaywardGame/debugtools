@@ -1,25 +1,21 @@
-import { ICreature } from "creature/ICreature";
+import { ICreature } from "entity/creature/ICreature";
 import IEntity from "entity/IEntity";
-import { Bindable, PlayerState } from "Enums";
+import { INPC } from "entity/npc/INPC";
+import IPlayer, { PlayerState } from "entity/player/IPlayer";
 import { RenderSource } from "game/IGame";
 import Translation from "language/Translation";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
-import { BindCatcherApi, bindingManager } from "newui/BindingManager";
+import { Bindable, BindCatcherApi, bindingManager } from "newui/BindingManager";
 import Button from "newui/component/Button";
 import Component from "newui/component/Component";
 import ContextMenu from "newui/component/ContextMenu";
 import { ComponentEvent } from "newui/component/IComponent";
 import Text from "newui/component/Text";
-import { ScreenId } from "newui/screen/IScreen";
 import { DialogEvent } from "newui/screen/screens/game/component/Dialog";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { INPC } from "npc/INPC";
-import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
+import { tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
@@ -38,7 +34,7 @@ import TerrainInformation from "./inspect/Terrain";
 import TileEventInformation from "./inspect/TileEvent";
 import TabDialog, { SubpanelInformation } from "./TabDialog";
 
-export type InspectDialogInformationSectionClass = new (gsapi: IGameScreenApi) => InspectInformationSection;
+export type InspectDialogInformationSectionClass = new () => InspectInformationSection;
 
 /**
  * A list of panel classes that will appear in the dialog.
@@ -95,8 +91,8 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	private shouldLog = false;
 	private willShowSubpanel = false;
 
-	public constructor(gsapi: IGameScreenApi, id: DialogId) {
-		super(gsapi, id);
+	public constructor(id: DialogId) {
+		super(id);
 
 		this.classes.add("debug-tools-inspect-dialog");
 
@@ -116,10 +112,10 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 */
 	public getSubpanels(): SubpanelInformation[] {
 		if (!this.infoSections) {
-			this.infoSections = informationSectionClasses.values()
-				.include(this.DEBUG_TOOLS.modRegistryInspectDialogPanels.getRegistrations()
+			this.infoSections = informationSectionClasses.stream()
+				.merge(this.DEBUG_TOOLS.modRegistryInspectDialogPanels.getRegistrations()
 					.map(registration => registration.data(InspectInformationSection)))
-				.map(cls => new cls(this.gsapi)
+				.map(cls => new cls()
 					.on("update", this.update)
 					.on(ComponentEvent.WillRemove, infoSection => {
 						if (this.storePanels) {
@@ -130,7 +126,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 
 						return undefined;
 					}))
-				.collect(Collectors.toArray);
+				.toArray();
 
 			// we're going to need the entity information section for some other stuff
 			this.entityInfoSection = this.infoSections
@@ -139,7 +135,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 
 		this.entityButtons = [];
 
-		return this.infoSections.values()
+		return this.infoSections.stream()
 			// add the tabs of the section to the tuple
 			.map(section => tuple(section, section.getTabs()))
 			// if there are no tabs from the section, remove it
@@ -160,7 +156,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 			// currently we have an array of `SubpanelInformation` arrays, because each tab provided an array of them, fix with `flat`
 			.flatMap<SubpanelInformation>()
 			// and now return an array
-			.collect(Collectors.toArray);
+			.toArray();
 	}
 
 	public getName(): Translation {
@@ -328,20 +324,18 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 */
 	@Bound
 	private showInspectionLockMenu(index: number) {
-		new ContextMenu(this.api,
-			this.entityButtons[index].classes.has("inspection-lock") ?
-				["Unlock Inspection", {
-					translation: translation(DebugToolsTranslation.UnlockInspection),
-					onActivate: this.unlockInspection,
-				}] :
-				["Lock Inspection", {
-					translation: translation(DebugToolsTranslation.LockInspection),
-					onActivate: this.lockInspection(index),
-				}],
-		)
+		new ContextMenu(this.entityButtons[index].classes.hasEvery("inspection-lock") ?
+			["Unlock Inspection", {
+				translation: translation(DebugToolsTranslation.UnlockInspection),
+				onActivate: this.unlockInspection,
+			}] :
+			["Lock Inspection", {
+				translation: translation(DebugToolsTranslation.LockInspection),
+				onActivate: this.lockInspection(index),
+			}])
 			.addAllDescribedOptions()
 			.setPosition(...bindingManager.getMouse().xy)
-			.schedule(this.api.getScreen(ScreenId.Game)!.setContextMenu);
+			.schedule(gameScreen!.setContextMenu);
 	}
 
 	/**

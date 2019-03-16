@@ -1,4 +1,3 @@
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 export declare enum SelectionType {
@@ -13,7 +12,7 @@ export default class SelectionPanel extends DebugToolsPanel {
     private tileEvents;
     private action;
     private method;
-    constructor(gsapi: IGameScreenApi);
+    constructor();
     getTranslation(): DebugToolsTranslation;
     execute(): void;
     private changeMethod;

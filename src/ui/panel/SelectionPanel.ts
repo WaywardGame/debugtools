@@ -1,19 +1,17 @@
-import ActionExecutor from "action/ActionExecutor";
-import { ICreature } from "creature/ICreature";
+import ActionExecutor from "entity/action/ActionExecutor";
+import { ICreature } from "entity/creature/ICreature";
 import { EntityType } from "entity/IEntity";
+import { INPC } from "entity/npc/INPC";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
 import Dropdown, { DropdownEvent } from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeRow } from "newui/component/RangeRow";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { INPC } from "npc/INPC";
 import { ITileEvent } from "tile/ITileEvent";
-import Arrays from "utilities/Arrays";
-import Collectors from "utilities/iterable/Collectors";
-import { pipe, tuple } from "utilities/iterable/Generators";
+import Arrays, { tuple } from "utilities/Arrays";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
+import Stream from "utilities/stream/Stream";
 import SelectionExecute from "../../action/SelectionExecute";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
@@ -42,13 +40,13 @@ export default class SelectionPanel extends DebugToolsPanel {
 	private action: DebugToolsTranslation;
 	private method: DebugToolsTranslation;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		new LabelledRow(this.api)
+		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.SelectionMethod)))
-			.append(new Dropdown(this.api)
+			.append(new Dropdown()
 				.setRefreshMethod(() => ({
 					defaultOption: DebugToolsTranslation.MethodAll,
 					options: [
@@ -58,7 +56,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 					],
 				}))
 				.on(DropdownEvent.Selection, this.changeMethod))
-			.append(this.rangeQuantity = new RangeRow(this.api)
+			.append(this.rangeQuantity = new RangeRow()
 				.classes.add("debug-tools-dialog-selection-quantity")
 				.setLabel(label => label.hide())
 				.editRange(range => range
@@ -69,25 +67,25 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 		this.changeMethod(null, DebugToolsTranslation.MethodAll);
 
-		new CheckButton(this.api)
+		new CheckButton()
 			.setText(translation(DebugToolsTranslation.FilterCreatures))
 			.on<[boolean]>(CheckButtonEvent.Change, (_, enabled) => { this.creatures = enabled; })
 			.appendTo(this);
 
-		new CheckButton(this.api)
+		new CheckButton()
 			.setText(translation(DebugToolsTranslation.FilterNPCs))
 			.on<[boolean]>(CheckButtonEvent.Change, (_, enabled) => { this.npcs = enabled; })
 			.appendTo(this);
 
-		new CheckButton(this.api)
+		new CheckButton()
 			.setText(translation(DebugToolsTranslation.FilterTileEvents))
 			.on<[boolean]>(CheckButtonEvent.Change, (_, enabled) => { this.tileEvents = enabled; })
 			.appendTo(this);
 
-		new LabelledRow(this.api)
+		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.SelectionAction)))
-			.append(new Dropdown(this.api)
+			.append(new Dropdown()
 				.on<[DebugToolsTranslation]>(DropdownEvent.Selection, (_, action) => this.action = action)
 				.setRefreshMethod(() => ({
 					defaultOption: DebugToolsTranslation.ActionRemove,
@@ -97,7 +95,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 				})))
 			.appendTo(this);
 
-		new Button(this.api)
+		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonExecute))
 			.on(ButtonEvent.Activate, this.execute)
 			.appendTo(this);
@@ -109,14 +107,14 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 	@Bound
 	public execute() {
-		const targets = pipe<(false | (undefined | ICreature | INPC | ITileEvent)[])[]>(
+		const targets = Stream.of<(false | (undefined | ICreature | INPC | ITileEvent)[])[]>(
 			this.creatures && game.creatures,
 			this.npcs && game.npcs,
 			this.tileEvents && game.tileEvents,
 		)
 			.flatMap(value => Array.isArray(value) ? value : value ? [value] : [])
 			.filter<undefined>(entity => !!entity)
-			.collect(Collectors.toArray);
+			.toArray();
 
 		if (!targets.length) return;
 

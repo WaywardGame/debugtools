@@ -1,18 +1,19 @@
-import ActionExecutor from "action/ActionExecutor";
-import { ICreature } from "creature/ICreature";
+import ActionExecutor from "entity/action/ActionExecutor";
+import { ICreature } from "entity/creature/ICreature";
 import Entity from "entity/Entity";
 import { REPUTATION_MAX } from "entity/Human";
 import IEntity, { EntityEvent, EntityType } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
-import { ItemQuality, ItemType } from "Enums";
+import { INPC } from "entity/npc/INPC";
+import IPlayer from "entity/player/IPlayer";
+import { Quality } from "game/IObject";
+import { ItemType } from "item/IItem";
 import Component from "newui/component/Component";
 import { ComponentEvent } from "newui/component/IComponent";
 import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { INPC } from "npc/INPC";
-import IPlayer from "player/IPlayer";
-import Objects, { Bound } from "utilities/Objects";
+import { Bound } from "utilities/Objects";
+import Stream from "utilities/stream/Stream";
 import AddItemToInventory from "../../action/AddItemToInventory";
 import SetStat from "../../action/SetStat";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -26,16 +27,16 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 	private human: IPlayer | INPC | undefined;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		this.addItemContainer = new Component(this.api).appendTo(this);
+		this.addItemContainer = new Component().appendTo(this);
 
 		this.addReputationSlider(DebugToolsTranslation.LabelMalignity, Stat.Malignity);
 		this.addReputationSlider(DebugToolsTranslation.LabelBenignity, Stat.Benignity);
 
 		this.on(DebugToolsPanelEvent.SwitchTo, () => {
-			const addItemToInventory = AddItemToInventoryComponent.init(this.api).appendTo(this.addItemContainer);
+			const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this.addItemContainer);
 			this.until(DebugToolsPanelEvent.SwitchAway)
 				.bind(addItemToInventory, AddItemToInventoryEvent.Execute, this.addItem);
 		});
@@ -62,7 +63,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 		if (!this.human) return;
 
-		for (const type of Objects.keys<keyof HumanInformation["reputationSliders"]>(this.reputationSliders)) {
+		for (const type of Stream.keys(this.reputationSliders)) {
 			this.reputationSliders[type]!.refresh();
 		}
 
@@ -71,7 +72,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 	}
 
 	private addReputationSlider(labelTranslation: DebugToolsTranslation, type: Stat.Benignity | Stat.Malignity) {
-		this.reputationSliders[type] = new RangeRow(this.api)
+		this.reputationSliders[type] = new RangeRow()
 			.setLabel(label => label.setText(translation(labelTranslation)))
 			.editRange(range => range
 				.setMin(0)
@@ -90,7 +91,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 	}
 
 	@Bound
-	private addItem(_: any, type: ItemType, quality: ItemQuality) {
+	private addItem(_: any, type: ItemType, quality: Quality) {
 		ActionExecutor.get(AddItemToInventory).execute(localPlayer, Entity.is(this.human, EntityType.Player) ? this.human : this.human!.inventory, type, quality);
 	}
 

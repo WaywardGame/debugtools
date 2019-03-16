@@ -1,9 +1,9 @@
-import { ICreature } from "creature/ICreature";
+import { ICreature } from "entity/creature/ICreature";
 import Entity from "entity/Entity";
 import { AiType, EntityType } from "entity/IEntity";
-import { NPCType } from "Enums";
-import { INPC } from "npc/INPC";
-import IPlayer from "player/IPlayer";
+import { INPC } from "entity/npc/INPC";
+import { NPCType } from "entity/npc/NPCS";
+import IPlayer from "entity/player/IPlayer";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import CloneInventory from "./CloneInventory";

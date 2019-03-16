@@ -1,7 +1,9 @@
-import ActionExecutor from "action/ActionExecutor";
-import { ICreature } from "creature/ICreature";
+import ActionExecutor from "entity/action/ActionExecutor";
+import { ICreature } from "entity/creature/ICreature";
 import IEntity, { EntityEvent, EntityType, IStatChangeInfo } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
+import { INPC } from "entity/npc/INPC";
+import IPlayer from "entity/player/IPlayer";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { bindingManager } from "newui/BindingManager";
@@ -16,13 +18,9 @@ import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
 import { IRefreshable } from "newui/component/Refreshable";
 import Text from "newui/component/Text";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { INPC } from "npc/INPC";
-import IPlayer from "player/IPlayer";
 import { ITile } from "tile/ITerrain";
+import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
 import Log from "utilities/Log";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
@@ -43,7 +41,7 @@ import HumanInformation from "./Human";
 import NpcInformation from "./Npc";
 import PlayerInformation from "./Player";
 
-export type InspectDialogEntityInformationSubsectionClass = new (gsapi: IGameScreenApi) => InspectEntityInformationSubsection;
+export type InspectDialogEntityInformationSubsectionClass = new () => InspectEntityInformationSubsection;
 
 const entitySubsectionClasses: InspectDialogEntityInformationSubsectionClass[] = [
 	PlayerInformation,
@@ -66,36 +64,36 @@ export default class EntityInformation extends InspectInformationSection {
 	private entities: (IPlayer | ICreature | INPC)[] = [];
 	private entity: IPlayer | ICreature | INPC | undefined;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		new BlockRow(this.api)
-			.append(new Button(this.api)
+		new BlockRow()
+			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonHealEntity))
 				.on(ButtonEvent.Activate, this.heal)
 				.appendTo(this))
-			.append(new Button(this.api)
+			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonKillEntity))
 				.on(ButtonEvent.Activate, this.kill))
 			.appendTo(this);
 
-		new BlockRow(this.api)
-			.append(new Button(this.api)
+		new BlockRow()
+			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonTeleportEntity))
 				.on(ButtonEvent.Activate, this.openTeleportMenu))
-			.append(new Button(this.api)
+			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonCloneEntity))
 				.on(ButtonEvent.Activate, this.cloneEntity))
 			.appendTo(this);
 
-		this.subsections = entitySubsectionClasses.values()
-			.include(this.DEBUG_TOOLS.modRegistryInspectDialogEntityInformationSubsections.getRegistrations()
+		this.subsections = entitySubsectionClasses.stream()
+			.merge(this.DEBUG_TOOLS.modRegistryInspectDialogEntityInformationSubsections.getRegistrations()
 				.map(registration => registration.data(InspectEntityInformationSubsection)))
-			.map(cls => new cls(this.gsapi)
+			.map(cls => new cls()
 				.appendTo(this))
-			.collect(Collectors.toArray);
+			.toArray();
 
-		this.statWrapper = new Component(this.api)
+		this.statWrapper = new Component()
 			.classes.add("debug-tools-inspect-entity-sub-section")
 			.appendTo(this);
 
@@ -106,10 +104,10 @@ export default class EntityInformation extends InspectInformationSection {
 	}
 
 	public getTabs() {
-		return this.entities.entries()
+		return this.entities.entries().stream()
 			.map(([i, entity]) => tuple(i, () => translation(DebugToolsTranslation.EntityName)
 				.get(EntityType[entity.entityType], entity.getName()/*.inContext(TextContext.Title)*/)))
-			.collect(Collectors.toArray);
+			.toArray();
 	}
 
 	public setTab(entity: number) {
@@ -170,7 +168,7 @@ export default class EntityInformation extends InspectInformationSection {
 
 		for (const stat of stats) {
 			if ("max" in stat && !stat.canExceedMax) {
-				this.statComponents.set(stat.type, new RangeRow(this.api)
+				this.statComponents.set(stat.type, new RangeRow()
 					.setLabel(label => label.setText(Translation.generator(Stat[stat.type])))
 					.editRange(range => range
 						.noClampOnRefresh()
@@ -182,7 +180,7 @@ export default class EntityInformation extends InspectInformationSection {
 					.appendTo(this.statWrapper));
 
 			} else {
-				this.statComponents.set(stat.type, new Input(this.api)
+				this.statComponents.set(stat.type, new Input()
 					.on(InputEvent.Done, (input, value: string) => {
 						if (isNaN(+value)) {
 							input.clear();
@@ -194,7 +192,7 @@ export default class EntityInformation extends InspectInformationSection {
 					.setCanBeEmpty(false)
 					.setDefault(() => this.entity ? `${this.entity.getStatValue(stat.type)}` : "")
 					.clear()
-					.appendTo(new LabelledRow(this.api)
+					.appendTo(new LabelledRow()
 						.setLabel(label => label.setText(Translation.generator(Stat[stat.type])))
 						.appendTo(this.statWrapper)));
 			}
@@ -211,7 +209,7 @@ export default class EntityInformation extends InspectInformationSection {
 
 	@Bound
 	private openTeleportMenu() {
-		const screen = this.api.getVisibleScreen();
+		const screen = newui.screens.getTop();
 		if (!screen) {
 			return;
 		}
@@ -223,7 +221,7 @@ export default class EntityInformation extends InspectInformationSection {
 
 		const mouse = bindingManager.getMouse();
 
-		new ContextMenu(this.api,
+		new ContextMenu(
 			["select location", {
 				translation: translation(DebugToolsTranslation.OptionTeleportSelectLocation),
 				onActivate: this.selectTeleportLocation,
@@ -248,17 +246,15 @@ export default class EntityInformation extends InspectInformationSection {
 
 	@Bound
 	private createTeleportToPlayerMenu() {
-		return players.values()
+		return players.stream()
 			.filter(player => player !== this.entity)
 			.map(player => tuple(player.name, {
 				translation: Translation.generator(player.name),
 				onActivate: () => this.teleport(player),
 			}))
-			.collect(Collectors.toArray)
-			.sort(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))
-			.values()
+			.sorted(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))
 			// create the context menu from them
-			.collect<ContextMenu>(options => new ContextMenu(this.api, ...options))
+			.collect<ContextMenu>(options => new ContextMenu(...options))
 			.addAllDescribedOptions();
 	}
 

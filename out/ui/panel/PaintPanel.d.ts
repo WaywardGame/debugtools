@@ -1,7 +1,10 @@
-import { Bindable, CreatureType, DoodadType, NPCType, SpriteBatchLayer, TerrainType } from "Enums";
-import { BindCatcherApi } from "newui/BindingManager";
+import { DoodadType } from "doodad/IDoodad";
+import { CreatureType } from "entity/creature/ICreature";
+import { NPCType } from "entity/npc/NPCS";
+import { Bindable, BindCatcherApi } from "newui/BindingManager";
 import Component from "newui/component/Component";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import { SpriteBatchLayer } from "renderer/IWorldRenderer";
+import { TerrainType } from "tile/ITerrain";
 import { TileEventType } from "tile/ITileEvent";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
@@ -45,7 +48,7 @@ export default class PaintPanel extends DebugToolsPanel {
     private readonly paintTiles;
     private lastPaintPosition?;
     private maxSprites;
-    constructor(gsapi: IGameScreenApi);
+    constructor();
     getTranslation(): DebugToolsTranslation;
     canClientMove(api: BindCatcherApi): false | undefined;
     getMaxSpritesForLayer(layer: SpriteBatchLayer, maxSprites: number): number | undefined;

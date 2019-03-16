@@ -1,12 +1,9 @@
-import { Bindable } from "Enums";
 import { RenderSource } from "game/IGame";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
 import Register from "mod/ModRegistry";
-import { BindCatcherApi } from "newui/BindingManager";
-import { ScreenId } from "newui/screen/IScreen";
-import GameScreen from "newui/screen/screens/GameScreen";
+import { Bindable, BindCatcherApi } from "newui/BindingManager";
 import { ITile } from "tile/ITerrain";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
@@ -61,8 +58,8 @@ export default class SelectLocation implements IHookHost {
 	// tslint:disable cyclomatic-complexity
 	@HookMethod(HookPriority.High)
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
-		const selectTilePressed = api.wasPressed(this.bindableSelectLocation) && newui.getScreen<GameScreen>(ScreenId.Game)!.isMouseWithin();
-		const cancelSelectTilePressed = api.wasPressed(this.bindableCancelSelectLocation) && newui.getScreen<GameScreen>(ScreenId.Game)!.isMouseWithin();
+		const selectTilePressed = api.wasPressed(this.bindableSelectLocation) && gameScreen!.isMouseWithin();
+		const cancelSelectTilePressed = api.wasPressed(this.bindableCancelSelectLocation) && gameScreen!.isMouseWithin();
 
 		// if we previously had the target overlay on a tile, remove it 
 		if (this.hoverTile) {

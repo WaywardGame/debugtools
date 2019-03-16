@@ -1,13 +1,11 @@
-import ActionExecutor from "action/ActionExecutor";
-import { ICorpse } from "creature/corpse/ICorpse";
-import { CreatureType } from "Enums";
+import ActionExecutor from "entity/action/ActionExecutor";
+import { ICorpse } from "entity/creature/corpse/ICorpse";
+import { CreatureType } from "entity/creature/ICreature";
 import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
+import { tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
@@ -27,25 +25,25 @@ export default class CorpseInformation extends InspectInformationSection {
 	private corpses: ICorpse[] = [];
 	private corpse: ICorpse | undefined;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		this.resurrectButton = new Button(this.api)
+		this.resurrectButton = new Button()
 			.setText(translation(DebugToolsTranslation.ButtonResurrectCorpse))
 			.on(ButtonEvent.Activate, this.resurrect)
 			.appendTo(this);
 
-		new Button(this.api)
+		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonRemoveThing))
 			.on(ButtonEvent.Activate, this.removeCorpse)
 			.appendTo(this);
 	}
 
 	public getTabs(): TabInformation[] {
-		return this.corpses.entries()
+		return this.corpses.entries().stream()
 			.map(([i, corpse]) => tuple(i, () => translation(DebugToolsTranslation.CorpseName)
 				.get(corpseManager.getName(corpse, false).inContext(TextContext.Title))))
-			.collect(Collectors.toArray);
+			.toArray();
 	}
 
 	public setTab(corpse: number) {

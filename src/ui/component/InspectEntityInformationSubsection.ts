@@ -1,13 +1,12 @@
-import { ICreature } from "creature/ICreature";
+import { ICreature } from "entity/creature/ICreature";
 import { Stat } from "entity/IStats";
+import { INPC } from "entity/npc/INPC";
+import IPlayer from "entity/player/IPlayer";
 import Component from "newui/component/Component";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { INPC } from "npc/INPC";
-import IPlayer from "player/IPlayer";
 
 export default abstract class InspectEntityInformationSubsection extends Component {
-	public constructor(protected readonly gsapi: IGameScreenApi) {
-		super(gsapi.uiApi);
+	public constructor() {
+		super();
 		this.classes.add("debug-tools-inspect-entity-sub-section");
 	}
 

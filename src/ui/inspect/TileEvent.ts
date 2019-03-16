@@ -1,13 +1,11 @@
-import ActionExecutor from "action/ActionExecutor";
+import ActionExecutor from "entity/action/ActionExecutor";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import { ITileEvent } from "tile/ITileEvent";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
+import { tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
@@ -25,20 +23,20 @@ export default class TileEventInformation extends InspectInformationSection {
 	// @ts-ignore
 	private tileEvent: ITileEvent | undefined;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		new Button(this.api)
+		new Button()
 			.setText(translation(DebugToolsTranslation.ActionRemove))
 			.on(ButtonEvent.Activate, this.removeTileEvent)
 			.appendTo(this);
 	}
 
 	public getTabs(): TabInformation[] {
-		return this.tileEvents.entries()
+		return this.tileEvents.entries().stream()
 			.map(([i, tileEvent]) => tuple(i, () => translation(DebugToolsTranslation.TileEventName)
 				.get(Translation.nameOf(Dictionary.TileEvent, tileEvent, false).inContext(TextContext.Title))))
-			.collect(Collectors.toArray);
+			.toArray();
 	}
 
 	public setTab(tileEvent: number) {

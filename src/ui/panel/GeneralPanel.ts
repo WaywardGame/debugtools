@@ -1,12 +1,12 @@
-import ActionExecutor from "action/ActionExecutor";
-import { ActionType } from "action/IAction";
-import { Bindable, SfxType } from "Enums";
+import { SfxType } from "audio/IAudio";
+import ActionExecutor from "entity/action/ActionExecutor";
+import { ActionType } from "entity/action/IAction";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
-import { BindCatcherApi } from "newui/BindingManager";
+import { Bindable, BindCatcherApi } from "newui/BindingManager";
 import { BlockRow } from "newui/component/BlockRow";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
@@ -14,12 +14,10 @@ import Dropdown from "newui/component/Dropdown";
 import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ParticleType } from "renderer/particle/IParticle";
 import { particles } from "renderer/particle/Particles";
+import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
 import SetTime from "../../action/SetTime";
@@ -43,10 +41,10 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 	private selectionPromise: CancelablePromise<Vector2> | undefined;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		this.timeRange = new RangeRow(this.api)
+		this.timeRange = new RangeRow()
 			.classes.add("debug-tools-range-row-no-default-button")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTime)))
 			.editRange(range => range
@@ -60,7 +58,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 			})
 			.appendTo(this);
 
-		this.inspectButton = new CheckButton(this.api)
+		this.inspectButton = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonInspect))
 			.setRefreshMethod(() => !!this.selectionPromise)
 			.on(CheckButtonEvent.Change, (_, checked: boolean) => {
@@ -84,49 +82,45 @@ export default class GeneralPanel extends DebugToolsPanel {
 			})
 			.appendTo(this);
 
-		new Button(this.api)
+		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonInspectLocalPlayer))
 			.on(ButtonEvent.Activate, () => this.DEBUG_TOOLS.inspect(localPlayer))
 			.appendTo(this);
 
-		new Button(this.api)
+		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonUnlockRecipes))
 			.on(ButtonEvent.Activate, this.unlockRecipes)
 			.appendTo(this);
 
-		new Button(this.api)
+		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonTravelAway))
 			.on(ButtonEvent.Activate, this.travelAway)
 			.appendTo(this);
 
-		new BlockRow(this.api)
+		new BlockRow()
 			.classes.add("debug-tools-dialog-checkbutton-dropdown-row")
-			.append(this.checkButtonAudio = new CheckButton(this.api)
+			.append(this.checkButtonAudio = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonAudio)))
-			.append(this.dropdownAudio = new Dropdown<SfxType>(this.api)
+			.append(this.dropdownAudio = new Dropdown<SfxType>()
 				.setRefreshMethod(() => ({
 					defaultOption: SfxType.Click,
 					options: Enums.values(SfxType)
 						.map(sfx => tuple(sfx, Translation.generator(SfxType[sfx])))
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
+						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
 				})))
 			.appendTo(this);
 
-		new BlockRow(this.api)
+		new BlockRow()
 			.classes.add("debug-tools-dialog-checkbutton-dropdown-row")
-			.append(this.checkButtonParticle = new CheckButton(this.api)
+			.append(this.checkButtonParticle = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonParticle)))
-			.append(this.dropdownParticle = new Dropdown<ParticleType>(this.api)
+			.append(this.dropdownParticle = new Dropdown<ParticleType>()
 				.setRefreshMethod(() => ({
 					defaultOption: ParticleType.Blood,
 					options: Enums.values(ParticleType)
 						.map(particle => tuple(particle, Translation.generator(ParticleType[particle])))
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
+						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
 				})))
 			.appendTo(this);
@@ -205,8 +199,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 	@Bound
 	private async unlockRecipes() {
-		const confirm = await this.api.interrupt(translation(DebugToolsTranslation.InterruptConfirmationUnlockRecipes))
-			.withDescription(translation(DebugToolsTranslation.InterruptConfirmationUnlockRecipesDescription))
+		const confirm = await newui.interrupt(this.DEBUG_TOOLS.interruptUnlockRecipes)
 			.withConfirmation();
 
 		if (!confirm) return;
@@ -225,7 +218,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 		let action: ActionType;
 		if (!game.isChallenge) {
-			const choice = await this.api.interrupt(translation(DebugToolsTranslation.InterruptChoiceTravelAway))
+			const choice = await newui.interrupt(this.DEBUG_TOOLS.interruptTravelAway)
 				.withChoice(InterruptChoice.Cancel, this.DEBUG_TOOLS.choiceTravelAway, this.DEBUG_TOOLS.choiceSailToCivilization);
 
 			if (choice === InterruptChoice.Cancel) return;

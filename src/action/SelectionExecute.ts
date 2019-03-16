@@ -1,8 +1,8 @@
-import { Action } from "action/Action";
-import { ActionArgument } from "action/IAction";
-import { ICreature } from "creature/ICreature";
+import { Action } from "entity/action/Action";
+import { ActionArgument } from "entity/action/IAction";
+import { ICreature } from "entity/creature/ICreature";
 import { EntityType } from "entity/IEntity";
-import { INPC } from "npc/INPC";
+import { INPC } from "entity/npc/INPC";
 import { ITileEvent } from "tile/ITileEvent";
 import { defaultUsability } from "../Actions";
 import { DebugToolsTranslation } from "../IDebugTools";

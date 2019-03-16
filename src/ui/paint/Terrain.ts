@@ -1,4 +1,3 @@
-import { TerrainType } from "Enums";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Button from "newui/component/Button";
@@ -7,12 +6,12 @@ import Component from "newui/component/Component";
 import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
-import { UiApi } from "newui/INewUi";
+import { TerrainType } from "tile/ITerrain";
 import { terrainDescriptions } from "tile/Terrains";
+import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
 import { Bound } from "utilities/Objects";
+import Stream from "utilities/stream/Stream";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
@@ -21,31 +20,30 @@ export default class TerrainPaint extends Component implements IPaintSection {
 	private terrain: TerrainType | undefined;
 	private dropdown: Dropdown<"nochange" | keyof typeof TerrainType>;
 
-	public constructor(api: UiApi) {
-		super(api);
+	public constructor() {
+		super();
 
-		new LabelledRow(api)
+		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTerrain)))
-			.append(this.dropdown = new Dropdown<"nochange" | keyof typeof TerrainType>(api)
+			.append(this.dropdown = new Dropdown<"nochange" | keyof typeof TerrainType>()
 				.setRefreshMethod(() => ({
 					defaultOption: "nochange",
-					options: ([
+					options: Stream.of<IDropdownOption<"nochange" | keyof typeof TerrainType>[]>(
 						["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
-					] as IDropdownOption<"nochange" | keyof typeof TerrainType>[]).values().include(Enums.values(TerrainType)
-						.map(terrain => tuple(
-							TerrainType[terrain] as keyof typeof TerrainType,
-							new Translation(Dictionary.Terrain, terrain).inContext(TextContext.Title),
-						))
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
+					)
+						.merge(Enums.values(TerrainType)
+							.map(terrain => tuple(
+								TerrainType[terrain] as keyof typeof TerrainType,
+								new Translation(Dictionary.Terrain, terrain).inContext(TextContext.Title),
+							))
+							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+							.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
 				}))
 				.on(DropdownEvent.Selection, this.changeTerrain))
 			.appendTo(this);
 
-		this.tilledCheckButton = new CheckButton(api)
+		this.tilledCheckButton = new CheckButton()
 			.hide()
 			.setText(translation(DebugToolsTranslation.ButtonToggleTilled))
 			.appendTo(this);

@@ -1,4 +1,4 @@
-import ActionExecutor from "action/ActionExecutor";
+import ActionExecutor from "entity/action/ActionExecutor";
 import { RenderSource } from "game/IGame";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
@@ -7,7 +7,6 @@ import Button, { ButtonEvent } from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
 import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { compileShaders, loadShaders } from "renderer/Shaders";
 import { Bound } from "utilities/Objects";
 import UpdateStatsAndAttributes from "../../action/UpdateStatsAndAttributes";
@@ -24,22 +23,22 @@ export default class DisplayPanel extends DebugToolsPanel {
 	@Mod.saveData<DebugTools>("Debug Tools")
 	public saveData: ISaveData;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		new CheckButton(this.api)
+		new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonToggleFog))
 			.setRefreshMethod(() => this.DEBUG_TOOLS.getPlayerData(localPlayer, "fog"))
 			.on(CheckButtonEvent.Change, this.toggleFog)
 			.appendTo(this);
 
-		new CheckButton(this.api)
+		new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonToggleLighting))
 			.setRefreshMethod(() => this.DEBUG_TOOLS.getPlayerData(localPlayer, "lighting"))
 			.on(CheckButtonEvent.Change, this.toggleLighting)
 			.appendTo(this);
 
-		this.zoomRange = new RangeRow(this.api)
+		this.zoomRange = new RangeRow()
 			.classes.add("debug-tools-range-row-no-default-button")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelZoomLevel)))
 			.editRange(range => range
@@ -54,19 +53,19 @@ export default class DisplayPanel extends DebugToolsPanel {
 			})
 			.appendTo(this);
 
-		new CheckButton(this.api)
+		new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonUnlockCamera))
 			.setRefreshMethod(() => this.DEBUG_TOOLS.isCameraUnlocked)
 			.on(CheckButtonEvent.Change, (_, checked: boolean) => this.DEBUG_TOOLS.setCameraUnlocked(checked))
 			.appendTo(this);
 
-		new Button(this.api)
+		new Button()
 			.classes.add("warning")
 			.setText(translation(DebugToolsTranslation.ButtonResetWebGL))
 			.on(ButtonEvent.Activate, this.resetWebGL)
 			.appendTo(this);
 
-		new Button(this.api)
+		new Button()
 			.classes.add("warning")
 			.setText(translation(DebugToolsTranslation.ButtonReloadShaders))
 			.on(ButtonEvent.Activate, this.reloadShaders)

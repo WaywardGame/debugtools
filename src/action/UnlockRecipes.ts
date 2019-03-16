@@ -1,6 +1,6 @@
-import { Action } from "action/Action";
+import { Action } from "entity/action/Action";
 import { EntityType } from "entity/IEntity";
-import { ItemType } from "Enums";
+import { ItemType } from "item/IItem";
 import itemDescriptions from "item/Items";
 import Enums from "utilities/enum/Enums";
 import { defaultUsability } from "../Actions";

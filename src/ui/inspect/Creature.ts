@@ -1,12 +1,11 @@
-import ActionExecutor from "action/ActionExecutor";
-import { ICreature } from "creature/ICreature";
+import ActionExecutor from "entity/action/ActionExecutor";
+import { ICreature } from "entity/creature/ICreature";
 import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
+import { INPC } from "entity/npc/INPC";
+import { IPlayer } from "entity/player/IPlayer";
 import Button, { ButtonEvent } from "newui/component/Button";
 import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { INPC } from "npc/INPC";
-import { IPlayer } from "player/IPlayer";
 import { Bound } from "utilities/Objects";
 import Remove from "../../action/Remove";
 import SetTamed from "../../action/SetTamed";
@@ -16,16 +15,16 @@ import InspectEntityInformationSubsection from "../component/InspectEntityInform
 export default class CreatureInformation extends InspectEntityInformationSubsection {
 	private creature: ICreature | undefined;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		new CheckButton(this.api)
+		new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonTameCreature))
 			.setRefreshMethod(() => this.creature ? this.creature.isTamed() : false)
 			.on(CheckButtonEvent.Change, this.setTamed)
 			.appendTo(this);
 
-		new Button(this.api)
+		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonRemoveThing))
 			.on(ButtonEvent.Activate, this.removeCreature)
 			.appendTo(this);

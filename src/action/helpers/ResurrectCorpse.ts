@@ -1,6 +1,6 @@
-import { ICorpse } from "creature/corpse/ICorpse";
-import { CreatureType } from "Enums";
-import IPlayer from "player/IPlayer";
+import { ICorpse } from "entity/creature/corpse/ICorpse";
+import { CreatureType } from "entity/creature/ICreature";
+import IPlayer from "entity/player/IPlayer";
 import Vector3 from "utilities/math/Vector3";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import GetPosition from "./GetPosition";

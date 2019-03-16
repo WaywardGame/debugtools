@@ -1,13 +1,12 @@
-import ActionExecutor from "action/ActionExecutor";
 import Doodad from "doodad/doodads/Doodad";
-import { IDoodad } from "doodad/IDoodad";
-import { GrowingStage, ItemQuality, ItemType } from "Enums";
-import { IContainer } from "item/IItem";
+import { GrowingStage, IDoodad } from "doodad/IDoodad";
+import ActionExecutor from "entity/action/ActionExecutor";
+import { Quality } from "game/IObject";
+import { IContainer, ItemType } from "item/IItem";
 import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button, { ButtonEvent } from "newui/component/Button";
 import EnumContextMenu, { EnumSort } from "newui/component/EnumContextMenu";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
@@ -33,20 +32,20 @@ export default class DoodadInformation extends InspectInformationSection {
 	private doodad: IDoodad | undefined;
 	private readonly buttonGrowthStage: Button;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		new Button(this.api)
+		new Button()
 			.setText(translation(DebugToolsTranslation.ActionRemove))
 			.on(ButtonEvent.Activate, this.removeDoodad)
 			.appendTo(this);
 
-		new Button(this.api)
+		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonCloneEntity))
 			.on(ButtonEvent.Activate, this.cloneDoodad)
 			.appendTo(this);
 
-		this.buttonGrowthStage = new Button(this.api)
+		this.buttonGrowthStage = new Button()
 			.setText(translation(DebugToolsTranslation.ButtonSetGrowthStage))
 			.on(ButtonEvent.Activate, this.setGrowthStage)
 			.appendTo(this);
@@ -54,7 +53,7 @@ export default class DoodadInformation extends InspectInformationSection {
 		this.on(DebugToolsPanelEvent.SwitchTo, () => {
 			if (!this.doodad!.containedItems) return;
 
-			const addItemToInventory = AddItemToInventoryComponent.init(this.api).appendTo(this);
+			const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this);
 			this.until(DebugToolsPanelEvent.SwitchAway)
 				.bind(addItemToInventory, AddItemToInventoryEvent.Execute, this.addItem);
 		});
@@ -83,7 +82,7 @@ export default class DoodadInformation extends InspectInformationSection {
 	}
 
 	@Bound
-	private addItem(_: any, type: ItemType, quality: ItemQuality) {
+	private addItem(_: any, type: ItemType, quality: Quality) {
 		ActionExecutor.get(AddItemToInventory).execute(localPlayer, this.doodad! as IContainer, type, quality);
 	}
 
@@ -102,7 +101,7 @@ export default class DoodadInformation extends InspectInformationSection {
 
 	@Bound
 	private async setGrowthStage() {
-		const growthStage = await new EnumContextMenu(this.api, GrowingStage)
+		const growthStage = await new EnumContextMenu(GrowingStage)
 			.setTranslator(stage => Doodad.getGrowingStageTranslation(stage, this.doodad!.description())!.inContext(TextContext.Title))
 			.setSort(EnumSort.Id)
 			.waitForChoice();

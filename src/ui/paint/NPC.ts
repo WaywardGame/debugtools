@@ -1,15 +1,14 @@
-import { NPCType } from "Enums";
+import { NPCType } from "entity/npc/NPCS";
 import Translation from "language/Translation";
 import Button from "newui/component/Button";
 import Component from "newui/component/Component";
 import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
-import { UiApi } from "newui/INewUi";
+import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
 import { Bound } from "utilities/Objects";
+import Stream from "utilities/stream/Stream";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
@@ -18,24 +17,23 @@ export default class NPCPaint extends Component implements IPaintSection {
 
 	private npc: NPCType | "remove" | undefined;
 
-	public constructor(api: UiApi) {
-		super(api);
+	public constructor() {
+		super();
 
-		new LabelledRow(api)
+		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelNPC)))
-			.append(this.dropdown = new Dropdown<"nochange" | "remove" | keyof typeof NPCType>(api)
+			.append(this.dropdown = new Dropdown<"nochange" | "remove" | keyof typeof NPCType>()
 				.setRefreshMethod(() => ({
 					defaultOption: "nochange",
-					options: ([
+					options: Stream.of<IDropdownOption<"nochange" | "remove" | keyof typeof NPCType>[]>(
 						["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
 						["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
-					] as IDropdownOption<"nochange" | "remove" | keyof typeof NPCType>[]).values().include(Enums.values(NPCType)
-						.map(npc => tuple(NPCType[npc] as keyof typeof NPCType, Translation.generator(NPCType[npc])))
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
+					)
+						.merge(Enums.values(NPCType)
+							.map(npc => tuple(NPCType[npc] as keyof typeof NPCType, Translation.generator(NPCType[npc])))
+							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+							.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
 				}))
 				.on(DropdownEvent.Selection, this.changeNPC))
 			.appendTo(this);

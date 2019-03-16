@@ -1,6 +1,4 @@
-import { Bindable } from "Enums";
-import { BindCatcherApi } from "newui/BindingManager";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import { Bindable, BindCatcherApi } from "newui/BindingManager";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
@@ -13,7 +11,7 @@ export default class GeneralPanel extends DebugToolsPanel {
     private readonly dropdownParticle;
     private readonly checkButtonParticle;
     private selectionPromise;
-    constructor(gsapi: IGameScreenApi);
+    constructor();
     getTranslation(): DebugToolsTranslation;
     canClientMove(api: BindCatcherApi): false | undefined;
     onGameTickEnd(): void;

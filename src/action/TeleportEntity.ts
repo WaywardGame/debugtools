@@ -1,8 +1,7 @@
-import { Action } from "action/Action";
-import { ActionArgument } from "action/IAction";
+import { Action } from "entity/action/Action";
+import { ActionArgument } from "entity/action/IAction";
 import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
-import { ScreenId } from "newui/screen/IScreen";
 import GameScreen from "newui/screen/screens/GameScreen";
 import { IVector3 } from "utilities/math/IVector";
 import GetPosition from "../action/helpers/GetPosition";
@@ -52,7 +51,7 @@ export default new Action(ActionArgument.Entity, ActionArgument.Vector3)
 		}
 
 		if (entity === localPlayer) {
-			newui.getScreen<GameScreen>(ScreenId.Game)!.movementHandler.walkToTileHandler.reset();
+			(gameScreen as GameScreen).movementHandler.walkToTileHandler.reset();
 		}
 
 		action.setUpdateView(true);

@@ -1,11 +1,11 @@
+import { MoveType } from "entity/IEntity";
+import IPlayer from "entity/player/IPlayer";
+import { MessageType } from "entity/player/MessageManager";
 import { TranslationGenerator } from "newui/component/IComponent";
 import Text from "newui/component/Text";
-import IPlayer from "player/IPlayer";
-import { MessageType } from "player/MessageManager";
 import { IVector3 } from "utilities/math/IVector";
 import TileHelpers from "utilities/TileHelpers";
 import Actions from "../../Actions";
-import { MoveType } from "Enums";
 
 /**
  * Given a position, finds an open tile, or sends an error message to executing player.

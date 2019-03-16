@@ -1,14 +1,13 @@
-import { ICreature } from "creature/ICreature";
+import { ICreature } from "entity/creature/ICreature";
 import { Stat } from "entity/IStats";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { INPC } from "npc/INPC";
-import IPlayer from "player/IPlayer";
+import { INPC } from "entity/npc/INPC";
+import IPlayer from "entity/player/IPlayer";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 export default class HumanInformation extends InspectEntityInformationSubsection {
     private readonly addItemContainer;
     private readonly reputationSliders;
     private human;
-    constructor(gsapi: IGameScreenApi);
+    constructor();
     getImmutableStats(): Stat[];
     update(entity: ICreature | INPC | IPlayer): void;
     private addReputationSlider;

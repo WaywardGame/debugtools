@@ -1,14 +1,13 @@
-import { NPCType } from "Enums";
+import { NPCType } from "entity/npc/NPCS";
 import Component from "newui/component/Component";
-import { UiApi } from "newui/INewUi";
 import { IPaintSection } from "../panel/PaintPanel";
 export default class NPCPaint extends Component implements IPaintSection {
     private readonly dropdown;
     private npc;
-    constructor(api: UiApi);
+    constructor();
     getTilePaintData(): {
         npc: {
-            type: NPCType | "remove";
+            type: "remove" | NPCType;
         };
     } | undefined;
     isChanging(): boolean;

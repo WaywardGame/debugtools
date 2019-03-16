@@ -1,11 +1,11 @@
-define(["require", "exports", "action/Action", "entity/IEntity", "Enums", "item/Items", "utilities/enum/Enums", "../Actions"], function (require, exports, Action_1, IEntity_1, Enums_1, Items_1, Enums_2, Actions_1) {
+define(["require", "exports", "entity/action/Action", "entity/IEntity", "item/IItem", "item/Items", "utilities/enum/Enums", "../Actions"], function (require, exports, Action_1, IEntity_1, IItem_1, Items_1, Enums_1, Actions_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = new Action_1.Action()
         .setUsableBy(IEntity_1.EntityType.Player)
         .setUsableWhen(...Actions_1.defaultUsability)
         .setHandler(action => {
-        const itemTypes = Enums_2.default.values(Enums_1.ItemType);
+        const itemTypes = Enums_1.default.values(IItem_1.ItemType);
         for (const itemType of itemTypes) {
             const desc = Items_1.default[itemType];
             if (desc && desc.recipe && desc.craftable !== false && !game.crafted[itemType]) {

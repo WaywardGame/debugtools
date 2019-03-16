@@ -1,8 +1,10 @@
-import ActionExecutor from "action/ActionExecutor";
-import { ICreature } from "creature/ICreature";
+import ActionExecutor from "entity/action/ActionExecutor";
+import { ICreature } from "entity/creature/ICreature";
 import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
-import { SkillType } from "Enums";
+import { SkillType } from "entity/IHuman";
+import { INPC } from "entity/npc/INPC";
+import IPlayer from "entity/player/IPlayer";
 import UiTranslation from "language/dictionary/UiTranslation";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
@@ -15,13 +17,10 @@ import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { INPC } from "npc/INPC";
-import IPlayer from "player/IPlayer";
+import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
 import { Bound } from "utilities/Objects";
+import Stream from "utilities/stream/Stream";
 import SetSkill from "../../action/SetSkill";
 import SetWeightBonus from "../../action/SetWeightBonus";
 import ToggleInvulnerable from "../../action/ToggleInvulnerable";
@@ -45,30 +44,30 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	private skill?: SkillType;
 	private player?: IPlayer;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
 		this.until(ComponentEvent.Remove)
 			.bind(this.DEBUG_TOOLS, DebugToolsEvent.PlayerDataChange, this.onPlayerDataChange);
 
-		this.checkButtonPermissions = new CheckButton(this.api)
+		this.checkButtonPermissions = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonTogglePermissions))
 			.setRefreshMethod(() => this.player ? !!this.DEBUG_TOOLS.getPlayerData(this.player, "permissions") : false)
 			.on(CheckButtonEvent.Change, this.togglePermissions)
 			.appendTo(this);
 
-		new BlockRow(this.api)
-			.append(this.checkButtonNoClip = new CheckButton(this.api)
+		new BlockRow()
+			.append(this.checkButtonNoClip = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonToggleNoClip))
 				.setRefreshMethod(() => this.player ? !!this.DEBUG_TOOLS.getPlayerData(this.player, "noclip") : false)
 				.on(CheckButtonEvent.Change, this.toggleNoClip))
-			.append(this.checkButtonInvulnerable = new CheckButton(this.api)
+			.append(this.checkButtonInvulnerable = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonToggleInvulnerable))
 				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "invulnerable") : false)
 				.on(CheckButtonEvent.Change, this.toggleInvulnerable))
 			.appendTo(this);
 
-		this.rangeWeightBonus = new RangeRow(this.api)
+		this.rangeWeightBonus = new RangeRow()
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelWeightBonus)))
 			.editRange(range => range
 				.setMin(0)
@@ -78,25 +77,22 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.on(RangeInputEvent.Finish, this.setWeightBonus)
 			.appendTo(this);
 
-		new LabelledRow(this.api)
+		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelSkill)))
-			.append(new Dropdown(this.api)
+			.append(new Dropdown()
 				.setRefreshMethod(() => ({
 					defaultOption: "none",
-					options: ([
-						["none", option => option.setText(translation(DebugToolsTranslation.None))],
-					] as IDropdownOption[]).values().include(Enums.values(SkillType)
-						.map(skill => tuple(SkillType[skill], Translation.generator(SkillType[skill])))
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
+					options: Stream.of<IDropdownOption[]>(["none", option => option.setText(translation(DebugToolsTranslation.None))])
+						.merge(Enums.values(SkillType)
+							.map(skill => tuple(SkillType[skill], Translation.generator(SkillType[skill])))
+							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+							.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
 				}))
 				.on(DropdownEvent.Selection, this.changeSkill))
 			.appendTo(this);
 
-		this.skillRangeRow = new RangeRow(this.api)
+		this.skillRangeRow = new RangeRow()
 			.hide()
 			.setLabel(label => label.setText(Translation.generator(() => this.skill === undefined ? "" : SkillType[this.skill])))
 			.editRange(range => range

@@ -4,10 +4,8 @@ import Mod from "mod/Mod";
 import Component from "newui/component/Component";
 import { ComponentEvent } from "newui/component/IComponent";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import { tuple } from "utilities/Arrays";
 import { sleep } from "utilities/Async";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import DebugToolsPanel, { DebugToolsPanelEvent } from "./component/DebugToolsPanel";
@@ -18,7 +16,7 @@ import SelectionPanel from "./panel/SelectionPanel";
 import TemplatePanel from "./panel/TemplatePanel";
 import TabDialog, { SubpanelInformation } from "./TabDialog";
 
-export type DebugToolsDialogPanelClass = new (gsapi: IGameScreenApi) => DebugToolsPanel;
+export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
 
 /**
  * A list of panel classes that will appear in the dialog.
@@ -62,8 +60,8 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 
 	private storePanels = true;
 
-	public constructor(gsapi: IGameScreenApi, id: DialogId) {
-		super(gsapi, id);
+	public constructor(id: DialogId) {
+		super(id);
 		this.classes.add("debug-tools-dialog");
 
 		// we register this component as a "hook host" — this means that, like the `Mod` class, it can implement hook methods
@@ -81,7 +79,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 		});
 
 		if (!this.DEBUG_TOOLS.hasPermission()) {
-			sleep(1).then(() => this.gsapi.closeDialog(id));
+			sleep(1).then(() => gameScreen!.closeDialog(id));
 		}
 	}
 
@@ -99,10 +97,10 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 	 */
 	public getSubpanels(): SubpanelInformation[] {
 		if (!this.subpanels) {
-			this.subpanels = subpanelClasses.values()
-				.include(this.DEBUG_TOOLS.modRegistryMainDialogPanels.getRegistrations()
+			this.subpanels = subpanelClasses.stream()
+				.merge(this.DEBUG_TOOLS.modRegistryMainDialogPanels.getRegistrations()
 					.map(registration => registration.data(DebugToolsPanel)))
-				.map(cls => new cls(this.gsapi)
+				.map(cls => new cls()
 					.on(ComponentEvent.WillRemove, panel => {
 						if (panel.isVisible()) {
 							panel.emit(DebugToolsPanelEvent.SwitchAway);
@@ -115,7 +113,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 
 						return undefined;
 					}))
-				.collect(Collectors.toArray);
+				.toArray();
 		}
 
 		return this.subpanels

@@ -1,7 +1,7 @@
-import { Action } from "action/Action";
-import { ActionArgument } from "action/IAction";
+import { Action } from "entity/action/Action";
+import { ActionArgument } from "entity/action/IAction";
 import { EntityType } from "entity/IEntity";
-import { SkillType } from "Enums";
+import { SkillType } from "entity/IHuman";
 import { defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.Player, ActionArgument.Number, ActionArgument.Number)

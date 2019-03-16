@@ -1,13 +1,12 @@
-import { CreatureType } from "Enums";
+import { CreatureType } from "entity/creature/ICreature";
 import Component from "newui/component/Component";
-import { UiApi } from "newui/INewUi";
 import { IPaintSection } from "../panel/PaintPanel";
 export default class CorpsePaint extends Component implements IPaintSection {
     private readonly dropdown;
     private readonly aberrantCheckButton;
     private readonly replaceExisting;
     private corpse;
-    constructor(api: UiApi);
+    constructor();
     getTilePaintData(): {
         corpse: {
             type: CreatureType | "remove" | undefined;

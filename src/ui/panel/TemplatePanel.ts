@@ -1,27 +1,25 @@
-import ActionExecutor from "action/ActionExecutor";
-import { Bindable } from "Enums";
+import ActionExecutor from "entity/action/ActionExecutor";
 import { RenderSource } from "game/IGame";
 import Translation from "language/Translation";
 import { ITemplateOptions, manipulateTemplates } from "mapgen/MapGenHelpers";
 import { HookMethod } from "mod/IHookHost";
 import Mod from "mod/Mod";
-import { BindCatcherApi } from "newui/BindingManager";
+import { Bindable, BindCatcherApi } from "newui/BindingManager";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Dropdown, { DropdownEvent } from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import Spacer from "newui/screen/screens/menu/component/Spacer";
 import { TileTemplateType } from "tile/ITerrain";
 import templateDescriptions from "tile/TerrainTemplates";
+import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
-import Objects, { Bound } from "utilities/Objects";
+import { Bound } from "utilities/Objects";
+import Stream from "utilities/stream/Stream";
 import PlaceTemplate from "../../action/PlaceTemplate";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -45,49 +43,45 @@ export default class TemplatePanel extends DebugToolsPanel {
 	private readonly previewTiles: number[] = [];
 	private selectHeld = false;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		new LabelledRow(this.api)
+		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTemplateType)))
-			.append(this.dropdownType = new Dropdown<TileTemplateType>(this.api)
+			.append(this.dropdownType = new Dropdown<TileTemplateType>()
 				.setRefreshMethod(() => ({
 					defaultOption: TileTemplateType.House,
 					options: Enums.values(TileTemplateType)
 						.map(type => tuple(type, Translation.generator(TileTemplateType[type])))
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
+						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
 				}))
 				.on(DropdownEvent.Selection, this.changeTemplateType))
 			.appendTo(this);
 
-		new LabelledRow(this.api)
+		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTemplate)))
-			.append(this.dropdownTemplate = new Dropdown<string>(this.api)
+			.append(this.dropdownTemplate = new Dropdown<string>()
 				.setRefreshMethod(() => ({
-					defaultOption: Objects.keys<string>(templateDescriptions[this.dropdownType.selection]).collect(Collectors.first())!,
-					options: Objects.keys<string>(templateDescriptions[this.dropdownType.selection])
+					defaultOption: Stream.keys<string>(templateDescriptions[this.dropdownType.selection]).first()!,
+					options: Stream.keys<string>(templateDescriptions[this.dropdownType.selection])
 						.map(name => tuple(name, Translation.generator(name)))
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
+						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
 				})))
 			.appendTo(this);
 
-		this.mirrorVertically = new CheckButton(this.api)
+		this.mirrorVertically = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonMirrorVertically))
 			.appendTo(this);
 
-		this.mirrorHorizontally = new CheckButton(this.api)
+		this.mirrorHorizontally = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonMirrorHorizontally))
 			.appendTo(this);
 
-		this.rotate = new RangeRow(this.api)
+		this.rotate = new RangeRow()
 			.classes.add("no-button")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelRotate)))
 			.editRange(range => range
@@ -96,7 +90,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 			.setDisplayValue(translation(DebugToolsTranslation.RangeRotateDegrees).get)
 			.appendTo(this);
 
-		this.degrade = new RangeRow(this.api)
+		this.degrade = new RangeRow()
 			.classes.add("no-button")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDegrade)))
 			.editRange(range => range
@@ -104,9 +98,9 @@ export default class TemplatePanel extends DebugToolsPanel {
 			.setDisplayValue(translation(DebugToolsTranslation.RangeDegradeAmount).get)
 			.appendTo(this);
 
-		new Spacer(this.api).appendTo(this);
+		new Spacer().appendTo(this);
 
-		this.place = new CheckButton(this.api)
+		this.place = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonPlace))
 			.appendTo(this);
 
@@ -128,8 +122,8 @@ export default class TemplatePanel extends DebugToolsPanel {
 	// tslint:disable cyclomatic-complexity
 	@Override @HookMethod
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
-		const wasPlacePressed = api.wasPressed(this.DEBUG_TOOLS.selector.bindableSelectLocation) && this.gsapi.isMouseWithin();
-		const wasCancelPressed = api.wasPressed(this.DEBUG_TOOLS.selector.bindableCancelSelectLocation) && this.gsapi.isMouseWithin();
+		const wasPlacePressed = api.wasPressed(this.DEBUG_TOOLS.selector.bindableSelectLocation) && gameScreen!.isMouseWithin();
+		const wasCancelPressed = api.wasPressed(this.DEBUG_TOOLS.selector.bindableCancelSelectLocation) && gameScreen!.isMouseWithin();
 
 		this.clearPreview();
 

@@ -1,28 +1,28 @@
-import ActionExecutor from "action/ActionExecutor";
-import { ActionType } from "action/IAction";
-import { ICreature, IDamageInfo } from "creature/ICreature";
+import ActionExecutor from "entity/action/ActionExecutor";
+import { ActionType } from "entity/action/IAction";
+import { ICreature, IDamageInfo } from "entity/creature/ICreature";
 import Entity from "entity/Entity";
-import { EntityType } from "entity/IEntity";
-import IHuman from "entity/IHuman";
-import { Bindable, Delay, Direction, MoveType, OverlayType, SpriteBatchLayer } from "Enums";
+import { EntityType, MoveType } from "entity/IEntity";
+import IHuman, { Delay } from "entity/IHuman";
+import { INPC } from "entity/npc/INPC";
+import { Source } from "entity/player/IMessageManager";
+import IPlayer from "entity/player/IPlayer";
 import { RenderSource } from "game/IGame";
 import { Dictionary } from "language/Dictionaries";
+import Interrupt from "language/dictionary/Interrupt";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Message from "language/dictionary/Message";
 import { HookMethod } from "mod/IHookHost";
 import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
-import { BindCatcherApi, bindingManager, KeyModifier } from "newui/BindingManager";
-import { ScreenId } from "newui/screen/IScreen";
+import { Bindable, BindCatcherApi, bindingManager, KeyModifier } from "newui/BindingManager";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
 import { MenuBarButtonGroup, MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
-import GameScreen from "newui/screen/screens/GameScreen";
-import { INPC } from "npc/INPC";
-import { Source } from "player/IMessageManager";
-import IPlayer from "player/IPlayer";
-import { ITile } from "tile/ITerrain";
+import { SpriteBatchLayer } from "renderer/IWorldRenderer";
+import { ITile, OverlayType } from "tile/ITerrain";
 import Log from "utilities/Log";
+import { Direction } from "utilities/math/Direction";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
@@ -172,6 +172,11 @@ export default class DebugTools extends Mod {
 
 	@Register.messageSource("DebugTools")
 	public readonly source: Source;
+
+	@Register.interrupt("ConfirmUnlockRecipes")
+	public readonly interruptUnlockRecipes: Interrupt;
+	@Register.interrupt("ChoiceTravelAway")
+	public readonly interruptTravelAway: Interrupt;
 
 	@Register.interruptChoice("SailToCivilization")
 	public readonly choiceSailToCivilization: InterruptChoice;
@@ -332,9 +337,8 @@ export default class DebugTools extends Mod {
 		this.emit(DebugToolsEvent.PlayerDataChange, player.id, key, value);
 
 		if (!this.hasPermission()) {
-			const gameScreen = newui.getScreen<GameScreen>(ScreenId.Game)!;
-			gameScreen.closeDialog(this.dialogMain);
-			gameScreen.closeDialog(this.dialogInspect);
+			gameScreen!.closeDialog(this.dialogMain);
+			gameScreen!.closeDialog(this.dialogInspect);
 		}
 	}
 
@@ -376,7 +380,7 @@ export default class DebugTools extends Mod {
 	 */
 	public onUnload() {
 		hookManager.deregister(this.selector);
-		AddItemToInventoryComponent.init(newui).releaseAndRemove();
+		AddItemToInventoryComponent.init().releaseAndRemove();
 	}
 
 	/**
@@ -423,8 +427,7 @@ export default class DebugTools extends Mod {
 	 * - Emits `DebugToolsEvent.Inspect`
 	 */
 	public inspect(what: Vector2 | ICreature | IPlayer | INPC) {
-		newui.getScreen<GameScreen>(ScreenId.Game)!
-			.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
+		gameScreen!.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
 			.setInspection(what);
 
 		this.emit(DebugToolsEvent.Inspect);
@@ -436,8 +439,7 @@ export default class DebugTools extends Mod {
 	public toggleDialog() {
 		if (!this.hasPermission()) return;
 
-		newui.getScreen<GameScreen>(ScreenId.Game)!
-			.toggleDialog(this.dialogMain);
+		gameScreen!.toggleDialog(this.dialogMain);
 	}
 
 	public hasPermission() {
@@ -463,7 +465,7 @@ export default class DebugTools extends Mod {
 	 */
 	@HookMethod
 	public onGameScreenVisible() {
-		AddItemToInventoryComponent.init(newui);
+		AddItemToInventoryComponent.init();
 	}
 
 	/**
@@ -624,9 +626,7 @@ export default class DebugTools extends Mod {
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable {
 		if (!this.hasPermission()) return bindPressed;
 
-		const gameScreen = newui.getScreen<GameScreen>(ScreenId.Game)!;
-
-		if (api.wasPressed(Bindable.GameZoomIn) && !bindPressed && gameScreen.isMouseWithin()) {
+		if (api.wasPressed(Bindable.GameZoomIn) && !bindPressed && gameScreen!.isMouseWithin()) {
 			this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;
 			this.data.zoomLevel = Math.min(11, ++this.data.zoomLevel);
 			game.updateZoomLevel();
@@ -634,7 +634,7 @@ export default class DebugTools extends Mod {
 			api.removePressState(Bindable.GameZoomIn);
 		}
 
-		if (api.wasPressed(Bindable.GameZoomOut) && !bindPressed && gameScreen.isMouseWithin()) {
+		if (api.wasPressed(Bindable.GameZoomOut) && !bindPressed && gameScreen!.isMouseWithin()) {
 			this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;
 			this.data.zoomLevel = Math.max(0, --this.data.zoomLevel);
 			game.updateZoomLevel();
@@ -647,7 +647,7 @@ export default class DebugTools extends Mod {
 			bindPressed = this.bindableToggleCameraLock;
 		}
 
-		if (api.wasPressed(this.bindableInspectTile) && !bindPressed && gameScreen.isMouseWithin()) {
+		if (api.wasPressed(this.bindableInspectTile) && !bindPressed && gameScreen!.isMouseWithin()) {
 			this.inspect(renderer.screenToTile(...bindingManager.getMouse().xy));
 			bindPressed = this.bindableInspectTile;
 		}

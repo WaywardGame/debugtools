@@ -1,4 +1,4 @@
-define(["require", "exports", "creature/Creature", "doodad/doodads/Doodad", "item/Item", "npc/BaseNPC", "./RemoveItem"], function (require, exports, Creature_1, Doodad_1, Item_1, BaseNPC_1, RemoveItem_1) {
+define(["require", "exports", "doodad/doodads/Doodad", "entity/creature/Creature", "entity/npc/BaseNPC", "item/Item", "./RemoveItem"], function (require, exports, Doodad_1, Creature_1, BaseNPC_1, Item_1, RemoveItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function default_1(action, target) {

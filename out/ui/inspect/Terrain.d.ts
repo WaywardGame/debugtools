@@ -1,4 +1,3 @@
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
@@ -10,7 +9,7 @@ export default class TerrainInformation extends InspectInformationSection {
     private terrainType;
     private readonly checkButtonTilled;
     private readonly dropdownTerrainType;
-    constructor(gsapi: IGameScreenApi);
+    constructor();
     getTabs(): TabInformation[];
     getTabTranslation(): import("../../../mod-reference/definitions/utilities/string/Interpolator").IStringSection[];
     update(position: IVector2, tile: ITile): this | undefined;

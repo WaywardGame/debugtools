@@ -1,11 +1,10 @@
-import ActionExecutor from "action/ActionExecutor";
-import { ICreature } from "creature/ICreature";
+import ActionExecutor from "entity/action/ActionExecutor";
+import { ICreature } from "entity/creature/ICreature";
 import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
+import { INPC } from "entity/npc/INPC";
+import { IPlayer } from "entity/player/IPlayer";
 import Button, { ButtonEvent } from "newui/component/Button";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { INPC } from "npc/INPC";
-import { IPlayer } from "player/IPlayer";
 import { Bound } from "utilities/Objects";
 import Remove from "../../action/Remove";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -14,10 +13,10 @@ import InspectEntityInformationSubsection from "../component/InspectEntityInform
 export default class NpcInformation extends InspectEntityInformationSubsection {
 	private npc: INPC | undefined;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		new Button(this.api)
+		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonRemoveThing))
 			.on(ButtonEvent.Activate, this.removeNPC)
 			.appendTo(this);
