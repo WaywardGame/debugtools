@@ -1,4 +1,5 @@
 import Translation from "language/Translation";
+
 import DebugTools from "./DebugTools";
 import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import InspectEntityInformationSubsection from "./ui/component/InspectEntityInformationSubsection";

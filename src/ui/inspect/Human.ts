@@ -2,7 +2,7 @@ import ActionExecutor from "entity/action/ActionExecutor";
 import { ICreature } from "entity/creature/ICreature";
 import Entity from "entity/Entity";
 import { REPUTATION_MAX } from "entity/Human";
-import IEntity, { EntityEvent, EntityType } from "entity/IEntity";
+import { EntityType } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
 import { INPC } from "entity/npc/INPC";
 import IPlayer from "entity/player/IPlayer";
@@ -14,6 +14,7 @@ import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
 import { Bound } from "utilities/Objects";
 import Stream from "utilities/stream/Stream";
+
 import AddItemToInventory from "../../action/AddItemToInventory";
 import SetStat from "../../action/SetStat";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -67,8 +68,8 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 			this.reputationSliders[type]!.refresh();
 		}
 
-		this.until([ComponentEvent.Remove, "change"])
-			.bind(entity as IEntity, EntityEvent.StatChanged, this.onStatChange);
+		entity.event.until(this.waitUntil([ComponentEvent.Remove, "change"]))
+			.subscribe("statChanged", this.onStatChange);
 	}
 
 	private addReputationSlider(labelTranslation: DebugToolsTranslation, type: Stat.Benignity | Stat.Malignity) {

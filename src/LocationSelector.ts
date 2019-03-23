@@ -8,6 +8,7 @@ import { ITile } from "tile/ITerrain";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
+
 import DebugTools from "./DebugTools";
 import { DEBUG_TOOLS_ID } from "./IDebugTools";
 import Overlays from "./overlay/Overlays";

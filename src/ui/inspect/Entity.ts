@@ -1,6 +1,6 @@
 import ActionExecutor from "entity/action/ActionExecutor";
 import { ICreature } from "entity/creature/ICreature";
-import IEntity, { EntityEvent, EntityType, IStatChangeInfo } from "entity/IEntity";
+import { EntityType, IStatChangeInfo } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
 import { INPC } from "entity/npc/INPC";
 import IPlayer from "entity/player/IPlayer";
@@ -25,6 +25,7 @@ import Log from "utilities/Log";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
+
 import Clone from "../../action/Clone";
 import Heal from "../../action/Heal";
 import Kill from "../../action/Kill";
@@ -36,6 +37,7 @@ import { areArraysIdentical } from "../../util/Array";
 import { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 import InspectInformationSection from "../component/InspectInformationSection";
+
 import CreatureInformation from "./Creature";
 import HumanInformation from "./Human";
 import NpcInformation from "./Npc";
@@ -138,8 +140,8 @@ export default class EntityInformation extends InspectInformationSection {
 		this.setShouldLog();
 
 		for (const entity of this.entities) {
-			this.until([ComponentEvent.Remove, "change"])
-				.bind(entity as IEntity, EntityEvent.StatChanged, this.onStatChange);
+			entity.event.until(this.waitUntil([ComponentEvent.Remove, "change"]))
+				.subscribe("statChanged", this.onStatChange);
 		}
 	}
 
