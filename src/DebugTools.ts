@@ -7,6 +7,7 @@ import IHuman, { Delay } from "entity/IHuman";
 import { INPC } from "entity/npc/INPC";
 import { Source } from "entity/player/IMessageManager";
 import IPlayer from "entity/player/IPlayer";
+import Game from "game/Game";
 import { RenderSource } from "game/IGame";
 import { Dictionary } from "language/Dictionaries";
 import Interrupt from "language/dictionary/Interrupt";
@@ -20,12 +21,15 @@ import { Bindable, BindCatcherApi, bindingManager, KeyModifier } from "newui/Bin
 import { DialogId } from "newui/screen/screens/game/Dialogs";
 import { MenuBarButtonGroup, MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
 import { SpriteBatchLayer } from "renderer/IWorldRenderer";
+import WorldRenderer from "renderer/WorldRenderer";
 import { ITile, OverlayType } from "tile/ITerrain";
+import { IInjectionApi, Inject, InjectionPosition } from "utilities/Inject";
 import Log from "utilities/Log";
 import { Direction } from "utilities/math/Direction";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
+
 import AddItemToInventory from "./action/AddItemToInventory";
 import ChangeTerrain from "./action/ChangeTerrain";
 import Clone from "./action/Clone";
@@ -680,37 +684,33 @@ export default class DebugTools extends Mod {
 	/**
 	 * If lighting is disabled, we return maximum light on all channels.
 	 */
-	@HookMethod
-	public getAmbientColor(colors: [number, number, number]) {
+	@Inject(WorldRenderer, "calculateAmbientColor", InjectionPosition.Post)
+	public getAmbientColor(api: IInjectionApi<WorldRenderer, "calculateAmbientColor">) {
 		if (this.getPlayerData(localPlayer, "lighting") === false) {
-			return Vector3.ONE.xyz;
+			api.returnValue = Vector3.ONE.xyz;
 		}
-
-		return undefined;
 	}
 
 	/**
 	 * If lighting is disabled, we return the maximum light level.
 	 */
-	@HookMethod
-	public getAmbientLightLevel(ambientLight: number, z: number): number | undefined {
+	@Inject(Game, "calculateAmbientLightLevel", InjectionPosition.Pre)
+	public getAmbientLightLevel(api: IInjectionApi<Game, "calculateAmbientLightLevel">, z: number) {
 		if (this.getPlayerData(localPlayer, "lighting") === false) {
-			return 1;
+			api.returnValue = 1;
+			api.cancelled = true;
 		}
-
-		return undefined;
 	}
 
 	/**
 	 * If lighting is disabled, we return the minimum light level.
 	 */
-	@HookMethod
-	public getTileLightLevel(tile: ITile, x: number, y: number, z: number): number | undefined {
+	@Inject(Game, "calculateTileLightLevel", InjectionPosition.Pre)
+	public getTileLightLevel(api: IInjectionApi<Game, "calculateTileLightLevel">, tile: ITile, x: number, y: number, z: number) {
 		if (this.getPlayerData(localPlayer, "lighting") === false) {
-			return 0;
+			api.returnValue = 0;
+			api.cancelled = true;
 		}
-
-		return undefined;
 	}
 
 	private needsUpgrade(data?: { lastVersion?: string }) {
