@@ -1,5 +1,6 @@
 import { IDoodad } from "doodad/IDoodad";
 import { IVector3 } from "utilities/math/IVector";
+
 import CloneContainedItems from "./CloneContainedItems";
 
 /**
@@ -7,6 +8,7 @@ import CloneContainedItems from "./CloneContainedItems";
  */
 export default function (doodad: IDoodad, position: IVector3) {
 	const clone = doodadManager.create(doodad.type, position.x, position.y, position.z, {
+		stillContainer: doodad.stillContainer,
 		gatherReady: doodad.gatherReady,
 		gfx: doodad.gfx,
 		spread: doodad.spread,

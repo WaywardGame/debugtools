@@ -684,10 +684,11 @@ export default class DebugTools extends Mod {
 	/**
 	 * If lighting is disabled, we return maximum light on all channels.
 	 */
-	@Inject(WorldRenderer, "calculateAmbientColor", InjectionPosition.Post)
+	@Inject(WorldRenderer, "calculateAmbientColor", InjectionPosition.Pre)
 	public getAmbientColor(api: IInjectionApi<WorldRenderer, "calculateAmbientColor">) {
 		if (this.getPlayerData(localPlayer, "lighting") === false) {
 			api.returnValue = Vector3.ONE.xyz;
+			api.cancelled = true;
 		}
 	}
 
