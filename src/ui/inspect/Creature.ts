@@ -4,9 +4,10 @@ import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
 import { INPC } from "entity/npc/INPC";
 import { IPlayer } from "entity/player/IPlayer";
-import Button, { ButtonEvent } from "newui/component/Button";
-import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
+import Button from "newui/component/Button";
+import { CheckButton } from "newui/component/CheckButton";
 import { Bound } from "utilities/Objects";
+
 import Remove from "../../action/Remove";
 import SetTamed from "../../action/SetTamed";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -21,12 +22,12 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 		new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonTameCreature))
 			.setRefreshMethod(() => this.creature ? this.creature.isTamed() : false)
-			.on(CheckButtonEvent.Change, this.setTamed)
+			.event.subscribe("toggle", this.setTamed)
 			.appendTo(this);
 
 		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonRemoveThing))
-			.on(ButtonEvent.Activate, this.removeCreature)
+			.event.subscribe("activate", this.removeCreature)
 			.appendTo(this);
 	}
 

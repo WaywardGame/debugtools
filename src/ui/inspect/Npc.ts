@@ -4,8 +4,9 @@ import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
 import { INPC } from "entity/npc/INPC";
 import { IPlayer } from "entity/player/IPlayer";
-import Button, { ButtonEvent } from "newui/component/Button";
+import Button from "newui/component/Button";
 import { Bound } from "utilities/Objects";
+
 import Remove from "../../action/Remove";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
@@ -18,7 +19,7 @@ export default class NpcInformation extends InspectEntityInformationSubsection {
 
 		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonRemoveThing))
-			.on(ButtonEvent.Activate, this.removeNPC)
+			.event.subscribe("activate", this.removeNPC)
 			.appendTo(this);
 	}
 

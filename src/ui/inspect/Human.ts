@@ -2,15 +2,14 @@ import ActionExecutor from "entity/action/ActionExecutor";
 import { ICreature } from "entity/creature/ICreature";
 import Entity from "entity/Entity";
 import { REPUTATION_MAX } from "entity/Human";
-import { EntityType } from "entity/IEntity";
+import IEntity, { EntityType } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
 import { INPC } from "entity/npc/INPC";
 import IPlayer from "entity/player/IPlayer";
+import { EventHandler } from "event/EventManager";
 import { Quality } from "game/IObject";
 import { ItemType } from "item/IItem";
 import Component from "newui/component/Component";
-import { ComponentEvent } from "newui/component/IComponent";
-import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
 import { Bound } from "utilities/Objects";
 import Stream from "utilities/stream/Stream";
@@ -18,8 +17,7 @@ import Stream from "utilities/stream/Stream";
 import AddItemToInventory from "../../action/AddItemToInventory";
 import SetStat from "../../action/SetStat";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
-import AddItemToInventoryComponent, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
-import { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
+import AddItemToInventoryComponent from "../component/AddItemToInventory";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
 export default class HumanInformation extends InspectEntityInformationSubsection {
@@ -35,12 +33,13 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 		this.addReputationSlider(DebugToolsTranslation.LabelMalignity, Stat.Malignity);
 		this.addReputationSlider(DebugToolsTranslation.LabelBenignity, Stat.Benignity);
+	}
 
-		this.on(DebugToolsPanelEvent.SwitchTo, () => {
-			const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this.addItemContainer);
-			this.until(DebugToolsPanelEvent.SwitchAway)
-				.bind(addItemToInventory, AddItemToInventoryEvent.Execute, this.addItem);
-		});
+	@EventHandler<HumanInformation>("self")("switchTo")
+	protected onSwitchTo() {
+		const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this.addItemContainer);
+		addItemToInventory.event.until<HumanInformation>(this, "switchAway")
+			.subscribe("execute", this.addItem);
 	}
 
 	public getImmutableStats() {
@@ -60,7 +59,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 		this.human = Entity.is(entity, EntityType.Creature) ? undefined : entity;
 		this.toggle(!!this.human);
 
-		this.emit("change");
+		this.event.emit("change");
 
 		if (!this.human) return;
 
@@ -68,7 +67,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 			this.reputationSliders[type]!.refresh();
 		}
 
-		entity.event.until(this.waitUntil([ComponentEvent.Remove, "change"]))
+		(entity as IEntity).event.until<HumanInformation>(this, "switchAway")
 			.subscribe("statChanged", this.onStatChange);
 	}
 
@@ -80,7 +79,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 				.setMax(REPUTATION_MAX)
 				.setRefreshMethod(() => this.human ? this.human.getStatValue(type)! : 0))
 			.setDisplayValue(true)
-			.on(RangeInputEvent.Finish, this.setReputation(type))
+			.event.subscribe("finish", this.setReputation(type))
 			.appendTo(this);
 	}
 

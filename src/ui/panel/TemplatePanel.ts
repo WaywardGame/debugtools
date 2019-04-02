@@ -1,4 +1,5 @@
 import ActionExecutor from "entity/action/ActionExecutor";
+import { EventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import Translation from "language/Translation";
 import { ITemplateOptions, manipulateTemplates } from "mapgen/MapGenHelpers";
@@ -7,7 +8,7 @@ import Mod from "mod/Mod";
 import { Bindable, BindCatcherApi } from "newui/BindingManager";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
-import Dropdown, { DropdownEvent } from "newui/component/Dropdown";
+import Dropdown from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
@@ -20,12 +21,13 @@ import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
 import Stream from "utilities/stream/Stream";
+
 import PlaceTemplate from "../../action/PlaceTemplate";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
 import { getTileId, getTilePosition } from "../../util/TilePosition";
-import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
+import DebugToolsPanel from "../component/DebugToolsPanel";
 
 export default class TemplatePanel extends DebugToolsPanel {
 
@@ -57,7 +59,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
 				}))
-				.on(DropdownEvent.Selection, this.changeTemplateType))
+				.event.subscribe("selection", this.changeTemplateType))
 			.appendTo(this);
 
 		new LabelledRow()
@@ -103,9 +105,6 @@ export default class TemplatePanel extends DebugToolsPanel {
 		this.place = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonPlace))
 			.appendTo(this);
-
-		this.on(DebugToolsPanelEvent.SwitchTo, this.onSwitchTo);
-		this.on(DebugToolsPanelEvent.SwitchAway, this.onSwitchAway);
 	}
 
 	@Override public getTranslation() {
@@ -193,14 +192,14 @@ export default class TemplatePanel extends DebugToolsPanel {
 		};
 	}
 
-	@Bound
-	private onSwitchTo() {
-		hookManager.register(this, "DebugToolsDialog:TemplatePanel")
-			.until(DebugToolsPanelEvent.SwitchAway);
+	@EventHandler<TemplatePanel>("self")("switchTo")
+	protected onSwitchTo() {
+		this.registerHookHost("DebugToolsDialog:TemplatePanel");
 	}
 
-	@Bound
-	private onSwitchAway() {
+	@EventHandler<TemplatePanel>("self")("switchAway")
+	protected onSwitchAway() {
+		hookManager.deregister(this);
 		this.place.setChecked(false);
 		this.clearPreview();
 	}

@@ -20,8 +20,8 @@ export default class TemplatePanel extends DebugToolsPanel {
     private getTemplate;
     private templateHasTile;
     private getTemplateOptions;
-    private onSwitchTo;
-    private onSwitchAway;
+    protected onSwitchTo(): void;
+    protected onSwitchAway(): void;
     private changeTemplateType;
     private placeTemplate;
     private clearPreview;

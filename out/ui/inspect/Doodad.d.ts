@@ -9,6 +9,7 @@ export default class DoodadInformation extends InspectInformationSection {
     private doodad;
     private readonly buttonGrowthStage;
     constructor();
+    protected onSwitchTo(): void;
     getTabs(): TabInformation[];
     update(position: IVector2, tile: ITile): void;
     logUpdate(): void;

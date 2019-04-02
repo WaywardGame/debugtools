@@ -3,8 +3,8 @@ import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button from "newui/component/Button";
-import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
-import Dropdown, { DropdownEvent } from "newui/component/Dropdown";
+import { CheckButton } from "newui/component/CheckButton";
+import Dropdown from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import { ITile, TerrainType } from "tile/ITerrain";
@@ -16,6 +16,7 @@ import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
+
 import ChangeTerrain from "../../action/ChangeTerrain";
 import ToggleTilled from "../../action/ToggleTilled";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -48,13 +49,13 @@ export default class TerrainInformation extends InspectInformationSection {
 						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
 				}))
-				.on(DropdownEvent.Selection, this.changeTerrain))
+				.event.subscribe("selection", this.changeTerrain))
 			.appendTo(this);
 
 		this.checkButtonTilled = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonToggleTilled))
 			.setRefreshMethod(() => this.tile && TileHelpers.isTilled(this.tile))
-			.on(CheckButtonEvent.Change, this.toggleTilled)
+			.event.subscribe("toggle", this.toggleTilled)
 			.appendTo(this);
 	}
 

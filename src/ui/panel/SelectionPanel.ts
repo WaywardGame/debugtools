@@ -2,9 +2,9 @@ import ActionExecutor from "entity/action/ActionExecutor";
 import { ICreature } from "entity/creature/ICreature";
 import { EntityType } from "entity/IEntity";
 import { INPC } from "entity/npc/INPC";
-import Button, { ButtonEvent } from "newui/component/Button";
-import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
-import Dropdown, { DropdownEvent } from "newui/component/Dropdown";
+import Button from "newui/component/Button";
+import { CheckButton } from "newui/component/CheckButton";
+import Dropdown from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeRow } from "newui/component/RangeRow";
 import { ITileEvent } from "tile/ITileEvent";
@@ -12,6 +12,7 @@ import Arrays, { tuple } from "utilities/Arrays";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
 import Stream from "utilities/stream/Stream";
+
 import SelectionExecute from "../../action/SelectionExecute";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
@@ -46,7 +47,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.SelectionMethod)))
-			.append(new Dropdown()
+			.append(new Dropdown<DebugToolsTranslation>()
 				.setRefreshMethod(() => ({
 					defaultOption: DebugToolsTranslation.MethodAll,
 					options: [
@@ -55,7 +56,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 						[DebugToolsTranslation.MethodRandom, option => option.setText(translation(DebugToolsTranslation.MethodRandom))],
 					],
 				}))
-				.on(DropdownEvent.Selection, this.changeMethod))
+				.event.subscribe("selection", this.changeMethod))
 			.append(this.rangeQuantity = new RangeRow()
 				.classes.add("debug-tools-dialog-selection-quantity")
 				.setLabel(label => label.hide())
@@ -69,24 +70,24 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 		new CheckButton()
 			.setText(translation(DebugToolsTranslation.FilterCreatures))
-			.on<[boolean]>(CheckButtonEvent.Change, (_, enabled) => { this.creatures = enabled; })
+			.event.subscribe("toggle", (_, enabled) => this.creatures = enabled)
 			.appendTo(this);
 
 		new CheckButton()
 			.setText(translation(DebugToolsTranslation.FilterNPCs))
-			.on<[boolean]>(CheckButtonEvent.Change, (_, enabled) => { this.npcs = enabled; })
+			.event.subscribe("toggle", (_, enabled) => this.npcs = enabled)
 			.appendTo(this);
 
 		new CheckButton()
 			.setText(translation(DebugToolsTranslation.FilterTileEvents))
-			.on<[boolean]>(CheckButtonEvent.Change, (_, enabled) => { this.tileEvents = enabled; })
+			.event.subscribe("toggle", (_, enabled) => this.tileEvents = enabled)
 			.appendTo(this);
 
 		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.SelectionAction)))
-			.append(new Dropdown()
-				.on<[DebugToolsTranslation]>(DropdownEvent.Selection, (_, action) => this.action = action)
+			.append(new Dropdown<DebugToolsTranslation>()
+				.event.subscribe("selection", (_, action) => this.action = action)
 				.setRefreshMethod(() => ({
 					defaultOption: DebugToolsTranslation.ActionRemove,
 					options: [
@@ -97,7 +98,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonExecute))
-			.on(ButtonEvent.Activate, this.execute)
+			.event.subscribe("activate", this.execute)
 			.appendTo(this);
 	}
 

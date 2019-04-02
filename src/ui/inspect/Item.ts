@@ -4,19 +4,19 @@ import { IItem, ItemType } from "item/IItem";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
-import Button, { ButtonEvent } from "newui/component/Button";
+import Button from "newui/component/Button";
 import Component from "newui/component/Component";
-import { ComponentEvent } from "newui/component/IComponent";
 import { Paragraph } from "newui/component/Text";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
+
 import AddItemToInventory from "../../action/AddItemToInventory";
 import Remove from "../../action/Remove";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
-import AddItemToInventoryComponent, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
+import AddItemToInventoryComponent from "../component/AddItemToInventory";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
 export default class ItemInformation extends InspectInformationSection {
@@ -45,8 +45,8 @@ export default class ItemInformation extends InspectInformationSection {
 
 	public setTab() {
 		const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this.wrapperAddItem);
-		this.until(ComponentEvent.WillRemove)
-			.bind(addItemToInventory, AddItemToInventoryEvent.Execute, this.addItem);
+		addItemToInventory.event.until<ItemInformation>(this, "willRemove")
+			.subscribe("execute", this.addItem);
 
 		return this;
 	}
@@ -71,7 +71,7 @@ export default class ItemInformation extends InspectInformationSection {
 
 			new Button()
 				.setText(translation(DebugToolsTranslation.ActionRemove))
-				.on(ButtonEvent.Activate, this.removeItem(item))
+				.event.subscribe("activate", this.removeItem(item))
 				.appendTo(this.wrapperItems);
 		}
 	}

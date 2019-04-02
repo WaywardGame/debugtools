@@ -2,14 +2,16 @@ import { DoodadType } from "doodad/IDoodad";
 import ActionExecutor from "entity/action/ActionExecutor";
 import { CreatureType } from "entity/creature/ICreature";
 import { NPCType } from "entity/npc/NPCS";
+import { ExtendedEvents } from "event/EventEmitter";
+import { EventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
 import { Bindable, BindCatcherApi, bindingManager } from "newui/BindingManager";
 import { BlockRow } from "newui/component/BlockRow";
-import Button, { ButtonEvent } from "newui/component/Button";
-import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
+import Button from "newui/component/Button";
+import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
 import ContextMenu from "newui/component/ContextMenu";
 import Spacer from "newui/screen/screens/menu/component/Spacer";
@@ -19,13 +21,14 @@ import { TileEventType } from "tile/ITileEvent";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
+
 import Paint from "../../action/Paint";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Overlays from "../../overlay/Overlays";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
 import { getTileId, getTilePosition } from "../../util/TilePosition";
-import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
+import DebugToolsPanel from "../component/DebugToolsPanel";
 import CorpsePaint from "../paint/Corpse";
 import CreaturePaint from "../paint/Creature";
 import DoodadPaint from "../paint/Doodad";
@@ -59,7 +62,12 @@ export interface IPaintData {
 	};
 }
 
+export interface IPaintSectionEvents {
+	change(): any;
+}
+
 export interface IPaintSection extends Component {
+	event: ExtendedEvents<this, Component, IPaintSectionEvents>;
 	isChanging(): boolean;
 	reset(): void;
 	getTilePaintData(): Partial<IPaintData> | undefined;
@@ -95,7 +103,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 		this.paintSections.push(...paintSections
 			.map(cls => new cls()
-				.on("change", this.onPaintSectionChange)
+				.event.subscribe("change", this.onPaintSectionChange)
 				.appendTo(this)));
 
 		new Spacer().appendTo(this);
@@ -104,21 +112,18 @@ export default class PaintPanel extends DebugToolsPanel {
 			.classes.add("debug-tools-paint-row")
 			.append(this.paintButton = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonPaint))
-				.on<[boolean]>(CheckButtonEvent.Change, (_, paint) => {
+				.event.subscribe("toggle", (_, paint) => {
 					this.paintRow.classes.toggle(this.painting = paint, "painting");
 					if (!paint) this.clearPaint();
 				}))
 			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonPaintClear))
 				.setTooltip(tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.TooltipPaintClear))))
-				.on(ButtonEvent.Activate, this.clearPaint))
+				.event.subscribe("activate", this.clearPaint))
 			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonPaintComplete))
 				.setTooltip(tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.TooltipPaintComplete))))
-				.on(ButtonEvent.Activate, this.completePaint));
-
-		this.on(DebugToolsPanelEvent.SwitchTo, this.onSwitchTo);
-		this.on(DebugToolsPanelEvent.SwitchAway, this.onSwitchAway);
+				.event.subscribe("activate", this.completePaint));
 	}
 
 	@Override public getTranslation() {
@@ -236,23 +241,18 @@ export default class PaintPanel extends DebugToolsPanel {
 	}
 	// tslint:enable cyclomatic-complexity
 
-	private updateOverlayBatch() {
-		if (this.paintTiles.length * 4 - 512 < this.maxSprites || this.paintTiles.length * 4 + 512 > this.maxSprites) {
-			renderer.initializeSpriteBatch(SpriteBatchLayer.Overlay, true);
-		}
-	}
-
-	@Bound
-	private onSwitchTo() {
+	@EventHandler<PaintPanel>("self")("switchTo")
+	protected onSwitchTo() {
 		this.getParent()!.classes.add("debug-tools-paint-panel");
 		this.paintRow.appendTo(this.getParent()!.getParent()!);
 
-		hookManager.register(this, "DebugToolsDialog:PaintPanel")
-			.until(DebugToolsPanelEvent.SwitchAway);
+		this.registerHookHost("DebugToolsDialog:PaintPanel");
 	}
 
-	@Bound
-	private onSwitchAway() {
+	@EventHandler<PaintPanel>("self")("switchAway")
+	protected onSwitchAway() {
+		hookManager.deregister(this);
+
 		this.paintButton.setChecked(false);
 
 		this.paintRow.store();
@@ -260,6 +260,12 @@ export default class PaintPanel extends DebugToolsPanel {
 		const parent = this.getParent();
 		if (parent) {
 			parent.classes.remove("debug-tools-paint-panel");
+		}
+	}
+
+	private updateOverlayBatch() {
+		if (this.paintTiles.length * 4 - 512 < this.maxSprites || this.paintTiles.length * 4 + 512 > this.maxSprites) {
+			renderer.initializeSpriteBatch(SpriteBatchLayer.Overlay, true);
 		}
 	}
 

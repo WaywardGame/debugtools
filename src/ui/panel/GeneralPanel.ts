@@ -1,6 +1,7 @@
 import { SfxType } from "audio/IAudio";
 import ActionExecutor from "entity/action/ActionExecutor";
 import { ActionType } from "entity/action/IAction";
+import { EventHandler } from "event/EventManager";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
@@ -8,10 +9,9 @@ import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
 import { Bindable, BindCatcherApi } from "newui/BindingManager";
 import { BlockRow } from "newui/component/BlockRow";
-import Button, { ButtonEvent } from "newui/component/Button";
-import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
+import Button from "newui/component/Button";
+import { CheckButton } from "newui/component/CheckButton";
 import Dropdown from "newui/component/Dropdown";
-import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
 import { ParticleType } from "renderer/particle/IParticle";
@@ -20,12 +20,13 @@ import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import { Bound } from "utilities/Objects";
+
 import SetTime from "../../action/SetTime";
 import UnlockRecipes from "../../action/UnlockRecipes";
-import DebugTools, { DebugToolsEvent } from "../../DebugTools";
+import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import CancelablePromise from "../../util/CancelablePromise";
-import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
+import DebugToolsPanel from "../component/DebugToolsPanel";
 
 export default class GeneralPanel extends DebugToolsPanel {
 
@@ -53,7 +54,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 				.setMax(1)
 				.setRefreshMethod(() => game.time.getTime()))
 			.setDisplayValue(time => game.time.getTranslation(time))
-			.on(RangeInputEvent.Change, (_, time: number) => {
+			.event.subscribe("change", (_, time) => {
 				ActionExecutor.get(SetTime).execute(localPlayer, time);
 			})
 			.appendTo(this);
@@ -61,7 +62,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 		this.inspectButton = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonInspect))
 			.setRefreshMethod(() => !!this.selectionPromise)
-			.on(CheckButtonEvent.Change, (_, checked: boolean) => {
+			.event.subscribe("willToggle", (_, checked) => {
 				if (!!this.selectionPromise !== checked) {
 					if (checked && this.DEBUG_TOOLS.selector.selecting) return false;
 
@@ -84,17 +85,17 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonInspectLocalPlayer))
-			.on(ButtonEvent.Activate, () => this.DEBUG_TOOLS.inspect(localPlayer))
+			.event.subscribe("activate", () => this.DEBUG_TOOLS.inspect(localPlayer))
 			.appendTo(this);
 
 		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonUnlockRecipes))
-			.on(ButtonEvent.Activate, this.unlockRecipes)
+			.event.subscribe("activate", this.unlockRecipes)
 			.appendTo(this);
 
 		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonTravelAway))
-			.on(ButtonEvent.Activate, this.travelAway)
+			.event.subscribe("activate", this.travelAway)
 			.appendTo(this);
 
 		new BlockRow()
@@ -124,9 +125,6 @@ export default class GeneralPanel extends DebugToolsPanel {
 						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
 				})))
 			.appendTo(this);
-
-		this.on(DebugToolsPanelEvent.SwitchTo, this.onSwitchTo);
-		this.on(DebugToolsPanelEvent.SwitchAway, this.onSwitchAway);
 	}
 
 	public getTranslation() {
@@ -166,21 +164,21 @@ export default class GeneralPanel extends DebugToolsPanel {
 		return bindPressed;
 	}
 
-	@Bound
-	private onSwitchTo() {
+	@EventHandler<GeneralPanel>("self")("switchTo")
+	protected onSwitchTo() {
 		this.timeRange.refresh();
 
-		hookManager.register(this, "DebugToolsDialog:GeneralPanel")
-			.until(DebugToolsPanelEvent.SwitchAway);
+		this.registerHookHost("DebugToolsDialog:GeneralPanel");
 
-		this.until(DebugToolsPanelEvent.SwitchAway)
-			.bind(this.DEBUG_TOOLS, DebugToolsEvent.Inspect, () => {
+		this.DEBUG_TOOLS.event.until<GeneralPanel>(this, "switchAway")
+			.subscribe("inspect", () => {
 				if (this.selectionPromise) this.selectionPromise.cancel();
 			});
 	}
 
-	@Bound
-	private onSwitchAway() {
+	@EventHandler<GeneralPanel>("self")("switchAway")
+	protected onSwitchAway() {
+		hookManager.deregister(this);
 		if (this.selectionPromise) {
 			this.selectionPromise.cancel();
 			delete this.selectionPromise;

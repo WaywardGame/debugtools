@@ -1,6 +1,6 @@
 import ActionExecutor from "entity/action/ActionExecutor";
 import { ICreature } from "entity/creature/ICreature";
-import { EntityType, IStatChangeInfo } from "entity/IEntity";
+import IEntity, { EntityType, IStatChangeInfo } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
 import { INPC } from "entity/npc/INPC";
 import IPlayer from "entity/player/IPlayer";
@@ -8,13 +8,11 @@ import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { bindingManager } from "newui/BindingManager";
 import { BlockRow } from "newui/component/BlockRow";
-import Button, { ButtonEvent } from "newui/component/Button";
+import Button from "newui/component/Button";
 import Component from "newui/component/Component";
 import ContextMenu from "newui/component/ContextMenu";
-import { ComponentEvent } from "newui/component/IComponent";
-import Input, { InputEvent } from "newui/component/Input";
+import Input from "newui/component/Input";
 import { LabelledRow } from "newui/component/LabelledRow";
-import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
 import { IRefreshable } from "newui/component/Refreshable";
 import Text from "newui/component/Text";
@@ -34,7 +32,6 @@ import TeleportEntity from "../../action/TeleportEntity";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
-import { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 import InspectInformationSection from "../component/InspectInformationSection";
 
@@ -72,20 +69,20 @@ export default class EntityInformation extends InspectInformationSection {
 		new BlockRow()
 			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonHealEntity))
-				.on(ButtonEvent.Activate, this.heal)
+				.event.subscribe("activate", this.heal)
 				.appendTo(this))
 			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonKillEntity))
-				.on(ButtonEvent.Activate, this.kill))
+				.event.subscribe("activate", this.kill))
 			.appendTo(this);
 
 		new BlockRow()
 			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonTeleportEntity))
-				.on(ButtonEvent.Activate, this.openTeleportMenu))
+				.event.subscribe("activate", this.openTeleportMenu))
 			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonCloneEntity))
-				.on(ButtonEvent.Activate, this.cloneEntity))
+				.event.subscribe("activate", this.cloneEntity))
 			.appendTo(this);
 
 		this.subsections = entitySubsectionClasses.stream()
@@ -99,10 +96,10 @@ export default class EntityInformation extends InspectInformationSection {
 			.classes.add("debug-tools-inspect-entity-sub-section")
 			.appendTo(this);
 
-		this.on(DebugToolsPanelEvent.SwitchTo, () => this.subsections
-			.forEach(subsection => subsection.emit(DebugToolsPanelEvent.SwitchTo)));
-		this.on(DebugToolsPanelEvent.SwitchAway, () => this.subsections
-			.forEach(subsection => subsection.emit(DebugToolsPanelEvent.SwitchAway)));
+		this.event.subscribe("switchTo", () => this.subsections
+			.forEach(subsection => subsection.event.emit("switchTo")));
+		this.event.subscribe("switchAway", () => this.subsections
+			.forEach(subsection => subsection.event.emit("switchAway")));
 	}
 
 	public getTabs() {
@@ -133,14 +130,14 @@ export default class EntityInformation extends InspectInformationSection {
 		if (areArraysIdentical(entities, this.entities)) return;
 		this.entities = entities;
 
-		this.emit("change");
+		this.event.emit("change");
 
 		if (!this.entities.length) return;
 
 		this.setShouldLog();
 
 		for (const entity of this.entities) {
-			entity.event.until(this.waitUntil([ComponentEvent.Remove, "change"]))
+			(entity as IEntity).event.until<EntityInformation>(this, "remove", "change")
 				.subscribe("statChanged", this.onStatChange);
 		}
 	}
@@ -177,13 +174,13 @@ export default class EntityInformation extends InspectInformationSection {
 						.setMin(0)
 						.setMax(stat.max!)
 						.setRefreshMethod(() => this.entity ? this.entity.getStatValue(stat.type)! : 0))
-					.on(RangeInputEvent.Finish, this.setStat(stat.type))
+					.event.subscribe("finish", this.setStat(stat.type))
 					.setDisplayValue(true)
 					.appendTo(this.statWrapper));
 
 			} else {
 				this.statComponents.set(stat.type, new Input()
-					.on(InputEvent.Done, (input, value: string) => {
+					.event.subscribe("done", (input, value) => {
 						if (isNaN(+value)) {
 							input.clear();
 
@@ -272,13 +269,13 @@ export default class EntityInformation extends InspectInformationSection {
 	private teleport(location: IVector2 | IVector3) {
 		ActionExecutor.get(TeleportEntity).execute(localPlayer, this.entity!, new Vector3(location, "z" in location ? location.z : this.entity!.z));
 
-		this.emit("update");
+		this.event.emit("update");
 	}
 
 	@Bound
 	private kill() {
 		ActionExecutor.get(Kill).execute(localPlayer, this.entity!);
-		this.emit("update");
+		this.event.emit("update");
 	}
 
 	@Bound
@@ -292,7 +289,7 @@ export default class EntityInformation extends InspectInformationSection {
 	@Bound
 	private heal() {
 		ActionExecutor.get(Heal).execute(localPlayer, this.entity!);
-		this.emit("update");
+		this.event.emit("update");
 	}
 
 	@Bound

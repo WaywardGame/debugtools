@@ -10,23 +10,22 @@ import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { BlockRow } from "newui/component/BlockRow";
 import Button from "newui/component/Button";
-import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
-import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdown";
-import { ComponentEvent } from "newui/component/IComponent";
+import { CheckButton } from "newui/component/CheckButton";
+import Dropdown, { IDropdownOption } from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
-import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
 import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Objects";
 import Stream from "utilities/stream/Stream";
+
 import SetSkill from "../../action/SetSkill";
 import SetWeightBonus from "../../action/SetWeightBonus";
 import ToggleInvulnerable from "../../action/ToggleInvulnerable";
 import ToggleNoClip from "../../action/ToggleNoClip";
 import TogglePermissions from "../../action/TogglePermissions";
-import DebugTools, { DebugToolsEvent } from "../../DebugTools";
+import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, translation } from "../../IDebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
@@ -47,24 +46,24 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	public constructor() {
 		super();
 
-		this.until(ComponentEvent.Remove)
-			.bind(this.DEBUG_TOOLS, DebugToolsEvent.PlayerDataChange, this.onPlayerDataChange);
+		this.DEBUG_TOOLS.event.until<PlayerInformation>(this, "remove")
+			.subscribe("playerDataChange", this.onPlayerDataChange);
 
 		this.checkButtonPermissions = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonTogglePermissions))
 			.setRefreshMethod(() => this.player ? !!this.DEBUG_TOOLS.getPlayerData(this.player, "permissions") : false)
-			.on(CheckButtonEvent.Change, this.togglePermissions)
+			.event.subscribe("toggle", this.togglePermissions)
 			.appendTo(this);
 
 		new BlockRow()
 			.append(this.checkButtonNoClip = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonToggleNoClip))
 				.setRefreshMethod(() => this.player ? !!this.DEBUG_TOOLS.getPlayerData(this.player, "noclip") : false)
-				.on(CheckButtonEvent.Change, this.toggleNoClip))
+				.event.subscribe("toggle", this.toggleNoClip))
 			.append(this.checkButtonInvulnerable = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonToggleInvulnerable))
 				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "invulnerable") : false)
-				.on(CheckButtonEvent.Change, this.toggleInvulnerable))
+				.event.subscribe("toggle", this.toggleInvulnerable))
 			.appendTo(this);
 
 		this.rangeWeightBonus = new RangeRow()
@@ -74,22 +73,22 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				.setMax(1000)
 				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "weightBonus") : 0))
 			.setDisplayValue(true)
-			.on(RangeInputEvent.Finish, this.setWeightBonus)
+			.event.subscribe("finish", this.setWeightBonus)
 			.appendTo(this);
 
 		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelSkill)))
-			.append(new Dropdown()
+			.append(new Dropdown<keyof typeof SkillType | "none">()
 				.setRefreshMethod(() => ({
 					defaultOption: "none",
-					options: Stream.of<IDropdownOption[]>(["none", option => option.setText(translation(DebugToolsTranslation.None))])
+					options: Stream.of<IDropdownOption<keyof typeof SkillType | "none">[]>(["none", option => option.setText(translation(DebugToolsTranslation.None))])
 						.merge(Enums.values(SkillType)
-							.map(skill => tuple(SkillType[skill], Translation.generator(SkillType[skill])))
+							.map(skill => tuple(SkillType[skill] as keyof typeof SkillType, Translation.generator(SkillType[skill])))
 							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 							.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
 				}))
-				.on(DropdownEvent.Selection, this.changeSkill))
+				.event.subscribe("selection", this.changeSkill))
 			.appendTo(this);
 
 		this.skillRangeRow = new RangeRow()
@@ -100,7 +99,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				.setMax(100)
 				.setRefreshMethod(() => this.skill !== undefined && this.player && this.skill in this.player.skills ? this.player.skills[this.skill]!.core : 0))
 			.setDisplayValue(Translation.ui(UiTranslation.GameStatsPercentage).get)
-			.on(RangeInputEvent.Finish, this.setSkill)
+			.event.subscribe("finish", this.setSkill)
 			.appendTo(this);
 	}
 
@@ -112,12 +111,12 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 		if (!this.player) return;
 
-		this.emit("change");
+		this.event.emit("change");
 
 		this.refresh();
 
-		this.until([ComponentEvent.Remove, "change"])
-			.bind(this.DEBUG_TOOLS, DebugToolsEvent.PlayerDataChange, this.refresh);
+		this.DEBUG_TOOLS.event.until<PlayerInformation>(this, "remove", "change")
+			.subscribe("playerDataChange", this.refresh);
 	}
 
 	@Bound

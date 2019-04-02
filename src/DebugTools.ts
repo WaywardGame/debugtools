@@ -7,6 +7,7 @@ import IHuman, { Delay } from "entity/IHuman";
 import { INPC } from "entity/npc/INPC";
 import { Source } from "entity/player/IMessageManager";
 import IPlayer from "entity/player/IPlayer";
+import { ExtendedEvents } from "event/EventEmitter";
 import Game from "game/Game";
 import { RenderSource } from "game/IGame";
 import { Dictionary } from "language/Dictionaries";
@@ -79,25 +80,26 @@ enum CameraState {
 	Transition,
 }
 
-export enum DebugToolsEvent {
+interface IDebugToolsEvents {
 	/**
 	 * Emitted when the data of the player is changing.
 	 * @param playerId The ID of the player whose data is changing
 	 * @param property The name of the property of the player's data which is changing
 	 * @param newValue The new value of the changed property in the player's data
 	 */
-	PlayerDataChange = "PlayerDataChange",
+	playerDataChange<K extends keyof IPlayerData>(playerId: number, property: K, newValue: IPlayerData[K]): any;
 	/**
 	 * Emitted when a tile or object is inspected.
 	 */
-	Inspect = "Inspect",
+	inspect(): any;
 	/**
 	 * Emitted when permissions are changed for this player.
 	 */
-	PermissionsChange = "PermissionsChange",
+	permissionsChange(): any;
 }
 
 export default class DebugTools extends Mod {
+	@Override public event: ExtendedEvents<this, Mod, IDebugToolsEvents>;
 
 	////////////////////////////////////
 	// Static
@@ -273,7 +275,7 @@ export default class DebugTools extends Mod {
 		tooltip: tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.DialogTitleMain))),
 		onCreate: button => {
 			button.toggle(DebugTools.INSTANCE.hasPermission());
-			DebugTools.INSTANCE.on(DebugToolsEvent.PlayerDataChange, () => button.toggle(DebugTools.INSTANCE.hasPermission()));
+			DebugTools.INSTANCE.event.subscribe("playerDataChange", () => button.toggle(DebugTools.INSTANCE.hasPermission()));
 		},
 	})
 	public readonly menuBarButton: MenuBarButtonType;
@@ -338,7 +340,7 @@ export default class DebugTools extends Mod {
 	public setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]) {
 		this.getPlayerData(player, key); // initializes it if it doesn't exist
 		this.data.playerData[player.identifier][key] = value;
-		this.emit(DebugToolsEvent.PlayerDataChange, player.id, key, value);
+		this.event.emit("playerDataChange", player.id, key, value);
 
 		if (!this.hasPermission()) {
 			gameScreen!.closeDialog(this.dialogMain);
@@ -434,7 +436,7 @@ export default class DebugTools extends Mod {
 		gameScreen!.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
 			.setInspection(what);
 
-		this.emit(DebugToolsEvent.Inspect);
+		this.event.emit("inspect");
 	}
 
 	/**

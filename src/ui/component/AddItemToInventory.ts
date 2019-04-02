@@ -1,28 +1,30 @@
+import { ExtendedEvents } from "event/EventEmitter";
 import { Quality } from "game/IObject";
 import { ItemType } from "item/IItem";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
-import Button, { ButtonEvent } from "newui/component/Button";
+import Button from "newui/component/Button";
 import Component from "newui/component/Component";
-import Dropdown, { DropdownEvent } from "newui/component/Dropdown";
-import { ComponentEvent } from "newui/component/IComponent";
+import Dropdown from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Objects";
 import Stream from "utilities/stream/Stream";
+
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 
-export enum AddItemToInventoryEvent {
+interface IAddItemToInventoryEvents {
 	/**
 	 * @param type The `ItemType` of the item to add
 	 * @param quality The `ItemQuality` of the item to add
 	 */
-	Execute = "Execute",
+	execute(type: ItemType, quality: Quality): any;
 }
 
 export default class AddItemToInventory extends Component {
+	@Override public event: ExtendedEvents<this, Component, IAddItemToInventoryEvents>;
 
 	private static INSTANCE: AddItemToInventory | undefined;
 
@@ -50,7 +52,7 @@ export default class AddItemToInventory extends Component {
 							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2))))
 						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
 				}))
-				.on(DropdownEvent.Selection, this.changeItem))
+				.event.subscribe("selection", this.changeItem))
 			.appendTo(this);
 
 		this.wrapperAddItem = new Component()
@@ -68,14 +70,14 @@ export default class AddItemToInventory extends Component {
 					}))))
 			.append(new Button()
 				.setText(translation(DebugToolsTranslation.AddToInventory))
-				.on(ButtonEvent.Activate, this.addItem))
+				.event.subscribe("activate", this.addItem))
 			.appendTo(this);
 
-		this.on(ComponentEvent.WillRemove, this.willRemove);
+		this.event.subscribe("willRemove", this.willRemove);
 	}
 
 	public releaseAndRemove() {
-		this.cancel(ComponentEvent.WillRemove, this.willRemove);
+		this.event.unsubscribe("willRemove", this.willRemove);
 		this.remove();
 		delete AddItemToInventory.INSTANCE;
 	}
@@ -93,6 +95,6 @@ export default class AddItemToInventory extends Component {
 
 	@Bound
 	private addItem() {
-		this.emit(AddItemToInventoryEvent.Execute, this.dropdownItemType.selection, this.dropdownItemQuality.selection);
+		this.event.emit("execute", this.dropdownItemType.selection, this.dropdownItemQuality.selection);
 	}
 }

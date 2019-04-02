@@ -2,13 +2,14 @@ import Translation from "language/Translation";
 import { IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import Component from "newui/component/Component";
-import { ComponentEvent } from "newui/component/IComponent";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
 import { tuple } from "utilities/Arrays";
 import { sleep } from "utilities/Async";
+
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
-import DebugToolsPanel, { DebugToolsPanelEvent } from "./component/DebugToolsPanel";
+
+import DebugToolsPanel from "./component/DebugToolsPanel";
 import DisplayPanel from "./panel/DisplayPanel";
 import GeneralPanel from "./panel/GeneralPanel";
 import PaintPanel from "./panel/PaintPanel";
@@ -65,15 +66,13 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 		this.classes.add("debug-tools-dialog");
 
 		// we register this component as a "hook host" — this means that, like the `Mod` class, it can implement hook methods
-		hookManager.register(this, "DebugToolsDialog")
-			// we deregister this component as a "hook host" when it's removed from the DOM
-			.until(ComponentEvent.Remove);
+		this.registerHookHost("DebugToolsDialog");
 
 		// when the dialog is removed from the DOM, we force remove all of the panels (they're cached otherwise)
-		this.on(ComponentEvent.WillRemove, () => {
+		this.event.subscribe("willRemove", () => {
 			this.storePanels = false;
 			for (const subpanel of this.subpanels) {
-				subpanel.emit(DebugToolsPanelEvent.SwitchAway);
+				subpanel.event.emit("switchAway");
 				subpanel.remove();
 			}
 		});
@@ -101,9 +100,9 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 				.merge(this.DEBUG_TOOLS.modRegistryMainDialogPanels.getRegistrations()
 					.map(registration => registration.data(DebugToolsPanel)))
 				.map(cls => new cls()
-					.on(ComponentEvent.WillRemove, panel => {
+					.event.subscribe("willRemove", panel => {
 						if (panel.isVisible()) {
-							panel.emit(DebugToolsPanelEvent.SwitchAway);
+							panel.event.emit("switchAway");
 						}
 
 						if (this.storePanels) {
@@ -133,7 +132,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 	private onShowSubpanel(showPanel: DebugToolsPanel) {
 		return (component: Component) => {
 			this.activePanel = showPanel.appendTo(component);
-			this.activePanel.emit(DebugToolsPanelEvent.SwitchTo);
+			this.activePanel.event.emit("switchTo");
 		};
 	}
 

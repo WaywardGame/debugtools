@@ -1,18 +1,19 @@
 import ActionExecutor from "entity/action/ActionExecutor";
+import { EventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
-import Button, { ButtonEvent } from "newui/component/Button";
-import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
-import { RangeInputEvent } from "newui/component/RangeInput";
+import Button from "newui/component/Button";
+import { CheckButton } from "newui/component/CheckButton";
 import { RangeRow } from "newui/component/RangeRow";
 import { compileShaders, loadShaders } from "renderer/Shaders";
 import { Bound } from "utilities/Objects";
+
 import UpdateStatsAndAttributes from "../../action/UpdateStatsAndAttributes";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, ISaveData, translation } from "../../IDebugTools";
-import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
+import DebugToolsPanel from "../component/DebugToolsPanel";
 
 export default class DisplayPanel extends DebugToolsPanel {
 	private readonly zoomRange: RangeRow;
@@ -29,13 +30,13 @@ export default class DisplayPanel extends DebugToolsPanel {
 		new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonToggleFog))
 			.setRefreshMethod(() => this.DEBUG_TOOLS.getPlayerData(localPlayer, "fog"))
-			.on(CheckButtonEvent.Change, this.toggleFog)
+			.event.subscribe("toggle", this.toggleFog)
 			.appendTo(this);
 
 		new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonToggleLighting))
 			.setRefreshMethod(() => this.DEBUG_TOOLS.getPlayerData(localPlayer, "lighting"))
-			.on(CheckButtonEvent.Change, this.toggleLighting)
+			.event.subscribe("toggle", this.toggleLighting)
 			.appendTo(this);
 
 		this.zoomRange = new RangeRow()
@@ -47,7 +48,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 				.setRefreshMethod(() => this.saveData.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.saveData.zoomLevel))
 			.setDisplayValue(() => translation(DebugToolsTranslation.ZoomLevel)
 				.get(this.DEBUG_TOOLS.getZoomLevel() || saveDataGlobal.options.zoomLevel))
-			.on(RangeInputEvent.Change, (_, value: number) => {
+			.event.subscribe("change", (_, value) => {
 				this.saveData.zoomLevel = value;
 				game.updateZoomLevel();
 			})
@@ -56,23 +57,20 @@ export default class DisplayPanel extends DebugToolsPanel {
 		new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonUnlockCamera))
 			.setRefreshMethod(() => this.DEBUG_TOOLS.isCameraUnlocked)
-			.on(CheckButtonEvent.Change, (_, checked: boolean) => this.DEBUG_TOOLS.setCameraUnlocked(checked))
+			.event.subscribe("toggle", (_, checked) => this.DEBUG_TOOLS.setCameraUnlocked(checked))
 			.appendTo(this);
 
 		new Button()
 			.classes.add("warning")
 			.setText(translation(DebugToolsTranslation.ButtonResetWebGL))
-			.on(ButtonEvent.Activate, this.resetWebGL)
+			.event.subscribe("activate", this.resetWebGL)
 			.appendTo(this);
 
 		new Button()
 			.classes.add("warning")
 			.setText(translation(DebugToolsTranslation.ButtonReloadShaders))
-			.on(ButtonEvent.Activate, this.reloadShaders)
+			.event.subscribe("activate", this.reloadShaders)
 			.appendTo(this);
-
-		this.on(DebugToolsPanelEvent.SwitchTo, this.onSwitchTo);
-		this.on(DebugToolsPanelEvent.SwitchAway, this.onSwitchAway);
 	}
 
 	public getTranslation() {
@@ -88,14 +86,13 @@ export default class DisplayPanel extends DebugToolsPanel {
 		return undefined;
 	}
 
-	@Bound
-	private onSwitchTo() {
-		hookManager.register(this, "DebugToolsDialog:DisplayPanel")
-			.until(DebugToolsPanelEvent.SwitchAway);
+	@EventHandler<DisplayPanel>("self")("switchTo")
+	protected onSwitchTo() {
+		this.registerHookHost("DebugToolsDialog:DisplayPanel");
 	}
 
-	@Bound
-	private onSwitchAway() {
+	@EventHandler<DisplayPanel>("self")("switchAway")
+	protected onSwitchAway() {
 
 	}
 

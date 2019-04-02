@@ -2,6 +2,7 @@ import { ICreature } from "entity/creature/ICreature";
 import IEntity from "entity/IEntity";
 import { INPC } from "entity/npc/INPC";
 import IPlayer, { PlayerState } from "entity/player/IPlayer";
+import { EventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import Translation from "language/Translation";
 import { HookMethod, IHookHost } from "mod/IHookHost";
@@ -10,9 +11,7 @@ import { Bindable, BindCatcherApi, bindingManager } from "newui/BindingManager";
 import Button from "newui/component/Button";
 import Component from "newui/component/Component";
 import ContextMenu from "newui/component/ContextMenu";
-import { ComponentEvent } from "newui/component/IComponent";
 import Text from "newui/component/Text";
-import { DialogEvent } from "newui/screen/screens/game/component/Dialog";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
 import { ITile } from "tile/ITerrain";
 import { tuple } from "utilities/Arrays";
@@ -26,7 +25,6 @@ import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import Overlays from "../overlay/Overlays";
 
-import { DebugToolsPanelEvent } from "./component/DebugToolsPanel";
 import InspectInformationSection from "./component/InspectInformationSection";
 import CorpseInformation from "./inspect/Corpse";
 import DoodadInformation from "./inspect/Doodad";
@@ -99,11 +97,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		this.classes.add("debug-tools-inspect-dialog");
 
 		// we register this component as a "hook host" — this means that, like the `Mod` class, it can implement hook methods
-		hookManager.register(this, "DebugToolsInspectDialog")
-			// we deregister this component as a "hook host" when it's removed from the DOM
-			.until(ComponentEvent.Remove);
-
-		this.on(DialogEvent.Close, this.onClose);
+		this.registerHookHost("DebugToolsInspectDialog");
 
 		InspectDialog.INSTANCE = this;
 	}
@@ -118,10 +112,10 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 				.merge(this.DEBUG_TOOLS.modRegistryInspectDialogPanels.getRegistrations()
 					.map(registration => registration.data(InspectInformationSection)))
 				.map(cls => new cls()
-					.on("update", this.update)
-					.on(ComponentEvent.WillRemove, infoSection => {
+					.event.subscribe("update", this.update)
+					.event.subscribe("willRemove", infoSection => {
 						if (this.storePanels) {
-							infoSection.emit(DebugToolsPanelEvent.SwitchAway);
+							infoSection.event.emit("switchAway");
 							infoSection.store();
 							return false;
 						}
@@ -151,7 +145,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 					// to show the panel, we append the section to the passed component & call a couple methods on the panel
 					(component: Component) => section.setTab(index)
 						.appendTo(component)
-						.emit(DebugToolsPanelEvent.SwitchTo),
+						.event.emit("switchTo"),
 					// we cache all of the entity buttons
 					(button: Button) => !(section instanceof EntityInformation) ? undefined : this.entityButtons[index] = button,
 				)))
@@ -247,6 +241,31 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	@HookMethod
 	public onTileUpdate(tile: ITile, x: number, y: number, z: number) {
 		this.update();
+	}
+
+	/**
+	 * - Removes the inspection overlay.
+	 * - Forcibly removes any info sections.
+	 */
+	@EventHandler<InspectDialog>("self")("close")
+	protected onClose() {
+		if (this.inspectingTile) {
+			TileHelpers.Overlay.remove(this.inspectingTile, Overlays.isSelectedTarget);
+			delete this.inspectingTile;
+		}
+
+		game.updateView(RenderSource.Mod, false);
+
+		this.storePanels = false;
+		for (const infoSection of this.infoSections) {
+			if (infoSection.isVisible()) {
+				infoSection.event.emit("switchAway");
+			}
+
+			infoSection.remove();
+		}
+
+		delete InspectDialog.INSTANCE;
 	}
 
 	/**
@@ -354,31 +373,6 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 */
 	private lockInspection(index: number) {
 		return () => this.setInspection(this.entityInfoSection.getEntity(index));
-	}
-
-	/**
-	 * - Removes the inspection overlay.
-	 * - Forcibly removes any info sections.
-	 */
-	@Bound
-	private onClose() {
-		if (this.inspectingTile) {
-			TileHelpers.Overlay.remove(this.inspectingTile, Overlays.isSelectedTarget);
-			delete this.inspectingTile;
-		}
-
-		game.updateView(RenderSource.Mod, false);
-
-		this.storePanels = false;
-		for (const infoSection of this.infoSections) {
-			if (infoSection.isVisible()) {
-				infoSection.emit(DebugToolsPanelEvent.SwitchAway);
-			}
-
-			infoSection.remove();
-		}
-
-		delete InspectDialog.INSTANCE;
 	}
 
 }

@@ -1,6 +1,7 @@
 import { DoodadType } from "doodad/IDoodad";
 import { CreatureType } from "entity/creature/ICreature";
 import { NPCType } from "entity/npc/NPCS";
+import { ExtendedEvents } from "event/EventEmitter";
 import { Bindable, BindCatcherApi } from "newui/BindingManager";
 import Component from "newui/component/Component";
 import { SpriteBatchLayer } from "renderer/IWorldRenderer";
@@ -34,7 +35,11 @@ export interface IPaintData {
         replaceExisting: boolean;
     };
 }
+export interface IPaintSectionEvents {
+    change(): any;
+}
 export interface IPaintSection extends Component {
+    event: ExtendedEvents<this, Component, IPaintSectionEvents>;
     isChanging(): boolean;
     reset(): void;
     getTilePaintData(): Partial<IPaintData> | undefined;
@@ -53,9 +58,9 @@ export default class PaintPanel extends DebugToolsPanel {
     canClientMove(api: BindCatcherApi): false | undefined;
     getMaxSpritesForLayer(layer: SpriteBatchLayer, maxSprites: number): number | undefined;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
+    protected onSwitchTo(): void;
+    protected onSwitchAway(): void;
     private updateOverlayBatch;
-    private onSwitchTo;
-    private onSwitchAway;
     private onPaintSectionChange;
     private showPaintSectionResetMenu;
     private completePaint;

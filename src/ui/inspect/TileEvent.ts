@@ -2,13 +2,14 @@ import ActionExecutor from "entity/action/ActionExecutor";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
-import Button, { ButtonEvent } from "newui/component/Button";
+import Button from "newui/component/Button";
 import { ITile } from "tile/ITerrain";
 import { ITileEvent } from "tile/ITileEvent";
 import { tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
+
 import Remove from "../../action/Remove";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
@@ -28,7 +29,7 @@ export default class TileEventInformation extends InspectInformationSection {
 
 		new Button()
 			.setText(translation(DebugToolsTranslation.ActionRemove))
-			.on(ButtonEvent.Activate, this.removeTileEvent)
+			.event.subscribe("activate", this.removeTileEvent)
 			.appendTo(this);
 	}
 

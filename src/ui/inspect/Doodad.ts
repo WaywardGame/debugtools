@@ -1,25 +1,26 @@
 import Doodad from "doodad/doodads/Doodad";
 import { GrowingStage, IDoodad } from "doodad/IDoodad";
 import ActionExecutor from "entity/action/ActionExecutor";
+import { EventHandler } from "event/EventManager";
 import { Quality } from "game/IObject";
 import { IContainer, ItemType } from "item/IItem";
 import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
-import Button, { ButtonEvent } from "newui/component/Button";
+import Button from "newui/component/Button";
 import EnumContextMenu, { EnumSort } from "newui/component/EnumContextMenu";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Objects";
+
 import AddItemToInventory from "../../action/AddItemToInventory";
 import Clone from "../../action/Clone";
 import Remove from "../../action/Remove";
 import SetGrowingStage from "../../action/SetGrowingStage";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
-import AddItemToInventoryComponent, { AddItemToInventoryEvent } from "../component/AddItemToInventory";
-import { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
+import AddItemToInventoryComponent from "../component/AddItemToInventory";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
 export default class DoodadInformation extends InspectInformationSection {
@@ -37,26 +38,28 @@ export default class DoodadInformation extends InspectInformationSection {
 
 		new Button()
 			.setText(translation(DebugToolsTranslation.ActionRemove))
-			.on(ButtonEvent.Activate, this.removeDoodad)
+			.event.subscribe("activate", this.removeDoodad)
 			.appendTo(this);
 
 		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonCloneEntity))
-			.on(ButtonEvent.Activate, this.cloneDoodad)
+			.event.subscribe("activate", this.cloneDoodad)
 			.appendTo(this);
 
 		this.buttonGrowthStage = new Button()
 			.setText(translation(DebugToolsTranslation.ButtonSetGrowthStage))
-			.on(ButtonEvent.Activate, this.setGrowthStage)
+			.event.subscribe("activate", this.setGrowthStage)
 			.appendTo(this);
+	}
 
-		this.on(DebugToolsPanelEvent.SwitchTo, () => {
-			if (!this.doodad!.containedItems) return;
+	@EventHandler<DoodadInformation>("self")("switchTo")
+	protected onSwitchTo() {
+		if (!this.doodad!.containedItems)
+			return;
 
-			const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this);
-			this.until(DebugToolsPanelEvent.SwitchAway)
-				.bind(addItemToInventory, AddItemToInventoryEvent.Execute, this.addItem);
-		});
+		const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this);
+		addItemToInventory.event.until<DoodadInformation>(this, "switchAway")
+			.subscribe("execute", this.addItem);
 	}
 
 	public getTabs(): TabInformation[] {

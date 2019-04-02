@@ -3,12 +3,13 @@ import { ICorpse } from "entity/creature/corpse/ICorpse";
 import { CreatureType } from "entity/creature/ICreature";
 import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
-import Button, { ButtonEvent } from "newui/component/Button";
+import Button from "newui/component/Button";
 import { ITile } from "tile/ITerrain";
 import { tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import { Bound } from "utilities/Objects";
+
 import Heal from "../../action/Heal";
 import Remove from "../../action/Remove";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -30,12 +31,12 @@ export default class CorpseInformation extends InspectInformationSection {
 
 		this.resurrectButton = new Button()
 			.setText(translation(DebugToolsTranslation.ButtonResurrectCorpse))
-			.on(ButtonEvent.Activate, this.resurrect)
+			.event.subscribe("activate", this.resurrect)
 			.appendTo(this);
 
 		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonRemoveThing))
-			.on(ButtonEvent.Activate, this.removeCorpse)
+			.event.subscribe("activate", this.removeCorpse)
 			.appendTo(this);
 	}
 
@@ -74,12 +75,12 @@ export default class CorpseInformation extends InspectInformationSection {
 	@Bound
 	private resurrect() {
 		ActionExecutor.get(Heal).execute(localPlayer, this.corpse!);
-		this.emit("update");
+		this.event.emit("update");
 	}
 
 	@Bound
 	private removeCorpse() {
 		ActionExecutor.get(Remove).execute(localPlayer, this.corpse!);
-		this.emit("update");
+		this.event.emit("update");
 	}
 }

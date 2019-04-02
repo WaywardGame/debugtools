@@ -1,20 +1,24 @@
 import { CreatureType } from "entity/creature/ICreature";
+import { ExtendedEvents } from "event/EventEmitter";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
-import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdown";
+import Dropdown, { IDropdownOption } from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import { Bound } from "utilities/Objects";
 import Stream from "utilities/stream/Stream";
+
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
-import { IPaintSection } from "../panel/PaintPanel";
+import { IPaintSection, IPaintSectionEvents } from "../panel/PaintPanel";
 
 export default class CorpsePaint extends Component implements IPaintSection {
+	@Override public event: ExtendedEvents<this, Component, IPaintSectionEvents>;
+
 	private readonly dropdown: Dropdown<"nochange" | "remove" | keyof typeof CreatureType>;
 	private readonly aberrantCheckButton: CheckButton;
 	private readonly replaceExisting: CheckButton;
@@ -43,7 +47,7 @@ export default class CorpsePaint extends Component implements IPaintSection {
 							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 							.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
 				}))
-				.on(DropdownEvent.Selection, this.changeCorpse))
+				.event.subscribe("selection", this.changeCorpse))
 			.appendTo(this);
 
 		this.replaceExisting = new CheckButton()
@@ -84,6 +88,6 @@ export default class CorpsePaint extends Component implements IPaintSection {
 		this.replaceExisting.toggle(isReplaceable);
 		if (!isReplaceable) this.replaceExisting.setChecked(false);
 
-		this.emit("change");
+		this.event.emit("change");
 	}
 }

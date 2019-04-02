@@ -16,8 +16,8 @@ export default class GeneralPanel extends DebugToolsPanel {
     canClientMove(api: BindCatcherApi): false | undefined;
     onGameTickEnd(): void;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
-    private onSwitchTo;
-    private onSwitchAway;
+    protected onSwitchTo(): void;
+    protected onSwitchAway(): void;
     private inspectTile;
     private unlockRecipes;
     private travelAway;

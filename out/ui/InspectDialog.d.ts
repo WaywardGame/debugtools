@@ -37,11 +37,11 @@ export default class InspectDialog extends TabDialog implements IHookHost {
     onGameTickEnd(): void;
     onMoveComplete(player: IPlayer): void;
     onTileUpdate(tile: ITile, x: number, y: number, z: number): void;
+    protected onClose(): void;
     private updateSubpanels;
     private setInspectionTile;
     private logUpdate;
     private showInspectionLockMenu;
     private unlockInspection;
     private lockInspection;
-    private onClose;
 }
