@@ -1,4 +1,5 @@
-import { ExtendedEvents } from "event/EventEmitter";
+import { Events } from "event/EventBuses";
+import { IEventEmitter } from "event/EventEmitter";
 import { Quality } from "game/IObject";
 import { ItemType } from "item/IItem";
 import { Dictionary } from "language/Dictionaries";
@@ -15,7 +16,7 @@ import Stream from "utilities/stream/Stream";
 
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 
-interface IAddItemToInventoryEvents {
+interface IAddItemToInventoryEvents extends Events<Component> {
 	/**
 	 * @param type The `ItemType` of the item to add
 	 * @param quality The `ItemQuality` of the item to add
@@ -24,7 +25,7 @@ interface IAddItemToInventoryEvents {
 }
 
 export default class AddItemToInventory extends Component {
-	@Override public event: ExtendedEvents<this, Component, IAddItemToInventoryEvents>;
+	@Override public event: IEventEmitter<this, IAddItemToInventoryEvents>;
 
 	private static INSTANCE: AddItemToInventory | undefined;
 

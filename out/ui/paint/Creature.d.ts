@@ -1,9 +1,10 @@
 import { CreatureType } from "entity/creature/ICreature";
-import { ExtendedEvents } from "event/EventEmitter";
+import { Events } from "event/EventBuses";
+import { IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
-import { IPaintSection, IPaintSectionEvents } from "../panel/PaintPanel";
+import { IPaintSection } from "../panel/PaintPanel";
 export default class CreaturePaint extends Component implements IPaintSection {
-    event: ExtendedEvents<this, Component, IPaintSectionEvents>;
+    event: IEventEmitter<this, Events<IPaintSection>>;
     private dropdown;
     private readonly aberrantCheckButton;
     private creature;

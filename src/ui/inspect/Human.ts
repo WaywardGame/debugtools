@@ -38,7 +38,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 	@EventHandler<HumanInformation>("self")("switchTo")
 	protected onSwitchTo() {
 		const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this.addItemContainer);
-		addItemToInventory.event.until<HumanInformation>(this, "switchAway")
+		addItemToInventory.event.until(this, "switchAway")
 			.subscribe("execute", this.addItem);
 	}
 
@@ -67,7 +67,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 			this.reputationSliders[type]!.refresh();
 		}
 
-		(entity as IEntity).event.until<HumanInformation>(this, "switchAway")
+		(entity as IEntity).event.until(this, "switchAway")
 			.subscribe("statChanged", this.onStatChange);
 	}
 

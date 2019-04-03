@@ -1,7 +1,8 @@
 import { DoodadType } from "doodad/IDoodad";
 import { CreatureType } from "entity/creature/ICreature";
 import { NPCType } from "entity/npc/NPCS";
-import { ExtendedEvents } from "event/EventEmitter";
+import { Events } from "event/EventBuses";
+import { IEventEmitter } from "event/EventEmitter";
 import { Bindable, BindCatcherApi } from "newui/BindingManager";
 import Component from "newui/component/Component";
 import { SpriteBatchLayer } from "renderer/IWorldRenderer";
@@ -35,11 +36,11 @@ export interface IPaintData {
         replaceExisting: boolean;
     };
 }
-export interface IPaintSectionEvents {
+interface IPaintSectionEvents extends Events<Component> {
     change(): any;
 }
 export interface IPaintSection extends Component {
-    event: ExtendedEvents<this, Component, IPaintSectionEvents>;
+    event: IEventEmitter<this, IPaintSectionEvents>;
     isChanging(): boolean;
     reset(): void;
     getTilePaintData(): Partial<IPaintData> | undefined;
@@ -66,3 +67,4 @@ export default class PaintPanel extends DebugToolsPanel {
     private completePaint;
     private clearPaint;
 }
+export {};

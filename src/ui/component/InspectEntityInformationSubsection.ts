@@ -2,17 +2,18 @@ import { ICreature } from "entity/creature/ICreature";
 import { Stat } from "entity/IStats";
 import { INPC } from "entity/npc/INPC";
 import IPlayer from "entity/player/IPlayer";
-import { ExtendedEvents } from "event/EventEmitter";
+import { Events } from "event/EventBuses";
+import { IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
 
-interface IInspectEntityInformationSubsectionEvents {
+interface IInspectEntityInformationSubsectionEvents extends Events<Component> {
 	change(): any;
 	switchTo(): any;
 	switchAway(): any;
 }
 
 export default abstract class InspectEntityInformationSubsection extends Component {
-	@Override public event: ExtendedEvents<this, Component, IInspectEntityInformationSubsectionEvents>;
+	@Override public event: IEventEmitter<this, IInspectEntityInformationSubsectionEvents>;
 
 	public constructor() {
 		super();

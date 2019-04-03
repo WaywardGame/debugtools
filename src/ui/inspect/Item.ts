@@ -45,7 +45,7 @@ export default class ItemInformation extends InspectInformationSection {
 
 	public setTab() {
 		const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this.wrapperAddItem);
-		addItemToInventory.event.until<ItemInformation>(this, "willRemove")
+		addItemToInventory.event.until(this, "willRemove")
 			.subscribe("execute", this.addItem);
 
 		return this;

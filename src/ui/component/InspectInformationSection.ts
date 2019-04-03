@@ -1,4 +1,5 @@
-import { ExtendedEvents } from "event/EventEmitter";
+import { Events } from "event/EventBuses";
+import { IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
 import { TranslationGenerator } from "newui/component/IComponent";
 import { ITile } from "tile/ITerrain";
@@ -6,7 +7,7 @@ import { IVector2 } from "utilities/math/IVector";
 
 export type TabInformation = [number, TranslationGenerator];
 
-interface IInspectInformationSectionEvents {
+interface IInspectInformationSectionEvents extends Events<Component> {
 	change(): any;
 	update(): any;
 	switchAway(): any;
@@ -14,7 +15,7 @@ interface IInspectInformationSectionEvents {
 }
 
 export default abstract class InspectInformationSection extends Component {
-	@Override public event: ExtendedEvents<this, Component, IInspectInformationSectionEvents>;
+	@Override public event: IEventEmitter<this, IInspectInformationSectionEvents>;
 
 	private shouldLog = false;
 	public get willLog() { return this.shouldLog; }

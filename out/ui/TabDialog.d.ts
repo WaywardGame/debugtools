@@ -1,15 +1,16 @@
-import { ExtendedEvents } from "event/EventEmitter";
+import { Events } from "event/EventBuses";
+import { IEventEmitter } from "event/EventEmitter";
 import Button from "newui/component/Button";
 import Component from "newui/component/Component";
 import { TranslationGenerator } from "newui/component/IComponent";
 import Dialog from "newui/screen/screens/game/component/Dialog";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
 export declare type SubpanelInformation = [string | number, TranslationGenerator, (component: Component) => any, ((button: Button) => any)?, Button?];
-interface ITabDialogEvents {
+interface ITabDialogEvents extends Events<Dialog> {
     changeSubpanel(): any;
 }
 export default abstract class TabDialog extends Dialog {
-    event: ExtendedEvents<this, Dialog, ITabDialogEvents>;
+    event: IEventEmitter<this, ITabDialogEvents>;
     private readonly subpanelLinkWrapper;
     private readonly panelWrapper;
     private subpanelInformations;

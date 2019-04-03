@@ -1,13 +1,14 @@
-import { ExtendedEvents } from "event/EventEmitter";
+import { Events } from "event/EventBuses";
+import { IEventEmitter } from "event/EventEmitter";
 import Translation from "language/Translation";
 import Component from "newui/component/Component";
 import { DebugToolsTranslation } from "../../IDebugTools";
-interface IDebugToolsPanelEvents {
+interface IDebugToolsPanelEvents extends Events<Component> {
     switchTo(): any;
     switchAway(): any;
 }
 export default abstract class DebugToolsPanel extends Component {
-    event: ExtendedEvents<this, Component, IDebugToolsPanelEvents>;
+    event: IEventEmitter<this, IDebugToolsPanelEvents>;
     abstract getTranslation(): DebugToolsTranslation | Translation;
 }
 export {};

@@ -7,7 +7,8 @@ import IHuman, { Delay } from "entity/IHuman";
 import { INPC } from "entity/npc/INPC";
 import { Source } from "entity/player/IMessageManager";
 import IPlayer from "entity/player/IPlayer";
-import { ExtendedEvents } from "event/EventEmitter";
+import { Events } from "event/EventBuses";
+import { IEventEmitter } from "event/EventEmitter";
 import Game from "game/Game";
 import { RenderSource } from "game/IGame";
 import { Dictionary } from "language/Dictionaries";
@@ -80,7 +81,7 @@ enum CameraState {
 	Transition,
 }
 
-interface IDebugToolsEvents {
+interface IDebugToolsEvents extends Events<Mod> {
 	/**
 	 * Emitted when the data of the player is changing.
 	 * @param playerId The ID of the player whose data is changing
@@ -99,7 +100,7 @@ interface IDebugToolsEvents {
 }
 
 export default class DebugTools extends Mod {
-	@Override public event: ExtendedEvents<this, Mod, IDebugToolsEvents>;
+	@Override public event: IEventEmitter<this, IDebugToolsEvents>;
 
 	////////////////////////////////////
 	// Static

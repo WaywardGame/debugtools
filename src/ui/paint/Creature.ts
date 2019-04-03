@@ -1,6 +1,7 @@
 import { creatureDescriptions } from "entity/creature/Creatures";
 import { CreatureType } from "entity/creature/ICreature";
-import { ExtendedEvents } from "event/EventEmitter";
+import { Events } from "event/EventBuses";
+import { IEventEmitter } from "event/EventEmitter";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Button from "newui/component/Button";
@@ -15,10 +16,10 @@ import { Bound } from "utilities/Objects";
 import Stream from "utilities/stream/Stream";
 
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
-import { IPaintSection, IPaintSectionEvents } from "../panel/PaintPanel";
+import { IPaintSection } from "../panel/PaintPanel";
 
 export default class CreaturePaint extends Component implements IPaintSection {
-	@Override public event: ExtendedEvents<this, Component, IPaintSectionEvents>;
+	@Override public event: IEventEmitter<this, Events<IPaintSection>>;
 
 	private dropdown: Dropdown<"nochange" | "remove" | keyof typeof CreatureType>;
 	private readonly aberrantCheckButton: CheckButton;

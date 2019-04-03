@@ -1,5 +1,6 @@
 import { NPCType } from "entity/npc/NPCS";
-import { ExtendedEvents } from "event/EventEmitter";
+import { Events } from "event/EventBuses";
+import { IEventEmitter } from "event/EventEmitter";
 import Translation from "language/Translation";
 import Button from "newui/component/Button";
 import Component from "newui/component/Component";
@@ -12,10 +13,10 @@ import { Bound } from "utilities/Objects";
 import Stream from "utilities/stream/Stream";
 
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
-import { IPaintSection, IPaintSectionEvents } from "../panel/PaintPanel";
+import { IPaintSection } from "../panel/PaintPanel";
 
 export default class NPCPaint extends Component implements IPaintSection {
-	@Override public event: ExtendedEvents<this, Component, IPaintSectionEvents>;
+	@Override public event: IEventEmitter<this, Events<IPaintSection>>;
 
 	private readonly dropdown: Dropdown<"nochange" | "remove" | keyof typeof NPCType>;
 

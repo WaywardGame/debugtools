@@ -46,7 +46,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	public constructor() {
 		super();
 
-		this.DEBUG_TOOLS.event.until<PlayerInformation>(this, "remove")
+		this.DEBUG_TOOLS.event.until(this, "remove")
 			.subscribe("playerDataChange", this.onPlayerDataChange);
 
 		this.checkButtonPermissions = new CheckButton()
@@ -115,7 +115,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 		this.refresh();
 
-		this.DEBUG_TOOLS.event.until<PlayerInformation>(this, "remove", "change")
+		this.DEBUG_TOOLS.event.until(this, "remove", "change")
 			.subscribe("playerDataChange", this.refresh);
 	}
 

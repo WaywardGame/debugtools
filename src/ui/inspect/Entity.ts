@@ -137,7 +137,7 @@ export default class EntityInformation extends InspectInformationSection {
 		this.setShouldLog();
 
 		for (const entity of this.entities) {
-			(entity as IEntity).event.until<EntityInformation>(this, "remove", "change")
+			(entity as IEntity).event.until(this, "remove", "change")
 				.subscribe("statChanged", this.onStatChange);
 		}
 	}

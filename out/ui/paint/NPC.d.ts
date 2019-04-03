@@ -1,9 +1,10 @@
 import { NPCType } from "entity/npc/NPCS";
-import { ExtendedEvents } from "event/EventEmitter";
+import { Events } from "event/EventBuses";
+import { IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
-import { IPaintSection, IPaintSectionEvents } from "../panel/PaintPanel";
+import { IPaintSection } from "../panel/PaintPanel";
 export default class NPCPaint extends Component implements IPaintSection {
-    event: ExtendedEvents<this, Component, IPaintSectionEvents>;
+    event: IEventEmitter<this, Events<IPaintSection>>;
     private readonly dropdown;
     private npc;
     constructor();

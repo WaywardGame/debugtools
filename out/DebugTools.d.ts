@@ -4,7 +4,8 @@ import IHuman from "entity/IHuman";
 import { INPC } from "entity/npc/INPC";
 import { Source } from "entity/player/IMessageManager";
 import IPlayer from "entity/player/IPlayer";
-import { ExtendedEvents } from "event/EventEmitter";
+import { Events } from "event/EventBuses";
+import { IEventEmitter } from "event/EventEmitter";
 import Game from "game/Game";
 import { Dictionary } from "language/Dictionaries";
 import Interrupt from "language/dictionary/Interrupt";
@@ -27,13 +28,13 @@ import Actions from "./Actions";
 import { IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
-interface IDebugToolsEvents {
+interface IDebugToolsEvents extends Events<Mod> {
     playerDataChange<K extends keyof IPlayerData>(playerId: number, property: K, newValue: IPlayerData[K]): any;
     inspect(): any;
     permissionsChange(): any;
 }
 export default class DebugTools extends Mod {
-    event: ExtendedEvents<this, Mod, IDebugToolsEvents>;
+    event: IEventEmitter<this, IDebugToolsEvents>;
     static readonly INSTANCE: DebugTools;
     static readonly LOG: Log;
     readonly actions: Actions;

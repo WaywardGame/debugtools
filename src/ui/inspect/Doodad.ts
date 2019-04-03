@@ -58,7 +58,7 @@ export default class DoodadInformation extends InspectInformationSection {
 			return;
 
 		const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this);
-		addItemToInventory.event.until<DoodadInformation>(this, "switchAway")
+		addItemToInventory.event.until(this, "switchAway")
 			.subscribe("execute", this.addItem);
 	}
 

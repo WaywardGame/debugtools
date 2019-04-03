@@ -14,4 +14,4 @@ define(["require", "exports", "newui/component/Component"], function (require, e
     ], DebugToolsPanel.prototype, "event", void 0);
     exports.default = DebugToolsPanel;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiRGVidWdUb29sc1BhbmVsLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL2NvbXBvbmVudC9EZWJ1Z1Rvb2xzUGFuZWwudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0lBV0EsTUFBOEIsZUFBZ0IsU0FBUSxtQkFBUztLQUk5RDtJQUhVO1FBQVQsUUFBUTtrREFBdUU7SUFEakYsa0NBSUMifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiRGVidWdUb29sc1BhbmVsLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL2NvbXBvbmVudC9EZWJ1Z1Rvb2xzUGFuZWwudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0lBWUEsTUFBOEIsZUFBZ0IsU0FBUSxtQkFBUztLQUk5RDtJQUhVO1FBQVQsUUFBUTtrREFBMkQ7SUFEckUsa0NBSUMifQ==

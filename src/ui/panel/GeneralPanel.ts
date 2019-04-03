@@ -170,7 +170,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 		this.registerHookHost("DebugToolsDialog:GeneralPanel");
 
-		this.DEBUG_TOOLS.event.until<GeneralPanel>(this, "switchAway")
+		this.DEBUG_TOOLS.event.until(this, "switchAway")
 			.subscribe("inspect", () => {
 				if (this.selectionPromise) this.selectionPromise.cancel();
 			});
