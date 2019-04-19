@@ -17,7 +17,6 @@ import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
 import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
-import { Bound } from "utilities/Objects";
 import Stream from "utilities/stream/Stream";
 
 import SetSkill from "../../action/SetSkill";
@@ -103,7 +102,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.appendTo(this);
 	}
 
-	public update(entity: ICreature | INPC | IPlayer) {
+	@Override public update(entity: ICreature | INPC | IPlayer) {
 		if (this.player === entity) return;
 
 		this.player = Entity.is(entity, EntityType.Player) ? entity : undefined;

@@ -5,7 +5,7 @@ import Component from "newui/component/Component";
 import { IPaintSection } from "../panel/PaintPanel";
 export default class CreaturePaint extends Component implements IPaintSection {
     event: IEventEmitter<this, Events<IPaintSection>>;
-    private dropdown;
+    private readonly dropdown;
     private readonly aberrantCheckButton;
     private creature;
     constructor();

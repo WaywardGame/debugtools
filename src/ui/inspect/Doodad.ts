@@ -12,7 +12,6 @@ import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
-import { Bound } from "utilities/Objects";
 
 import AddItemToInventory from "../../action/AddItemToInventory";
 import Clone from "../../action/Clone";
@@ -62,14 +61,14 @@ export default class DoodadInformation extends InspectInformationSection {
 			.subscribe("execute", this.addItem);
 	}
 
-	public getTabs(): TabInformation[] {
+	@Override public getTabs(): TabInformation[] {
 		return this.doodad ? [
 			[0, () => translation(DebugToolsTranslation.DoodadName)
 				.get(this.doodad!.getName(false).inContext(TextContext.Title))],
 		] : [];
 	}
 
-	public update(position: IVector2, tile: ITile) {
+	@Override public update(position: IVector2, tile: ITile) {
 		if (tile.doodad === this.doodad) return;
 		this.doodad = tile.doodad;
 
@@ -80,7 +79,7 @@ export default class DoodadInformation extends InspectInformationSection {
 		this.setShouldLog();
 	}
 
-	public logUpdate() {
+	@Override public logUpdate() {
 		this.LOG.info("Doodad:", this.doodad);
 	}
 

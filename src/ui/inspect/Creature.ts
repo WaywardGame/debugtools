@@ -6,7 +6,6 @@ import { INPC } from "entity/npc/INPC";
 import { IPlayer } from "entity/player/IPlayer";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
-import { Bound } from "utilities/Objects";
 
 import Remove from "../../action/Remove";
 import SetTamed from "../../action/SetTamed";
@@ -31,7 +30,7 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 			.appendTo(this);
 	}
 
-	public update(entity: ICreature | INPC | IPlayer) {
+	@Override public update(entity: ICreature | INPC | IPlayer) {
 		this.creature = Entity.is(entity, EntityType.Creature) ? entity : undefined;
 		this.toggle(!!this.creature);
 	}

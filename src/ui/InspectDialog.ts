@@ -18,7 +18,6 @@ import { tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
-import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
 
 import DebugTools from "../DebugTools";
@@ -106,7 +105,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 * Implements the abstract method in "TabDialog". Returns an array of tuples containing information used to set-up the
 	 * subpanels of this dialog.
 	 */
-	public getSubpanels(): SubpanelInformation[] {
+	@Override public getSubpanels(): SubpanelInformation[] {
 		if (!this.infoSections) {
 			this.infoSections = informationSectionClasses.stream()
 				.merge(this.DEBUG_TOOLS.modRegistryInspectDialogPanels.getRegistrations()
@@ -155,7 +154,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 			.toArray();
 	}
 
-	public getName(): Translation {
+	@Override public getName(): Translation {
 		return translation(DebugToolsTranslation.DialogTitleInspect);
 	}
 
@@ -197,7 +196,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		this.schedule(300, 300, this.updateSubpanels);
 	}
 
-	@HookMethod
+	@Override @HookMethod
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
 		if (api.wasPressed(this.DEBUG_TOOLS.bindableCloseInspectDialog) && !bindPressed) {
 			this.close();
@@ -278,14 +277,14 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		this.updateSubpanelList();
 
 		if (this.willShowSubpanel && this.inspectionLock) {
-			this.showSubPanel(this.entityButtons[this.entityInfoSection.getIndex(this.inspectionLock)]);
+			this.showSubPanel(this.entityButtons[this.entityInfoSection.getEntityIndex(this.inspectionLock)]);
 			this.willShowSubpanel = false;
 		}
 
 		if (this.inspectionLock) {
 			for (const entityButton of this.entityButtons) entityButton.classes.remove("inspection-lock");
 
-			this.entityButtons[this.entityInfoSection.getIndex(this.inspectionLock)]
+			this.entityButtons[this.entityInfoSection.getEntityIndex(this.inspectionLock)]
 				.classes.add("inspection-lock");
 		}
 	}

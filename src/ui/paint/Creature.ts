@@ -12,7 +12,6 @@ import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
-import { Bound } from "utilities/Objects";
 import Stream from "utilities/stream/Stream";
 
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -21,7 +20,7 @@ import { IPaintSection } from "../panel/PaintPanel";
 export default class CreaturePaint extends Component implements IPaintSection {
 	@Override public event: IEventEmitter<this, Events<IPaintSection>>;
 
-	private dropdown: Dropdown<"nochange" | "remove" | keyof typeof CreatureType>;
+	private readonly dropdown: Dropdown<"nochange" | "remove" | keyof typeof CreatureType>;
 	private readonly aberrantCheckButton: CheckButton;
 
 	private creature: CreatureType | "remove" | undefined;

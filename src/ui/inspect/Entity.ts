@@ -22,7 +22,6 @@ import Enums from "utilities/enum/Enums";
 import Log from "utilities/Log";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
-import { Bound } from "utilities/Objects";
 
 import Clone from "../../action/Clone";
 import Heal from "../../action/Heal";
@@ -142,7 +141,7 @@ export default class EntityInformation extends InspectInformationSection {
 		}
 	}
 
-	public getIndex(entity: ICreature | INPC | IPlayer) {
+	public getEntityIndex(entity: ICreature | INPC | IPlayer) {
 		return this.entities.indexOf(entity);
 	}
 

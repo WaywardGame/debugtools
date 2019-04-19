@@ -19,7 +19,6 @@ import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
-import { Bound } from "utilities/Objects";
 import Stream from "utilities/stream/Stream";
 
 import PlaceTemplate from "../../action/PlaceTemplate";

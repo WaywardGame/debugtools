@@ -8,7 +8,6 @@ import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import { RangeRow } from "newui/component/RangeRow";
 import { compileShaders, loadShaders } from "renderer/Shaders";
-import { Bound } from "utilities/Objects";
 
 import UpdateStatsAndAttributes from "../../action/UpdateStatsAndAttributes";
 import DebugTools from "../../DebugTools";
@@ -73,7 +72,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 			.appendTo(this);
 	}
 
-	public getTranslation() {
+	@Override public getTranslation() {
 		return DebugToolsTranslation.PanelDisplay;
 	}
 

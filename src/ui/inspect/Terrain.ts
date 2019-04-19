@@ -14,7 +14,6 @@ import Enums from "utilities/enum/Enums";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
-import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
 
 import ChangeTerrain from "../../action/ChangeTerrain";

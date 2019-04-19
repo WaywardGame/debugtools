@@ -8,7 +8,6 @@ import { ITile } from "tile/ITerrain";
 import { tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
-import { Bound } from "utilities/Objects";
 
 import Heal from "../../action/Heal";
 import Remove from "../../action/Remove";
@@ -40,14 +39,14 @@ export default class CorpseInformation extends InspectInformationSection {
 			.appendTo(this);
 	}
 
-	public getTabs(): TabInformation[] {
+	@Override public getTabs(): TabInformation[] {
 		return this.corpses.entries().stream()
 			.map(([i, corpse]) => tuple(i, () => translation(DebugToolsTranslation.CorpseName)
 				.get(corpseManager.getName(corpse, false).inContext(TextContext.Title))))
 			.toArray();
 	}
 
-	public setTab(corpse: number) {
+	@Override public setTab(corpse: number) {
 		this.corpse = this.corpses[corpse];
 
 		this.resurrectButton.toggle(this.corpse.type !== CreatureType.Blood && this.corpse.type !== CreatureType.WaterBlood);
@@ -55,7 +54,7 @@ export default class CorpseInformation extends InspectInformationSection {
 		return this;
 	}
 
-	public update(position: IVector2, tile: ITile) {
+	@Override public update(position: IVector2, tile: ITile) {
 		const corpses = [...tile.corpses || []];
 
 		if (areArraysIdentical(corpses, this.corpses)) return;
@@ -66,7 +65,7 @@ export default class CorpseInformation extends InspectInformationSection {
 		this.setShouldLog();
 	}
 
-	public logUpdate() {
+	@Override public logUpdate() {
 		for (const corpse of this.corpses) {
 			this.LOG.info("Corpse:", corpse);
 		}

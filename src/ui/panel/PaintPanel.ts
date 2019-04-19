@@ -20,11 +20,11 @@ import { SpriteBatchLayer } from "renderer/IWorldRenderer";
 import { TerrainType } from "tile/ITerrain";
 import { TileEventType } from "tile/ITileEvent";
 import Vector2 from "utilities/math/Vector2";
-import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
+
 import Paint from "../../action/Paint";
 import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Overlays from "../../overlay/Overlays";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
 import { getTileId, getTilePosition } from "../../util/TilePosition";
@@ -35,7 +35,6 @@ import DoodadPaint from "../paint/Doodad";
 import NPCPaint from "../paint/NPC";
 import TerrainPaint from "../paint/Terrain";
 import TileEventPaint from "../paint/TileEvent";
-
 
 export interface IPaintData {
 	terrain?: {

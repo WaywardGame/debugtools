@@ -8,6 +8,7 @@
 		"array-type": [true, "array"],
 		"member-ordering": false,
 		"no-unnecessary-class": false,
-		"increment-decrement": false
+		"increment-decrement": false,
+		"no-void-expression": false
 	}
 }

@@ -11,7 +11,6 @@ import { Quality } from "game/IObject";
 import { ItemType } from "item/IItem";
 import Component from "newui/component/Component";
 import { RangeRow } from "newui/component/RangeRow";
-import { Bound } from "utilities/Objects";
 import Stream from "utilities/stream/Stream";
 
 import AddItemToInventory from "../../action/AddItemToInventory";
@@ -42,7 +41,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 			.subscribe("execute", this.addItem);
 	}
 
-	public getImmutableStats() {
+	@Override public getImmutableStats() {
 		return this.human ? [
 			Stat.Benignity,
 			Stat.Malignity,
@@ -53,7 +52,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 		] : [];
 	}
 
-	public update(entity: ICreature | INPC | IPlayer) {
+	@Override public update(entity: ICreature | INPC | IPlayer) {
 		if (this.human === entity) return;
 
 		this.human = Entity.is(entity, EntityType.Creature) ? undefined : entity;

@@ -12,7 +12,6 @@ import { TerrainType } from "tile/ITerrain";
 import { terrainDescriptions } from "tile/Terrains";
 import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
-import { Bound } from "utilities/Objects";
 import Stream from "utilities/stream/Stream";
 
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -23,7 +22,7 @@ export default class TerrainPaint extends Component implements IPaintSection {
 
 	private readonly tilledCheckButton: CheckButton;
 	private terrain: TerrainType | undefined;
-	private dropdown: Dropdown<"nochange" | keyof typeof TerrainType>;
+	private readonly dropdown: Dropdown<"nochange" | keyof typeof TerrainType>;
 
 	public constructor() {
 		super();

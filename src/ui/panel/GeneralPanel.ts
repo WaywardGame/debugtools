@@ -19,7 +19,6 @@ import { particles } from "renderer/particle/Particles";
 import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
-import { Bound } from "utilities/Objects";
 
 import SetTime from "../../action/SetTime";
 import UnlockRecipes from "../../action/UnlockRecipes";
@@ -68,7 +67,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 					if (!checked) {
 						if (this.selectionPromise && !this.selectionPromise.isResolved) {
-							this.selectionPromise!.cancel();
+							this.selectionPromise.cancel();
 						}
 
 						delete this.selectionPromise;
@@ -127,7 +126,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.appendTo(this);
 	}
 
-	public getTranslation() {
+	@Override public getTranslation() {
 		return DebugToolsTranslation.PanelGeneral;
 	}
 
@@ -145,7 +144,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 		}
 	}
 
-	@HookMethod(HookPriority.High)
+	@Override @HookMethod(HookPriority.High)
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
 		if (api.wasPressed(this.DEBUG_TOOLS.selector.bindableSelectLocation) && !bindPressed) {
 			if (this.checkButtonAudio.checked) {

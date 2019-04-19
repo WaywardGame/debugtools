@@ -10,7 +10,6 @@ import { RangeRow } from "newui/component/RangeRow";
 import { ITileEvent } from "tile/ITileEvent";
 import Arrays, { tuple } from "utilities/Arrays";
 import Vector2 from "utilities/math/Vector2";
-import { Bound } from "utilities/Objects";
 import Stream from "utilities/stream/Stream";
 
 import SelectionExecute from "../../action/SelectionExecute";
@@ -102,7 +101,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 			.appendTo(this);
 	}
 
-	public getTranslation() {
+	@Override public getTranslation() {
 		return DebugToolsTranslation.PanelSelection;
 	}
 

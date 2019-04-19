@@ -10,7 +10,6 @@ import { Paragraph } from "newui/component/Text";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
-import { Bound } from "utilities/Objects";
 
 import AddItemToInventory from "../../action/AddItemToInventory";
 import Remove from "../../action/Remove";
@@ -37,13 +36,13 @@ export default class ItemInformation extends InspectInformationSection {
 		this.wrapperItems = new Component().appendTo(this);
 	}
 
-	public getTabs(): TabInformation[] {
+	@Override public getTabs(): TabInformation[] {
 		return [
 			[0, translation(DebugToolsTranslation.TabItemStack)],
 		];
 	}
 
-	public setTab() {
+	@Override public setTab() {
 		const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this.wrapperAddItem);
 		addItemToInventory.event.until(this, "willRemove")
 			.subscribe("execute", this.addItem);
@@ -51,7 +50,7 @@ export default class ItemInformation extends InspectInformationSection {
 		return this;
 	}
 
-	public update(position: IVector2, tile: ITile) {
+	@Override public update(position: IVector2, tile: ITile) {
 		this.position = position;
 		const items = [...tile.containedItems || []];
 
@@ -76,7 +75,7 @@ export default class ItemInformation extends InspectInformationSection {
 		}
 	}
 
-	public logUpdate() {
+	@Override public logUpdate() {
 		this.LOG.info("Items:", this.items);
 	}
 

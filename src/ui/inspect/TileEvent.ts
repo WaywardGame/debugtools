@@ -8,7 +8,6 @@ import { ITileEvent } from "tile/ITileEvent";
 import { tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
-import { Bound } from "utilities/Objects";
 
 import Remove from "../../action/Remove";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -33,19 +32,19 @@ export default class TileEventInformation extends InspectInformationSection {
 			.appendTo(this);
 	}
 
-	public getTabs(): TabInformation[] {
+	@Override public getTabs(): TabInformation[] {
 		return this.tileEvents.entries().stream()
 			.map(([i, tileEvent]) => tuple(i, () => translation(DebugToolsTranslation.TileEventName)
 				.get(Translation.nameOf(Dictionary.TileEvent, tileEvent, false).inContext(TextContext.Title))))
 			.toArray();
 	}
 
-	public setTab(tileEvent: number) {
+	@Override public setTab(tileEvent: number) {
 		this.tileEvent = this.tileEvents[tileEvent];
 		return this;
 	}
 
-	public update(position: IVector2, tile: ITile) {
+	@Override public update(position: IVector2, tile: ITile) {
 		const tileEvents = [...tile.events || []];
 
 		if (areArraysIdentical(tileEvents, this.tileEvents)) return;
@@ -54,7 +53,7 @@ export default class TileEventInformation extends InspectInformationSection {
 		this.setShouldLog();
 	}
 
-	public logUpdate() {
+	@Override public logUpdate() {
 		for (const tileEvent of this.tileEvents) {
 			this.LOG.info("Tile Event:", tileEvent);
 		}

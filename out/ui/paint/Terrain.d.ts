@@ -7,7 +7,7 @@ export default class TerrainPaint extends Component implements IPaintSection {
     event: IEventEmitter<this, Events<IPaintSection>>;
     private readonly tilledCheckButton;
     private terrain;
-    private dropdown;
+    private readonly dropdown;
     constructor();
     getTilePaintData(): {
         terrain: {
