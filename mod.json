@@ -6,7 +6,7 @@
 	"compatibleMinorVersions": [
 		7
 	],
-	"multiplayerCompatible": true,
+	"multiplayer": "compatible",
 	"file": "out/DebugTools",
 	"unloadable": true,
 	"stylesheets": [
