@@ -3,7 +3,7 @@ import IEntity from "entity/IEntity";
 import { INPC } from "entity/npc/INPC";
 import IPlayer, { PlayerState } from "entity/player/IPlayer";
 import { EventHandler } from "event/EventManager";
-import { RenderSource } from "game/IGame";
+import { RenderSource, TileUpdateType } from "game/IGame";
 import Translation from "language/Translation";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
@@ -238,7 +238,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	}
 
 	@HookMethod
-	public onTileUpdate(tile: ITile, x: number, y: number, z: number) {
+	public onTileUpdate(tile: ITile, x: number, y: number, z: number, tileUpdateType: TileUpdateType) {
 		this.update();
 	}
 
