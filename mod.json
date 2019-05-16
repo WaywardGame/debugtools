@@ -4,7 +4,7 @@
 	"version": "2.0",
 	"author": "Yuudaari",
 	"compatibleMinorVersions": [
-		7
+		8
 	],
 	"multiplayer": "compatible",
 	"file": "out/DebugTools",
