@@ -61,32 +61,50 @@ export default class SelectLocation implements IHookHost {
 		const selectTilePressed = api.wasPressed(this.bindableSelectLocation) && gameScreen!.isMouseWithin();
 		const cancelSelectTilePressed = api.wasPressed(this.bindableCancelSelectLocation) && gameScreen!.isMouseWithin();
 
-		// if we previously had the target overlay on a tile, remove it 
-		if (this.hoverTile) {
-			TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
-
-			delete this.hoverTile;
-		}
+		let updateRender = false;
 
 		if (this._selecting) {
 			const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
 
 			// add the target overlay to the tile currently being hovered
-			const tile = this.hoverTile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
-			TileHelpers.Overlay.add(tile, { type: this.DEBUG_TOOLS.overlayTarget }, Overlays.isHoverTarget);
+			const tile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
+
+			if (tile !== this.hoverTile) {
+				updateRender = true;
+
+				if (this.hoverTile) {
+					TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
+				}
+
+				this.hoverTile = tile;
+				TileHelpers.Overlay.add(tile, { type: this.DEBUG_TOOLS.overlayTarget }, Overlays.isHoverTarget);
+			}
 
 			if (cancelSelectTilePressed && !bindPressed) {
+				updateRender = true;
+
 				if (this.selectionPromise) this.selectionPromise.cancel();
 				else this.cancel();
 				bindPressed = this.bindableCancelSelectLocation;
 
 			} else if (selectTilePressed && !bindPressed) {
+				updateRender = true;
+
 				this.selectTile(tilePosition);
 
 				bindPressed = this.bindableSelectLocation;
 				this.selectTileHeld = true;
 			}
 
+		} else if (this.hoverTile) {
+			// if we previously had the target overlay on a tile, remove it
+			TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
+			delete this.hoverTile;
+
+			updateRender = true;
+		}
+
+		if (updateRender) {
 			game.updateView(RenderSource.Mod, false);
 		}
 
