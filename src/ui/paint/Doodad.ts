@@ -37,12 +37,16 @@ export default class DoodadPaint extends Component implements IPaintSection {
 					)
 						.merge(Enums.values(DoodadType)
 							.filter(type => type !== DoodadType.Item)
-							.map(doodad => tuple(
-								DoodadType[doodad] as keyof typeof DoodadType,
-								Translation.nameOf(Dictionary.Doodad, doodad, false).inContext(TextContext.Title),
-							))
-							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-							.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
+							.map(doodad => {
+								const translation = Translation.nameOf(Dictionary.Doodad, doodad, false).inContext(TextContext.Title);
+								return {
+									type: DoodadType[doodad] as keyof typeof DoodadType,
+									translation: translation,
+									translationString: Text.toString(translation),
+								};
+							})
+							.sorted((o1, o2) => o1.translationString.localeCompare(o2.translationString))
+							.map(({ type, translation }) => tuple(type, (option: Button) => option.setText(translation)))),
 				}))
 				.event.subscribe("selection", this.changeDoodad))
 			.appendTo(this);
