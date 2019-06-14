@@ -13,8 +13,8 @@ export default new Action()
 
 		for (const itemType of itemTypes) {
 			const desc = itemDescriptions[itemType];
-			if (desc && desc.recipe && desc.craftable !== false && !game.crafted[itemType]) {
-				game.crafted[itemType] = {
+			if (desc && desc.recipe && desc.craftable !== false && !action.executor.crafted[itemType]) {
+				action.executor.crafted[itemType] = {
 					newUnlock: true,
 					unlockTime: Date.now(),
 				};
