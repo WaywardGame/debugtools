@@ -1,4 +1,4 @@
-import Doodad from "doodad/doodads/Doodad";
+import Doodad from "doodad/Doodad";
 import { GrowingStage, IDoodad } from "doodad/IDoodad";
 import ActionExecutor from "entity/action/ActionExecutor";
 import { EventHandler } from "event/EventManager";

@@ -1,4 +1,4 @@
-import Doodad from "doodad/doodads/Doodad";
+import Doodad from "doodad/Doodad";
 import { IDoodad } from "doodad/IDoodad";
 import { IActionApi } from "entity/action/IAction";
 import { ICorpse } from "entity/creature/corpse/ICorpse";

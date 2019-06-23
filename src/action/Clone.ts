@@ -1,4 +1,4 @@
-import Doodad from "doodad/doodads/Doodad";
+import Doodad from "doodad/Doodad";
 import { Action } from "entity/action/Action";
 import { ActionArgument, anyOf } from "entity/action/IAction";
 import { EntityPlayerCreatureNpc, EntityType } from "entity/IEntity";
