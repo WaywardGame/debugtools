@@ -51,6 +51,7 @@ export default class DebugTools extends Mod {
     readonly bindableTeleportLocalPlayer: Bindable;
     readonly bindableToggleNoClipOnLocalPlayer: Bindable;
     readonly bindableToggleCameraLock: Bindable;
+    readonly bindableToggleFullVisibility: Bindable;
     readonly bindablePaint: Bindable;
     readonly bindableErasePaint: Bindable;
     readonly bindableClearPaint: Bindable;
@@ -106,6 +107,8 @@ export default class DebugTools extends Mod {
     inspect(what: Vector2 | ICreature | IPlayer | INPC): void;
     toggleDialog(): void;
     hasPermission(): boolean | undefined;
+    toggleFog(fog: boolean): void;
+    toggleLighting(lighting: boolean): void;
     postFieldOfView(): void;
     onGameScreenVisible(): void;
     getZoomLevel(): number | undefined;

@@ -61,7 +61,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				.event.subscribe("toggle", this.toggleNoClip))
 			.append(this.checkButtonInvulnerable = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonToggleInvulnerable))
-				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "invulnerable") : false)
+				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "invulnerable") === true : false)
 				.event.subscribe("toggle", this.toggleInvulnerable))
 			.appendTo(this);
 

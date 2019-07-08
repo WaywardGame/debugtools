@@ -119,9 +119,9 @@ export interface ISaveData {
 }
 export interface IPlayerData {
     weightBonus: number;
-    invulnerable: boolean;
-    lighting: boolean;
-    fog: boolean;
+    invulnerable?: boolean;
+    lighting?: boolean;
+    fog?: boolean;
     noclip: false | {
         moving: boolean;
         delay: number;

@@ -1,4 +1,3 @@
-import ActionExecutor from "entity/action/ActionExecutor";
 import { EventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import { HookMethod } from "mod/IHookHost";
@@ -9,7 +8,6 @@ import { CheckButton } from "newui/component/CheckButton";
 import { RangeRow } from "newui/component/RangeRow";
 import { compileShaders, loadShaders } from "renderer/Shaders";
 
-import UpdateStatsAndAttributes from "../../action/UpdateStatsAndAttributes";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, ISaveData, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
@@ -28,13 +26,13 @@ export default class DisplayPanel extends DebugToolsPanel {
 
 		new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonToggleFog))
-			.setRefreshMethod(() => this.DEBUG_TOOLS.getPlayerData(localPlayer, "fog"))
+			.setRefreshMethod(() => this.DEBUG_TOOLS.getPlayerData(localPlayer, "fog") !== false)
 			.event.subscribe("toggle", this.toggleFog)
 			.appendTo(this);
 
 		new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonToggleLighting))
-			.setRefreshMethod(() => this.DEBUG_TOOLS.getPlayerData(localPlayer, "lighting"))
+			.setRefreshMethod(() => this.DEBUG_TOOLS.getPlayerData(localPlayer, "lighting") !== false)
 			.event.subscribe("toggle", this.toggleLighting)
 			.appendTo(this);
 
@@ -85,6 +83,16 @@ export default class DisplayPanel extends DebugToolsPanel {
 		return undefined;
 	}
 
+	@Bound
+	public toggleFog(_: any, fog: boolean) {
+		this.DEBUG_TOOLS.toggleFog(fog);
+	}
+
+	@Bound
+	public toggleLighting(_: any, lighting: boolean) {
+		this.DEBUG_TOOLS.toggleLighting(lighting);
+	}
+
 	@EventHandler<DisplayPanel>("self")("switchTo")
 	protected onSwitchTo() {
 		this.registerHookHost("DebugToolsDialog:DisplayPanel");
@@ -93,19 +101,6 @@ export default class DisplayPanel extends DebugToolsPanel {
 	@EventHandler<DisplayPanel>("self")("switchAway")
 	protected onSwitchAway() {
 
-	}
-
-	@Bound
-	private toggleFog(_: any, fog: boolean) {
-		this.DEBUG_TOOLS.setPlayerData(localPlayer, "fog", fog);
-		this.DEBUG_TOOLS.updateFog();
-	}
-
-	@Bound
-	private toggleLighting(_: any, lighting: boolean) {
-		this.DEBUG_TOOLS.setPlayerData(localPlayer, "lighting", lighting);
-		ActionExecutor.get(UpdateStatsAndAttributes).execute(localPlayer, localPlayer);
-		game.updateView(RenderSource.Mod, true);
 	}
 
 	@Bound

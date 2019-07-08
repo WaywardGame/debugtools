@@ -8,10 +8,10 @@ export default class DisplayPanel extends DebugToolsPanel {
     constructor();
     getTranslation(): DebugToolsTranslation;
     getZoomLevel(): number | undefined;
+    toggleFog(_: any, fog: boolean): void;
+    toggleLighting(_: any, lighting: boolean): void;
     protected onSwitchTo(): void;
     protected onSwitchAway(): void;
-    private toggleFog;
-    private toggleLighting;
     private resetWebGL;
     private reloadShaders;
 }

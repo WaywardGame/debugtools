@@ -155,6 +155,8 @@ export default class DebugTools extends Mod {
 
 	@Register.bindable("ToggleCameraLock", { key: "KeyC", modifiers: [KeyModifier.Alt] })
 	public readonly bindableToggleCameraLock: Bindable;
+	@Register.bindable("ToggleFullVisibility", { key: "KeyV", modifiers: [KeyModifier.Alt] })
+	public readonly bindableToggleFullVisibility: Bindable;
 
 	@Register.bindable("Paint", { mouseButton: 0 })
 	public readonly bindablePaint: Bindable;
@@ -356,7 +358,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
 	 */
-	public initializeGlobalData(data?: IGlobalData) {
+	@Override public initializeGlobalData(data?: IGlobalData) {
 		return !this.needsUpgrade(data) ? data : {
 			lastVersion: modManager.getVersion(this.getIndex()),
 		};
@@ -365,7 +367,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
 	 */
-	public initializeSaveData(data?: ISaveData) {
+	@Override public initializeSaveData(data?: ISaveData) {
 		return !this.needsUpgrade(data) ? data : {
 			playerData: {},
 			lastVersion: modManager.getVersion(this.getIndex()),
@@ -376,7 +378,7 @@ export default class DebugTools extends Mod {
 	 * Called when Debug Tools is loaded (in a save)
 	 * - Registers the `LocationSelector` stored in `this.selector` as a hook host.
 	 */
-	public onLoad(): void {
+	@Override public onLoad(): void {
 		hookManager.register(this.selector, "DebugTools:LocationSelector");
 	}
 
@@ -385,7 +387,7 @@ export default class DebugTools extends Mod {
 	 * - Deregisters `this.selector` as a hook host.
 	 * - Removes the `AddItemToInventory` UI Component.
 	 */
-	public onUnload() {
+	@Override public onUnload() {
 		hookManager.deregister(this.selector);
 		AddItemToInventoryComponent.init().releaseAndRemove();
 	}
@@ -453,6 +455,17 @@ export default class DebugTools extends Mod {
 		return !multiplayer.isConnected() || multiplayer.isServer() || this.getPlayerData(localPlayer, "permissions");
 	}
 
+	public toggleFog(fog: boolean) {
+		this.setPlayerData(localPlayer, "fog", fog);
+		this.updateFog();
+	}
+
+	public toggleLighting(lighting: boolean) {
+		this.setPlayerData(localPlayer, "lighting", lighting);
+		ActionExecutor.get(UpdateStatsAndAttributes).execute(localPlayer, localPlayer);
+		game.updateView(RenderSource.Mod, true);
+	}
+
 	////////////////////////////////////
 	// Hooks
 	//
@@ -460,7 +473,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * When the field of view has initialized, we update the fog (enables/disables it based on the mod save data)
 	 */
-	@HookMethod
+	@Override @HookMethod
 	public postFieldOfView() {
 		this.updateFog();
 	}
@@ -470,7 +483,7 @@ export default class DebugTools extends Mod {
 	 * - Initializes the `AddItemToInventory` UI Component (it takes a second or two to be created, and there are multiple places in
 	 * the UI that use it. We initialize it only once so the slow initialization only happens once.)
 	 */
-	@HookMethod
+	@Override @HookMethod
 	public onGameScreenVisible() {
 		AddItemToInventoryComponent.init();
 	}
@@ -484,7 +497,7 @@ export default class DebugTools extends Mod {
 	 * - If our internal zoom level is `1`: `0.125`
 	 * - If our internal zoom level is `0`: `0.0625`
 	 */
-	@HookMethod
+	@Override @HookMethod
 	public getZoomLevel() {
 		if (this.data.zoomLevel === undefined) {
 			return undefined;
@@ -505,7 +518,7 @@ export default class DebugTools extends Mod {
 	 * 		- If it is, we lock the camera again and return `undefined`.
 	 * 		- Otherwise, we return the transition camera position.
 	 */
-	@HookMethod
+	@Override @HookMethod
 	public getCameraPosition(position: IVector2): IVector2 | undefined {
 		if (this.cameraState === CameraState.Locked) {
 			return undefined;
@@ -525,7 +538,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * We cancel damage to the player if they're set as "invulnerable"
 	 */
-	@HookMethod
+	@Override @HookMethod
 	public onPlayerDamage(player: IPlayer, info: IDamageInfo): number | undefined {
 		if (this.getPlayerData(player, "invulnerable")) return 0;
 		return undefined;
@@ -534,7 +547,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * We prevent creatures attacking the enemy if the enemy is a player who is set as "invulnerable" or "noclipping"
 	 */
-	@HookMethod
+	@Override @HookMethod
 	public canCreatureAttack(creature: ICreature, enemy: IPlayer | ICreature): boolean | undefined {
 		if (Entity.is(enemy, EntityType.Player)) {
 			if (this.getPlayerData(enemy, "invulnerable")) return false;
@@ -552,7 +565,7 @@ export default class DebugTools extends Mod {
 	 * - Moves the player to the next tile instantly, then adds the calculated delay.
 	 * - Cancels the default movement by returning `false`.
 	 */
-	@HookMethod
+	@Override @HookMethod
 	public onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined {
 		const noclip = this.getPlayerData(player, "noclip");
 		if (!noclip) return undefined;
@@ -584,7 +597,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * Used to reset noclip movement speed.
 	 */
-	@HookMethod
+	@Override @HookMethod
 	public onNoInputReceived(player: IPlayer): void {
 		const noclip = this.getPlayerData(player, "noclip");
 		if (!noclip) return;
@@ -595,7 +608,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * Used to prevent the weight movement penalty while noclipping.
 	 */
-	@HookMethod
+	@Override @HookMethod
 	public getPlayerWeightMovementPenalty(player: IPlayer): number | undefined {
 		return this.getPlayerData(player, "noclip") ? 0 : undefined;
 	}
@@ -604,7 +617,7 @@ export default class DebugTools extends Mod {
 	 * If the player is "noclipping", we put them in `SpriteBatchLayer.CreatureFlying`.
 	 * Otherwise we return `undefined` and let the game or other mods handle it.
 	 */
-	@HookMethod
+	@Override @HookMethod
 	public getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined {
 		return this.getPlayerData(player, "noclip") ? SpriteBatchLayer.CreatureFlying : undefined;
 	}
@@ -613,7 +626,7 @@ export default class DebugTools extends Mod {
 	 * If the player is "noclipping", we return `false` (not swimming). 
 	 * Otherwise we return `undefined` and let the game or other mods handle it. 
 	 */
-	@HookMethod
+	@Override @HookMethod
 	public isHumanSwimming(human: IHuman, isSwimming: boolean): boolean | undefined {
 		if (Entity.is(human, EntityType.NPC)) return undefined;
 
@@ -623,13 +636,13 @@ export default class DebugTools extends Mod {
 	/**
 	 * We add the weight bonus from the player's save data to the existing strength.
 	 */
-	@HookMethod
+	@Override @HookMethod
 	public getPlayerMaxWeight(weight: number, player: IPlayer) {
 		return weight + this.getPlayerData(player, "weightBonus");
 	}
 
 	// tslint:disable cyclomatic-complexity
-	@HookMethod
+	@Override @HookMethod
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable {
 		if (!this.hasPermission()) return bindPressed;
 
@@ -652,6 +665,13 @@ export default class DebugTools extends Mod {
 		if (api.wasPressed(this.bindableToggleCameraLock) && !bindPressed) {
 			this.setCameraUnlocked(this.cameraState !== CameraState.Unlocked);
 			bindPressed = this.bindableToggleCameraLock;
+		}
+
+		if (api.wasPressed(this.bindableToggleFullVisibility) && !bindPressed) {
+			const visibility = !(this.getPlayerData(localPlayer, "fog") || this.getPlayerData(localPlayer, "lighting"));
+			this.toggleFog(visibility);
+			this.toggleLighting(visibility);
+			bindPressed = this.bindableToggleFullVisibility;
 		}
 
 		if (api.wasPressed(this.bindableInspectTile) && !bindPressed && gameScreen!.isMouseWithin()) {

@@ -151,15 +151,15 @@ export interface IPlayerData {
 	/**
 	 * Whether the player is immune to damage
 	 */
-	invulnerable: boolean;
+	invulnerable?: boolean;
 	/**
 	 * Whether lighting is enabled
 	 */
-	lighting: boolean;
+	lighting?: boolean;
 	/**
 	 * Whether the fog/field of view/fog of war is enabled
 	 */
-	fog: boolean;
+	fog?: boolean;
 	/**
 	 * False if the player is not "noclipping", an object otherwise.
 	 */
