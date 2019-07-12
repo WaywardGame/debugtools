@@ -10,7 +10,7 @@ export default class NPCPaint extends Component implements IPaintSection {
     constructor();
     getTilePaintData(): {
         npc: {
-            type: NPCType | "remove";
+            type: "remove" | NPCType;
         };
     } | undefined;
     isChanging(): boolean;
