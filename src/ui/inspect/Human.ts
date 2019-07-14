@@ -2,10 +2,10 @@ import ActionExecutor from "entity/action/ActionExecutor";
 import { ICreature } from "entity/creature/ICreature";
 import Entity from "entity/Entity";
 import { REPUTATION_MAX } from "entity/Human";
-import IEntity, { EntityType } from "entity/IEntity";
+import { EntityType } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
 import { INPC } from "entity/npc/INPC";
-import IPlayer from "entity/player/IPlayer";
+import Player from "entity/player/Player";
 import { EventHandler } from "event/EventManager";
 import { Quality } from "game/IObject";
 import { ItemType } from "item/IItem";
@@ -23,7 +23,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 	private readonly addItemContainer: Component;
 	private readonly reputationSliders: { [key in Stat.Malignity | Stat.Benignity]?: RangeRow } = {};
 
-	private human: IPlayer | INPC | undefined;
+	private human: Player | INPC | undefined;
 
 	public constructor() {
 		super();
@@ -52,7 +52,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 		] : [];
 	}
 
-	@Override public update(entity: ICreature | INPC | IPlayer) {
+	@Override public update(entity: ICreature | INPC | Player) {
 		if (this.human === entity) return;
 
 		this.human = Entity.is(entity, EntityType.Creature) ? undefined : entity;
@@ -66,7 +66,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 			this.reputationSliders[type]!.refresh();
 		}
 
-		(entity as IEntity).event.until(this, "switchAway")
+		(entity as Entity).event.until(this, "switchAway")
 			.subscribe("statChanged", this.onStatChange);
 	}
 

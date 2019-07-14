@@ -1,4 +1,4 @@
 import { IActionApi } from "entity/action/IAction";
-import IPlayer from "entity/player/IPlayer";
+import Player from "entity/player/Player";
 import { IItem } from "item/IItem";
-export default function (action: IActionApi<IPlayer>, item: IItem): void;
+export default function (action: IActionApi<Player>, item: IItem): void;

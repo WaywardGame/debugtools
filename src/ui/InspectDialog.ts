@@ -1,7 +1,8 @@
 import { ICreature } from "entity/creature/ICreature";
-import IEntity from "entity/IEntity";
+import Entity from "entity/Entity";
 import { INPC } from "entity/npc/INPC";
-import IPlayer, { PlayerState } from "entity/player/IPlayer";
+import { PlayerState } from "entity/player/IPlayer";
+import Player from "entity/player/Player";
 import { EventHandler } from "event/EventManager";
 import { RenderSource, TileUpdateType } from "game/IGame";
 import Translation from "language/Translation";
@@ -84,7 +85,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 
 	private tilePosition?: Vector3;
 	private tile?: ITile;
-	private inspectionLock?: ICreature | IPlayer | INPC;
+	private inspectionLock?: ICreature | Player | INPC;
 	private inspectingTile?: ITile;
 	private storePanels = true;
 	private shouldLog = false;
@@ -165,7 +166,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 * - Updates the dialog. (`update`)
 	 * - If the inspection is locked to an entity, it makes a note of needing to show the entity's subpanel (`willShowSubpanel`).
 	 */
-	public setInspection(what: Vector2 | IPlayer | ICreature | INPC) {
+	public setInspection(what: Vector2 | Player | ICreature | INPC) {
 		this.setInspectionTile(what);
 
 		this.inspectionLock = "entityType" in what ? what : undefined;
@@ -233,7 +234,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	}
 
 	@HookMethod
-	public onMoveComplete(player: IPlayer) {
+	public onMoveComplete(player: Player) {
 		this.update();
 	}
 
@@ -295,7 +296,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 * - If there was an existing inspection overlay, removes it.
 	 * - Adds a new inspection overlay to the currently inspecting tile.
 	 */
-	private setInspectionTile(what: Vector2 | IEntity) {
+	private setInspectionTile(what: Vector2 | Entity) {
 		const position = new Vector3(what.x, what.y, "z" in what ? what.z : localPlayer.z);
 
 		if (this.tilePosition && position.equals(this.tilePosition)) return;

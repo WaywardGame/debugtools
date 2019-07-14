@@ -3,7 +3,7 @@ import { ICreature } from "entity/creature/ICreature";
 import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
 import { INPC } from "entity/npc/INPC";
-import { IPlayer } from "entity/player/IPlayer";
+import Player from "entity/player/Player";
 import Button from "newui/component/Button";
 
 import Remove from "../../action/Remove";
@@ -22,7 +22,7 @@ export default class NpcInformation extends InspectEntityInformationSubsection {
 			.appendTo(this);
 	}
 
-	@Override public update(entity: ICreature | IPlayer | INPC) {
+	@Override public update(entity: ICreature | Player | INPC) {
 		this.npc = Entity.is(entity, EntityType.NPC) ? entity : undefined;
 		this.toggle(!!this.npc);
 	}

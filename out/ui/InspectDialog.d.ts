@@ -1,6 +1,7 @@
 import { ICreature } from "entity/creature/ICreature";
 import { INPC } from "entity/npc/INPC";
-import IPlayer, { PlayerState } from "entity/player/IPlayer";
+import { PlayerState } from "entity/player/IPlayer";
+import Player from "entity/player/Player";
 import { TileUpdateType } from "game/IGame";
 import Translation from "language/Translation";
 import { IHookHost } from "mod/IHookHost";
@@ -31,12 +32,12 @@ export default class InspectDialog extends TabDialog implements IHookHost {
     constructor(id: DialogId);
     getSubpanels(): SubpanelInformation[];
     getName(): Translation;
-    setInspection(what: Vector2 | IPlayer | ICreature | INPC): this;
+    setInspection(what: Vector2 | Player | ICreature | INPC): this;
     update(): void;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     onGameEnd(state: PlayerState): void;
     onGameTickEnd(): void;
-    onMoveComplete(player: IPlayer): void;
+    onMoveComplete(player: Player): void;
     onTileUpdate(tile: ITile, x: number, y: number, z: number, tileUpdateType: TileUpdateType): void;
     protected onClose(): void;
     private updateSubpanels;

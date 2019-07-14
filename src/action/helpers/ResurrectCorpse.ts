@@ -1,11 +1,11 @@
 import { ICorpse } from "entity/creature/corpse/ICorpse";
 import { CreatureType } from "entity/creature/ICreature";
-import IPlayer from "entity/player/IPlayer";
+import Player from "entity/player/Player";
 import Vector3 from "utilities/math/Vector3";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import GetPosition from "./GetPosition";
 
-export default function (player: IPlayer, corpse: ICorpse) {
+export default function (player: Player, corpse: ICorpse) {
 	// blood can't be resurrected
 	if (corpse.type === CreatureType.Blood || corpse.type === CreatureType.WaterBlood) {
 		return false;

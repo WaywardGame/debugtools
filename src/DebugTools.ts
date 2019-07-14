@@ -6,7 +6,7 @@ import { EntityType, MoveType } from "entity/IEntity";
 import IHuman, { Delay } from "entity/IHuman";
 import { INPC } from "entity/npc/INPC";
 import { Source } from "entity/player/IMessageManager";
-import IPlayer from "entity/player/IPlayer";
+import Player from "entity/player/Player";
 import { Events } from "event/EventBuses";
 import { IEventEmitter } from "event/EventEmitter";
 import Game from "game/Game";
@@ -313,7 +313,7 @@ export default class DebugTools extends Mod {
 	 * 
 	 * Note: If the player data doesn't yet exist, it will be created.
 	 */
-	public getPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K): IPlayerData[K] {
+	public getPlayerData<K extends keyof IPlayerData>(player: Player, key: K): IPlayerData[K] {
 		const playerData = this.data.playerData;
 		const data = playerData[player.identifier];
 		if (data) {
@@ -340,7 +340,7 @@ export default class DebugTools extends Mod {
 	 * 
 	 * Note: Emits `DebugToolsEvent.PlayerDataChange` with the id of the player, the key of the changing data, and the new value.
 	 */
-	public setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]) {
+	public setPlayerData<K extends keyof IPlayerData>(player: Player, key: K, value: IPlayerData[K]) {
 		this.getPlayerData(player, key); // initializes it if it doesn't exist
 		this.data.playerData[player.identifier][key] = value;
 		this.event.emit("playerDataChange", player.id, key, value);
@@ -435,7 +435,7 @@ export default class DebugTools extends Mod {
 	 * - Opens the `InspectDialog`.
 	 * - Emits `DebugToolsEvent.Inspect`
 	 */
-	public inspect(what: Vector2 | ICreature | IPlayer | INPC) {
+	public inspect(what: Vector2 | ICreature | Player | INPC) {
 		gameScreen!.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
 			.setInspection(what);
 
@@ -539,7 +539,7 @@ export default class DebugTools extends Mod {
 	 * We cancel damage to the player if they're set as "invulnerable"
 	 */
 	@Override @HookMethod
-	public onPlayerDamage(player: IPlayer, info: IDamageInfo): number | undefined {
+	public onPlayerDamage(player: Player, info: IDamageInfo): number | undefined {
 		if (this.getPlayerData(player, "invulnerable")) return 0;
 		return undefined;
 	}
@@ -548,7 +548,7 @@ export default class DebugTools extends Mod {
 	 * We prevent creatures attacking the enemy if the enemy is a player who is set as "invulnerable" or "noclipping"
 	 */
 	@Override @HookMethod
-	public canCreatureAttack(creature: ICreature, enemy: IPlayer | ICreature): boolean | undefined {
+	public canCreatureAttack(creature: ICreature, enemy: Player | ICreature): boolean | undefined {
 		if (Entity.is(enemy, EntityType.Player)) {
 			if (this.getPlayerData(enemy, "invulnerable")) return false;
 			if (this.getPlayerData(enemy, "noclip")) return false;
@@ -566,7 +566,7 @@ export default class DebugTools extends Mod {
 	 * - Cancels the default movement by returning `false`.
 	 */
 	@Override @HookMethod
-	public onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined {
+	public onMove(player: Player, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined {
 		const noclip = this.getPlayerData(player, "noclip");
 		if (!noclip) return undefined;
 
@@ -598,7 +598,7 @@ export default class DebugTools extends Mod {
 	 * Used to reset noclip movement speed.
 	 */
 	@Override @HookMethod
-	public onNoInputReceived(player: IPlayer): void {
+	public onNoInputReceived(player: Player): void {
 		const noclip = this.getPlayerData(player, "noclip");
 		if (!noclip) return;
 
@@ -609,7 +609,7 @@ export default class DebugTools extends Mod {
 	 * Used to prevent the weight movement penalty while noclipping.
 	 */
 	@Override @HookMethod
-	public getPlayerWeightMovementPenalty(player: IPlayer): number | undefined {
+	public getPlayerWeightMovementPenalty(player: Player): number | undefined {
 		return this.getPlayerData(player, "noclip") ? 0 : undefined;
 	}
 
@@ -618,7 +618,7 @@ export default class DebugTools extends Mod {
 	 * Otherwise we return `undefined` and let the game or other mods handle it.
 	 */
 	@Override @HookMethod
-	public getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined {
+	public getPlayerSpriteBatchLayer(player: Player, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined {
 		return this.getPlayerData(player, "noclip") ? SpriteBatchLayer.CreatureFlying : undefined;
 	}
 
@@ -630,14 +630,14 @@ export default class DebugTools extends Mod {
 	public isHumanSwimming(human: IHuman, isSwimming: boolean): boolean | undefined {
 		if (Entity.is(human, EntityType.NPC)) return undefined;
 
-		return this.getPlayerData(human as IPlayer, "noclip") ? false : undefined;
+		return this.getPlayerData(human as Player, "noclip") ? false : undefined;
 	}
 
 	/**
 	 * We add the weight bonus from the player's save data to the existing strength.
 	 */
 	@Override @HookMethod
-	public getPlayerMaxWeight(weight: number, player: IPlayer) {
+	public getPlayerMaxWeight(weight: number, player: Player) {
 		return weight + this.getPlayerData(player, "weightBonus");
 	}
 

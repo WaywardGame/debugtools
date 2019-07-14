@@ -4,7 +4,7 @@ import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
 import { SkillType } from "entity/IHuman";
 import { INPC } from "entity/npc/INPC";
-import IPlayer from "entity/player/IPlayer";
+import Player from "entity/player/Player";
 import UiTranslation from "language/dictionary/UiTranslation";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
@@ -40,7 +40,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	private readonly checkButtonPermissions?: CheckButton;
 
 	private skill?: SkillType;
-	private player?: IPlayer;
+	private player?: Player;
 
 	public constructor() {
 		super();
@@ -102,7 +102,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.appendTo(this);
 	}
 
-	@Override public update(entity: ICreature | INPC | IPlayer) {
+	@Override public update(entity: ICreature | INPC | Player) {
 		if (this.player === entity) return;
 
 		this.player = Entity.is(entity, EntityType.Player) ? entity : undefined;

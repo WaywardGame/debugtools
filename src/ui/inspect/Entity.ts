@@ -1,9 +1,10 @@
 import ActionExecutor from "entity/action/ActionExecutor";
 import { ICreature } from "entity/creature/ICreature";
-import IEntity, { EntityType, IStatChangeInfo } from "entity/IEntity";
+import Entity from "entity/Entity";
+import { EntityType, IStatChangeInfo } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
 import { INPC } from "entity/npc/INPC";
-import IPlayer from "entity/player/IPlayer";
+import Player from "entity/player/Player";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { bindingManager } from "newui/BindingManager";
@@ -59,8 +60,8 @@ export default class EntityInformation extends InspectInformationSection {
 	private readonly statWrapper: Component;
 	private readonly statComponents = new Map<Stat, IRefreshable>();
 
-	private entities: (IPlayer | ICreature | INPC)[] = [];
-	private entity: IPlayer | ICreature | INPC | undefined;
+	private entities: (Player | ICreature | INPC)[] = [];
+	private entity: Player | ICreature | INPC | undefined;
 
 	public constructor() {
 		super();
@@ -121,7 +122,7 @@ export default class EntityInformation extends InspectInformationSection {
 	}
 
 	public update(position: IVector2, tile: ITile) {
-		const entities: (IPlayer | ICreature | INPC)[] = game.getPlayersAtTile(tile, true);
+		const entities: (Player | ICreature | INPC)[] = game.getPlayersAtTile(tile, true);
 
 		if (tile.creature) entities.push(tile.creature);
 		if (tile.npc) entities.push(tile.npc);
@@ -136,12 +137,12 @@ export default class EntityInformation extends InspectInformationSection {
 		this.setShouldLog();
 
 		for (const entity of this.entities) {
-			(entity as IEntity).event.until(this, "remove", "change")
+			(entity as Entity).event.until(this, "remove", "change")
 				.subscribe("statChanged", this.onStatChange);
 		}
 	}
 
-	public getEntityIndex(entity: ICreature | INPC | IPlayer) {
+	public getEntityIndex(entity: ICreature | INPC | Player) {
 		return this.entities.indexOf(entity);
 	}
 
@@ -162,7 +163,7 @@ export default class EntityInformation extends InspectInformationSection {
 		const stats = Enums.values(Stat)
 			.filter(stat => this.entity!.hasStat(stat) && (!this.subsections.some(subsection => subsection.getImmutableStats().includes(stat))))
 			.map(stat => this.entity!.getStat(stat))
-			.filter<undefined>((stat): stat is IStat => stat !== undefined);
+			.filter2<IStat>(stat => stat !== undefined);
 
 		for (const stat of stats) {
 			if ("max" in stat && !stat.canExceedMax) {

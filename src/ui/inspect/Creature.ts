@@ -3,7 +3,7 @@ import { ICreature } from "entity/creature/ICreature";
 import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
 import { INPC } from "entity/npc/INPC";
-import { IPlayer } from "entity/player/IPlayer";
+import Player from "entity/player/Player";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 
@@ -30,7 +30,7 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 			.appendTo(this);
 	}
 
-	@Override public update(entity: ICreature | INPC | IPlayer) {
+	@Override public update(entity: ICreature | INPC | Player) {
 		this.creature = Entity.is(entity, EntityType.Creature) ? entity : undefined;
 		this.toggle(!!this.creature);
 	}

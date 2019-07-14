@@ -3,17 +3,18 @@ import Entity from "entity/Entity";
 import { AiType, EntityType } from "entity/IEntity";
 import { INPC } from "entity/npc/INPC";
 import { NPCType } from "entity/npc/NPCS";
-import IPlayer from "entity/player/IPlayer";
+import Player from "entity/player/Player";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
+
 import CloneInventory from "./CloneInventory";
 import CopyStats from "./CopyStats";
 
 /**
  * Clones an entity to another position. Given a player, clones a matching NPC.
  */
-export default function (entity: ICreature | INPC | IPlayer, position: IVector3) {
-	let clone: ICreature | INPC | IPlayer;
+export default function (entity: ICreature | INPC | Player, position: IVector3) {
+	let clone: ICreature | INPC | Player;
 
 	if (Entity.is(entity, EntityType.Creature)) {
 		clone = creatureManager.spawn(entity.type, position.x, position.y, position.z, true, entity.aberrant)!;
