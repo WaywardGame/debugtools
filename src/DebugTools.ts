@@ -1,10 +1,12 @@
 import ActionExecutor from "entity/action/ActionExecutor";
 import { ActionType } from "entity/action/IAction";
-import { ICreature, IDamageInfo } from "entity/creature/ICreature";
+import Creature from "entity/creature/Creature";
+import { IDamageInfo } from "entity/creature/ICreature";
 import Entity from "entity/Entity";
+import Human from "entity/Human";
 import { EntityType, MoveType } from "entity/IEntity";
-import IHuman, { Delay } from "entity/IHuman";
-import { INPC } from "entity/npc/INPC";
+import { Delay } from "entity/IHuman";
+import NPC from "entity/npc/NPC";
 import { Source } from "entity/player/IMessageManager";
 import Player from "entity/player/Player";
 import { Events } from "event/EventBuses";
@@ -435,7 +437,7 @@ export default class DebugTools extends Mod {
 	 * - Opens the `InspectDialog`.
 	 * - Emits `DebugToolsEvent.Inspect`
 	 */
-	public inspect(what: Vector2 | ICreature | Player | INPC) {
+	public inspect(what: Vector2 | Creature | Player | NPC) {
 		gameScreen!.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
 			.setInspection(what);
 
@@ -548,7 +550,7 @@ export default class DebugTools extends Mod {
 	 * We prevent creatures attacking the enemy if the enemy is a player who is set as "invulnerable" or "noclipping"
 	 */
 	@Override @HookMethod
-	public canCreatureAttack(creature: ICreature, enemy: Player | ICreature): boolean | undefined {
+	public canCreatureAttack(creature: Creature, enemy: Player | Creature): boolean | undefined {
 		if (Entity.is(enemy, EntityType.Player)) {
 			if (this.getPlayerData(enemy, "invulnerable")) return false;
 			if (this.getPlayerData(enemy, "noclip")) return false;
@@ -627,7 +629,7 @@ export default class DebugTools extends Mod {
 	 * Otherwise we return `undefined` and let the game or other mods handle it. 
 	 */
 	@Override @HookMethod
-	public isHumanSwimming(human: IHuman, isSwimming: boolean): boolean | undefined {
+	public isHumanSwimming(human: Human, isSwimming: boolean): boolean | undefined {
 		if (Entity.is(human, EntityType.NPC)) return undefined;
 
 		return this.getPlayerData(human as Player, "noclip") ? false : undefined;

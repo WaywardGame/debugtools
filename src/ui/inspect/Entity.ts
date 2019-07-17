@@ -1,9 +1,9 @@
 import ActionExecutor from "entity/action/ActionExecutor";
-import { ICreature } from "entity/creature/ICreature";
+import Creature from "entity/creature/Creature";
 import Entity from "entity/Entity";
 import { EntityType, IStatChangeInfo } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
-import { INPC } from "entity/npc/INPC";
+import NPC from "entity/npc/NPC";
 import Player from "entity/player/Player";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
@@ -60,8 +60,8 @@ export default class EntityInformation extends InspectInformationSection {
 	private readonly statWrapper: Component;
 	private readonly statComponents = new Map<Stat, IRefreshable>();
 
-	private entities: (Player | ICreature | INPC)[] = [];
-	private entity: Player | ICreature | INPC | undefined;
+	private entities: (Player | Creature | NPC)[] = [];
+	private entity: Player | Creature | NPC | undefined;
 
 	public constructor() {
 		super();
@@ -102,14 +102,14 @@ export default class EntityInformation extends InspectInformationSection {
 			.forEach(subsection => subsection.event.emit("switchAway")));
 	}
 
-	public getTabs() {
+	@Override public getTabs() {
 		return this.entities.entries().stream()
 			.map(([i, entity]) => tuple(i, () => translation(DebugToolsTranslation.EntityName)
 				.get(EntityType[entity.entityType], entity.getName()/*.inContext(TextContext.Title)*/)))
 			.toArray();
 	}
 
-	public setTab(entity: number) {
+	@Override public setTab(entity: number) {
 		this.entity = this.entities[entity];
 
 		for (const subsection of this.subsections) {
@@ -121,8 +121,8 @@ export default class EntityInformation extends InspectInformationSection {
 		return this;
 	}
 
-	public update(position: IVector2, tile: ITile) {
-		const entities: (Player | ICreature | INPC)[] = game.getPlayersAtTile(tile, true);
+	@Override public update(position: IVector2, tile: ITile) {
+		const entities: (Player | Creature | NPC)[] = game.getPlayersAtTile(tile, true);
 
 		if (tile.creature) entities.push(tile.creature);
 		if (tile.npc) entities.push(tile.npc);
@@ -142,7 +142,7 @@ export default class EntityInformation extends InspectInformationSection {
 		}
 	}
 
-	public getEntityIndex(entity: ICreature | INPC | Player) {
+	public getEntityIndex(entity: Creature | NPC | Player) {
 		return this.entities.indexOf(entity);
 	}
 
@@ -150,7 +150,7 @@ export default class EntityInformation extends InspectInformationSection {
 		return this.entities[index];
 	}
 
-	public logUpdate() {
+	@Override public logUpdate() {
 		for (const entity of this.entities) {
 			this.LOG.info("Entity:", entity);
 		}

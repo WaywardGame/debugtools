@@ -1,2 +1,2 @@
-import IHuman from "entity/IHuman";
-export default function (from: IHuman, to: IHuman): void;
+import Human from "entity/Human";
+export default function (from: Human, to: Human): void;

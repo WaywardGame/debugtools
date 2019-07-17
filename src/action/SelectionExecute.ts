@@ -1,12 +1,14 @@
 import { Action } from "entity/action/Action";
 import { ActionArgument } from "entity/action/IAction";
-import { ICreature } from "entity/creature/ICreature";
+import Creature from "entity/creature/Creature";
 import { EntityType } from "entity/IEntity";
-import { INPC } from "entity/npc/INPC";
+import NPC from "entity/npc/NPC";
 import { ITileEvent } from "tile/ITileEvent";
+
 import { defaultUsability } from "../Actions";
 import { DebugToolsTranslation } from "../IDebugTools";
 import { SelectionType } from "../ui/panel/SelectionPanel";
+
 import Remove from "./helpers/Remove";
 
 /**
@@ -19,7 +21,7 @@ export default new Action(ActionArgument.Number, ActionArgument.Array)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, executionType: DebugToolsTranslation, selection: [SelectionType, number][]) => {
 		for (const [type, id] of selection) {
-			let target: ICreature | INPC | ITileEvent | undefined;
+			let target: Creature | NPC | ITileEvent | undefined;
 
 			switch (type) {
 				case SelectionType.Creature:

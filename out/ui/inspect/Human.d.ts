@@ -1,6 +1,6 @@
-import { ICreature } from "entity/creature/ICreature";
+import Creature from "entity/creature/Creature";
 import { Stat } from "entity/IStats";
-import { INPC } from "entity/npc/INPC";
+import NPC from "entity/npc/NPC";
 import Player from "entity/player/Player";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 export default class HumanInformation extends InspectEntityInformationSubsection {
@@ -10,7 +10,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
     constructor();
     protected onSwitchTo(): void;
     getImmutableStats(): Stat[];
-    update(entity: ICreature | INPC | Player): void;
+    update(entity: Creature | NPC | Player): void;
     private addReputationSlider;
     private setReputation;
     private addItem;

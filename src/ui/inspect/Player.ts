@@ -1,9 +1,9 @@
 import ActionExecutor from "entity/action/ActionExecutor";
-import { ICreature } from "entity/creature/ICreature";
+import Creature from "entity/creature/Creature";
 import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
 import { SkillType } from "entity/IHuman";
-import { INPC } from "entity/npc/INPC";
+import NPC from "entity/npc/NPC";
 import Player from "entity/player/Player";
 import UiTranslation from "language/dictionary/UiTranslation";
 import Translation from "language/Translation";
@@ -102,7 +102,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.appendTo(this);
 	}
 
-	@Override public update(entity: ICreature | INPC | Player) {
+	@Override public update(entity: Creature | NPC | Player) {
 		if (this.player === entity) return;
 
 		this.player = Entity.is(entity, EntityType.Player) ? entity : undefined;

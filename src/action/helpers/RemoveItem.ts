@@ -2,11 +2,11 @@ import { IActionApi } from "entity/action/IAction";
 import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
 import Player from "entity/player/Player";
-import { IItem } from "item/IItem";
+import Item from "item/Item";
 
 import InspectDialog from "../../ui/InspectDialog";
 
-export default function (action: IActionApi<Player>, item: IItem) {
+export default function (action: IActionApi<Player>, item: Item) {
 	const container = item.containedWithin;
 	itemManager.remove(item);
 

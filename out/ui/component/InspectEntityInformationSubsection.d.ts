@@ -1,6 +1,6 @@
-import { ICreature } from "entity/creature/ICreature";
+import Creature from "entity/creature/Creature";
 import { Stat } from "entity/IStats";
-import { INPC } from "entity/npc/INPC";
+import NPC from "entity/npc/NPC";
 import Player from "entity/player/Player";
 import { Events } from "event/EventBuses";
 import { IEventEmitter } from "event/EventEmitter";
@@ -13,7 +13,7 @@ interface IInspectEntityInformationSubsectionEvents extends Events<Component> {
 export default abstract class InspectEntityInformationSubsection extends Component {
     event: IEventEmitter<this, IInspectEntityInformationSubsectionEvents>;
     constructor();
-    abstract update(entity: Player | ICreature | INPC): void;
+    abstract update(entity: Player | Creature | NPC): void;
     getImmutableStats(): Stat[];
 }
 export {};

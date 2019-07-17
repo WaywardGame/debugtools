@@ -1,7 +1,7 @@
 import ActionExecutor from "entity/action/ActionExecutor";
-import { ICreature } from "entity/creature/ICreature";
+import Creature from "entity/creature/Creature";
 import { EntityType } from "entity/IEntity";
-import { INPC } from "entity/npc/INPC";
+import NPC from "entity/npc/NPC";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Dropdown from "newui/component/Dropdown";
@@ -27,7 +27,7 @@ const entityTypeToSelectionTypeMap = {
 	[EntityType.NPC]: SelectionType.NPC,
 };
 
-function getSelectionType(target: ICreature | INPC | ITileEvent) {
+function getSelectionType(target: Creature | NPC | ITileEvent) {
 	return "entityType" in target ? entityTypeToSelectionTypeMap[target.entityType] : SelectionType.TileEvent;
 }
 
@@ -107,7 +107,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 	@Bound
 	public execute() {
-		const targets = Stream.of<(false | (undefined | ICreature | INPC | ITileEvent)[])[]>(
+		const targets = Stream.of<(false | (undefined | Creature | NPC | ITileEvent)[])[]>(
 			this.creatures && game.creatures,
 			this.npcs && game.npcs,
 			this.tileEvents && game.tileEvents,

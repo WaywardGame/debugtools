@@ -1,5 +1,5 @@
-import { ICreature } from "entity/creature/ICreature";
-import { INPC } from "entity/npc/INPC";
+import Creature from "entity/creature/Creature";
+import NPC from "entity/npc/NPC";
 import Player from "entity/player/Player";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
@@ -20,7 +20,7 @@ export default class EntityInformation extends InspectInformationSection {
     getTabs(): [number, () => import("../../../mod-reference/definitions/utilities/string/Interpolator").IStringSection[]][];
     setTab(entity: number): this;
     update(position: IVector2, tile: ITile): void;
-    getEntityIndex(entity: ICreature | INPC | Player): number;
+    getEntityIndex(entity: Creature | NPC | Player): number;
     getEntity(index: number): import("../../../mod-reference/definitions/entity/IEntity").EntityPlayerCreatureNpc;
     logUpdate(): void;
     private initializeStats;

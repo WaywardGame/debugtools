@@ -1,5 +1,5 @@
 import Doodad from "doodad/Doodad";
-import { GrowingStage, IDoodad } from "doodad/IDoodad";
+import { GrowingStage } from "doodad/IDoodad";
 import ActionExecutor from "entity/action/ActionExecutor";
 import { EventHandler } from "event/EventManager";
 import { Quality } from "game/IObject";
@@ -29,7 +29,7 @@ export default class DoodadInformation extends InspectInformationSection {
 	@Mod.log(DEBUG_TOOLS_ID)
 	public readonly LOG: Log;
 
-	private doodad: IDoodad | undefined;
+	private doodad: Doodad | undefined;
 	private readonly buttonGrowthStage: Button;
 
 	public constructor() {

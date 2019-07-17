@@ -1,7 +1,8 @@
 import { ActionType } from "entity/action/IAction";
-import { ICreature, IDamageInfo } from "entity/creature/ICreature";
-import IHuman from "entity/IHuman";
-import { INPC } from "entity/npc/INPC";
+import Creature from "entity/creature/Creature";
+import { IDamageInfo } from "entity/creature/ICreature";
+import Human from "entity/Human";
+import NPC from "entity/npc/NPC";
 import { Source } from "entity/player/IMessageManager";
 import Player from "entity/player/Player";
 import { Events } from "event/EventBuses";
@@ -104,7 +105,7 @@ export default class DebugTools extends Mod {
     onSave(): any;
     updateFog(): void;
     setCameraUnlocked(unlocked: boolean): void;
-    inspect(what: Vector2 | ICreature | Player | INPC): void;
+    inspect(what: Vector2 | Creature | Player | NPC): void;
     toggleDialog(): void;
     hasPermission(): boolean | undefined;
     toggleFog(fog: boolean): void;
@@ -114,12 +115,12 @@ export default class DebugTools extends Mod {
     getZoomLevel(): number | undefined;
     getCameraPosition(position: IVector2): IVector2 | undefined;
     onPlayerDamage(player: Player, info: IDamageInfo): number | undefined;
-    canCreatureAttack(creature: ICreature, enemy: Player | ICreature): boolean | undefined;
+    canCreatureAttack(creature: Creature, enemy: Player | Creature): boolean | undefined;
     onMove(player: Player, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined;
     onNoInputReceived(player: Player): void;
     getPlayerWeightMovementPenalty(player: Player): number | undefined;
     getPlayerSpriteBatchLayer(player: Player, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined;
-    isHumanSwimming(human: IHuman, isSwimming: boolean): boolean | undefined;
+    isHumanSwimming(human: Human, isSwimming: boolean): boolean | undefined;
     getPlayerMaxWeight(weight: number, player: Player): number;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     getAmbientColor(api: IInjectionApi<WorldRenderer, "calculateAmbientColor">): void;

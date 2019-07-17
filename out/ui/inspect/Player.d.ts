@@ -1,5 +1,5 @@
-import { ICreature } from "entity/creature/ICreature";
-import { INPC } from "entity/npc/INPC";
+import Creature from "entity/creature/Creature";
+import NPC from "entity/npc/NPC";
 import Player from "entity/player/Player";
 import DebugTools from "../../DebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
@@ -13,7 +13,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
     private skill?;
     private player?;
     constructor();
-    update(entity: ICreature | INPC | Player): void;
+    update(entity: Creature | NPC | Player): void;
     private refresh;
     private changeSkill;
     private setSkill;

@@ -1,6 +1,7 @@
 import ActionExecutor from "entity/action/ActionExecutor";
 import { Quality } from "game/IObject";
-import { IItem, ItemType } from "item/IItem";
+import { ItemType } from "item/IItem";
+import Item from "item/Item";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
@@ -26,7 +27,7 @@ export default class ItemInformation extends InspectInformationSection {
 	private readonly wrapperAddItem: Component;
 	private readonly wrapperItems: Component;
 
-	private items: IItem[] = [];
+	private items: Item[] = [];
 	private position: IVector2;
 
 	public constructor() {
@@ -85,7 +86,7 @@ export default class ItemInformation extends InspectInformationSection {
 	}
 
 	@Bound
-	private removeItem(item: IItem) {
+	private removeItem(item: Item) {
 		return () => {
 			ActionExecutor.get(Remove).execute(localPlayer, item);
 		};

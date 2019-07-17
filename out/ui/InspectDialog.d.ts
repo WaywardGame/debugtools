@@ -1,5 +1,5 @@
-import { ICreature } from "entity/creature/ICreature";
-import { INPC } from "entity/npc/INPC";
+import Creature from "entity/creature/Creature";
+import NPC from "entity/npc/NPC";
 import { PlayerState } from "entity/player/IPlayer";
 import Player from "entity/player/Player";
 import { TileUpdateType } from "game/IGame";
@@ -32,7 +32,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
     constructor(id: DialogId);
     getSubpanels(): SubpanelInformation[];
     getName(): Translation;
-    setInspection(what: Vector2 | Player | ICreature | INPC): this;
+    setInspection(what: Vector2 | Player | Creature | NPC): this;
     update(): void;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     onGameEnd(state: PlayerState): void;

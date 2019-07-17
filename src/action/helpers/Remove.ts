@@ -1,21 +1,17 @@
 import Doodad from "doodad/Doodad";
-import { IDoodad } from "doodad/IDoodad";
 import { IActionApi } from "entity/action/IAction";
 import { ICorpse } from "entity/creature/corpse/ICorpse";
 import Creature from "entity/creature/Creature";
-import { ICreature } from "entity/creature/ICreature";
-import BaseNPC from "entity/npc/BaseNPC";
-import { INPC } from "entity/npc/INPC";
+import NPC from "entity/npc/NPC";
 import Player from "entity/player/Player";
-import { IItem } from "item/IItem";
 import Item from "item/Item";
 import { ITileEvent } from "tile/ITileEvent";
 
 import RemoveItem from "./RemoveItem";
 
-export default function (action: IActionApi<Player>, target: ICreature | INPC | IDoodad | IItem | ICorpse | ITileEvent) {
+export default function (action: IActionApi<Player>, target: Creature | NPC | Doodad | Item | ICorpse | ITileEvent) {
 	if (target instanceof Creature) return creatureManager.remove(target);
-	if (target instanceof BaseNPC) return npcManager.remove(target);
+	if (target instanceof NPC) return npcManager.remove(target);
 	if (target instanceof Doodad) return doodadManager.remove(target, true);
 	if (target instanceof Item) return RemoveItem(action, target);
 	if (tileEventManager.is(target)) return tileEventManager.remove(target);

@@ -1,4 +1,4 @@
-import { IDoodad } from "doodad/IDoodad";
+import Doodad from "doodad/Doodad";
 import { IVector3 } from "utilities/math/IVector";
 
 import CloneContainedItems from "./CloneContainedItems";
@@ -6,7 +6,7 @@ import CloneContainedItems from "./CloneContainedItems";
 /**
  * Clones a doodad to another position.
  */
-export default function (doodad: IDoodad, position: IVector3) {
+export default function (doodad: Doodad, position: IVector3) {
 	const clone = doodadManager.create(doodad.type, position.x, position.y, position.z, {
 		stillContainer: doodad.stillContainer,
 		gatherReady: doodad.gatherReady,
@@ -18,7 +18,6 @@ export default function (doodad: IDoodad, position: IVector3) {
 		disassembly: !doodad.disassembly ? undefined : doodad.disassembly
 			.map(item => itemManager.createFake(item.type, item.quality)),
 		ownerIdentifier: doodad.ownerIdentifier,
-		item: !doodad.item ? undefined : itemManager.createFake(doodad.item.type, doodad.item.quality),
 		step: doodad.step,
 	});
 

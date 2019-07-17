@@ -1,6 +1,6 @@
-import { ICreature } from "entity/creature/ICreature";
+import Creature from "entity/creature/Creature";
 import Entity from "entity/Entity";
-import { INPC } from "entity/npc/INPC";
+import NPC from "entity/npc/NPC";
 import { PlayerState } from "entity/player/IPlayer";
 import Player from "entity/player/Player";
 import { EventHandler } from "event/EventManager";
@@ -85,7 +85,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 
 	private tilePosition?: Vector3;
 	private tile?: ITile;
-	private inspectionLock?: ICreature | Player | INPC;
+	private inspectionLock?: Creature | Player | NPC;
 	private inspectingTile?: ITile;
 	private storePanels = true;
 	private shouldLog = false;
@@ -166,7 +166,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 * - Updates the dialog. (`update`)
 	 * - If the inspection is locked to an entity, it makes a note of needing to show the entity's subpanel (`willShowSubpanel`).
 	 */
-	public setInspection(what: Vector2 | Player | ICreature | INPC) {
+	public setInspection(what: Vector2 | Player | Creature | NPC) {
 		this.setInspectionTile(what);
 
 		this.inspectionLock = "entityType" in what ? what : undefined;

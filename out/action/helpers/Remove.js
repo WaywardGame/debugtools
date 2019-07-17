@@ -1,10 +1,10 @@
-define(["require", "exports", "doodad/Doodad", "entity/creature/Creature", "entity/npc/BaseNPC", "item/Item", "./RemoveItem"], function (require, exports, Doodad_1, Creature_1, BaseNPC_1, Item_1, RemoveItem_1) {
+define(["require", "exports", "doodad/Doodad", "entity/creature/Creature", "entity/npc/NPC", "item/Item", "./RemoveItem"], function (require, exports, Doodad_1, Creature_1, NPC_1, Item_1, RemoveItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function default_1(action, target) {
         if (target instanceof Creature_1.default)
             return creatureManager.remove(target);
-        if (target instanceof BaseNPC_1.default)
+        if (target instanceof NPC_1.default)
             return npcManager.remove(target);
         if (target instanceof Doodad_1.default)
             return doodadManager.remove(target, true);
@@ -17,4 +17,4 @@ define(["require", "exports", "doodad/Doodad", "entity/creature/Creature", "enti
     }
     exports.default = default_1;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUmVtb3ZlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2FjdGlvbi9oZWxwZXJzL1JlbW92ZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFlQSxtQkFBeUIsTUFBMEIsRUFBRSxNQUFpRTtRQUNySCxJQUFJLE1BQU0sWUFBWSxrQkFBUTtZQUFFLE9BQU8sZUFBZSxDQUFDLE1BQU0sQ0FBQyxNQUFNLENBQUMsQ0FBQztRQUN0RSxJQUFJLE1BQU0sWUFBWSxpQkFBTztZQUFFLE9BQU8sVUFBVSxDQUFDLE1BQU0sQ0FBQyxNQUFNLENBQUMsQ0FBQztRQUNoRSxJQUFJLE1BQU0sWUFBWSxnQkFBTTtZQUFFLE9BQU8sYUFBYSxDQUFDLE1BQU0sQ0FBQyxNQUFNLEVBQUUsSUFBSSxDQUFDLENBQUM7UUFDeEUsSUFBSSxNQUFNLFlBQVksY0FBSTtZQUFFLE9BQU8sb0JBQVUsQ0FBQyxNQUFNLEVBQUUsTUFBTSxDQUFDLENBQUM7UUFDOUQsSUFBSSxnQkFBZ0IsQ0FBQyxFQUFFLENBQUMsTUFBTSxDQUFDO1lBQUUsT0FBTyxnQkFBZ0IsQ0FBQyxNQUFNLENBQUMsTUFBTSxDQUFDLENBQUM7UUFDeEUsSUFBSSxhQUFhLENBQUMsRUFBRSxDQUFDLE1BQU0sQ0FBQztZQUFFLE9BQU8sYUFBYSxDQUFDLE1BQU0sQ0FBQyxNQUFNLENBQUMsQ0FBQztJQUNuRSxDQUFDO0lBUEQsNEJBT0MifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUmVtb3ZlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2FjdGlvbi9oZWxwZXJzL1JlbW92ZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFXQSxtQkFBeUIsTUFBMEIsRUFBRSxNQUE2RDtRQUNqSCxJQUFJLE1BQU0sWUFBWSxrQkFBUTtZQUFFLE9BQU8sZUFBZSxDQUFDLE1BQU0sQ0FBQyxNQUFNLENBQUMsQ0FBQztRQUN0RSxJQUFJLE1BQU0sWUFBWSxhQUFHO1lBQUUsT0FBTyxVQUFVLENBQUMsTUFBTSxDQUFDLE1BQU0sQ0FBQyxDQUFDO1FBQzVELElBQUksTUFBTSxZQUFZLGdCQUFNO1lBQUUsT0FBTyxhQUFhLENBQUMsTUFBTSxDQUFDLE1BQU0sRUFBRSxJQUFJLENBQUMsQ0FBQztRQUN4RSxJQUFJLE1BQU0sWUFBWSxjQUFJO1lBQUUsT0FBTyxvQkFBVSxDQUFDLE1BQU0sRUFBRSxNQUFNLENBQUMsQ0FBQztRQUM5RCxJQUFJLGdCQUFnQixDQUFDLEVBQUUsQ0FBQyxNQUFNLENBQUM7WUFBRSxPQUFPLGdCQUFnQixDQUFDLE1BQU0sQ0FBQyxNQUFNLENBQUMsQ0FBQztRQUN4RSxJQUFJLGFBQWEsQ0FBQyxFQUFFLENBQUMsTUFBTSxDQUFDO1lBQUUsT0FBTyxhQUFhLENBQUMsTUFBTSxDQUFDLE1BQU0sQ0FBQyxDQUFDO0lBQ25FLENBQUM7SUFQRCw0QkFPQyJ9

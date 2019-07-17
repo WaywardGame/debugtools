@@ -1,10 +1,10 @@
 import ActionExecutor from "entity/action/ActionExecutor";
-import { ICreature } from "entity/creature/ICreature";
+import Creature from "entity/creature/Creature";
 import Entity from "entity/Entity";
 import { REPUTATION_MAX } from "entity/Human";
 import { EntityType } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
-import { INPC } from "entity/npc/INPC";
+import NPC from "entity/npc/NPC";
 import Player from "entity/player/Player";
 import { EventHandler } from "event/EventManager";
 import { Quality } from "game/IObject";
@@ -23,7 +23,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 	private readonly addItemContainer: Component;
 	private readonly reputationSliders: { [key in Stat.Malignity | Stat.Benignity]?: RangeRow } = {};
 
-	private human: Player | INPC | undefined;
+	private human: Player | NPC | undefined;
 
 	public constructor() {
 		super();
@@ -52,7 +52,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 		] : [];
 	}
 
-	@Override public update(entity: ICreature | INPC | Player) {
+	@Override public update(entity: Creature | NPC | Player) {
 		if (this.human === entity) return;
 
 		this.human = Entity.is(entity, EntityType.Creature) ? undefined : entity;

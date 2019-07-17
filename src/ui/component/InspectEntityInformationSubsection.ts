@@ -1,6 +1,6 @@
-import { ICreature } from "entity/creature/ICreature";
+import Creature from "entity/creature/Creature";
 import { Stat } from "entity/IStats";
-import { INPC } from "entity/npc/INPC";
+import NPC from "entity/npc/NPC";
 import Player from "entity/player/Player";
 import { Events } from "event/EventBuses";
 import { IEventEmitter } from "event/EventEmitter";
@@ -20,7 +20,7 @@ export default abstract class InspectEntityInformationSubsection extends Compone
 		this.classes.add("debug-tools-inspect-entity-sub-section");
 	}
 
-	public abstract update(entity: Player | ICreature | INPC): void;
+	public abstract update(entity: Player | Creature | NPC): void;
 
 	public getImmutableStats(): Stat[] { return []; }
 }
