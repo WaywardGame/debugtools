@@ -5,7 +5,7 @@ import Player from "entity/player/Player";
 import { TileUpdateType } from "game/IGame";
 import Translation from "language/Translation";
 import { IHookHost } from "mod/IHookHost";
-import { Bindable, BindCatcherApi } from "newui/BindingManager";
+import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import { DialogId, IDialogDescription } from "newui/screen/screens/game/Dialogs";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";

@@ -1,5 +1,5 @@
 import { IHookHost } from "mod/IHookHost";
-import { Bindable, BindCatcherApi } from "newui/BindingManager";
+import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import Vector2 from "utilities/math/Vector2";
 import DebugTools from "./DebugTools";
 import CancelablePromise from "./util/CancelablePromise";

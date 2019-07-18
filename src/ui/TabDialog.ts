@@ -6,6 +6,7 @@ import Component from "newui/component/Component";
 import { TranslationGenerator } from "newui/component/IComponent";
 import Dialog from "newui/screen/screens/game/component/Dialog";
 import { DialogId, Edge } from "newui/screen/screens/game/Dialogs";
+import newui from "newui/NewUi";
 
 export type SubpanelInformation = [string | number, TranslationGenerator, (component: Component) => any, ((button: Button) => any)?, Button?];
 

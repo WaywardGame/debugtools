@@ -17,6 +17,7 @@ import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeRow } from "newui/component/RangeRow";
 import { IRefreshable } from "newui/component/Refreshable";
 import Text from "newui/component/Text";
+import newui from "newui/NewUi";
 import { ITile } from "tile/ITerrain";
 import { tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";

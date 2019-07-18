@@ -1,16 +1,12 @@
 import { ICorpse } from "entity/creature/corpse/ICorpse";
-import { CreatureType } from "entity/creature/ICreature";
 import Player from "entity/player/Player";
 import Vector3 from "utilities/math/Vector3";
+
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
+
 import GetPosition from "./GetPosition";
 
 export default function (player: Player, corpse: ICorpse) {
-	// blood can't be resurrected
-	if (corpse.type === CreatureType.Blood || corpse.type === CreatureType.WaterBlood) {
-		return false;
-	}
-
 	// fail if the location is blocked
 	const location = GetPosition(player, new Vector3(corpse), () => translation(DebugToolsTranslation.ActionResurrect)
 		.get(corpseManager.getName(corpse)));

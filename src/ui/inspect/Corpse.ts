@@ -1,6 +1,5 @@
 import ActionExecutor from "entity/action/ActionExecutor";
 import { ICorpse } from "entity/creature/corpse/ICorpse";
-import { CreatureType } from "entity/creature/ICreature";
 import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button from "newui/component/Button";
@@ -20,15 +19,13 @@ export default class CorpseInformation extends InspectInformationSection {
 	@Mod.log(DEBUG_TOOLS_ID)
 	public readonly LOG: Log;
 
-	private readonly resurrectButton: Button;
-
 	private corpses: ICorpse[] = [];
 	private corpse: ICorpse | undefined;
 
 	public constructor() {
 		super();
 
-		this.resurrectButton = new Button()
+		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonResurrectCorpse))
 			.event.subscribe("activate", this.resurrect)
 			.appendTo(this);
@@ -48,9 +45,6 @@ export default class CorpseInformation extends InspectInformationSection {
 
 	@Override public setTab(corpse: number) {
 		this.corpse = this.corpses[corpse];
-
-		this.resurrectButton.toggle(this.corpse.type !== CreatureType.Blood && this.corpse.type !== CreatureType.WaterBlood);
-
 		return this;
 	}
 

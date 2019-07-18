@@ -1,6 +1,6 @@
 import { RenderSource } from "game/IGame";
 import Register from "mod/ModRegistry";
-import { Bindable, BindCatcherApi, KeyModifier } from "newui/BindingManager";
+import { Bindable, BindCatcherApi, KeyModifier } from "newui/IBindingManager";
 import Vector2 from "utilities/math/Vector2";
 
 const ACCELERATION = 0.12;

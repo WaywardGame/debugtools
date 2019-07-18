@@ -1,7 +1,7 @@
 import { Events } from "event/EventBuses";
 import { IEventEmitter } from "event/EventEmitter";
 import { Quality } from "game/IObject";
-import { ItemType } from "item/IItem";
+import { ItemType, ItemTypeGroup } from "item/IItem";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Button from "newui/component/Button";
@@ -14,6 +14,8 @@ import Enums from "utilities/enum/Enums";
 import Stream from "utilities/stream/Stream";
 
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
+
+import GroupDropdown from "./GroupDropdown";
 
 interface IAddItemToInventoryEvents extends Events<Component> {
 	/**
@@ -42,16 +44,7 @@ export default class AddItemToInventory extends Component {
 		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelItem)))
-			.append(this.dropdownItemType = new Dropdown<ItemType>()
-				.setRefreshMethod(() => ({
-					defaultOption: ItemType.None,
-					options: Stream.of(tuple(ItemType.None, Translation.nameOf(Dictionary.Item, ItemType.None, false).inContext(TextContext.Title)))
-						.merge(Enums.values(ItemType)
-							.filter(item => item)
-							.map(item => tuple(item, Translation.nameOf(Dictionary.Item, item, false).inContext(TextContext.Title)))
-							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2))))
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
-				}))
+			.append(this.dropdownItemType = new ItemDropdown()
 				.event.subscribe("selection", this.changeItem))
 			.appendTo(this);
 
@@ -96,5 +89,33 @@ export default class AddItemToInventory extends Component {
 	@Bound
 	private addItem() {
 		this.event.emit("execute", this.dropdownItemType.selection, this.dropdownItemQuality.selection);
+	}
+}
+
+class ItemDropdown extends GroupDropdown<ItemType, ItemTypeGroup> {
+
+	public constructor() {
+		super();
+		this.setRefreshMethod(() => ({
+			defaultOption: ItemType.None,
+			options: Stream.of(tuple(ItemType.None, Translation.nameOf(Dictionary.Item, ItemType.None, false).inContext(TextContext.Title)))
+				.merge(Enums.values(ItemType)
+					.filter(item => item)
+					.map(item => tuple(item, Translation.nameOf(Dictionary.Item, item, false).inContext(TextContext.Title)))
+					.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2))))
+				.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
+		}));
+	}
+
+	@Override protected getGroupName(group: ItemTypeGroup) {
+		return new Translation(Dictionary.ItemGroup, group).getString();
+	}
+
+	@Override protected isInGroup(item: ItemType, group: ItemTypeGroup) {
+		return itemManager.isInGroup(item, group);
+	}
+
+	@Override protected getGroups() {
+		return Enums.values(ItemTypeGroup);
 	}
 }

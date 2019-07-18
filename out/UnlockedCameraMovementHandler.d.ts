@@ -1,4 +1,4 @@
-import { Bindable, BindCatcherApi } from "newui/BindingManager";
+import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import Vector2 from "utilities/math/Vector2";
 export default class UnlockedCameraMovementHandler {
     readonly bindMoveCameraUp: Bindable;

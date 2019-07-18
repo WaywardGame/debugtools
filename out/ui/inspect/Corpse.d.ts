@@ -4,7 +4,6 @@ import { IVector2 } from "utilities/math/IVector";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 export default class CorpseInformation extends InspectInformationSection {
     readonly LOG: Log;
-    private readonly resurrectButton;
     private corpses;
     private corpse;
     constructor();

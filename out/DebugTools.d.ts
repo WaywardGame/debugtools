@@ -14,7 +14,7 @@ import InterruptChoice from "language/dictionary/InterruptChoice";
 import Message from "language/dictionary/Message";
 import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
-import { Bindable, BindCatcherApi } from "newui/BindingManager";
+import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
 import { MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
 import { SpriteBatchLayer } from "renderer/IWorldRenderer";

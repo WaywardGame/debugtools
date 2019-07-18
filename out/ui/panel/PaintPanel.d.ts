@@ -3,7 +3,7 @@ import { CreatureType } from "entity/creature/ICreature";
 import { NPCType } from "entity/npc/NPCS";
 import { Events } from "event/EventBuses";
 import { IEventEmitter } from "event/EventEmitter";
-import { Bindable, BindCatcherApi } from "newui/BindingManager";
+import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import Component from "newui/component/Component";
 import { SpriteBatchLayer } from "renderer/IWorldRenderer";
 import { TerrainType } from "tile/ITerrain";
