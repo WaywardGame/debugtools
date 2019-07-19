@@ -84,7 +84,7 @@ class DoodadDropdown extends GroupDropdown<"nochange" | "remove" | keyof typeof 
 	}
 
 	@Override protected getGroupName(group: DoodadTypeGroup) {
-		return new Translation(Dictionary.DoodadGroup, group).getString();
+		return new Translation(Dictionary.DoodadGroup, group).setFailWith("").getString();
 	}
 
 	@Override protected isInGroup(optionName: "nochange" | "remove" | keyof typeof DoodadType, group: DoodadTypeGroup) {
