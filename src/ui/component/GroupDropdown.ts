@@ -9,6 +9,7 @@ import newui from "newui/NewUi";
 import Tooltip from "newui/tooltip/Tooltip";
 import Arrays, { tuple } from "utilities/Arrays";
 import { sleep } from "utilities/Async";
+import Log, { LogSource } from "utilities/Log";
 import StackMap from "utilities/map/StackMap";
 import { IVector2 } from "utilities/math/IVector";
 import Stream from "utilities/stream/Stream";
@@ -118,7 +119,9 @@ export default abstract class GroupDropdown<O extends string | number, G extends
 		super.onRegenerateBox();
 		const tooltip = this.getTooltip();
 		if (tooltip) {
-			tooltip.style.set("max-height", `calc(50vh - ${this.getStyle("--block-height")})`);
+			Log.warn("DebugTools", LogSource.NewUi, LogSource.Reflow)("GroupDropdown.onRegenerateBox() getComputedStyle", this);
+			const style = getComputedStyle(this.element);
+			tooltip.style.set("max-height", `calc(50vh - ${style.getPropertyValue("--block-height")})`);
 		}
 	}
 
@@ -162,6 +165,7 @@ export default abstract class GroupDropdown<O extends string | number, G extends
 		else
 			this.inputButton.setInputText(`${inputText}${inputText.length && !inputText.endsWith(" ") ? " " : ""}group:${group} `);
 
+		Log.warn(LogSource.NewUi, LogSource.Reflow)("GroupDropdown.focus() focus", this);
 		this.inputButton.focus();
 	}
 }
