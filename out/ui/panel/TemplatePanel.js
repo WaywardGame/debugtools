@@ -19,9 +19,9 @@ define(["require", "exports", "entity/action/ActionExecutor", "event/EventManage
                 .setRefreshMethod(() => ({
                 defaultOption: ITerrain_1.TileTemplateType.House,
                 options: Enums_1.default.values(ITerrain_1.TileTemplateType)
-                    .map(type => Arrays_1.tuple(type, Translation_1.default.generator(ITerrain_1.TileTemplateType[type])))
+                    .map(type => Arrays_1.Tuple(type, Translation_1.default.generator(ITerrain_1.TileTemplateType[type])))
                     .sorted(([, t1], [, t2]) => Text_1.default.toString(t1).localeCompare(Text_1.default.toString(t2)))
-                    .map(([id, t]) => Arrays_1.tuple(id, (option) => option.setText(t))),
+                    .map(([id, t]) => Arrays_1.Tuple(id, (option) => option.setText(t))),
             }))
                 .event.subscribe("selection", this.changeTemplateType))
                 .appendTo(this);
@@ -32,9 +32,9 @@ define(["require", "exports", "entity/action/ActionExecutor", "event/EventManage
                 .setRefreshMethod(() => ({
                 defaultOption: Stream_1.default.keys(TerrainTemplates_1.default[this.dropdownType.selection]).first(),
                 options: Stream_1.default.keys(TerrainTemplates_1.default[this.dropdownType.selection])
-                    .map(name => Arrays_1.tuple(name, Translation_1.default.generator(name)))
+                    .map(name => Arrays_1.Tuple(name, Translation_1.default.generator(name)))
                     .sorted(([, t1], [, t2]) => Text_1.default.toString(t1).localeCompare(Text_1.default.toString(t2)))
-                    .map(([id, t]) => Arrays_1.tuple(id, (option) => option.setText(t))),
+                    .map(([id, t]) => Arrays_1.Tuple(id, (option) => option.setText(t))),
             })))
                 .appendTo(this);
             this.mirrorVertically = new CheckButton_1.CheckButton()

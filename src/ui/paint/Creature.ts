@@ -10,7 +10,7 @@ import Component from "newui/component/Component";
 import Dropdown, { IDropdownOption } from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Stream from "utilities/stream/Stream";
 
@@ -40,12 +40,12 @@ export default class CreaturePaint extends Component implements IPaintSection {
 					)
 						.merge(Enums.values(CreatureType)
 							.filter(creature => creatureDescriptions[creature])
-							.map(creature => tuple(
+							.map(creature => Tuple(
 								CreatureType[creature] as keyof typeof CreatureType,
 								Translation.nameOf(Dictionary.Creature, creature, false).inContext(TextContext.Title),
 							))
 							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-							.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
+							.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t)))),
 				}))
 				.event.subscribe("selection", this.changeCreature))
 			.appendTo(this);

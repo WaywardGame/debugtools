@@ -9,7 +9,7 @@ import Component from "newui/component/Component";
 import Dropdown from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Stream from "utilities/stream/Stream";
 
@@ -58,8 +58,8 @@ export default class AddItemToInventory extends Component {
 					.setRefreshMethod(() => ({
 						defaultOption: Quality.Random,
 						options: Enums.values(Quality)
-							.map(quality => tuple(quality, Translation.generator(Quality[quality])))
-							.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
+							.map(quality => Tuple(quality, Translation.generator(Quality[quality])))
+							.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 					}))))
 			.append(new Button()
 				.setText(translation(DebugToolsTranslation.AddToInventory))
@@ -98,12 +98,12 @@ class ItemDropdown extends GroupDropdown<ItemType, ItemTypeGroup> {
 		super();
 		this.setRefreshMethod(() => ({
 			defaultOption: ItemType.None,
-			options: Stream.of(tuple(ItemType.None, Translation.nameOf(Dictionary.Item, ItemType.None, false).inContext(TextContext.Title)))
+			options: Stream.of(Tuple(ItemType.None, Translation.nameOf(Dictionary.Item, ItemType.None, false).inContext(TextContext.Title)))
 				.merge(Enums.values(ItemType)
 					.filter(item => item)
-					.map(item => tuple(item, Translation.nameOf(Dictionary.Item, item, false).inContext(TextContext.Title)))
+					.map(item => Tuple(item, Translation.nameOf(Dictionary.Item, item, false).inContext(TextContext.Title)))
 					.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2))))
-				.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
+				.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 		}));
 	}
 

@@ -100,7 +100,7 @@ define(["require", "exports", "entity/action/ActionExecutor", "entity/IEntity", 
                     break;
             }
             ActionExecutor_1.default.get(SelectionExecute_1.default).execute(localPlayer, this.action, targets.slice(0, quantity)
-                .map(target => Arrays_1.tuple(getSelectionType(target), target.id)));
+                .map(target => Arrays_1.Tuple(getSelectionType(target), target.id)));
         }
         changeMethod(_, method) {
             this.method = method;

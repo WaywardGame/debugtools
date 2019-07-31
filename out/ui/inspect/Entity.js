@@ -51,7 +51,7 @@ define(["require", "exports", "entity/action/ActionExecutor", "entity/IEntity", 
         }
         getTabs() {
             return this.entities.entries().stream()
-                .map(([i, entity]) => Arrays_1.tuple(i, () => IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.EntityName)
+                .map(([i, entity]) => Arrays_1.Tuple(i, () => IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.EntityName)
                 .get(IEntity_1.EntityType[entity.entityType], entity.getName())))
                 .toArray();
         }
@@ -167,7 +167,7 @@ define(["require", "exports", "entity/action/ActionExecutor", "entity/IEntity", 
         createTeleportToPlayerMenu() {
             return players.stream()
                 .filter(player => player !== this.entity)
-                .map(player => Arrays_1.tuple(player.name, {
+                .map(player => Arrays_1.Tuple(player.name, {
                 translation: Translation_1.default.generator(player.name),
                 onActivate: () => this.teleport(player),
             }))

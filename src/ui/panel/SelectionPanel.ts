@@ -8,7 +8,7 @@ import Dropdown from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeRow } from "newui/component/RangeRow";
 import { ITileEvent } from "tile/ITileEvent";
-import Arrays, { tuple } from "utilities/Arrays";
+import Arrays, { Tuple } from "utilities/Arrays";
 import Vector2 from "utilities/math/Vector2";
 import Stream from "utilities/stream/Stream";
 
@@ -135,7 +135,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 		}
 
 		ActionExecutor.get(SelectionExecute).execute(localPlayer, this.action, targets.slice(0, quantity)
-			.map(target => tuple(getSelectionType(target), target.id)));
+			.map(target => Tuple(getSelectionType(target), target.id)));
 	}
 
 	@Bound

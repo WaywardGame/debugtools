@@ -10,7 +10,7 @@ import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import { TerrainType } from "tile/ITerrain";
 import { terrainDescriptions } from "tile/Terrains";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Stream from "utilities/stream/Stream";
 
@@ -37,12 +37,12 @@ export default class TerrainPaint extends Component implements IPaintSection {
 						["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
 					)
 						.merge(Enums.values(TerrainType)
-							.map(terrain => tuple(
+							.map(terrain => Tuple(
 								TerrainType[terrain] as keyof typeof TerrainType,
 								new Translation(Dictionary.Terrain, terrain).inContext(TextContext.Title),
 							))
 							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-							.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
+							.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t)))),
 				}))
 				.event.subscribe("selection", this.changeTerrain))
 			.appendTo(this);

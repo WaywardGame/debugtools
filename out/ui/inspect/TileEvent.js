@@ -18,7 +18,7 @@ define(["require", "exports", "entity/action/ActionExecutor", "language/Dictiona
         }
         getTabs() {
             return this.tileEvents.entries().stream()
-                .map(([i, tileEvent]) => Arrays_1.tuple(i, () => IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.TileEventName)
+                .map(([i, tileEvent]) => Arrays_1.Tuple(i, () => IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.TileEventName)
                 .get(Translation_1.default.nameOf(Dictionaries_1.Dictionary.TileEvent, tileEvent, false).inContext(Translation_1.TextContext.Title))))
                 .toArray();
         }

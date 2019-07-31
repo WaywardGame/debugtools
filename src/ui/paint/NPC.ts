@@ -7,7 +7,7 @@ import Component from "newui/component/Component";
 import Dropdown, { IDropdownOption } from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Stream from "utilities/stream/Stream";
 
@@ -35,9 +35,9 @@ export default class NPCPaint extends Component implements IPaintSection {
 						["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
 					)
 						.merge(Enums.values(NPCType)
-							.map(npc => tuple(NPCType[npc] as keyof typeof NPCType, Translation.generator(NPCType[npc])))
+							.map(npc => Tuple(NPCType[npc] as keyof typeof NPCType, Translation.generator(NPCType[npc])))
 							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-							.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
+							.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t)))),
 				}))
 				.event.subscribe("selection", this.changeNPC))
 			.appendTo(this);

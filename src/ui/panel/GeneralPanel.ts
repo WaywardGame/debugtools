@@ -17,7 +17,7 @@ import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import newui from "newui/NewUi";
 import { ParticleType } from "renderer/particle/IParticle";
 import { particles } from "renderer/particle/Particles";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 
@@ -106,9 +106,9 @@ export default class GeneralPanel extends DebugToolsPanel {
 				.setRefreshMethod(() => ({
 					defaultOption: SfxType.Click,
 					options: Enums.values(SfxType)
-						.map(sfx => tuple(sfx, Translation.generator(SfxType[sfx])))
+						.map(sfx => Tuple(sfx, Translation.generator(SfxType[sfx])))
 						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
+						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				})))
 			.appendTo(this);
 
@@ -120,9 +120,9 @@ export default class GeneralPanel extends DebugToolsPanel {
 				.setRefreshMethod(() => ({
 					defaultOption: ParticleType.Blood,
 					options: Enums.values(ParticleType)
-						.map(particle => tuple(particle, Translation.generator(ParticleType[particle])))
+						.map(particle => Tuple(particle, Translation.generator(ParticleType[particle])))
 						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
+						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				})))
 			.appendTo(this);
 	}

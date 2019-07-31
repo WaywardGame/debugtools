@@ -4,7 +4,7 @@ import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button from "newui/component/Button";
 import { ITile } from "tile/ITerrain";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 
@@ -38,7 +38,7 @@ export default class CorpseInformation extends InspectInformationSection {
 
 	@Override public getTabs(): TabInformation[] {
 		return this.corpses.entries().stream()
-			.map(([i, corpse]) => tuple(i, () => translation(DebugToolsTranslation.CorpseName)
+			.map(([i, corpse]) => Tuple(i, () => translation(DebugToolsTranslation.CorpseName)
 				.get(corpseManager.getName(corpse, false).inContext(TextContext.Title))))
 			.toArray();
 	}

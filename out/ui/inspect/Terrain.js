@@ -18,9 +18,9 @@ define(["require", "exports", "entity/action/ActionExecutor", "language/Dictiona
                 defaultOption: this.tile ? TileHelpers_1.default.getType(this.tile) : ITerrain_1.TerrainType.Dirt,
                 options: Enums_1.default.values(ITerrain_1.TerrainType)
                     .filter(terrain => terrain)
-                    .map(terrain => Arrays_1.tuple(terrain, new Translation_1.default(Dictionaries_1.Dictionary.Terrain, terrain).inContext(Translation_1.TextContext.Title)))
+                    .map(terrain => Arrays_1.Tuple(terrain, new Translation_1.default(Dictionaries_1.Dictionary.Terrain, terrain).inContext(Translation_1.TextContext.Title)))
                     .sorted(([, t1], [, t2]) => Text_1.default.toString(t1).localeCompare(Text_1.default.toString(t2)))
-                    .map(([id, t]) => Arrays_1.tuple(id, (option) => option.setText(t))),
+                    .map(([id, t]) => Arrays_1.Tuple(id, (option) => option.setText(t))),
             }))
                 .event.subscribe("selection", this.changeTerrain))
                 .appendTo(this);

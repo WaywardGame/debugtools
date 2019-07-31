@@ -9,7 +9,7 @@ import Dropdown, { IDropdownOption } from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import { TileEventType } from "tile/ITileEvent";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Stream from "utilities/stream/Stream";
 
@@ -39,12 +39,12 @@ export default class TileEventPaint extends Component implements IPaintSection {
 					)
 						.merge(Enums.values(TileEventType)
 							.filter(event => event !== TileEventType.None)
-							.map(event => tuple(
+							.map(event => Tuple(
 								TileEventType[event] as keyof typeof TileEventType,
 								Translation.nameOf(Dictionary.TileEvent, event, false).inContext(TextContext.Title),
 							))
 							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-							.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
+							.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t)))),
 				}))
 				.event.subscribe("selection", this.changeEvent))
 			.appendTo(this);

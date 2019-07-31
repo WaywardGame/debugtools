@@ -44,9 +44,9 @@ define(["require", "exports", "entity/action/ActionExecutor", "entity/Entity", "
                 defaultOption: "none",
                 options: Stream_1.default.of(["none", option => option.setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.None))])
                     .merge(Enums_1.default.values(IHuman_1.SkillType)
-                    .map(skill => Arrays_1.tuple(IHuman_1.SkillType[skill], Translation_1.default.generator(IHuman_1.SkillType[skill])))
+                    .map(skill => Arrays_1.Tuple(IHuman_1.SkillType[skill], Translation_1.default.generator(IHuman_1.SkillType[skill])))
                     .sorted(([, t1], [, t2]) => Text_1.default.toString(t1).localeCompare(Text_1.default.toString(t2)))
-                    .map(([id, t]) => Arrays_1.tuple(id, (option) => option.setText(t)))),
+                    .map(([id, t]) => Arrays_1.Tuple(id, (option) => option.setText(t)))),
             }))
                 .event.subscribe("selection", this.changeSkill))
                 .appendTo(this);

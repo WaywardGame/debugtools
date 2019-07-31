@@ -5,7 +5,7 @@ import Mod from "mod/Mod";
 import Button from "newui/component/Button";
 import { ITile } from "tile/ITerrain";
 import { ITileEvent } from "tile/ITileEvent";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 
@@ -34,7 +34,7 @@ export default class TileEventInformation extends InspectInformationSection {
 
 	@Override public getTabs(): TabInformation[] {
 		return this.tileEvents.entries().stream()
-			.map(([i, tileEvent]) => tuple(i, () => translation(DebugToolsTranslation.TileEventName)
+			.map(([i, tileEvent]) => Tuple(i, () => translation(DebugToolsTranslation.TileEventName)
 				.get(Translation.nameOf(Dictionary.TileEvent, tileEvent, false).inContext(TextContext.Title))))
 			.toArray();
 	}

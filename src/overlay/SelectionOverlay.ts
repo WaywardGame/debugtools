@@ -1,6 +1,6 @@
 import Mod from "mod/Mod";
 import { ITile } from "tile/ITerrain";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
@@ -100,7 +100,7 @@ function updateSelectionOverlay(tile: ITile, tilePosition: IVector2, updateNeigh
 function getNeighborTiles(tilePosition: IVector2): INeighborTiles {
 	const vectors = getNeighborVectors(tilePosition);
 	return Enums.values(NeighborPosition)
-		.map(pos => tuple(pos, tuple(vectors[pos], game.getTile(...vectors[pos].xyz))))
+		.map(pos => Tuple(pos, Tuple(vectors[pos], game.getTile(...vectors[pos].xyz))))
 		.toObject();
 }
 

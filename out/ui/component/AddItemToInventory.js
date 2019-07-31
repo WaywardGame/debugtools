@@ -26,8 +26,8 @@ define(["require", "exports", "game/IObject", "item/IItem", "language/Dictionari
                 .setRefreshMethod(() => ({
                 defaultOption: IObject_1.Quality.Random,
                 options: Enums_1.default.values(IObject_1.Quality)
-                    .map(quality => Arrays_1.tuple(quality, Translation_1.default.generator(IObject_1.Quality[quality])))
-                    .map(([id, t]) => Arrays_1.tuple(id, (option) => option.setText(t))),
+                    .map(quality => Arrays_1.Tuple(quality, Translation_1.default.generator(IObject_1.Quality[quality])))
+                    .map(([id, t]) => Arrays_1.Tuple(id, (option) => option.setText(t))),
             }))))
                 .append(new Button_1.default()
                 .setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.AddToInventory))
@@ -72,12 +72,12 @@ define(["require", "exports", "game/IObject", "item/IItem", "language/Dictionari
             super();
             this.setRefreshMethod(() => ({
                 defaultOption: IItem_1.ItemType.None,
-                options: Stream_1.default.of(Arrays_1.tuple(IItem_1.ItemType.None, Translation_1.default.nameOf(Dictionaries_1.Dictionary.Item, IItem_1.ItemType.None, false).inContext(Translation_1.TextContext.Title)))
+                options: Stream_1.default.of(Arrays_1.Tuple(IItem_1.ItemType.None, Translation_1.default.nameOf(Dictionaries_1.Dictionary.Item, IItem_1.ItemType.None, false).inContext(Translation_1.TextContext.Title)))
                     .merge(Enums_1.default.values(IItem_1.ItemType)
                     .filter(item => item)
-                    .map(item => Arrays_1.tuple(item, Translation_1.default.nameOf(Dictionaries_1.Dictionary.Item, item, false).inContext(Translation_1.TextContext.Title)))
+                    .map(item => Arrays_1.Tuple(item, Translation_1.default.nameOf(Dictionaries_1.Dictionary.Item, item, false).inContext(Translation_1.TextContext.Title)))
                     .sorted(([, t1], [, t2]) => Text_1.default.toString(t1).localeCompare(Text_1.default.toString(t2))))
-                    .map(([id, t]) => Arrays_1.tuple(id, (option) => option.setText(t))),
+                    .map(([id, t]) => Arrays_1.Tuple(id, (option) => option.setText(t))),
             }));
         }
         getGroupName(group) {

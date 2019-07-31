@@ -9,7 +9,7 @@ import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
 import { ITile, TerrainType } from "tile/ITerrain";
 import terrainDescriptions from "tile/Terrains";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
@@ -44,9 +44,9 @@ export default class TerrainInformation extends InspectInformationSection {
 					defaultOption: this.tile ? TileHelpers.getType(this.tile) : TerrainType.Dirt,
 					options: Enums.values(TerrainType)
 						.filter(terrain => terrain)
-						.map(terrain => tuple(terrain, new Translation(Dictionary.Terrain, terrain).inContext(TextContext.Title)))
+						.map(terrain => Tuple(terrain, new Translation(Dictionary.Terrain, terrain).inContext(TextContext.Title)))
 						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
+						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				}))
 				.event.subscribe("selection", this.changeTerrain))
 			.appendTo(this);

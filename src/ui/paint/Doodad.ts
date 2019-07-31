@@ -8,7 +8,7 @@ import Component from "newui/component/Component";
 import Dropdown, { IDropdownOption } from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Stream from "utilities/stream/Stream";
 
@@ -79,7 +79,7 @@ class DoodadDropdown extends GroupDropdown<"nochange" | "remove" | keyof typeof 
 						};
 					})
 					.sorted((o1, o2) => o1.translationString.localeCompare(o2.translationString))
-					.map(({ type, translation }) => tuple(type, (option: Button) => option.setText(translation)))),
+					.map(({ type, translation }) => Tuple(type, (option: Button) => option.setText(translation)))),
 		}));
 	}
 

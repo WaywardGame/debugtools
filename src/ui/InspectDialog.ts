@@ -16,7 +16,7 @@ import Text from "newui/component/Text";
 import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
 import { ITile } from "tile/ITerrain";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
@@ -134,13 +134,13 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 
 		return this.infoSections.stream()
 			// add the tabs of the section to the tuple
-			.map(section => tuple(section, section.getTabs()))
+			.map(section => Tuple(section, section.getTabs()))
 			// if there are no tabs from the section, remove it
 			.filter(([, tabs]) => !!tabs.length)
 			// map each of the section/tab tuples with an array of tuples representing all the subpanels (tabs) provided by that section
 			.map(([section, tabs]) => tabs
 				// map each tab to the subpanel information for it
-				.map(([index, getTabTranslation]) => tuple(
+				.map(([index, getTabTranslation]) => Tuple(
 					Text.toString(getTabTranslation),
 					getTabTranslation,
 					// to show the panel, we append the section to the passed component & call a couple methods on the panel

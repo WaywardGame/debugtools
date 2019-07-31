@@ -19,9 +19,9 @@ define(["require", "exports", "language/Dictionaries", "language/Translation", "
                 options: Stream_1.default.of(["nochange", option => option.setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.PaintNoChange))], ["remove", option => option.setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.PaintRemove))])
                     .merge(Enums_1.default.values(ITileEvent_1.TileEventType)
                     .filter(event => event !== ITileEvent_1.TileEventType.None)
-                    .map(event => Arrays_1.tuple(ITileEvent_1.TileEventType[event], Translation_1.default.nameOf(Dictionaries_1.Dictionary.TileEvent, event, false).inContext(Translation_1.TextContext.Title)))
+                    .map(event => Arrays_1.Tuple(ITileEvent_1.TileEventType[event], Translation_1.default.nameOf(Dictionaries_1.Dictionary.TileEvent, event, false).inContext(Translation_1.TextContext.Title)))
                     .sorted(([, t1], [, t2]) => Text_1.default.toString(t1).localeCompare(Text_1.default.toString(t2)))
-                    .map(([id, t]) => Arrays_1.tuple(id, (option) => option.setText(t)))),
+                    .map(([id, t]) => Arrays_1.Tuple(id, (option) => option.setText(t)))),
             }))
                 .event.subscribe("selection", this.changeEvent))
                 .appendTo(this);

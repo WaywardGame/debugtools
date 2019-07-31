@@ -3,7 +3,7 @@ import { IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import Component from "newui/component/Component";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import { sleep } from "utilities/Async";
 
 import DebugTools from "../DebugTools";
@@ -116,7 +116,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 		}
 
 		return this.subpanels
-			.map(subpanel => tuple(
+			.map(subpanel => Tuple(
 				translation(subpanel.getTranslation()).getString(),
 				translation(subpanel.getTranslation()),
 				this.onShowSubpanel(subpanel),

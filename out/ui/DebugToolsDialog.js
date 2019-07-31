@@ -53,7 +53,7 @@ define(["require", "exports", "mod/Mod", "newui/screen/screens/game/Dialogs", "u
                     .toArray();
             }
             return this.subpanels
-                .map(subpanel => Arrays_1.tuple(IDebugTools_1.translation(subpanel.getTranslation()).getString(), IDebugTools_1.translation(subpanel.getTranslation()), this.onShowSubpanel(subpanel)));
+                .map(subpanel => Arrays_1.Tuple(IDebugTools_1.translation(subpanel.getTranslation()).getString(), IDebugTools_1.translation(subpanel.getTranslation()), this.onShowSubpanel(subpanel)));
         }
         onShowSubpanel(showPanel) {
             return (component) => {

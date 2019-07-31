@@ -15,7 +15,7 @@ import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import Spacer from "newui/screen/screens/menu/component/Spacer";
 import { TileTemplateType } from "tile/ITerrain";
 import templateDescriptions from "tile/TerrainTemplates";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
@@ -54,9 +54,9 @@ export default class TemplatePanel extends DebugToolsPanel {
 				.setRefreshMethod(() => ({
 					defaultOption: TileTemplateType.House,
 					options: Enums.values(TileTemplateType)
-						.map(type => tuple(type, Translation.generator(TileTemplateType[type])))
+						.map(type => Tuple(type, Translation.generator(TileTemplateType[type])))
 						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
+						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				}))
 				.event.subscribe("selection", this.changeTemplateType))
 			.appendTo(this);
@@ -68,9 +68,9 @@ export default class TemplatePanel extends DebugToolsPanel {
 				.setRefreshMethod(() => ({
 					defaultOption: Stream.keys<string>(templateDescriptions[this.dropdownType.selection]).first()!,
 					options: Stream.keys<string>(templateDescriptions[this.dropdownType.selection])
-						.map(name => tuple(name, Translation.generator(name)))
+						.map(name => Tuple(name, Translation.generator(name)))
 						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
+						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				})))
 			.appendTo(this);
 

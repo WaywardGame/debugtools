@@ -7,7 +7,7 @@ import { BindCatcherApi } from "newui/IBindingManager";
 import { SelectDirection } from "newui/INewUi";
 import newui from "newui/NewUi";
 import Tooltip from "newui/tooltip/Tooltip";
-import Arrays, { tuple } from "utilities/Arrays";
+import Arrays, { Tuple } from "utilities/Arrays";
 import { sleep } from "utilities/Async";
 import Log, { LogSource } from "utilities/Log";
 import StackMap from "utilities/map/StackMap";
@@ -147,7 +147,7 @@ export default abstract class GroupDropdown<O extends string | number, G extends
 
 	private getGroupMap() {
 		return this.groups = this.groups || Stream.from(this.getGroups())
-			.map(group => tuple(this.getGroupName(group).toLowerCase().replace(/\s*/g, ""), tuple(group)))
+			.map(group => Tuple(this.getGroupName(group).toLowerCase().replace(/\s*/g, ""), Tuple(group)))
 			.filter(([group]) => group)
 			.toMap();
 	}

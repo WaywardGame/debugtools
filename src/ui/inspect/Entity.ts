@@ -19,7 +19,7 @@ import { IRefreshable } from "newui/component/Refreshable";
 import Text from "newui/component/Text";
 import newui from "newui/NewUi";
 import { ITile } from "tile/ITerrain";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Log from "utilities/Log";
 import { IVector2, IVector3 } from "utilities/math/IVector";
@@ -105,7 +105,7 @@ export default class EntityInformation extends InspectInformationSection {
 
 	@Override public getTabs() {
 		return this.entities.entries().stream()
-			.map(([i, entity]) => tuple(i, () => translation(DebugToolsTranslation.EntityName)
+			.map(([i, entity]) => Tuple(i, () => translation(DebugToolsTranslation.EntityName)
 				.get(EntityType[entity.entityType], entity.getName()/*.inContext(TextContext.Title)*/)))
 			.toArray();
 	}
@@ -248,7 +248,7 @@ export default class EntityInformation extends InspectInformationSection {
 	private createTeleportToPlayerMenu() {
 		return players.stream()
 			.filter(player => player !== this.entity)
-			.map(player => tuple(player.name, {
+			.map(player => Tuple(player.name, {
 				translation: Translation.generator(player.name),
 				onActivate: () => this.teleport(player),
 			}))

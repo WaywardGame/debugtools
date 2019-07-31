@@ -18,9 +18,9 @@ define(["require", "exports", "language/Dictionaries", "language/Translation", "
                 defaultOption: "nochange",
                 options: Stream_1.default.of(["nochange", option => option.setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.PaintNoChange))])
                     .merge(Enums_1.default.values(ITerrain_1.TerrainType)
-                    .map(terrain => Arrays_1.tuple(ITerrain_1.TerrainType[terrain], new Translation_1.default(Dictionaries_1.Dictionary.Terrain, terrain).inContext(Translation_1.TextContext.Title)))
+                    .map(terrain => Arrays_1.Tuple(ITerrain_1.TerrainType[terrain], new Translation_1.default(Dictionaries_1.Dictionary.Terrain, terrain).inContext(Translation_1.TextContext.Title)))
                     .sorted(([, t1], [, t2]) => Text_1.default.toString(t1).localeCompare(Text_1.default.toString(t2)))
-                    .map(([id, t]) => Arrays_1.tuple(id, (option) => option.setText(t)))),
+                    .map(([id, t]) => Arrays_1.Tuple(id, (option) => option.setText(t)))),
             }))
                 .event.subscribe("selection", this.changeTerrain))
                 .appendTo(this);

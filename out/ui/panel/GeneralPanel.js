@@ -64,9 +64,9 @@ define(["require", "exports", "audio/IAudio", "entity/action/ActionExecutor", "e
                 .setRefreshMethod(() => ({
                 defaultOption: IAudio_1.SfxType.Click,
                 options: Enums_1.default.values(IAudio_1.SfxType)
-                    .map(sfx => Arrays_1.tuple(sfx, Translation_1.default.generator(IAudio_1.SfxType[sfx])))
+                    .map(sfx => Arrays_1.Tuple(sfx, Translation_1.default.generator(IAudio_1.SfxType[sfx])))
                     .sorted(([, t1], [, t2]) => Text_1.default.toString(t1).localeCompare(Text_1.default.toString(t2)))
-                    .map(([id, t]) => Arrays_1.tuple(id, (option) => option.setText(t))),
+                    .map(([id, t]) => Arrays_1.Tuple(id, (option) => option.setText(t))),
             })))
                 .appendTo(this);
             new BlockRow_1.BlockRow()
@@ -77,9 +77,9 @@ define(["require", "exports", "audio/IAudio", "entity/action/ActionExecutor", "e
                 .setRefreshMethod(() => ({
                 defaultOption: IParticle_1.ParticleType.Blood,
                 options: Enums_1.default.values(IParticle_1.ParticleType)
-                    .map(particle => Arrays_1.tuple(particle, Translation_1.default.generator(IParticle_1.ParticleType[particle])))
+                    .map(particle => Arrays_1.Tuple(particle, Translation_1.default.generator(IParticle_1.ParticleType[particle])))
                     .sorted(([, t1], [, t2]) => Text_1.default.toString(t1).localeCompare(Text_1.default.toString(t2)))
-                    .map(([id, t]) => Arrays_1.tuple(id, (option) => option.setText(t))),
+                    .map(([id, t]) => Arrays_1.Tuple(id, (option) => option.setText(t))),
             })))
                 .appendTo(this);
         }

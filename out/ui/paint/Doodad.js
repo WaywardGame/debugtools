@@ -59,7 +59,7 @@ define(["require", "exports", "doodad/IDoodad", "language/Dictionaries", "langua
                     };
                 })
                     .sorted((o1, o2) => o1.translationString.localeCompare(o2.translationString))
-                    .map(({ type, translation }) => Arrays_1.tuple(type, (option) => option.setText(translation)))),
+                    .map(({ type, translation }) => Arrays_1.Tuple(type, (option) => option.setText(translation)))),
             }));
         }
         getGroupName(group) {

@@ -22,7 +22,7 @@ define(["require", "exports", "entity/action/ActionExecutor", "language/Translat
         }
         getTabs() {
             return this.corpses.entries().stream()
-                .map(([i, corpse]) => Arrays_1.tuple(i, () => IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.CorpseName)
+                .map(([i, corpse]) => Arrays_1.Tuple(i, () => IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.CorpseName)
                 .get(corpseManager.getName(corpse, false).inContext(Translation_1.TextContext.Title))))
                 .toArray();
         }

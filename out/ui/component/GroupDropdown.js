@@ -85,7 +85,7 @@ define(["require", "exports", "event/EventManager", "newui/component/Component",
         }
         getGroupMap() {
             return this.groups = this.groups || Stream_1.default.from(this.getGroups())
-                .map(group => Arrays_1.tuple(this.getGroupName(group).toLowerCase().replace(/\s*/g, ""), Arrays_1.tuple(group)))
+                .map(group => Arrays_1.Tuple(this.getGroupName(group).toLowerCase().replace(/\s*/g, ""), Arrays_1.Tuple(group)))
                 .filter(([group]) => group)
                 .toMap();
         }

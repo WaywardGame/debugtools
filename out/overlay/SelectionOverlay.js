@@ -73,7 +73,7 @@ define(["require", "exports", "mod/Mod", "utilities/Arrays", "utilities/enum/Enu
     function getNeighborTiles(tilePosition) {
         const vectors = getNeighborVectors(tilePosition);
         return Enums_1.default.values(NeighborPosition)
-            .map(pos => Arrays_1.tuple(pos, Arrays_1.tuple(vectors[pos], game.getTile(...vectors[pos].xyz))))
+            .map(pos => Arrays_1.Tuple(pos, Arrays_1.Tuple(vectors[pos], game.getTile(...vectors[pos].xyz))))
             .toObject();
     }
     function getPaintOverlayConnections(neighbors) {

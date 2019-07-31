@@ -46,10 +46,10 @@ define(["require", "exports", "event/EventManager", "game/IGame", "mod/IHookHost
             }
             this.entityButtons = [];
             return this.infoSections.stream()
-                .map(section => Arrays_1.tuple(section, section.getTabs()))
+                .map(section => Arrays_1.Tuple(section, section.getTabs()))
                 .filter(([, tabs]) => !!tabs.length)
                 .map(([section, tabs]) => tabs
-                .map(([index, getTabTranslation]) => Arrays_1.tuple(Text_1.default.toString(getTabTranslation), getTabTranslation, (component) => section.setTab(index)
+                .map(([index, getTabTranslation]) => Arrays_1.Tuple(Text_1.default.toString(getTabTranslation), getTabTranslation, (component) => section.setTab(index)
                 .appendTo(component)
                 .event.emit("switchTo"), (button) => !(section instanceof Entity_1.default) ? undefined : this.entityButtons[index] = button)))
                 .flatMap()

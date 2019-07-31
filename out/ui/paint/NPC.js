@@ -18,9 +18,9 @@ define(["require", "exports", "entity/npc/NPCS", "language/Translation", "newui/
                 defaultOption: "nochange",
                 options: Stream_1.default.of(["nochange", option => option.setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.PaintNoChange))], ["remove", option => option.setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.PaintRemove))])
                     .merge(Enums_1.default.values(NPCS_1.NPCType)
-                    .map(npc => Arrays_1.tuple(NPCS_1.NPCType[npc], Translation_1.default.generator(NPCS_1.NPCType[npc])))
+                    .map(npc => Arrays_1.Tuple(NPCS_1.NPCType[npc], Translation_1.default.generator(NPCS_1.NPCType[npc])))
                     .sorted(([, t1], [, t2]) => Text_1.default.toString(t1).localeCompare(Text_1.default.toString(t2)))
-                    .map(([id, t]) => Arrays_1.tuple(id, (option) => option.setText(t)))),
+                    .map(([id, t]) => Arrays_1.Tuple(id, (option) => option.setText(t)))),
             }))
                 .event.subscribe("selection", this.changeNPC))
                 .appendTo(this);

@@ -15,7 +15,7 @@ import Dropdown, { IDropdownOption } from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
-import { tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Stream from "utilities/stream/Stream";
 
@@ -83,9 +83,9 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 					defaultOption: "none",
 					options: Stream.of<IDropdownOption<keyof typeof SkillType | "none">[]>(["none", option => option.setText(translation(DebugToolsTranslation.None))])
 						.merge(Enums.values(SkillType)
-							.map(skill => tuple(SkillType[skill] as keyof typeof SkillType, Translation.generator(SkillType[skill])))
+							.map(skill => Tuple(SkillType[skill] as keyof typeof SkillType, Translation.generator(SkillType[skill])))
 							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-							.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
+							.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t)))),
 				}))
 				.event.subscribe("selection", this.changeSkill))
 			.appendTo(this);
