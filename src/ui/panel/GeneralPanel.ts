@@ -22,7 +22,6 @@ import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 
 import SetTime from "../../action/SetTime";
-import UnlockRecipes from "../../action/UnlockRecipes";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import CancelablePromise from "../../util/CancelablePromise";
@@ -86,11 +85,6 @@ export default class GeneralPanel extends DebugToolsPanel {
 		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonInspectLocalPlayer))
 			.event.subscribe("activate", () => this.DEBUG_TOOLS.inspect(localPlayer))
-			.appendTo(this);
-
-		new Button()
-			.setText(translation(DebugToolsTranslation.ButtonUnlockRecipes))
-			.event.subscribe("activate", this.unlockRecipes)
 			.appendTo(this);
 
 		new Button()
@@ -193,16 +187,6 @@ export default class GeneralPanel extends DebugToolsPanel {
 		if (!tilePosition) return;
 
 		this.DEBUG_TOOLS.inspect(tilePosition);
-	}
-
-	@Bound
-	private async unlockRecipes() {
-		const confirm = await newui.interrupt(this.DEBUG_TOOLS.interruptUnlockRecipes)
-			.withConfirmation();
-
-		if (!confirm) return;
-
-		ActionExecutor.get(UnlockRecipes).execute(localPlayer);
 	}
 
 	/**

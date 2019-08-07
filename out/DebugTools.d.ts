@@ -81,7 +81,6 @@ export default class DebugTools extends Mod {
     readonly actionUpdateStatsAndAttributes: ActionType;
     readonly actionAddItemToInventory: ActionType;
     readonly actionPaint: ActionType;
-    readonly actionUnlockRecipes: ActionType;
     readonly actionToggleInvulnerable: ActionType;
     readonly actionSetSkill: ActionType;
     readonly actionSetGrowingStage: ActionType;

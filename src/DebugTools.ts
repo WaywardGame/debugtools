@@ -55,7 +55,6 @@ import ToggleInvulnerable from "./action/ToggleInvulnerable";
 import ToggleNoClip from "./action/ToggleNoClip";
 import TogglePermissions from "./action/TogglePermissions";
 import ToggleTilled from "./action/ToggleTilled";
-import UnlockRecipes from "./action/UnlockRecipes";
 import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
 import Actions from "./Actions";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
@@ -246,9 +245,6 @@ export default class DebugTools extends Mod {
 
 	@Register.action("Paint", Paint)
 	public readonly actionPaint: ActionType;
-
-	@Register.action("UnlockRecipes", UnlockRecipes)
-	public readonly actionUnlockRecipes: ActionType;
 
 	@Register.action("ToggleInvulnerable", ToggleInvulnerable)
 	public readonly actionToggleInvulnerable: ActionType;

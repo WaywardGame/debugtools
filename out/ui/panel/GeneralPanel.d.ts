@@ -19,6 +19,5 @@ export default class GeneralPanel extends DebugToolsPanel {
     protected onSwitchTo(): void;
     protected onSwitchAway(): void;
     private inspectTile;
-    private unlockRecipes;
     private travelAway;
 }
