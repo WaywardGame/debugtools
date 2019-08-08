@@ -8,6 +8,7 @@
 	],
 	"multiplayer": "compatible",
 	"file": "out/DebugTools",
+	"allowUnlockingMilestones": true,
 	"unloadable": true,
 	"stylesheets": [
 		"style/debugTools"
