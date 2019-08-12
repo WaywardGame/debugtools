@@ -9,16 +9,10 @@ import UiTranslation from "language/dictionary/UiTranslation";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { BlockRow } from "newui/component/BlockRow";
-import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
-import Dropdown, { IDropdownOption } from "newui/component/Dropdown";
+import SkillDropdown from "newui/component/dropdown/SkillDropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeRow } from "newui/component/RangeRow";
-import Text from "newui/component/Text";
-import { Tuple } from "utilities/Arrays";
-import Enums from "utilities/enum/Enums";
-import Stream from "utilities/stream/Stream";
-
 import SetSkill from "../../action/SetSkill";
 import SetWeightBonus from "../../action/SetWeightBonus";
 import ToggleInvulnerable from "../../action/ToggleInvulnerable";
@@ -78,15 +72,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelSkill)))
-			.append(new Dropdown<keyof typeof SkillType | "none">()
-				.setRefreshMethod(() => ({
-					defaultOption: "none",
-					options: Stream.of<IDropdownOption<keyof typeof SkillType | "none">[]>(["none", option => option.setText(translation(DebugToolsTranslation.None))])
-						.merge(Enums.values(SkillType)
-							.map(skill => Tuple(SkillType[skill] as keyof typeof SkillType, Translation.generator(SkillType[skill])))
-							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-							.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t)))),
-				}))
+			.append(new SkillDropdown("none", [["none", option => option.setText(translation(DebugToolsTranslation.None))]])
 				.event.subscribe("selection", this.changeSkill))
 			.appendTo(this);
 

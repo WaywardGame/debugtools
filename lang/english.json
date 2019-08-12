@@ -92,13 +92,18 @@
 			"selectionFilter": "{#--text-color-faded:Filter}",
 			"selectionAction": "{#--text-color-faded:Action}",
 			"selectionMatches": "Matches",
+			"selectionAll": "All",
 			"methodAll": "All",
 			"methodNearest": "Nearest",
 			"methodRandom": "Random",
 			"filterCreatures": "Creatures",
 			"filterNPCs": "NPCs",
 			"filterTileEvents": "Tile Events",
+			"filterDoodads": "Doodads",
+			"filterCorpses": "Corpses",
+			"filterPlayers": "Players",
 			"actionRemove": "Remove",
+			"actionTeleportTo": "Teleport To",
 			"buttonExecute": "Execute",
 			
 			

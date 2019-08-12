@@ -1,21 +1,17 @@
 import { Events } from "event/EventBuses";
 import { IEventEmitter } from "event/EventEmitter";
 import { Quality } from "game/IObject";
-import { ItemType, ItemTypeGroup } from "item/IItem";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { TextContext } from "language/Translation";
+import { ItemType } from "item/IItem";
+import Translation from "language/Translation";
 import Button from "newui/component/Button";
 import Component from "newui/component/Component";
 import Dropdown from "newui/component/Dropdown";
+import ItemDropdown from "newui/component/dropdown/ItemDropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
-import Text from "newui/component/Text";
 import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
-import Stream from "utilities/stream/Stream";
 
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
-
-import GroupDropdown from "./GroupDropdown";
 
 interface IAddItemToInventoryEvents extends Events<Component> {
 	/**
@@ -34,7 +30,7 @@ export default class AddItemToInventory extends Component {
 		return AddItemToInventory.INSTANCE = AddItemToInventory.INSTANCE || new AddItemToInventory();
 	}
 
-	private readonly dropdownItemType: Dropdown<ItemType>;
+	private readonly dropdownItemType: ItemDropdown<"None">;
 	private readonly dropdownItemQuality: Dropdown<Quality>;
 	private readonly wrapperAddItem: Component;
 
@@ -44,7 +40,7 @@ export default class AddItemToInventory extends Component {
 		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelItem)))
-			.append(this.dropdownItemType = new ItemDropdown()
+			.append(this.dropdownItemType = new ItemDropdown("None", [["None", option => option.setText(translation(DebugToolsTranslation.None))]])
 				.event.subscribe("selection", this.changeItem))
 			.appendTo(this);
 
@@ -82,40 +78,12 @@ export default class AddItemToInventory extends Component {
 	}
 
 	@Bound
-	private changeItem(_: any, item: ItemType) {
-		this.wrapperAddItem.toggle(item !== ItemType.None);
+	private changeItem(_: any, item: keyof typeof ItemType) {
+		this.wrapperAddItem.toggle(item !== "None");
 	}
 
 	@Bound
 	private addItem() {
-		this.event.emit("execute", this.dropdownItemType.selection, this.dropdownItemQuality.selection);
-	}
-}
-
-class ItemDropdown extends GroupDropdown<ItemType, ItemTypeGroup> {
-
-	public constructor() {
-		super();
-		this.setRefreshMethod(() => ({
-			defaultOption: ItemType.None,
-			options: Stream.of(Tuple(ItemType.None, Translation.nameOf(Dictionary.Item, ItemType.None, false).inContext(TextContext.Title)))
-				.merge(Enums.values(ItemType)
-					.filter(item => item)
-					.map(item => Tuple(item, Translation.nameOf(Dictionary.Item, item, false).inContext(TextContext.Title)))
-					.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2))))
-				.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
-		}));
-	}
-
-	@Override protected getGroupName(group: ItemTypeGroup) {
-		return new Translation(Dictionary.ItemGroup, group).getString();
-	}
-
-	@Override protected isInGroup(item: ItemType, group: ItemTypeGroup) {
-		return itemManager.isInGroup(item, group);
-	}
-
-	@Override protected getGroups() {
-		return Enums.values(ItemTypeGroup);
+		this.event.emit("execute", ItemType[this.dropdownItemType.selection], this.dropdownItemQuality.selection);
 	}
 }

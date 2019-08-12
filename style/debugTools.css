@@ -35,7 +35,7 @@
 }
 
 .dropdown-label > .label {
-	margin-top: calc(3px * var(--scale-floor));
+    margin-top: calc(4px * var(--scale-floor));
 }
 
 .debug-tools-inspect-human-wrapper-add-item {
@@ -116,18 +116,4 @@
 
 .debug-tools-tab-dialog.tabs-drawer .debug-tools-tab-dialog-subpanel-link-wrapper > * > * {
 	min-width: calc(130px * var(--scale-floor)) !important;
-}
-
-.debug-tools-group-dropdown-tooltip {
-	--tooltip-padding-left: 0px !important;
-	--tooltip-padding-right: 10px !important;
-	padding: calc(5px * var(--scale-floor)) calc(12px * var(--scale-floor)) !important;
-    border: 1px solid var(--element-background-color-contrast-active);
-}
-
-.debug-tools-group-dropdown-tooltip .paragraph {
-	color: #999;
-}
-.debug-tools-group-dropdown-tooltip .paragraph:hover {
-	color: #fff;
 }

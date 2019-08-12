@@ -1,19 +1,12 @@
-import { DoodadType, DoodadTypeGroup } from "doodad/IDoodad";
+import { DoodadType } from "doodad/IDoodad";
 import { Events } from "event/EventBuses";
 import { IEventEmitter } from "event/EventEmitter";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { TextContext } from "language/Translation";
-import Button from "newui/component/Button";
 import Component from "newui/component/Component";
-import Dropdown, { IDropdownOption } from "newui/component/Dropdown";
+import Dropdown from "newui/component/Dropdown";
+import { DoodadDropdown } from "newui/component/dropdown/DoodadDropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
-import Text from "newui/component/Text";
-import { Tuple } from "utilities/Arrays";
-import Enums from "utilities/enum/Enums";
-import Stream from "utilities/stream/Stream";
 
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
-import GroupDropdown from "../component/GroupDropdown";
 import { IPaintSection } from "../panel/PaintPanel";
 
 export default class DoodadPaint extends Component implements IPaintSection {
@@ -29,7 +22,10 @@ export default class DoodadPaint extends Component implements IPaintSection {
 		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDoodad)))
-			.append(this.dropdown = new DoodadDropdown()
+			.append(this.dropdown = new DoodadDropdown<"nochange" | "remove">("nochange", [
+				["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
+				["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
+			])
 				.event.subscribe("selection", this.changeDoodad))
 			.appendTo(this);
 	}
@@ -55,44 +51,5 @@ export default class DoodadPaint extends Component implements IPaintSection {
 		this.doodad = doodad === "nochange" ? undefined : doodad === "remove" ? "remove" : DoodadType[doodad];
 
 		this.event.emit("change");
-	}
-}
-
-class DoodadDropdown extends GroupDropdown<"nochange" | "remove" | keyof typeof DoodadType, DoodadTypeGroup> {
-
-	public constructor() {
-		super();
-		this.setRefreshMethod(() => ({
-			defaultOption: "nochange",
-			options: Stream.of<IDropdownOption<"nochange" | "remove" | keyof typeof DoodadType>[]>(
-				["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
-				["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
-			)
-				.merge(Enums.values(DoodadType)
-					.filter(type => type !== DoodadType.Item)
-					.map(doodad => {
-						const translation = Translation.nameOf(Dictionary.Doodad, doodad, false).inContext(TextContext.Title);
-						return {
-							type: DoodadType[doodad] as keyof typeof DoodadType,
-							translation: translation,
-							translationString: Text.toString(translation),
-						};
-					})
-					.sorted((o1, o2) => o1.translationString.localeCompare(o2.translationString))
-					.map(({ type, translation }) => Tuple(type, (option: Button) => option.setText(translation)))),
-		}));
-	}
-
-	@Override protected getGroupName(group: DoodadTypeGroup) {
-		return new Translation(Dictionary.DoodadGroup, group).setFailWith("").getString();
-	}
-
-	@Override protected isInGroup(optionName: "nochange" | "remove" | keyof typeof DoodadType, group: DoodadTypeGroup) {
-		const doodad = DoodadType[optionName as keyof typeof DoodadType];
-		return doodad === undefined ? false : doodadManager.isInGroup(doodad, group);
-	}
-
-	@Override protected getGroups() {
-		return Enums.values(DoodadTypeGroup);
 	}
 }

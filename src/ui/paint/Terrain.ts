@@ -1,18 +1,11 @@
 import { Events } from "event/EventBuses";
 import { IEventEmitter } from "event/EventEmitter";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { TextContext } from "language/Translation";
-import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
-import Dropdown, { IDropdownOption } from "newui/component/Dropdown";
+import TerrainDropdown from "newui/component/dropdown/TerrainDropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
-import Text from "newui/component/Text";
 import { TerrainType } from "tile/ITerrain";
 import { terrainDescriptions } from "tile/Terrains";
-import { Tuple } from "utilities/Arrays";
-import Enums from "utilities/enum/Enums";
-import Stream from "utilities/stream/Stream";
 
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
@@ -22,7 +15,7 @@ export default class TerrainPaint extends Component implements IPaintSection {
 
 	private readonly tilledCheckButton: CheckButton;
 	private terrain: TerrainType | undefined;
-	private readonly dropdown: Dropdown<"nochange" | keyof typeof TerrainType>;
+	private readonly dropdown: TerrainDropdown<"nochange">;
 
 	public constructor() {
 		super();
@@ -30,20 +23,9 @@ export default class TerrainPaint extends Component implements IPaintSection {
 		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTerrain)))
-			.append(this.dropdown = new Dropdown<"nochange" | keyof typeof TerrainType>()
-				.setRefreshMethod(() => ({
-					defaultOption: "nochange",
-					options: Stream.of<IDropdownOption<"nochange" | keyof typeof TerrainType>[]>(
-						["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
-					)
-						.merge(Enums.values(TerrainType)
-							.map(terrain => Tuple(
-								TerrainType[terrain] as keyof typeof TerrainType,
-								new Translation(Dictionary.Terrain, terrain).inContext(TextContext.Title),
-							))
-							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-							.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t)))),
-				}))
+			.append(this.dropdown = new TerrainDropdown("nochange", [
+				["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
+			])
 				.event.subscribe("selection", this.changeTerrain))
 			.appendTo(this);
 

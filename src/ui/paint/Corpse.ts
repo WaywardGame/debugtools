@@ -1,17 +1,10 @@
 import { CreatureType } from "entity/creature/ICreature";
 import { Events } from "event/EventBuses";
 import { IEventEmitter } from "event/EventEmitter";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { TextContext } from "language/Translation";
-import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
-import Dropdown, { IDropdownOption } from "newui/component/Dropdown";
+import CorpseDropdown from "newui/component/dropdown/CorpseDropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
-import Text from "newui/component/Text";
-import { Tuple } from "utilities/Arrays";
-import Enums from "utilities/enum/Enums";
-import Stream from "utilities/stream/Stream";
 
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
@@ -19,7 +12,7 @@ import { IPaintSection } from "../panel/PaintPanel";
 export default class CorpsePaint extends Component implements IPaintSection {
 	@Override public event: IEventEmitter<this, Events<IPaintSection>>;
 
-	private readonly dropdown: Dropdown<"nochange" | "remove" | keyof typeof CreatureType>;
+	private readonly dropdown: CorpseDropdown<"nochange" | "remove">;
 	private readonly aberrantCheckButton: CheckButton;
 	private readonly replaceExisting: CheckButton;
 
@@ -31,22 +24,10 @@ export default class CorpsePaint extends Component implements IPaintSection {
 		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelCorpse)))
-			.append(this.dropdown = new Dropdown<"nochange" | "remove" | keyof typeof CreatureType>()
-				.setRefreshMethod(() => ({
-					defaultOption: "nochange",
-					options: Stream.of<IDropdownOption<"nochange" | "remove" | keyof typeof CreatureType>[]>(
-						["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
-						["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
-					)
-						.merge(Enums.values(CreatureType)
-							.map(creature => Tuple(
-								CreatureType[creature] as keyof typeof CreatureType,
-								Translation.nameOf(Dictionary.Creature, creature, false).inContext(TextContext.Title)
-									.setFailWith(corpseManager.getName(creature, false).inContext(TextContext.Title)),
-							))
-							.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-							.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t)))),
-				}))
+			.append(this.dropdown = new CorpseDropdown("nochange", [
+				["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
+				["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
+			])
 				.event.subscribe("selection", this.changeCorpse))
 			.appendTo(this);
 

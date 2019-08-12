@@ -61,12 +61,16 @@ export enum DebugToolsTranslation {
 	SelectionFilter,
 	SelectionAction,
 	SelectionMatches,
+	SelectionAll,
 	MethodAll,
 	MethodNearest,
 	MethodRandom,
 	FilterCreatures,
 	FilterNPCs,
 	FilterTileEvents,
+	FilterDoodads,
+	FilterCorpses,
+	FilterPlayers,
 	ActionRemove,
 	ButtonExecute,
 	// Templates
@@ -126,6 +130,7 @@ export enum DebugToolsTranslation {
 	ActionResurrect,
 	ActionClone,
 	ActionTeleport,
+	ActionTeleportTo,
 }
 
 export interface ISaveData {
