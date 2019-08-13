@@ -110,7 +110,7 @@ export declare enum DebugToolsTranslation {
     ActionResurrect = 101,
     ActionClone = 102,
     ActionTeleport = 103,
-    ActionTeleportTo = 104
+    To = 104
 }
 export interface ISaveData {
     lastVersion: string;

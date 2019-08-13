@@ -1,12 +1,9 @@
 import Doodad from "doodad/Doodad";
-import { DoodadType } from "doodad/IDoodad";
 import ActionExecutor from "entity/action/ActionExecutor";
 import { ICorpse } from "entity/creature/corpse/ICorpse";
 import Creature from "entity/creature/Creature";
-import { CreatureType } from "entity/creature/ICreature";
 import { EntityType } from "entity/IEntity";
 import NPC from "entity/npc/NPC";
-import { NPCType } from "entity/npc/NPCS";
 import Player from "entity/player/Player";
 import { BlockRow } from "newui/component/BlockRow";
 import Button from "newui/component/Button";
@@ -19,11 +16,11 @@ import NPCDropdown from "newui/component/dropdown/NPCDropdown";
 import TileEventDropdown from "newui/component/dropdown/TileEventDropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeRow } from "newui/component/RangeRow";
-import { ITileEvent, TileEventType } from "tile/ITileEvent";
+import Text from "newui/component/Text";
+import { ITileEvent } from "tile/ITileEvent";
 import Arrays, { Tuple } from "utilities/Arrays";
 import Vector2 from "utilities/math/Vector2";
 import Stream from "utilities/stream/Stream";
-
 import SelectionExecute, { SelectionType } from "../../action/SelectionExecute";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
@@ -42,25 +39,27 @@ function getSelectionType(target: Creature | NPC | ITileEvent | Doodad | ICorpse
 
 export default class SelectionPanel extends DebugToolsPanel {
 
+	private readonly textPreposition = new Text().setText(translation(DebugToolsTranslation.To)).hide();
+
 	private readonly creatures = new SelectionSource(game.creatures, DebugToolsTranslation.FilterCreatures,
 		new CreatureDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
-		(creature, filter) => filter === "all" || (creature && creature.type === CreatureType[filter as keyof typeof CreatureType]));
+		(creature, filter) => filter === "all" || (creature && creature.type === filter));
 
 	private readonly npcs = new SelectionSource(game.npcs, DebugToolsTranslation.FilterNPCs,
 		new NPCDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
-		(npc, filter) => filter === "all" || (npc && npc.type === NPCType[filter as keyof typeof NPCType]));
+		(npc, filter) => filter === "all" || (npc && npc.type === filter));
 
 	private readonly tileEvents = new SelectionSource(game.tileEvents, DebugToolsTranslation.FilterTileEvents,
 		new TileEventDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
-		(tileEvent, filter) => filter === "all" || (tileEvent && tileEvent.type === TileEventType[filter as keyof typeof TileEventType]));
+		(tileEvent, filter) => filter === "all" || (tileEvent && tileEvent.type === filter));
 
 	private readonly doodads = new SelectionSource(game.doodads, DebugToolsTranslation.FilterDoodads,
 		new DoodadDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
-		(doodad, filter) => filter === "all" || (doodad && doodad.type === DoodadType[filter as keyof typeof DoodadType]));
+		(doodad, filter) => filter === "all" || (doodad && doodad.type === filter));
 
 	private readonly corpses = new SelectionSource(game.corpses, DebugToolsTranslation.FilterCorpses,
 		new CorpseDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
-		(corpse, filter) => filter === "all" || (corpse && corpse.type === CreatureType[filter as keyof typeof CreatureType]));
+		(corpse, filter) => filter === "all" || (corpse && corpse.type === filter));
 
 	private readonly players = new SelectionSource(players, DebugToolsTranslation.FilterPlayers,
 		new Dropdown()
@@ -91,12 +90,6 @@ export default class SelectionPanel extends DebugToolsPanel {
 			],
 		}));
 
-	private readonly dropdownMethodWrapper = new LabelledRow()
-		.classes.add("dropdown-label")
-		.setLabel(label => label.setText(translation(DebugToolsTranslation.SelectionMethod)))
-		.append(this.dropdownMethod, this.rangeQuantity)
-		.appendTo(this);
-
 	private readonly dropdownAlternativeTarget = new Dropdown<string>().hide();
 
 	private readonly dropdownAction = new Dropdown<DebugToolsTranslation>()
@@ -105,24 +98,33 @@ export default class SelectionPanel extends DebugToolsPanel {
 			defaultOption: DebugToolsTranslation.ActionRemove,
 			options: [
 				[DebugToolsTranslation.ActionRemove, option => option.setText(translation(DebugToolsTranslation.ActionRemove))],
-				[DebugToolsTranslation.ActionTeleportTo, option => option.setText(translation(DebugToolsTranslation.ActionTeleportTo))],
+				[DebugToolsTranslation.ActionTeleport, option => option.setText(translation(DebugToolsTranslation.ActionTeleport))],
 			],
 		}));
 
 	public constructor() {
 		super();
 
-		this.append(this.creatures, this.npcs, this.tileEvents, this.doodads, this.corpses, this.players);
-
 		new BlockRow()
-			.append(this.dropdownAlternativeTarget)
+			.classes.add("debug-tools-selection-action")
 			.append(new LabelledRow()
 				.classes.add("dropdown-label")
 				.setLabel(label => label.setText(translation(DebugToolsTranslation.SelectionAction)))
 				.append(this.dropdownAction))
+			.append(this.dropdownAlternativeTarget)
+			.append(this.textPreposition)
 			.appendTo(this);
 
+		new LabelledRow()
+			.classes.add("dropdown-label")
+			.setLabel(label => label.setText(translation(DebugToolsTranslation.SelectionMethod)))
+			.append(this.dropdownMethod, this.rangeQuantity)
+			.appendTo(this);
+
+		this.append(this.creatures, this.npcs, this.tileEvents, this.doodads, this.corpses, this.players);
+
 		new Button()
+			.classes.add("has-icon-before", "icon-arrow-right", "icon-no-scale")
 			.setText(translation(DebugToolsTranslation.ButtonExecute))
 			.event.subscribe("activate", this.execute)
 			.appendTo(this);
@@ -171,7 +173,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 	@Bound
 	private onActionChange(_: any, action: DebugToolsTranslation) {
 		switch (action) {
-			case DebugToolsTranslation.ActionTeleportTo:
+			case DebugToolsTranslation.ActionTeleport:
 				this.dropdownMethod.select(DebugToolsTranslation.MethodNearest);
 				this.dropdownAlternativeTarget
 					.setRefreshMethod(() => ({
@@ -186,8 +188,10 @@ export default class SelectionPanel extends DebugToolsPanel {
 		}
 
 		this.players.checkButton.setDisabled(action === DebugToolsTranslation.ActionRemove);
-		this.dropdownMethodWrapper.classes.toggle(action === DebugToolsTranslation.ActionTeleportTo, "disabled");
-		this.dropdownAlternativeTarget.toggle(action === DebugToolsTranslation.ActionTeleportTo);
+		this.dropdownMethod.options.get(DebugToolsTranslation.MethodAll)!.setDisabled(action === DebugToolsTranslation.ActionTeleport);
+		this.rangeQuantity.setDisabled(action === DebugToolsTranslation.ActionTeleport);
+		this.dropdownAlternativeTarget.toggle(action === DebugToolsTranslation.ActionTeleport);
+		this.textPreposition.toggle(action === DebugToolsTranslation.ActionTeleport);
 	}
 }
 

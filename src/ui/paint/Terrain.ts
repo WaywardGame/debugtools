@@ -53,10 +53,10 @@ export default class TerrainPaint extends Component implements IPaintSection {
 	}
 
 	@Bound
-	private changeTerrain(_: any, terrain: keyof typeof TerrainType | "nochange") {
-		this.terrain = terrain === "nochange" ? undefined : TerrainType[terrain];
+	private changeTerrain(_: any, terrain: TerrainType | "nochange") {
+		this.terrain = terrain === "nochange" ? undefined : terrain;
 
-		const tillable = terrain !== "nochange" && terrainDescriptions[TerrainType[terrain]]!.tillable === true;
+		const tillable = terrain !== "nochange" && terrainDescriptions[terrain]!.tillable === true;
 		this.tilledCheckButton.toggle(tillable);
 		if (!tillable) this.tilledCheckButton.setChecked(false);
 

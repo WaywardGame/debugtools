@@ -117,3 +117,11 @@
 .debug-tools-tab-dialog.tabs-drawer .debug-tools-tab-dialog-subpanel-link-wrapper > * > * {
 	min-width: calc(130px * var(--scale-floor)) !important;
 }
+
+.debug-tools-selection-action {
+	grid-template-columns: auto auto auto;
+}
+
+.debug-tools-selection-action > .text {
+	margin-top: calc(10px * var(--scale-floor));
+}

@@ -130,7 +130,7 @@ export enum DebugToolsTranslation {
 	ActionResurrect,
 	ActionClone,
 	ActionTeleport,
-	ActionTeleportTo,
+	To,
 }
 
 export interface ISaveData {

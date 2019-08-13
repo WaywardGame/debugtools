@@ -78,12 +78,12 @@ export default class AddItemToInventory extends Component {
 	}
 
 	@Bound
-	private changeItem(_: any, item: keyof typeof ItemType) {
+	private changeItem(_: any, item: ItemType | "None") {
 		this.wrapperAddItem.toggle(item !== "None");
 	}
 
 	@Bound
 	private addItem() {
-		this.event.emit("execute", ItemType[this.dropdownItemType.selection], this.dropdownItemQuality.selection);
+		this.event.emit("execute", this.dropdownItemType.selection as ItemType, this.dropdownItemQuality.selection);
 	}
 }

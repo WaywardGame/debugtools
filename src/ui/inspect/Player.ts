@@ -117,11 +117,11 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	}
 
 	@Bound
-	private changeSkill(_: any, skillName: keyof typeof SkillType | "none") {
-		this.skill = skillName === "none" ? undefined : SkillType[skillName];
+	private changeSkill(_: any, skill: SkillType | "none") {
+		this.skill = skill === "none" ? undefined : skill;
 		this.skillRangeRow.refresh();
 
-		this.skillRangeRow.toggle(skillName !== "none");
+		this.skillRangeRow.toggle(skill !== "none");
 	}
 
 	@Bound

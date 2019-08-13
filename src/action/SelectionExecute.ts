@@ -25,7 +25,7 @@ export default new Action(ActionArgument.Number, ActionArgument.Array, optional(
 					if (target instanceof Player) continue;
 					Remove(action, target);
 					break;
-				case DebugToolsTranslation.ActionTeleportTo:
+				case DebugToolsTranslation.ActionTeleport:
 					const playerToTeleport = players.find(player => player.identifier === alternativeTarget) || localPlayer;
 					teleportEntity(action, playerToTeleport, target);
 					return;

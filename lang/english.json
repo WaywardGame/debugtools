@@ -103,7 +103,7 @@
 			"filterCorpses": "Corpses",
 			"filterPlayers": "Players",
 			"actionRemove": "Remove",
-			"actionTeleportTo": "Teleport To",
+			"to": "to",
 			"buttonExecute": "Execute",
 			
 			
@@ -162,7 +162,7 @@
 			
 			"actionResurrect": "resurrect {0}",
 			"actionClone": "clone {0}",
-			"actionTeleport": "teleport {0}"
+			"actionTeleport": "{0?teleport {0}:Teleport}"
 		},
 		"item": {
 			"none": "none"

@@ -54,8 +54,8 @@ export default class CreaturePaint extends Component implements IPaintSection {
 	}
 
 	@Bound
-	private changeCreature(_: any, creature: keyof typeof CreatureType | "nochange" | "remove") {
-		this.creature = creature === "nochange" ? undefined : creature === "remove" ? "remove" : CreatureType[creature];
+	private changeCreature(_: any, creature: CreatureType | "nochange" | "remove") {
+		this.creature = creature === "nochange" ? undefined : creature === "remove" ? "remove" : creature;
 		this.aberrantCheckButton.toggle(this.creature !== undefined && this.creature !== "remove");
 
 		this.event.emit("change");

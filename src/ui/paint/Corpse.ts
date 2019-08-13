@@ -61,8 +61,8 @@ export default class CorpsePaint extends Component implements IPaintSection {
 	}
 
 	@Bound
-	private changeCorpse(_: any, corpse: keyof typeof CreatureType | "remove" | "nochange") {
-		this.corpse = corpse === "nochange" ? undefined : corpse === "remove" ? "remove" : CreatureType[corpse];
+	private changeCorpse(_: any, corpse: CreatureType | "remove" | "nochange") {
+		this.corpse = corpse === "nochange" ? undefined : corpse === "remove" ? "remove" : corpse;
 
 		const isReplaceable = this.corpse !== undefined && this.corpse !== "remove";
 		this.aberrantCheckButton.toggle(isReplaceable);
