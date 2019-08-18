@@ -273,7 +273,7 @@ export default class DebugTools extends Mod {
 	@Register.menuBarButton("Dialog", {
 		onActivate: () => DebugTools.INSTANCE.toggleDialog(),
 		group: MenuBarButtonGroup.Meta,
-		bindable: Registry<DebugTools, Bindable>().get("bindableToggleDialog"),
+		bindable: Registry<DebugTools>().get("bindableToggleDialog"),
 		tooltip: tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.DialogTitleMain))),
 		onCreate: button => {
 			button.toggle(DebugTools.INSTANCE.hasPermission());
