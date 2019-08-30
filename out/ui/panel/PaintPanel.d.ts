@@ -50,6 +50,7 @@ export default class PaintPanel extends DebugToolsPanel {
     private readonly paintSections;
     private readonly paintButton;
     private readonly paintRow;
+    private readonly paintRadius;
     private painting;
     private readonly paintTiles;
     private lastPaintPosition?;

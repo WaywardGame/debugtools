@@ -15,14 +15,15 @@ import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
 import ContextMenu from "newui/component/ContextMenu";
+import { RangeRow } from "newui/component/RangeRow";
 import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import Spacer from "newui/screen/screens/menu/component/Spacer";
 import { SpriteBatchLayer } from "renderer/IWorldRenderer";
 import { TerrainType } from "tile/ITerrain";
 import { TileEventType } from "tile/ITileEvent";
 import Vector2 from "utilities/math/Vector2";
+import Vector3 from "utilities/math/Vector3";
 import TileHelpers from "utilities/TileHelpers";
-
 import Paint from "../../action/Paint";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -91,6 +92,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	private readonly paintSections: IPaintSection[] = [];
 	private readonly paintButton: CheckButton;
 	private readonly paintRow: Component;
+	private readonly paintRadius: RangeRow;
 
 	private painting = false;
 	private readonly paintTiles: number[] = [];
@@ -109,22 +111,34 @@ export default class PaintPanel extends DebugToolsPanel {
 
 		new Spacer().appendTo(this);
 
-		this.paintRow = new BlockRow()
+		this.paintRow = new Component()
 			.classes.add("debug-tools-paint-row")
-			.append(this.paintButton = new CheckButton()
-				.setText(translation(DebugToolsTranslation.ButtonPaint))
-				.event.subscribe("toggle", (_, paint) => {
-					this.paintRow.classes.toggle(this.painting = paint, "painting");
-					if (!paint) this.clearPaint();
-				}))
-			.append(new Button()
-				.setText(translation(DebugToolsTranslation.ButtonPaintClear))
-				.setTooltip(tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.TooltipPaintClear))))
-				.event.subscribe("activate", this.clearPaint))
-			.append(new Button()
-				.setText(translation(DebugToolsTranslation.ButtonPaintComplete))
-				.setTooltip(tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.TooltipPaintComplete))))
-				.event.subscribe("activate", this.completePaint));
+			.append(this.paintRadius = new RangeRow()
+				.setLabel(label => label.setText(translation(DebugToolsTranslation.PaintRadius)))
+				.editRange(range => range
+					.setMin(0)
+					.setMax(5)
+					.setRefreshMethod(() => 0)
+					.setTooltip(tooltip => tooltip.addText(text => text
+						.setText(translation(DebugToolsTranslation.PaintRadiusTooltip)))))
+				.setDisplayValue(true)
+				.addDefaultButton(() => 0))
+			.append(new BlockRow()
+				.classes.add("real-paint-row")
+				.append(this.paintButton = new CheckButton()
+					.setText(translation(DebugToolsTranslation.ButtonPaint))
+					.event.subscribe("toggle", (_, paint) => {
+						this.paintRow.classes.toggle(this.painting = paint, "painting");
+						if (!paint) this.clearPaint();
+					}))
+				.append(new Button()
+					.setText(translation(DebugToolsTranslation.ButtonPaintClear))
+					.setTooltip(tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.TooltipPaintClear))))
+					.event.subscribe("activate", this.clearPaint))
+				.append(new Button()
+					.setText(translation(DebugToolsTranslation.ButtonPaintComplete))
+					.setTooltip(tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.TooltipPaintComplete))))
+					.event.subscribe("activate", this.completePaint)));
 	}
 
 	@Override public getTranslation() {
@@ -174,11 +188,13 @@ export default class PaintPanel extends DebugToolsPanel {
 
 					const paintPosition = interpolatedPosition.floor(new Vector2());
 
-					SelectionOverlay.add(paintPosition);
+					for (const [paintTilePosition] of TileHelpers.tilesInRange(new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
+						SelectionOverlay.add(paintTilePosition);
 
-					const tileId = getTileId(paintPosition.x, paintPosition.y, localPlayer.z);
+						const tileId = getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z);
 
-					if (!this.paintTiles.includes(tileId)) this.paintTiles.push(tileId);
+						if (!this.paintTiles.includes(tileId)) this.paintTiles.push(tileId);
+					}
 
 					if (paintPosition.equals(tilePosition)) break;
 				}
@@ -202,12 +218,14 @@ export default class PaintPanel extends DebugToolsPanel {
 
 					const paintPosition = interpolatedPosition.floor(new Vector2());
 
-					SelectionOverlay.remove(paintPosition);
+					for (const [paintTilePosition] of TileHelpers.tilesInRange(new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
+						SelectionOverlay.remove(paintTilePosition);
 
-					const tileId = getTileId(paintPosition.x, paintPosition.y, localPlayer.z);
+						const tileId = getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z);
 
-					const index = this.paintTiles.indexOf(tileId);
-					if (index > -1) this.paintTiles.splice(index, 1);
+						const index = this.paintTiles.indexOf(tileId);
+						if (index > -1) this.paintTiles.splice(index, 1);
+					}
 
 					if (paintPosition.equals(tilePosition)) break;
 				}

@@ -71,6 +71,8 @@
 			"buttonPaint": "Paint",
 			"paintNoChange": "No Change",
 			"paintRemove": "Remove",
+			"paintRadius": "Radius",
+			"paintRadiusTooltip": "A radius of 0 means you will only be painting a single tile. Larger radiuses add that many tiles away from the center tile.",
 			"labelTerrain": "{#--text-color-faded:Terrain}",
 			"labelCreature": "{#--text-color-faded:Creature}",
 			"buttonPaintClear": "Clear",

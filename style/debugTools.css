@@ -47,25 +47,23 @@
 	position: absolute;
 	bottom: -10px;
 	width: calc(100% - 10px * var(--scale-floor));
-	gap: calc(4px * var(--scale));
+	background: rgba(var(--element-color-r), var(--element-color-b), var(--element-color-g), var(--dialog-opacity));
 }
 
-.debug-tools-paint-row:not(.painting) {
+.debug-tools-paint-row > * {
+	gap: calc(4px * var(--scale-floor));
+}
+
+.debug-tools-paint-row:not(.painting) > .real-paint-row {
 	grid-template-columns: 1fr !important;
 }
 
-.debug-tools-paint-row:not(.painting) > :not(:first-child) {
+.debug-tools-paint-row:not(.painting) > .real-paint-row > :not(:first-child) {
 	display: none;
 }
 
-.debug-tools-paint-panel {
-	-webkit-mask-image: linear-gradient(
-		transparent 0, 
-		#000 var(--fade-height), 
-		#000 calc(100% - 35px), 
-		transparent calc(100% - 15px)
-	);
-	 height: calc(100% + 40px * var(--scale-floor));
+.debug-tools-paint-panel .menu-separator {
+	height: calc(54px * var(--scale-floor));
 }
 
 .debug-tools-tab-dialog-subpanel-link.inspection-lock {

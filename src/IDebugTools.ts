@@ -42,6 +42,8 @@ export enum DebugToolsTranslation {
 	ButtonPaint,
 	PaintNoChange,
 	PaintRemove,
+	PaintRadius,
+	PaintRadiusTooltip,
 	LabelTerrain,
 	ButtonPaintClear,
 	TooltipPaintClear,
