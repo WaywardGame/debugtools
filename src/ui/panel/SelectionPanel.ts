@@ -20,7 +20,6 @@ import Text from "newui/component/Text";
 import { ITileEvent } from "tile/ITileEvent";
 import Arrays, { Tuple } from "utilities/Arrays";
 import Vector2 from "utilities/math/Vector2";
-import Stream from "utilities/stream/Stream";
 import SelectionExecute, { SelectionType } from "../../action/SelectionExecute";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";

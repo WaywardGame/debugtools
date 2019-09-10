@@ -17,11 +17,11 @@ export default class EntityInformation extends InspectInformationSection {
     private entities;
     private entity;
     constructor();
-    getTabs(): [number, () => import("../../../mod-reference/definitions/utilities/string/Interpolator").IStringSection[]][];
+    getTabs(): [number, () => import("../../../node_modules/@wayward/types/definitions/utilities/string/Interpolator").IStringSection[]][];
     setTab(entity: number): this;
     update(position: IVector2, tile: ITile): void;
     getEntityIndex(entity: Creature | NPC | Player): number;
-    getEntity(index: number): import("../../../mod-reference/definitions/entity/IEntity").EntityPlayerCreatureNpc;
+    getEntity(index: number): import("../../../node_modules/@wayward/types/definitions/entity/IEntity").EntityPlayerCreatureNpc;
     logUpdate(): void;
     private initializeStats;
     private onStatChange;

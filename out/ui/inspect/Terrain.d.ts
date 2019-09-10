@@ -11,7 +11,7 @@ export default class TerrainInformation extends InspectInformationSection {
     private readonly dropdownTerrainType;
     constructor();
     getTabs(): TabInformation[];
-    getTabTranslation(): import("../../../mod-reference/definitions/utilities/string/Interpolator").IStringSection[];
+    getTabTranslation(): import("../../../node_modules/@wayward/types/definitions/utilities/string/Interpolator").IStringSection[];
     update(position: IVector2, tile: ITile): this | undefined;
     logUpdate(): void;
     private toggleTilled;

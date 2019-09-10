@@ -11,7 +11,6 @@ import { Quality } from "game/IObject";
 import { ItemType } from "item/IItem";
 import Component from "newui/component/Component";
 import { RangeRow } from "newui/component/RangeRow";
-import Stream from "utilities/stream/Stream";
 
 import AddItemToInventory from "../../action/AddItemToInventory";
 import SetStat from "../../action/SetStat";
