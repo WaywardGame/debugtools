@@ -7,7 +7,7 @@ In the menu, you can give yourself items, change terrain, spawn creatures, refre
 ```
 git clone https://github.com/WaywardGame/debugtools.git
 cd debugtools
-git submodule update --init
+path/to/wayward/install/wayward.exe +mod update .
 ```
 
 ## Building:
