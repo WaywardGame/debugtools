@@ -12,6 +12,7 @@ import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
 import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import { gameScreen } from "newui/screen/screens/GameScreen";
 import Spacer from "newui/screen/screens/menu/component/Spacer";
 import { TileTemplateType } from "tile/ITerrain";
 import templateDescriptions from "tile/TerrainTemplates";
@@ -19,7 +20,6 @@ import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
-
 import PlaceTemplate from "../../action/PlaceTemplate";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";

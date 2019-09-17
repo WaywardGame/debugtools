@@ -11,6 +11,7 @@ import { Source } from "entity/player/IMessageManager";
 import Player from "entity/player/Player";
 import { Events } from "event/EventBuses";
 import { IEventEmitter } from "event/EventEmitter";
+import { EventHandler } from "event/EventManager";
 import Game from "game/Game";
 import { RenderSource } from "game/IGame";
 import { Dictionary } from "language/Dictionaries";
@@ -25,6 +26,7 @@ import { bindingManager } from "newui/BindingManager";
 import { Bindable, BindCatcherApi, KeyModifier } from "newui/IBindingManager";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
 import { MenuBarButtonGroup, MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
+import { gameScreen } from "newui/screen/screens/GameScreen";
 import { SpriteBatchLayer } from "renderer/IWorldRenderer";
 import WorldRenderer from "renderer/WorldRenderer";
 import { ITile, OverlayType } from "tile/ITerrain";
@@ -34,7 +36,6 @@ import { Direction } from "utilities/math/Direction";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
-
 import AddItemToInventory from "./action/AddItemToInventory";
 import ChangeTerrain from "./action/ChangeTerrain";
 import Clone from "./action/Clone";
@@ -546,7 +547,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * We prevent creatures attacking the enemy if the enemy is a player who is set as "invulnerable" or "noclipping"
 	 */
-	@Override @HookMethod
+	@EventHandler(Creature)("canAttack")
 	public canCreatureAttack(creature: Creature, enemy: Player | Creature): boolean | undefined {
 		if (Entity.is(enemy, EntityType.Player)) {
 			if (this.getPlayerData(enemy, "invulnerable")) return false;

@@ -2,15 +2,15 @@ import { ActionApi } from "entity/action/IAction";
 import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
 import Player from "entity/player/Player";
+import { gameScreen } from "newui/screen/screens/GameScreen";
 import { IVector3 } from "utilities/math/IVector";
-
 import GetPosition from "../../action/helpers/GetPosition";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 
 export function teleportEntity(action: ActionApi<any>, entity: Entity, position?: IVector3) {
 
 	position = GetPosition(action.executor as Player, position!, () => translation(DebugToolsTranslation.ActionTeleport)
-		.get(entity!.getName()));
+		.get(entity.getName()));
 
 	if (!entity || !position) return;
 

@@ -15,17 +15,16 @@ import ContextMenu from "newui/component/ContextMenu";
 import Text from "newui/component/Text";
 import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
+import { gameScreen } from "newui/screen/screens/GameScreen";
 import { ITile } from "tile/ITerrain";
 import { Tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import TileHelpers from "utilities/TileHelpers";
-
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import Overlays from "../overlay/Overlays";
-
 import InspectInformationSection from "./component/InspectInformationSection";
 import CorpseInformation from "./inspect/Corpse";
 import DoodadInformation from "./inspect/Doodad";

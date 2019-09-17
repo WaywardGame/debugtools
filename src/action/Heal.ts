@@ -4,7 +4,7 @@ import Entity from "entity/Entity";
 import { EntityType, StatusEffectChangeReason, StatusType } from "entity/IEntity";
 import { IStatMax, Stat } from "entity/IStats";
 import { PlayerState } from "entity/player/IPlayer";
-import GameScreen from "newui/screen/screens/GameScreen";
+import { gameScreen } from "newui/screen/screens/GameScreen";
 import Actions, { defaultUsability } from "../Actions";
 import ResurrectCorpse from "./helpers/ResurrectCorpse";
 
@@ -45,5 +45,5 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
 
 		action.setUpdateRender();
 		Actions.DEBUG_TOOLS.updateFog();
-		(gameScreen as GameScreen).onGameTickEnd();
+		gameScreen!.onGameTickEnd();
 	});

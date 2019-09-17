@@ -3,12 +3,11 @@ import { IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import Component from "newui/component/Component";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
+import { gameScreen } from "newui/screen/screens/GameScreen";
 import { Tuple } from "utilities/Arrays";
 import { sleep } from "utilities/Async";
-
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
-
 import DebugToolsPanel from "./component/DebugToolsPanel";
 import DisplayPanel from "./panel/DisplayPanel";
 import GeneralPanel from "./panel/GeneralPanel";
@@ -82,7 +81,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 		}
 	}
 
-	public getName(): Translation {
+	@Override public getName(): Translation {
 		return translation(DebugToolsTranslation.DialogTitleMain);
 	}
 
@@ -94,7 +93,7 @@ export default class DebugToolsDialog extends TabDialog implements IHookHost {
 	 * handler to the panel, which will `store` (cache) the panel instead of removing it, and trigger a `SwitchAway` event on the 
 	 * panel when this occurs.
 	 */
-	public getSubpanels(): SubpanelInformation[] {
+	@Override public getSubpanels(): SubpanelInformation[] {
 		if (!this.subpanels) {
 			this.subpanels = subpanelClasses.stream()
 				.merge(this.DEBUG_TOOLS.modRegistryMainDialogPanels.getRegistrations()

@@ -17,6 +17,7 @@ import Component from "newui/component/Component";
 import ContextMenu from "newui/component/ContextMenu";
 import { RangeRow } from "newui/component/RangeRow";
 import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import { gameScreen } from "newui/screen/screens/GameScreen";
 import Spacer from "newui/screen/screens/menu/component/Spacer";
 import { SpriteBatchLayer } from "renderer/IWorldRenderer";
 import { TerrainType } from "tile/ITerrain";
