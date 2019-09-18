@@ -1,9 +1,11 @@
+import { EventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
 import Register from "mod/ModRegistry";
 import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import MovementHandler from "newui/screen/screens/game/util/movement/MovementHandler";
 import { gameScreen } from "newui/screen/screens/GameScreen";
 import { ITile } from "tile/ITerrain";
 import Vector2 from "utilities/math/Vector2";
@@ -118,8 +120,8 @@ export default class SelectLocation implements IHookHost {
 	/**
 	 * Prevents movement if a tile is currently being selected or if the select tile bind is still held.
 	 */
-	@HookMethod
-	public canClientMove(api: BindCatcherApi): false | undefined {
+	@EventHandler(MovementHandler)("canMove")
+	public canClientMove(): false | undefined {
 		if (this._selecting || this.selectTileHeld) {
 			return false;
 		}

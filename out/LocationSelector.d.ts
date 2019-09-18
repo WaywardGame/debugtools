@@ -14,7 +14,7 @@ export default class SelectLocation implements IHookHost {
     private selectionPromise;
     select(): CancelablePromise<Vector2>;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
-    canClientMove(api: BindCatcherApi): false | undefined;
+    canClientMove(): false | undefined;
     private cancel;
     private selectTile;
 }

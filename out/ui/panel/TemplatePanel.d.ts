@@ -15,7 +15,7 @@ export default class TemplatePanel extends DebugToolsPanel {
     private selectHeld;
     constructor();
     getTranslation(): DebugToolsTranslation;
-    canClientMove(api: BindCatcherApi): false | undefined;
+    canClientMove(): false | undefined;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     private getTemplate;
     private templateHasTile;

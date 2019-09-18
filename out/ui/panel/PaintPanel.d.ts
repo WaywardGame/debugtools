@@ -57,8 +57,8 @@ export default class PaintPanel extends DebugToolsPanel {
     private maxSprites;
     constructor();
     getTranslation(): DebugToolsTranslation;
-    canClientMove(api: BindCatcherApi): false | undefined;
-    getMaxSpritesForLayer(layer: SpriteBatchLayer, maxSprites: number): number | undefined;
+    canClientMove(): false | undefined;
+    getMaxSpritesForLayer(_: any, layer: SpriteBatchLayer, maxSprites: number): number | undefined;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     protected onSwitchTo(): void;
     protected onSwitchAway(): void;

@@ -17,9 +17,11 @@ import Component from "newui/component/Component";
 import ContextMenu from "newui/component/ContextMenu";
 import { RangeRow } from "newui/component/RangeRow";
 import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import MovementHandler from "newui/screen/screens/game/util/movement/MovementHandler";
 import { gameScreen } from "newui/screen/screens/GameScreen";
 import Spacer from "newui/screen/screens/menu/component/Spacer";
 import { SpriteBatchLayer } from "renderer/IWorldRenderer";
+import WorldRenderer from "renderer/WorldRenderer";
 import { TerrainType } from "tile/ITerrain";
 import { TileEventType } from "tile/ITileEvent";
 import Vector2 from "utilities/math/Vector2";
@@ -146,15 +148,15 @@ export default class PaintPanel extends DebugToolsPanel {
 		return DebugToolsTranslation.PanelPaint;
 	}
 
-	@HookMethod
-	public canClientMove(api: BindCatcherApi): false | undefined {
+	@EventHandler(MovementHandler)("canMove")
+	public canClientMove(): false | undefined {
 		if (this.painting) return false;
 
 		return undefined;
 	}
 
-	@HookMethod
-	public getMaxSpritesForLayer(layer: SpriteBatchLayer, maxSprites: number): number | undefined {
+	@EventHandler(WorldRenderer)("getMaxSpritesForLayer")
+	public getMaxSpritesForLayer(_: any, layer: SpriteBatchLayer, maxSprites: number): number | undefined {
 		if (this.painting) {
 			return this.maxSprites = maxSprites + this.paintTiles.length * 4;
 		}

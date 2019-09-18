@@ -12,6 +12,7 @@ import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
 import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import MovementHandler from "newui/screen/screens/game/util/movement/MovementHandler";
 import { gameScreen } from "newui/screen/screens/GameScreen";
 import Spacer from "newui/screen/screens/menu/component/Spacer";
 import { TileTemplateType } from "tile/ITerrain";
@@ -109,8 +110,8 @@ export default class TemplatePanel extends DebugToolsPanel {
 		return DebugToolsTranslation.PanelTemplates;
 	}
 
-	@HookMethod
-	public canClientMove(api: BindCatcherApi) {
+	@EventHandler(MovementHandler)("canMove")
+	public canClientMove() {
 		if (this.place.checked || this.selectHeld) return false;
 
 		return undefined;

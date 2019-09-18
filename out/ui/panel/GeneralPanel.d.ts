@@ -13,7 +13,7 @@ export default class GeneralPanel extends DebugToolsPanel {
     private selectionPromise;
     constructor();
     getTranslation(): DebugToolsTranslation;
-    canClientMove(api: BindCatcherApi): false | undefined;
+    canClientMove(): false | undefined;
     onGameTickEnd(): void;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     protected onSwitchTo(): void;

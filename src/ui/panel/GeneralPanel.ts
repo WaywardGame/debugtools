@@ -15,12 +15,12 @@ import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
 import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import newui from "newui/NewUi";
+import MovementHandler from "newui/screen/screens/game/util/movement/MovementHandler";
 import { ParticleType } from "renderer/particle/IParticle";
 import { particles } from "renderer/particle/Particles";
 import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
-
 import SetTime from "../../action/SetTime";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -125,8 +125,8 @@ export default class GeneralPanel extends DebugToolsPanel {
 		return DebugToolsTranslation.PanelGeneral;
 	}
 
-	@HookMethod
-	public canClientMove(api: BindCatcherApi): false | undefined {
+	@EventHandler(MovementHandler)("canMove")
+	public canClientMove(): false | undefined {
 		if (this.selectionPromise || this.checkButtonAudio.checked || this.checkButtonParticle.checked) return false;
 
 		return undefined;
