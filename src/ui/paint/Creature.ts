@@ -1,5 +1,5 @@
 import { CreatureType } from "entity/creature/ICreature";
-import { Events } from "event/EventBuses";
+import { Events } from "event/EventEmitter";
 import { IEventEmitter } from "event/EventEmitter";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";

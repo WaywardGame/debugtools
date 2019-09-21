@@ -2,9 +2,8 @@ import { DoodadType } from "doodad/IDoodad";
 import ActionExecutor from "entity/action/ActionExecutor";
 import { CreatureType } from "entity/creature/ICreature";
 import { NPCType } from "entity/npc/NPCS";
-import { Events } from "event/EventBuses";
-import { IEventEmitter } from "event/EventEmitter";
-import { EventHandler } from "event/EventManager";
+import { Events, IEventEmitter } from "event/EventEmitter";
+import { EventHandler, EventSubscriber, OwnEventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
@@ -29,7 +28,7 @@ import Vector3 from "utilities/math/Vector3";
 import TileHelpers from "utilities/TileHelpers";
 import Paint from "../../action/Paint";
 import DebugTools from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import Overlays from "../../overlay/Overlays";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
 import { getTileId, getTilePosition } from "../../util/TilePosition";
@@ -87,6 +86,7 @@ const paintSections: (new () => IPaintSection)[] = [
 	TileEventPaint,
 ];
 
+@EventSubscriber
 export default class PaintPanel extends DebugToolsPanel {
 
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
@@ -148,22 +148,16 @@ export default class PaintPanel extends DebugToolsPanel {
 		return DebugToolsTranslation.PanelPaint;
 	}
 
-	@EventHandler(MovementHandler)("canMove")
+	@EventHandler(MovementHandler, "canMove")
 	public canClientMove(): false | undefined {
 		if (this.painting) return false;
 
 		return undefined;
 	}
 
-	@EventHandler(WorldRenderer)("getMaxSpritesForLayer")
-	public getMaxSpritesForLayer(_: any, layer: SpriteBatchLayer, maxSprites: number): number | undefined {
-		if (this.painting) {
-			return this.maxSprites = maxSprites + this.paintTiles.length * 4;
-		}
-
-		this.maxSprites = maxSprites;
-
-		return undefined;
+	@EventHandler(WorldRenderer, "getMaxSpritesForLayer")
+	public getMaxSpritesForLayer(_: any, maxSprites: number) {
+		return this.maxSprites = maxSprites + (this.painting ? this.paintTiles.length * 4 : 0);
 	}
 
 	// tslint:disable cyclomatic-complexity
@@ -263,7 +257,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	}
 	// tslint:enable cyclomatic-complexity
 
-	@EventHandler<PaintPanel>("self")("switchTo")
+	@OwnEventHandler(PaintPanel, "switchTo")
 	protected onSwitchTo() {
 		this.getParent()!.classes.add("debug-tools-paint-panel");
 		this.paintRow.appendTo(this.getParent()!.getParent()!);
@@ -271,7 +265,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		this.registerHookHost("DebugToolsDialog:PaintPanel");
 	}
 
-	@EventHandler<PaintPanel>("self")("switchAway")
+	@OwnEventHandler(PaintPanel, "switchAway")
 	protected onSwitchAway() {
 		hookManager.deregister(this);
 

@@ -1,5 +1,5 @@
 import ActionExecutor from "entity/action/ActionExecutor";
-import { EventHandler } from "event/EventManager";
+import { EventHandler, EventSubscriber, OwnEventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import Translation from "language/Translation";
 import { ITemplateOptions, manipulateTemplates } from "mapgen/MapGenHelpers";
@@ -23,11 +23,12 @@ import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import PlaceTemplate from "../../action/PlaceTemplate";
 import DebugTools from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
 import { getTileId, getTilePosition } from "../../util/TilePosition";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 
+@EventSubscriber
 export default class TemplatePanel extends DebugToolsPanel {
 
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
@@ -110,7 +111,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 		return DebugToolsTranslation.PanelTemplates;
 	}
 
-	@EventHandler(MovementHandler)("canMove")
+	@EventHandler(MovementHandler, "canMove")
 	public canClientMove() {
 		if (this.place.checked || this.selectHeld) return false;
 
@@ -191,12 +192,12 @@ export default class TemplatePanel extends DebugToolsPanel {
 		};
 	}
 
-	@EventHandler<TemplatePanel>("self")("switchTo")
+	@OwnEventHandler(TemplatePanel, "switchTo")
 	protected onSwitchTo() {
 		this.registerHookHost("DebugToolsDialog:TemplatePanel");
 	}
 
-	@EventHandler<TemplatePanel>("self")("switchAway")
+	@OwnEventHandler(TemplatePanel, "switchAway")
 	protected onSwitchAway() {
 		hookManager.deregister(this);
 		this.place.setChecked(false);

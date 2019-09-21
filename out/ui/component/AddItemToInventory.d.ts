@@ -1,4 +1,4 @@
-import { Events } from "event/EventBuses";
+import { Events } from "event/EventEmitter";
 import { IEventEmitter } from "event/EventEmitter";
 import { Quality } from "game/IObject";
 import { ItemType } from "item/IItem";

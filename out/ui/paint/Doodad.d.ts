@@ -1,5 +1,5 @@
 import { DoodadType } from "doodad/IDoodad";
-import { Events } from "event/EventBuses";
+import { Events } from "event/EventEmitter";
 import { IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
 import { IPaintSection } from "../panel/PaintPanel";

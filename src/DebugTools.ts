@@ -9,7 +9,7 @@ import { Delay } from "entity/IHuman";
 import NPC from "entity/npc/NPC";
 import { Source } from "entity/player/IMessageManager";
 import Player from "entity/player/Player";
-import { Events } from "event/EventBuses";
+import { Events } from "event/EventEmitter";
 import { IEventEmitter } from "event/EventEmitter";
 import { EventHandler } from "event/EventManager";
 import Game from "game/Game";
@@ -547,7 +547,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * We prevent creatures attacking the enemy if the enemy is a player who is set as "invulnerable" or "noclipping"
 	 */
-	@EventHandler(Creature)("canAttack")
+	@EventHandler(Creature, "canAttack")
 	public canCreatureAttack(creature: Creature, enemy: Player | Creature): boolean | undefined {
 		if (Entity.is(enemy, EntityType.Player)) {
 			if (this.getPlayerData(enemy, "invulnerable")) return false;

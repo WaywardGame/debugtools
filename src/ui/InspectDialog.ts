@@ -3,7 +3,7 @@ import Entity from "entity/Entity";
 import NPC from "entity/npc/NPC";
 import { PlayerState } from "entity/player/IPlayer";
 import Player from "entity/player/Player";
-import { EventHandler } from "event/EventManager";
+import { OwnEventHandler } from "event/EventManager";
 import { RenderSource, TileUpdateType } from "game/IGame";
 import Translation from "language/Translation";
 import { HookMethod, IHookHost } from "mod/IHookHost";
@@ -23,7 +23,7 @@ import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import TileHelpers from "utilities/TileHelpers";
 import DebugTools from "../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../IDebugTools";
 import Overlays from "../overlay/Overlays";
 import InspectInformationSection from "./component/InspectInformationSection";
 import CorpseInformation from "./inspect/Corpse";
@@ -247,7 +247,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 * - Removes the inspection overlay.
 	 * - Forcibly removes any info sections.
 	 */
-	@EventHandler<InspectDialog>("self")("close")
+	@OwnEventHandler(InspectDialog, "close")
 	protected onClose() {
 		if (this.inspectingTile) {
 			TileHelpers.Overlay.remove(this.inspectingTile, Overlays.isSelectedTarget);

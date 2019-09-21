@@ -1,4 +1,4 @@
-import { Events } from "event/EventBuses";
+import { Events } from "event/EventEmitter";
 import { IEventEmitter } from "event/EventEmitter";
 import Button from "newui/component/Button";
 import Component from "newui/component/Component";

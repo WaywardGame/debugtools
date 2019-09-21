@@ -2,7 +2,7 @@ import Creature from "entity/creature/Creature";
 import { Stat } from "entity/IStats";
 import NPC from "entity/npc/NPC";
 import Player from "entity/player/Player";
-import { Events } from "event/EventBuses";
+import { Events } from "event/EventEmitter";
 import { IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
 

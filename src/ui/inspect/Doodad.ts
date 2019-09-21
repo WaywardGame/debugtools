@@ -1,7 +1,7 @@
 import Doodad from "doodad/Doodad";
 import { GrowingStage } from "doodad/IDoodad";
 import ActionExecutor from "entity/action/ActionExecutor";
-import { EventHandler } from "event/EventManager";
+import { OwnEventHandler } from "event/EventManager";
 import { Quality } from "game/IObject";
 import { IContainer, ItemType } from "item/IItem";
 import { TextContext } from "language/Translation";
@@ -12,15 +12,15 @@ import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
-
 import AddItemToInventory from "../../action/AddItemToInventory";
 import Clone from "../../action/Clone";
 import Remove from "../../action/Remove";
 import SetGrowingStage from "../../action/SetGrowingStage";
 import DebugTools from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import AddItemToInventoryComponent from "../component/AddItemToInventory";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
+
 
 export default class DoodadInformation extends InspectInformationSection {
 
@@ -51,7 +51,7 @@ export default class DoodadInformation extends InspectInformationSection {
 			.appendTo(this);
 	}
 
-	@EventHandler<DoodadInformation>("self")("switchTo")
+	@OwnEventHandler(DoodadInformation, "switchTo")
 	protected onSwitchTo() {
 		if (!this.doodad!.containedItems)
 			return;

@@ -1,5 +1,5 @@
 import { NPCType } from "entity/npc/NPCS";
-import { Events } from "event/EventBuses";
+import { Events } from "event/EventEmitter";
 import { IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
 import NPCDropdown from "newui/component/dropdown/NPCDropdown";

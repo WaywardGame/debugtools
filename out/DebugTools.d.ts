@@ -5,7 +5,7 @@ import Human from "entity/Human";
 import NPC from "entity/npc/NPC";
 import { Source } from "entity/player/IMessageManager";
 import Player from "entity/player/Player";
-import { Events } from "event/EventBuses";
+import { Events } from "event/EventEmitter";
 import { IEventEmitter } from "event/EventEmitter";
 import Game from "game/Game";
 import { Dictionary } from "language/Dictionaries";

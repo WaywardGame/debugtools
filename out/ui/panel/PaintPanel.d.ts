@@ -1,11 +1,9 @@
 import { DoodadType } from "doodad/IDoodad";
 import { CreatureType } from "entity/creature/ICreature";
 import { NPCType } from "entity/npc/NPCS";
-import { Events } from "event/EventBuses";
-import { IEventEmitter } from "event/EventEmitter";
+import { Events, IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
 import { Bindable, BindCatcherApi } from "newui/IBindingManager";
-import { SpriteBatchLayer } from "renderer/IWorldRenderer";
 import { TerrainType } from "tile/ITerrain";
 import { TileEventType } from "tile/ITileEvent";
 import DebugTools from "../../DebugTools";
@@ -58,7 +56,7 @@ export default class PaintPanel extends DebugToolsPanel {
     constructor();
     getTranslation(): DebugToolsTranslation;
     canClientMove(): false | undefined;
-    getMaxSpritesForLayer(_: any, layer: SpriteBatchLayer, maxSprites: number): number | undefined;
+    getMaxSpritesForLayer(_: any, maxSprites: number): number;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     protected onSwitchTo(): void;
     protected onSwitchAway(): void;

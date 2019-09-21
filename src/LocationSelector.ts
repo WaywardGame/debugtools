@@ -1,4 +1,4 @@
-import { EventHandler } from "event/EventManager";
+import { EventHandler, EventSubscriber } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
@@ -15,6 +15,7 @@ import { DEBUG_TOOLS_ID } from "./IDebugTools";
 import Overlays from "./overlay/Overlays";
 import CancelablePromise from "./util/CancelablePromise";
 
+@EventSubscriber
 export default class SelectLocation implements IHookHost {
 
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
@@ -120,7 +121,7 @@ export default class SelectLocation implements IHookHost {
 	/**
 	 * Prevents movement if a tile is currently being selected or if the select tile bind is still held.
 	 */
-	@EventHandler(MovementHandler)("canMove")
+	@EventHandler(MovementHandler, "canMove")
 	public canClientMove(): false | undefined {
 		if (this._selecting || this.selectTileHeld) {
 			return false;

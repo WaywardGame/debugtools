@@ -1,4 +1,4 @@
-import { EventHandler } from "event/EventManager";
+import { OwnEventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
@@ -7,10 +7,10 @@ import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import { RangeRow } from "newui/component/RangeRow";
 import { compileShaders, loadShaders } from "renderer/Shaders";
-
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, ISaveData, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
+
 
 export default class DisplayPanel extends DebugToolsPanel {
 	private readonly zoomRange: RangeRow;
@@ -93,12 +93,12 @@ export default class DisplayPanel extends DebugToolsPanel {
 		this.DEBUG_TOOLS.toggleLighting(lighting);
 	}
 
-	@EventHandler<DisplayPanel>("self")("switchTo")
+	@OwnEventHandler(DisplayPanel, "switchTo")
 	protected onSwitchTo() {
 		this.registerHookHost("DebugToolsDialog:DisplayPanel");
 	}
 
-	@EventHandler<DisplayPanel>("self")("switchAway")
+	@OwnEventHandler(DisplayPanel, "switchAway")
 	protected onSwitchAway() {
 
 	}

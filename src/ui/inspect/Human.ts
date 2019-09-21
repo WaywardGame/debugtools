@@ -6,17 +6,17 @@ import { EntityType } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
 import NPC from "entity/npc/NPC";
 import Player from "entity/player/Player";
-import { EventHandler } from "event/EventManager";
+import { OwnEventHandler } from "event/EventManager";
 import { Quality } from "game/IObject";
 import { ItemType } from "item/IItem";
 import Component from "newui/component/Component";
 import { RangeRow } from "newui/component/RangeRow";
-
 import AddItemToInventory from "../../action/AddItemToInventory";
 import SetStat from "../../action/SetStat";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import AddItemToInventoryComponent from "../component/AddItemToInventory";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
+
 
 export default class HumanInformation extends InspectEntityInformationSubsection {
 	private readonly addItemContainer: Component;
@@ -33,7 +33,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 		this.addReputationSlider(DebugToolsTranslation.LabelBenignity, Stat.Benignity);
 	}
 
-	@EventHandler<HumanInformation>("self")("switchTo")
+	@OwnEventHandler(HumanInformation, "switchTo")
 	protected onSwitchTo() {
 		const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this.addItemContainer);
 		addItemToInventory.event.until(this, "switchAway")

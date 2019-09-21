@@ -1,7 +1,7 @@
 import { SfxType } from "audio/IAudio";
 import ActionExecutor from "entity/action/ActionExecutor";
 import { ActionType } from "entity/action/IAction";
-import { EventHandler } from "event/EventManager";
+import { EventHandler, EventSubscriber, OwnEventHandler } from "event/EventManager";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
@@ -23,10 +23,11 @@ import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import SetTime from "../../action/SetTime";
 import DebugTools from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import CancelablePromise from "../../util/CancelablePromise";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 
+@EventSubscriber
 export default class GeneralPanel extends DebugToolsPanel {
 
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
@@ -125,7 +126,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 		return DebugToolsTranslation.PanelGeneral;
 	}
 
-	@EventHandler(MovementHandler)("canMove")
+	@EventHandler(MovementHandler, "canMove")
 	public canClientMove(): false | undefined {
 		if (this.selectionPromise || this.checkButtonAudio.checked || this.checkButtonParticle.checked) return false;
 
@@ -158,7 +159,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 		return bindPressed;
 	}
 
-	@EventHandler<GeneralPanel>("self")("switchTo")
+	@OwnEventHandler(GeneralPanel, "switchTo")
 	protected onSwitchTo() {
 		this.timeRange.refresh();
 
@@ -170,7 +171,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 			});
 	}
 
-	@EventHandler<GeneralPanel>("self")("switchAway")
+	@OwnEventHandler(GeneralPanel, "switchAway")
 	protected onSwitchAway() {
 		hookManager.deregister(this);
 		if (this.selectionPromise) {
