@@ -62,6 +62,10 @@
 	display: none;
 }
 
+.debug-tools-paint-panel::after {
+	height: 50px;
+}
+
 .debug-tools-paint-panel .menu-separator {
 	height: calc(54px * var(--scale-floor));
 }

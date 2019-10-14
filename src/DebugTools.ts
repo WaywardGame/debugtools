@@ -9,8 +9,8 @@ import { Delay } from "entity/IHuman";
 import NPC from "entity/npc/NPC";
 import { Source } from "entity/player/IMessageManager";
 import Player from "entity/player/Player";
-import { Events } from "event/EventEmitter";
-import { IEventEmitter } from "event/EventEmitter";
+import { EventBus } from "event/EventBuses";
+import { Events, IEventEmitter } from "event/EventEmitter";
 import { EventHandler } from "event/EventManager";
 import Game from "game/Game";
 import { RenderSource } from "game/IGame";
@@ -617,8 +617,8 @@ export default class DebugTools extends Mod {
 	 * If the player is "noclipping", we put them in `SpriteBatchLayer.CreatureFlying`.
 	 * Otherwise we return `undefined` and let the game or other mods handle it.
 	 */
-	@Override @HookMethod
-	public getPlayerSpriteBatchLayer(player: Player, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined {
+	@EventHandler(WorldRenderer, "getPlayerSpriteBatchLayer")
+	public getPlayerSpriteBatchLayer(_: any, player: Player, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined {
 		return this.getPlayerData(player, "noclip") ? SpriteBatchLayer.CreatureFlying : undefined;
 	}
 
@@ -636,8 +636,8 @@ export default class DebugTools extends Mod {
 	/**
 	 * We add the weight bonus from the player's save data to the existing strength.
 	 */
-	@Override @HookMethod
-	public getPlayerMaxWeight(weight: number, player: Player) {
+	@EventHandler(EventBus.Players, "getMaxWeight")
+	public getPlayerMaxWeight(player: Player, weight: number) {
 		return weight + this.getPlayerData(player, "weightBonus");
 	}
 
