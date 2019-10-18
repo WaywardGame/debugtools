@@ -497,7 +497,7 @@ export default class DebugTools extends Mod {
 	 * - If our internal zoom level is `1`: `0.125`
 	 * - If our internal zoom level is `0`: `0.0625`
 	 */
-	@Override @HookMethod
+	@EventHandler(EventBus.Game, "getZoomLevel")
 	public getZoomLevel() {
 		if (this.data.zoomLevel === undefined) {
 			return undefined;
@@ -518,8 +518,8 @@ export default class DebugTools extends Mod {
 	 * 		- If it is, we lock the camera again and return `undefined`.
 	 * 		- Otherwise, we return the transition camera position.
 	 */
-	@Override @HookMethod
-	public getCameraPosition(position: IVector2): IVector2 | undefined {
+	@EventHandler(EventBus.Game, "getCameraPosition")
+	protected getCameraPosition(_: any, position: IVector2): IVector2 | undefined {
 		if (this.cameraState === CameraState.Locked) {
 			return undefined;
 		}
@@ -548,7 +548,7 @@ export default class DebugTools extends Mod {
 	 * We prevent creatures attacking the enemy if the enemy is a player who is set as "invulnerable" or "noclipping"
 	 */
 	@EventHandler(Creature, "canAttack")
-	public canCreatureAttack(creature: Creature, enemy: Player | Creature): boolean | undefined {
+	protected canCreatureAttack(creature: Creature, enemy: Player | Creature): boolean | undefined {
 		if (Entity.is(enemy, EntityType.Player)) {
 			if (this.getPlayerData(enemy, "invulnerable")) return false;
 			if (this.getPlayerData(enemy, "noclip")) return false;
@@ -608,8 +608,8 @@ export default class DebugTools extends Mod {
 	/**
 	 * Used to prevent the weight movement penalty while noclipping.
 	 */
-	@Override @HookMethod
-	public getPlayerWeightMovementPenalty(player: Player): number | undefined {
+	@EventHandler(EventBus.Players, "getWeightMovementPenalty")
+	protected getPlayerWeightMovementPenalty(player: Player): number | undefined {
 		return this.getPlayerData(player, "noclip") ? 0 : undefined;
 	}
 
@@ -618,7 +618,7 @@ export default class DebugTools extends Mod {
 	 * Otherwise we return `undefined` and let the game or other mods handle it.
 	 */
 	@EventHandler(WorldRenderer, "getPlayerSpriteBatchLayer")
-	public getPlayerSpriteBatchLayer(_: any, player: Player, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined {
+	protected getPlayerSpriteBatchLayer(_: any, player: Player, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined {
 		return this.getPlayerData(player, "noclip") ? SpriteBatchLayer.CreatureFlying : undefined;
 	}
 
@@ -626,8 +626,8 @@ export default class DebugTools extends Mod {
 	 * If the player is "noclipping", we return `false` (not swimming). 
 	 * Otherwise we return `undefined` and let the game or other mods handle it. 
 	 */
-	@Override @HookMethod
-	public isHumanSwimming(human: Human, isSwimming: boolean): boolean | undefined {
+	@EventHandler(Human, "isSwimming")
+	protected isHumanSwimming(human: Human, isSwimming: boolean): boolean | undefined {
 		if (Entity.is(human, EntityType.NPC)) return undefined;
 
 		return this.getPlayerData(human as Player, "noclip") ? false : undefined;
@@ -637,7 +637,7 @@ export default class DebugTools extends Mod {
 	 * We add the weight bonus from the player's save data to the existing strength.
 	 */
 	@EventHandler(EventBus.Players, "getMaxWeight")
-	public getPlayerMaxWeight(player: Player, weight: number) {
+	protected getPlayerMaxWeight(player: Player, weight: number) {
 		return weight + this.getPlayerData(player, "weightBonus");
 	}
 

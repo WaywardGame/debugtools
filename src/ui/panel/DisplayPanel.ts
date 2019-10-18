@@ -1,7 +1,7 @@
-import { OwnEventHandler } from "event/EventManager";
+import { EventBus } from "event/EventBuses";
+import { Priority } from "event/EventEmitter";
+import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
-import { HookMethod } from "mod/IHookHost";
-import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
@@ -74,7 +74,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 		return DebugToolsTranslation.PanelDisplay;
 	}
 
-	@HookMethod(HookPriority.High)
+	@EventHandler(EventBus.Game, "getZoomLevel", Priority.High)
 	public getZoomLevel(): number | undefined {
 		if (this.zoomRange) {
 			this.zoomRange.refresh();
