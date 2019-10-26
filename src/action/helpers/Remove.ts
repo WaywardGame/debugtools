@@ -1,22 +1,19 @@
-import { IActionApi } from "action/IAction";
-import { ICorpse } from "creature/corpse/ICorpse";
-import Creature from "creature/Creature";
-import { ICreature } from "creature/ICreature";
-import Doodad from "doodad/doodads/Doodad";
-import { IDoodad } from "doodad/IDoodad";
-import { IItem } from "item/IItem";
+import Doodad from "doodad/Doodad";
+import { IActionApi } from "entity/action/IAction";
+import { ICorpse } from "entity/creature/corpse/ICorpse";
+import Creature from "entity/creature/Creature";
+import NPC from "entity/npc/NPC";
+import Player from "entity/player/Player";
 import Item from "item/Item";
-import BaseNPC from "npc/BaseNPC";
-import { INPC } from "npc/INPC";
-import IPlayer from "player/IPlayer";
 import { ITileEvent } from "tile/ITileEvent";
+
 import RemoveItem from "./RemoveItem";
 
-export default function (action: IActionApi<IPlayer>, target: ICreature | INPC | IDoodad | IItem | ICorpse | ITileEvent) {
+export default function (action: IActionApi<Player>, target: Creature | NPC | Doodad | Item | ICorpse | ITileEvent) {
 	if (target instanceof Creature) return creatureManager.remove(target);
-	else if (target instanceof BaseNPC) return npcManager.remove(target);
-	else if (target instanceof Doodad) return doodadManager.remove(target, true);
-	else if (target instanceof Item) return RemoveItem(action, target);
-	else if (tileEventManager.is(target)) return tileEventManager.remove(target);
-	else if (corpseManager.is(target)) return corpseManager.remove(target);
+	if (target instanceof NPC) return npcManager.remove(target);
+	if (target instanceof Doodad) return doodadManager.remove(target, true);
+	if (target instanceof Item) return RemoveItem(action, target);
+	if (tileEventManager.is(target)) return tileEventManager.remove(target);
+	if (corpseManager.is(target)) return corpseManager.remove(target);
 }

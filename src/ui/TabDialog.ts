@@ -1,41 +1,45 @@
-import Button, { ButtonEvent } from "newui/component/Button";
+import { Events } from "event/EventEmitter";
+import { IEventEmitter } from "event/EventEmitter";
+import { OwnEventHandler } from "event/EventManager";
+import Button from "newui/component/Button";
 import Component from "newui/component/Component";
 import { TranslationGenerator } from "newui/component/IComponent";
-import Dialog, { DialogEvent } from "newui/screen/screens/game/component/Dialog";
+import newui from "newui/NewUi";
+import Dialog from "newui/screen/screens/game/component/Dialog";
 import { DialogId, Edge } from "newui/screen/screens/game/Dialogs";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import Collectors from "utilities/iterable/Collectors";
-import { Bound } from "utilities/Objects";
 
 export type SubpanelInformation = [string | number, TranslationGenerator, (component: Component) => any, ((button: Button) => any)?, Button?];
 
+interface ITabDialogEvents extends Events<Dialog> {
+	changeSubpanel(): any;
+}
+
 export default abstract class TabDialog extends Dialog {
+	@Override public event: IEventEmitter<this, ITabDialogEvents>;
+
 	private readonly subpanelLinkWrapper: Component;
 	private readonly panelWrapper: Component;
 
 	private subpanelInformations: SubpanelInformation[];
 	private activeSubpanel: SubpanelInformation | undefined;
 
-	public constructor(gsapi: IGameScreenApi, id: DialogId) {
-		super(gsapi, id);
+	public constructor(id: DialogId) {
+		super(id);
 		this.classes.add("debug-tools-tab-dialog");
 
-		const api = gsapi.uiApi;
-
-		new Component(api)
+		new Component()
 			.classes.add("debug-tools-tab-dialog-subpanel-link-wrapper")
 			.append(this.subpanelLinkWrapper = this.addScrollableWrapper())
 			.appendTo(this.body);
 
 		this.panelWrapper = this.addScrollableWrapper()
-			.appendTo(new Component(api)
+			.appendTo(new Component()
 				.classes.add("debug-tools-tab-dialog-subpanel-wrapper")
 				.appendTo(this.body));
 
 		this.updateSubpanelList();
 		this.showFirstSubpanel();
 
-		this.on(DialogEvent.Resize, this.onResize);
 		this.onResize();
 	}
 
@@ -45,10 +49,10 @@ export default abstract class TabDialog extends Dialog {
 		this.subpanelInformations = this.getSubpanels();
 
 		this.subpanelLinkWrapper.dump()
-			.append(this.subpanelInformations.map(subpanel => new Button(this.api)
+			.append(this.subpanelInformations.map(subpanel => new Button()
 				.classes.add("debug-tools-tab-dialog-subpanel-link")
 				.setText(subpanel[1])
-				.on(ButtonEvent.Activate, this.showSubPanel(subpanel[0]))
+				.event.subscribe("activate", this.showSubPanel(subpanel[0]))
 				.schedule(subpanelButton => subpanel[4] = subpanelButton)
 				.schedule(subpanel[3])));
 
@@ -85,7 +89,7 @@ export default abstract class TabDialog extends Dialog {
 	}
 
 	private showFirstSubpanel() {
-		const [subpanelId, , , , button] = this.subpanelInformations.collect(Collectors.first())!;
+		const [subpanelId, , , , button] = this.subpanelInformations[0];
 		this.showSubPanel(subpanelId)(button!);
 	}
 
@@ -96,7 +100,7 @@ export default abstract class TabDialog extends Dialog {
 
 		subpanel[2](this.panelWrapper.dump());
 
-		this.emit("change-subpanel");
+		this.event.emit("changeSubpanel");
 	}
 
 	private setActiveButton(button: Button) {
@@ -107,9 +111,9 @@ export default abstract class TabDialog extends Dialog {
 		button.classes.add("active");
 	}
 
-	@Bound
+	@OwnEventHandler(TabDialog, "resize")
 	private onResize() {
-		const dialogWidth = this.api.windowWidth * (this.edges[Edge.Right] - this.edges[Edge.Left]) / 100;
+		const dialogWidth = newui.windowWidth * (this.edges[Edge.Right] - this.edges[Edge.Left]) / 100;
 		this.classes.toggle(dialogWidth < 440, "tabs-drawer");
 	}
 }

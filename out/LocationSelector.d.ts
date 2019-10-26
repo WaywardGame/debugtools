@@ -1,6 +1,5 @@
-import { Bindable } from "Enums";
 import { IHookHost } from "mod/IHookHost";
-import { BindCatcherApi } from "newui/BindingManager";
+import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import Vector2 from "utilities/math/Vector2";
 import DebugTools from "./DebugTools";
 import CancelablePromise from "./util/CancelablePromise";
@@ -15,7 +14,7 @@ export default class SelectLocation implements IHookHost {
     private selectionPromise;
     select(): CancelablePromise<Vector2>;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
-    canClientMove(api: BindCatcherApi): false | undefined;
+    canClientMove(): false | undefined;
     private cancel;
     private selectTile;
 }

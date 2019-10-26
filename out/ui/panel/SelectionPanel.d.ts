@@ -1,20 +1,19 @@
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
-export declare enum SelectionType {
-    Creature = 0,
-    NPC = 1,
-    TileEvent = 2
-}
 export default class SelectionPanel extends DebugToolsPanel {
+    private readonly textPreposition;
+    private readonly creatures;
+    private readonly npcs;
+    private readonly tileEvents;
+    private readonly doodads;
+    private readonly corpses;
+    private readonly players;
     private readonly rangeQuantity;
-    private creatures;
-    private npcs;
-    private tileEvents;
-    private action;
-    private method;
-    constructor(gsapi: IGameScreenApi);
+    private readonly dropdownMethod;
+    private readonly dropdownAlternativeTarget;
+    private readonly dropdownAction;
+    constructor();
     getTranslation(): DebugToolsTranslation;
     execute(): void;
-    private changeMethod;
+    private onActionChange;
 }

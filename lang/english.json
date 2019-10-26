@@ -7,6 +7,9 @@
 		"source": {
 			"modDebugToolsDebugTools": "Debug Tools"
 		},
+		"interrupt": {
+			"modDebugToolsChoiceTravelAway": "Where would you like to travel to?"
+		},
 		"interruptChoice": {
 			"modDebugToolsSailToCivilization": "Civilization",
 			"modDebugToolsTravelAway": "New Lands"
@@ -17,6 +20,7 @@
 			"modDebugToolsCancelSelectLocation": "Cancel Location Select",
 			"modDebugToolsInspectTile": "Inspect Tile",
 			"modDebugToolsToggleCameraLock": "Toggle Camera Lock",
+			"modDebugToolsToggleFullVisibility": "Toggle Full Visibility",
 			"modDebugToolsCameraMoveUp": "Camera Up",
 			"modDebugToolsCameraMoveDown": "Camera Down",
 			"modDebugToolsCameraMoveLeft": "Camera Left",
@@ -44,13 +48,9 @@
 			"labelTime": "Time",
 			"buttonInspect": "Inspect",
 			"buttonInspectLocalPlayer": "Inspect Local Player",
-			"buttonUnlockRecipes": "Unlock Recipes",
-			"interruptConfirmationUnlockRecipes": "Are you sure you want\nto unlock all recipes?",
-			"interruptConfirmationUnlockRecipesDescription": "There's no undo besides erasing //all//\nrecipe progress in the Options Menu.",
 			"buttonRemoveAllCreatures": "Remove All Creatures",
 			"buttonRemoveAllNPCs": "Remove All NPCs",
 			"buttonTravelAway": "Travel Away",
-			"interruptChoiceTravelAway": "Where would you like to travel to?",
 			"buttonAudio": "Play Sound",
 			"buttonParticle": "Spawn Particle",
 			
@@ -71,6 +71,8 @@
 			"buttonPaint": "Paint",
 			"paintNoChange": "No Change",
 			"paintRemove": "Remove",
+			"paintRadius": "Radius",
+			"paintRadiusTooltip": "A radius of 0 means you will only be painting a single tile. Larger radiuses add that many tiles away from the center tile.",
 			"labelTerrain": "{#--text-color-faded:Terrain}",
 			"labelCreature": "{#--text-color-faded:Creature}",
 			"buttonPaintClear": "Clear",
@@ -92,13 +94,18 @@
 			"selectionFilter": "{#--text-color-faded:Filter}",
 			"selectionAction": "{#--text-color-faded:Action}",
 			"selectionMatches": "Matches",
+			"selectionAll": "All",
 			"methodAll": "All",
 			"methodNearest": "Nearest",
 			"methodRandom": "Random",
 			"filterCreatures": "Creatures",
 			"filterNPCs": "NPCs",
 			"filterTileEvents": "Tile Events",
+			"filterDoodads": "Doodads",
+			"filterCorpses": "Corpses",
+			"filterPlayers": "Players",
 			"actionRemove": "Remove",
+			"to": "to",
 			"buttonExecute": "Execute",
 			
 			
@@ -157,7 +164,7 @@
 			
 			"actionResurrect": "resurrect {0}",
 			"actionClone": "clone {0}",
-			"actionTeleport": "teleport {0}"
+			"actionTeleport": "{0?teleport {0}:Teleport}"
 		},
 		"item": {
 			"none": "none"

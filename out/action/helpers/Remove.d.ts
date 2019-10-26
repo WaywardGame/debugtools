@@ -1,9 +1,9 @@
-import { IActionApi } from "action/IAction";
-import { ICorpse } from "creature/corpse/ICorpse";
-import { ICreature } from "creature/ICreature";
-import { IDoodad } from "doodad/IDoodad";
-import { IItem } from "item/IItem";
-import { INPC } from "npc/INPC";
-import IPlayer from "player/IPlayer";
+import Doodad from "doodad/Doodad";
+import { IActionApi } from "entity/action/IAction";
+import { ICorpse } from "entity/creature/corpse/ICorpse";
+import Creature from "entity/creature/Creature";
+import NPC from "entity/npc/NPC";
+import Player from "entity/player/Player";
+import Item from "item/Item";
 import { ITileEvent } from "tile/ITileEvent";
-export default function (action: IActionApi<IPlayer>, target: ICreature | INPC | IDoodad | IItem | ICorpse | ITileEvent): void;
+export default function (action: IActionApi<Player>, target: Creature | NPC | Doodad | Item | ICorpse | ITileEvent): void;

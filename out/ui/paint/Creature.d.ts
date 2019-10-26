@@ -1,12 +1,14 @@
-import { CreatureType } from "Enums";
+import { CreatureType } from "entity/creature/ICreature";
+import { Events } from "event/EventEmitter";
+import { IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
-import { UiApi } from "newui/INewUi";
 import { IPaintSection } from "../panel/PaintPanel";
 export default class CreaturePaint extends Component implements IPaintSection {
-    private dropdown;
+    event: IEventEmitter<this, Events<IPaintSection>>;
+    private readonly dropdown;
     private readonly aberrantCheckButton;
     private creature;
-    constructor(api: UiApi);
+    constructor();
     getTilePaintData(): {
         creature: {
             type: CreatureType | "remove";

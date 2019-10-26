@@ -1,43 +1,31 @@
-import { NPCType } from "Enums";
-import Translation from "language/Translation";
-import Button from "newui/component/Button";
+import { NPCType } from "entity/npc/NPCS";
+import { Events } from "event/EventEmitter";
+import { IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
-import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdown";
+import NPCDropdown from "newui/component/dropdown/NPCDropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
-import Text from "newui/component/Text";
-import { UiApi } from "newui/INewUi";
-import Enums from "utilities/enum/Enums";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
-import { Bound } from "utilities/Objects";
+
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
 export default class NPCPaint extends Component implements IPaintSection {
-	private readonly dropdown: Dropdown<"nochange" | "remove" | keyof typeof NPCType>;
+	@Override public event: IEventEmitter<this, Events<IPaintSection>>;
+
+	private readonly dropdown: NPCDropdown<"nochange" | "remove">;
 
 	private npc: NPCType | "remove" | undefined;
 
-	public constructor(api: UiApi) {
-		super(api);
+	public constructor() {
+		super();
 
-		new LabelledRow(api)
+		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelNPC)))
-			.append(this.dropdown = new Dropdown<"nochange" | "remove" | keyof typeof NPCType>(api)
-				.setRefreshMethod(() => ({
-					defaultOption: "nochange",
-					options: ([
-						["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
-						["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
-					] as IDropdownOption<"nochange" | "remove" | keyof typeof NPCType>[]).values().include(Enums.values(NPCType)
-						.map(npc => tuple(NPCType[npc] as keyof typeof NPCType, Translation.generator(NPCType[npc])))
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
-				}))
-				.on(DropdownEvent.Selection, this.changeNPC))
+			.append(this.dropdown = new NPCDropdown("nochange", [
+				["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
+				["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
+			])
+				.event.subscribe("selection", this.changeNPC))
 			.appendTo(this);
 	}
 
@@ -58,9 +46,9 @@ export default class NPCPaint extends Component implements IPaintSection {
 	}
 
 	@Bound
-	private changeNPC(_: any, npc: keyof typeof NPCType | "nochange" | "remove") {
-		this.npc = npc === "nochange" ? undefined : npc === "remove" ? "remove" : NPCType[npc];
+	private changeNPC(_: any, npc: NPCType | "nochange" | "remove") {
+		this.npc = npc === "nochange" ? undefined : npc === "remove" ? "remove" : npc;
 
-		this.emit("change");
+		this.event.emit("change");
 	}
 }

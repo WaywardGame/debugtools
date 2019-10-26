@@ -1,2 +1,2 @@
-import IEntity from "entity/IEntity";
-export default function (from: IEntity, to: IEntity): void;
+import Entity from "entity/Entity";
+export default function (from: Entity, to: Entity): void;

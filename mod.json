@@ -3,11 +3,10 @@
 	"description": "Adds a special debug tools menu into the game.",
 	"version": "2.0",
 	"author": "Yuudaari",
-	"compatibleMinorVersions": [
-		7
-	],
-	"multiplayerCompatible": true,
+	"waywardVersion": "2.8.0-beta",
+	"multiplayer": "compatible",
 	"file": "out/DebugTools",
+	"allowUnlockingMilestones": true,
 	"unloadable": true,
 	"stylesheets": [
 		"style/debugTools"

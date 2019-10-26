@@ -1,16 +1,21 @@
+import { Events } from "event/EventEmitter";
+import { IEventEmitter } from "event/EventEmitter";
 import Button from "newui/component/Button";
 import Component from "newui/component/Component";
 import { TranslationGenerator } from "newui/component/IComponent";
 import Dialog from "newui/screen/screens/game/component/Dialog";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 export declare type SubpanelInformation = [string | number, TranslationGenerator, (component: Component) => any, ((button: Button) => any)?, Button?];
+interface ITabDialogEvents extends Events<Dialog> {
+    changeSubpanel(): any;
+}
 export default abstract class TabDialog extends Dialog {
+    event: IEventEmitter<this, ITabDialogEvents>;
     private readonly subpanelLinkWrapper;
     private readonly panelWrapper;
     private subpanelInformations;
     private activeSubpanel;
-    constructor(gsapi: IGameScreenApi, id: DialogId);
+    constructor(id: DialogId);
     protected abstract getSubpanels(): SubpanelInformation[];
     protected updateSubpanelList(): void;
     protected showSubPanel(button: Button): void;
@@ -20,3 +25,4 @@ export default abstract class TabDialog extends Dialog {
     private setActiveButton;
     private onResize;
 }
+export {};

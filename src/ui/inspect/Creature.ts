@@ -1,37 +1,36 @@
-import ActionExecutor from "action/ActionExecutor";
-import { ICreature } from "creature/ICreature";
+import ActionExecutor from "entity/action/ActionExecutor";
+import Creature from "entity/creature/Creature";
 import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
-import Button, { ButtonEvent } from "newui/component/Button";
-import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { INPC } from "npc/INPC";
-import { IPlayer } from "player/IPlayer";
-import { Bound } from "utilities/Objects";
+import NPC from "entity/npc/NPC";
+import Player from "entity/player/Player";
+import Button from "newui/component/Button";
+import { CheckButton } from "newui/component/CheckButton";
+
 import Remove from "../../action/Remove";
 import SetTamed from "../../action/SetTamed";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
 export default class CreatureInformation extends InspectEntityInformationSubsection {
-	private creature: ICreature | undefined;
+	private creature: Creature | undefined;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		new CheckButton(this.api)
+		new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonTameCreature))
 			.setRefreshMethod(() => this.creature ? this.creature.isTamed() : false)
-			.on(CheckButtonEvent.Change, this.setTamed)
+			.event.subscribe("toggle", this.setTamed)
 			.appendTo(this);
 
-		new Button(this.api)
+		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonRemoveThing))
-			.on(ButtonEvent.Activate, this.removeCreature)
+			.event.subscribe("activate", this.removeCreature)
 			.appendTo(this);
 	}
 
-	public update(entity: ICreature | INPC | IPlayer) {
+	@Override public update(entity: Creature | NPC | Player) {
 		this.creature = Entity.is(entity, EntityType.Creature) ? entity : undefined;
 		this.toggle(!!this.creature);
 	}

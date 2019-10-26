@@ -1,34 +1,30 @@
-import { ICreature } from "creature/ICreature";
-import IEntity from "entity/IEntity";
-import { Bindable, PlayerState } from "Enums";
-import { RenderSource } from "game/IGame";
+import Creature from "entity/creature/Creature";
+import Entity from "entity/Entity";
+import NPC from "entity/npc/NPC";
+import { PlayerState } from "entity/player/IPlayer";
+import Player from "entity/player/Player";
+import { OwnEventHandler } from "event/EventManager";
+import { RenderSource, TileUpdateType } from "game/IGame";
 import Translation from "language/Translation";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
-import { BindCatcherApi, bindingManager } from "newui/BindingManager";
+import { bindingManager } from "newui/BindingManager";
 import Button from "newui/component/Button";
 import Component from "newui/component/Component";
 import ContextMenu from "newui/component/ContextMenu";
-import { ComponentEvent } from "newui/component/IComponent";
 import Text from "newui/component/Text";
-import { ScreenId } from "newui/screen/IScreen";
-import { DialogEvent } from "newui/screen/screens/game/component/Dialog";
+import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { INPC } from "npc/INPC";
-import IPlayer from "player/IPlayer";
+import { gameScreen } from "newui/screen/screens/GameScreen";
 import { ITile } from "tile/ITerrain";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
+import { Tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
-import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
 import DebugTools from "../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../IDebugTools";
 import Overlays from "../overlay/Overlays";
-import { DebugToolsPanelEvent } from "./component/DebugToolsPanel";
 import InspectInformationSection from "./component/InspectInformationSection";
 import CorpseInformation from "./inspect/Corpse";
 import DoodadInformation from "./inspect/Doodad";
@@ -38,7 +34,7 @@ import TerrainInformation from "./inspect/Terrain";
 import TileEventInformation from "./inspect/TileEvent";
 import TabDialog, { SubpanelInformation } from "./TabDialog";
 
-export type InspectDialogInformationSectionClass = new (gsapi: IGameScreenApi) => InspectInformationSection;
+export type InspectDialogInformationSectionClass = new () => InspectInformationSection;
 
 /**
  * A list of panel classes that will appear in the dialog.
@@ -89,23 +85,19 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 
 	private tilePosition?: Vector3;
 	private tile?: ITile;
-	private inspectionLock?: ICreature | IPlayer | INPC;
+	private inspectionLock?: Creature | Player | NPC;
 	private inspectingTile?: ITile;
 	private storePanels = true;
 	private shouldLog = false;
 	private willShowSubpanel = false;
 
-	public constructor(gsapi: IGameScreenApi, id: DialogId) {
-		super(gsapi, id);
+	public constructor(id: DialogId) {
+		super(id);
 
 		this.classes.add("debug-tools-inspect-dialog");
 
 		// we register this component as a "hook host" — this means that, like the `Mod` class, it can implement hook methods
-		hookManager.register(this, "DebugToolsInspectDialog")
-			// we deregister this component as a "hook host" when it's removed from the DOM
-			.until(ComponentEvent.Remove);
-
-		this.on(DialogEvent.Close, this.onClose);
+		this.registerHookHost("DebugToolsInspectDialog");
 
 		InspectDialog.INSTANCE = this;
 	}
@@ -114,23 +106,23 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 * Implements the abstract method in "TabDialog". Returns an array of tuples containing information used to set-up the
 	 * subpanels of this dialog.
 	 */
-	public getSubpanels(): SubpanelInformation[] {
+	@Override public getSubpanels(): SubpanelInformation[] {
 		if (!this.infoSections) {
-			this.infoSections = informationSectionClasses.values()
-				.include(this.DEBUG_TOOLS.modRegistryInspectDialogPanels.getRegistrations()
+			this.infoSections = informationSectionClasses.stream()
+				.merge(this.DEBUG_TOOLS.modRegistryInspectDialogPanels.getRegistrations()
 					.map(registration => registration.data(InspectInformationSection)))
-				.map(cls => new cls(this.gsapi)
-					.on("update", this.update)
-					.on(ComponentEvent.WillRemove, infoSection => {
+				.map(cls => new cls()
+					.event.subscribe("update", this.update)
+					.event.subscribe("willRemove", infoSection => {
 						if (this.storePanels) {
-							infoSection.emit(DebugToolsPanelEvent.SwitchAway);
+							infoSection.event.emit("switchAway");
 							infoSection.store();
 							return false;
 						}
 
 						return undefined;
 					}))
-				.collect(Collectors.toArray);
+				.toArray();
 
 			// we're going to need the entity information section for some other stuff
 			this.entityInfoSection = this.infoSections
@@ -139,31 +131,31 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 
 		this.entityButtons = [];
 
-		return this.infoSections.values()
+		return this.infoSections.stream()
 			// add the tabs of the section to the tuple
-			.map(section => tuple(section, section.getTabs()))
+			.map(section => Tuple(section, section.getTabs()))
 			// if there are no tabs from the section, remove it
 			.filter(([, tabs]) => !!tabs.length)
 			// map each of the section/tab tuples with an array of tuples representing all the subpanels (tabs) provided by that section
 			.map(([section, tabs]) => tabs
 				// map each tab to the subpanel information for it
-				.map(([index, getTabTranslation]) => tuple(
+				.map(([index, getTabTranslation]) => Tuple(
 					Text.toString(getTabTranslation),
 					getTabTranslation,
 					// to show the panel, we append the section to the passed component & call a couple methods on the panel
 					(component: Component) => section.setTab(index)
 						.appendTo(component)
-						.emit(DebugToolsPanelEvent.SwitchTo),
+						.event.emit("switchTo"),
 					// we cache all of the entity buttons
 					(button: Button) => !(section instanceof EntityInformation) ? undefined : this.entityButtons[index] = button,
 				)))
 			// currently we have an array of `SubpanelInformation` arrays, because each tab provided an array of them, fix with `flat`
 			.flatMap<SubpanelInformation>()
 			// and now return an array
-			.collect(Collectors.toArray);
+			.toArray();
 	}
 
-	public getName(): Translation {
+	@Override public getName(): Translation {
 		return translation(DebugToolsTranslation.DialogTitleInspect);
 	}
 
@@ -174,7 +166,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 * - Updates the dialog. (`update`)
 	 * - If the inspection is locked to an entity, it makes a note of needing to show the entity's subpanel (`willShowSubpanel`).
 	 */
-	public setInspection(what: Vector2 | IPlayer | ICreature | INPC) {
+	public setInspection(what: Vector2 | Player | Creature | NPC) {
 		this.setInspectionTile(what);
 
 		this.inspectionLock = "entityType" in what ? what : undefined;
@@ -205,7 +197,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		this.schedule(300, 300, this.updateSubpanels);
 	}
 
-	@HookMethod
+	@Override @HookMethod
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
 		if (api.wasPressed(this.DEBUG_TOOLS.bindableCloseInspectDialog) && !bindPressed) {
 			this.close();
@@ -242,13 +234,38 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	}
 
 	@HookMethod
-	public onMoveComplete(player: IPlayer) {
+	public onMoveComplete(player: Player) {
 		this.update();
 	}
 
 	@HookMethod
-	public onTileUpdate(tile: ITile, x: number, y: number, z: number) {
+	public onTileUpdate(tile: ITile, x: number, y: number, z: number, tileUpdateType: TileUpdateType) {
 		this.update();
+	}
+
+	/**
+	 * - Removes the inspection overlay.
+	 * - Forcibly removes any info sections.
+	 */
+	@OwnEventHandler(InspectDialog, "close")
+	protected onClose() {
+		if (this.inspectingTile) {
+			TileHelpers.Overlay.remove(this.inspectingTile, Overlays.isSelectedTarget);
+			delete this.inspectingTile;
+		}
+
+		game.updateView(RenderSource.Mod, false);
+
+		this.storePanels = false;
+		for (const infoSection of this.infoSections) {
+			if (infoSection.isVisible()) {
+				infoSection.event.emit("switchAway");
+			}
+
+			infoSection.remove();
+		}
+
+		delete InspectDialog.INSTANCE;
 	}
 
 	/**
@@ -261,14 +278,14 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		this.updateSubpanelList();
 
 		if (this.willShowSubpanel && this.inspectionLock) {
-			this.showSubPanel(this.entityButtons[this.entityInfoSection.getIndex(this.inspectionLock)]);
+			this.showSubPanel(this.entityButtons[this.entityInfoSection.getEntityIndex(this.inspectionLock)]);
 			this.willShowSubpanel = false;
 		}
 
 		if (this.inspectionLock) {
 			for (const entityButton of this.entityButtons) entityButton.classes.remove("inspection-lock");
 
-			this.entityButtons[this.entityInfoSection.getIndex(this.inspectionLock)]
+			this.entityButtons[this.entityInfoSection.getEntityIndex(this.inspectionLock)]
 				.classes.add("inspection-lock");
 		}
 	}
@@ -279,7 +296,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 * - If there was an existing inspection overlay, removes it.
 	 * - Adds a new inspection overlay to the currently inspecting tile.
 	 */
-	private setInspectionTile(what: Vector2 | IEntity) {
+	private setInspectionTile(what: Vector2 | Entity) {
 		const position = new Vector3(what.x, what.y, "z" in what ? what.z : localPlayer.z);
 
 		if (this.tilePosition && position.equals(this.tilePosition)) return;
@@ -328,20 +345,18 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 */
 	@Bound
 	private showInspectionLockMenu(index: number) {
-		new ContextMenu(this.api,
-			this.entityButtons[index].classes.has("inspection-lock") ?
-				["Unlock Inspection", {
-					translation: translation(DebugToolsTranslation.UnlockInspection),
-					onActivate: this.unlockInspection,
-				}] :
-				["Lock Inspection", {
-					translation: translation(DebugToolsTranslation.LockInspection),
-					onActivate: this.lockInspection(index),
-				}],
-		)
+		new ContextMenu(this.entityButtons[index].classes.hasEvery("inspection-lock") ?
+			["Unlock Inspection", {
+				translation: translation(DebugToolsTranslation.UnlockInspection),
+				onActivate: this.unlockInspection,
+			}] :
+			["Lock Inspection", {
+				translation: translation(DebugToolsTranslation.LockInspection),
+				onActivate: this.lockInspection(index),
+			}])
 			.addAllDescribedOptions()
 			.setPosition(...bindingManager.getMouse().xy)
-			.schedule(this.api.getScreen(ScreenId.Game)!.setContextMenu);
+			.schedule(gameScreen!.setContextMenu);
 	}
 
 	/**
@@ -358,31 +373,6 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 */
 	private lockInspection(index: number) {
 		return () => this.setInspection(this.entityInfoSection.getEntity(index));
-	}
-
-	/**
-	 * - Removes the inspection overlay.
-	 * - Forcibly removes any info sections.
-	 */
-	@Bound
-	private onClose() {
-		if (this.inspectingTile) {
-			TileHelpers.Overlay.remove(this.inspectingTile, Overlays.isSelectedTarget);
-			delete this.inspectingTile;
-		}
-
-		game.updateView(RenderSource.Mod, false);
-
-		this.storePanels = false;
-		for (const infoSection of this.infoSections) {
-			if (infoSection.isVisible()) {
-				infoSection.emit(DebugToolsPanelEvent.SwitchAway);
-			}
-
-			infoSection.remove();
-		}
-
-		delete InspectDialog.INSTANCE;
 	}
 
 }

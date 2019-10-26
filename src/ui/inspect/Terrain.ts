@@ -1,24 +1,21 @@
-import ActionExecutor from "action/ActionExecutor";
-import { TerrainType } from "Enums";
+import ActionExecutor from "entity/action/ActionExecutor";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button from "newui/component/Button";
-import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
-import Dropdown, { DropdownEvent } from "newui/component/Dropdown";
+import { CheckButton } from "newui/component/CheckButton";
+import Dropdown from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import Text from "newui/component/Text";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { ITile } from "tile/ITerrain";
+import { ITile, TerrainType } from "tile/ITerrain";
 import terrainDescriptions from "tile/Terrains";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
-import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
+
 import ChangeTerrain from "../../action/ChangeTerrain";
 import ToggleTilled from "../../action/ToggleTilled";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -36,30 +33,28 @@ export default class TerrainInformation extends InspectInformationSection {
 	private readonly checkButtonTilled: CheckButton;
 	private readonly dropdownTerrainType: Dropdown<TerrainType>;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		new LabelledRow(this.api)
+		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelChangeTerrain)))
-			.append(this.dropdownTerrainType = new Dropdown<TerrainType>(this.api)
+			.append(this.dropdownTerrainType = new Dropdown<TerrainType>()
 				.setRefreshMethod(() => ({
 					defaultOption: this.tile ? TileHelpers.getType(this.tile) : TerrainType.Dirt,
 					options: Enums.values(TerrainType)
 						.filter(terrain => terrain)
-						.map(terrain => tuple(terrain, new Translation(Dictionary.Terrain, terrain).inContext(TextContext.Title)))
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
+						.map(terrain => Tuple(terrain, new Translation(Dictionary.Terrain, terrain).inContext(TextContext.Title)))
+						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				}))
-				.on(DropdownEvent.Selection, this.changeTerrain))
+				.event.subscribe("selection", this.changeTerrain))
 			.appendTo(this);
 
-		this.checkButtonTilled = new CheckButton(this.api)
+		this.checkButtonTilled = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonToggleTilled))
 			.setRefreshMethod(() => this.tile && TileHelpers.isTilled(this.tile))
-			.on(CheckButtonEvent.Change, this.toggleTilled)
+			.event.subscribe("toggle", this.toggleTilled)
 			.appendTo(this);
 	}
 

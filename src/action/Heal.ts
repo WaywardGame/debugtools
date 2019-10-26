@@ -1,11 +1,10 @@
-import { Action } from "action/Action";
-import { ActionArgument, anyOf } from "action/IAction";
+import { Action } from "entity/action/Action";
+import { ActionArgument, anyOf } from "entity/action/IAction";
 import Entity from "entity/Entity";
-import { EntityType, StatusEffectChangeReason } from "entity/IEntity";
+import { EntityType, StatusEffectChangeReason, StatusType } from "entity/IEntity";
 import { IStatMax, Stat } from "entity/IStats";
-import { PlayerState, StatusType } from "Enums";
-import { ScreenId } from "newui/screen/IScreen";
-import GameScreen from "newui/screen/screens/GameScreen";
+import { PlayerState } from "entity/player/IPlayer";
+import { gameScreen } from "newui/screen/screens/GameScreen";
 import Actions, { defaultUsability } from "../Actions";
 import ResurrectCorpse from "./helpers/ResurrectCorpse";
 
@@ -46,5 +45,5 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
 
 		action.setUpdateRender();
 		Actions.DEBUG_TOOLS.updateFog();
-		newui.getScreen<GameScreen>(ScreenId.Game)!.onGameTickEnd();
+		gameScreen!.onGameTickEnd();
 	});

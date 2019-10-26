@@ -1,12 +1,11 @@
-import { ICreature } from "creature/ICreature";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { INPC } from "npc/INPC";
-import { IPlayer } from "player/IPlayer";
+import Creature from "entity/creature/Creature";
+import NPC from "entity/npc/NPC";
+import Player from "entity/player/Player";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 export default class CreatureInformation extends InspectEntityInformationSubsection {
     private creature;
-    constructor(gsapi: IGameScreenApi);
-    update(entity: ICreature | INPC | IPlayer): void;
+    constructor();
+    update(entity: Creature | NPC | Player): void;
     private setTamed;
     private removeCreature;
 }

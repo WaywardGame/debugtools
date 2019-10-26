@@ -1,6 +1,4 @@
-import { Bindable } from "Enums";
-import { BindCatcherApi } from "newui/BindingManager";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
@@ -15,15 +13,15 @@ export default class TemplatePanel extends DebugToolsPanel {
     private readonly place;
     private readonly previewTiles;
     private selectHeld;
-    constructor(gsapi: IGameScreenApi);
+    constructor();
     getTranslation(): DebugToolsTranslation;
-    canClientMove(api: BindCatcherApi): false | undefined;
+    canClientMove(): false | undefined;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
     private getTemplate;
     private templateHasTile;
     private getTemplateOptions;
-    private onSwitchTo;
-    private onSwitchAway;
+    protected onSwitchTo(): void;
+    protected onSwitchAway(): void;
     private changeTemplateType;
     private placeTemplate;
     private clearPreview;

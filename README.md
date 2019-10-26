@@ -3,11 +3,13 @@ Adds a special debug tools menu into the game. By default you can open it by pre
 
 In the menu, you can give yourself items, change terrain, spawn creatures, refresh health, no-clip and more!
 
-## Cloning:
+## Cloning/Setup:
 ```
 git clone https://github.com/WaywardGame/debugtools.git
 cd debugtools
-git submodule update --init
+On Windows: path/to/wayward/install/wayward.cmd +mod update .
+On macOS: path/to/wayward/install/Wayward.app/Contents/MacOS/Electron +mod update .
+On Linux: path/to/wayward/install/wayward +mod update .
 ```
 
 ## Building:

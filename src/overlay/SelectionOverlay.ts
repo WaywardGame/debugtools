@@ -1,12 +1,10 @@
 import Mod from "mod/Mod";
 import { ITile } from "tile/ITerrain";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
-import Objects from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID } from "../IDebugTools";
@@ -90,7 +88,7 @@ function updateSelectionOverlay(tile: ITile, tilePosition: IVector2, updateNeigh
 	neighborTiles = neighborTiles || getNeighborTiles(tilePosition);
 	connections = connections || getPaintOverlayConnections(neighborTiles);
 
-	for (const [neighborPosition, neighborTile] of Objects.values(neighborTiles)) {
+	for (const [neighborPosition, neighborTile] of Object.values(neighborTiles)) {
 		updateSelectionOverlay(neighborTile, neighborPosition, false);
 	}
 }
@@ -101,17 +99,17 @@ function updateSelectionOverlay(tile: ITile, tilePosition: IVector2, updateNeigh
 function getNeighborTiles(tilePosition: IVector2): INeighborTiles {
 	const vectors = getNeighborVectors(tilePosition);
 	return Enums.values(NeighborPosition)
-		.map(pos => tuple(pos, tuple(vectors[pos], game.getTile(...vectors[pos].xyz))))
-		.collect(Objects.create);
+		.map(pos => Tuple(pos, Tuple(vectors[pos], game.getTile(...vectors[pos].xyz))))
+		.toObject();
 }
 
 /**
  * Returns an array of neighbor positions that are painted/selected
  */
 function getPaintOverlayConnections(neighbors: INeighborTiles) {
-	return Objects.keys(neighbors)
+	return Stream.keys(neighbors)
 		.filter(neighborPosition => TileHelpers.Overlay.has(neighbors[neighborPosition][1], Overlays.isPaint))
-		.collect(Collectors.toArray);
+		.toArray();
 }
 
 /**

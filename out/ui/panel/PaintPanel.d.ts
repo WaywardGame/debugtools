@@ -1,7 +1,10 @@
-import { Bindable, CreatureType, DoodadType, NPCType, SpriteBatchLayer, TerrainType } from "Enums";
-import { BindCatcherApi } from "newui/BindingManager";
+import { DoodadType } from "doodad/IDoodad";
+import { CreatureType } from "entity/creature/ICreature";
+import { NPCType } from "entity/npc/NPCS";
+import { Events, IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import { TerrainType } from "tile/ITerrain";
 import { TileEventType } from "tile/ITileEvent";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
@@ -31,7 +34,11 @@ export interface IPaintData {
         replaceExisting: boolean;
     };
 }
+interface IPaintSectionEvents extends Events<Component> {
+    change(): any;
+}
 export interface IPaintSection extends Component {
+    event: IEventEmitter<this, IPaintSectionEvents>;
     isChanging(): boolean;
     reset(): void;
     getTilePaintData(): Partial<IPaintData> | undefined;
@@ -41,20 +48,22 @@ export default class PaintPanel extends DebugToolsPanel {
     private readonly paintSections;
     private readonly paintButton;
     private readonly paintRow;
+    private readonly paintRadius;
     private painting;
     private readonly paintTiles;
     private lastPaintPosition?;
     private maxSprites;
-    constructor(gsapi: IGameScreenApi);
+    constructor();
     getTranslation(): DebugToolsTranslation;
-    canClientMove(api: BindCatcherApi): false | undefined;
-    getMaxSpritesForLayer(layer: SpriteBatchLayer, maxSprites: number): number | undefined;
+    canClientMove(): false | undefined;
+    getMaxSpritesForLayer(_: any, maxSprites: number): number;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
+    protected onSwitchTo(): void;
+    protected onSwitchAway(): void;
     private updateOverlayBatch;
-    private onSwitchTo;
-    private onSwitchAway;
     private onPaintSectionChange;
     private showPaintSectionResetMenu;
     private completePaint;
     private clearPaint;
 }
+export {};

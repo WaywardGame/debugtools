@@ -1,51 +1,35 @@
-import { TerrainType } from "Enums";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { TextContext } from "language/Translation";
-import Button from "newui/component/Button";
+import { Events } from "event/EventEmitter";
+import { IEventEmitter } from "event/EventEmitter";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
-import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdown";
+import TerrainDropdown from "newui/component/dropdown/TerrainDropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
-import Text from "newui/component/Text";
-import { UiApi } from "newui/INewUi";
+import { TerrainType } from "tile/ITerrain";
 import { terrainDescriptions } from "tile/Terrains";
-import Enums from "utilities/enum/Enums";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
-import { Bound } from "utilities/Objects";
+
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
 export default class TerrainPaint extends Component implements IPaintSection {
+	@Override public event: IEventEmitter<this, Events<IPaintSection>>;
+
 	private readonly tilledCheckButton: CheckButton;
 	private terrain: TerrainType | undefined;
-	private dropdown: Dropdown<"nochange" | keyof typeof TerrainType>;
+	private readonly dropdown: TerrainDropdown<"nochange">;
 
-	public constructor(api: UiApi) {
-		super(api);
+	public constructor() {
+		super();
 
-		new LabelledRow(api)
+		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTerrain)))
-			.append(this.dropdown = new Dropdown<"nochange" | keyof typeof TerrainType>(api)
-				.setRefreshMethod(() => ({
-					defaultOption: "nochange",
-					options: ([
-						["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
-					] as IDropdownOption<"nochange" | keyof typeof TerrainType>[]).values().include(Enums.values(TerrainType)
-						.map(terrain => tuple(
-							TerrainType[terrain] as keyof typeof TerrainType,
-							new Translation(Dictionary.Terrain, terrain).inContext(TextContext.Title),
-						))
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
-				}))
-				.on(DropdownEvent.Selection, this.changeTerrain))
+			.append(this.dropdown = new TerrainDropdown("nochange", [
+				["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
+			])
+				.event.subscribe("selection", this.changeTerrain))
 			.appendTo(this);
 
-		this.tilledCheckButton = new CheckButton(api)
+		this.tilledCheckButton = new CheckButton()
 			.hide()
 			.setText(translation(DebugToolsTranslation.ButtonToggleTilled))
 			.appendTo(this);
@@ -69,13 +53,13 @@ export default class TerrainPaint extends Component implements IPaintSection {
 	}
 
 	@Bound
-	private changeTerrain(_: any, terrain: keyof typeof TerrainType | "nochange") {
-		this.terrain = terrain === "nochange" ? undefined : TerrainType[terrain];
+	private changeTerrain(_: any, terrain: TerrainType | "nochange") {
+		this.terrain = terrain === "nochange" ? undefined : terrain;
 
-		const tillable = terrain !== "nochange" && terrainDescriptions[TerrainType[terrain]]!.tillable === true;
+		const tillable = terrain !== "nochange" && terrainDescriptions[terrain]!.tillable === true;
 		this.tilledCheckButton.toggle(tillable);
 		if (!tillable) this.tilledCheckButton.setChecked(false);
 
-		this.emit("change");
+		this.event.emit("change");
 	}
 }

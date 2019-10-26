@@ -1,14 +1,13 @@
-import { ICreature } from "creature/ICreature";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { INPC } from "npc/INPC";
-import IPlayer from "player/IPlayer";
+import Creature from "entity/creature/Creature";
+import NPC from "entity/npc/NPC";
+import Player from "entity/player/Player";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import DebugTools from "../../DebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 import InspectInformationSection from "../component/InspectInformationSection";
-export declare type InspectDialogEntityInformationSubsectionClass = new (gsapi: IGameScreenApi) => InspectEntityInformationSubsection;
+export declare type InspectDialogEntityInformationSubsectionClass = new () => InspectEntityInformationSubsection;
 export default class EntityInformation extends InspectInformationSection {
     readonly DEBUG_TOOLS: DebugTools;
     readonly LOG: Log;
@@ -17,12 +16,12 @@ export default class EntityInformation extends InspectInformationSection {
     private readonly statComponents;
     private entities;
     private entity;
-    constructor(gsapi: IGameScreenApi);
-    getTabs(): [number, () => import("../../../mod-reference/definitions/utilities/string/Interpolator").IStringSection[]][];
+    constructor();
+    getTabs(): [number, () => import("../../../node_modules/@wayward/types/definitions/utilities/string/Interpolator").IStringSection[]][];
     setTab(entity: number): this;
     update(position: IVector2, tile: ITile): void;
-    getIndex(entity: ICreature | INPC | IPlayer): number;
-    getEntity(index: number): import("../../../mod-reference/definitions/entity/IEntity").EntityPlayerCreatureNpc;
+    getEntityIndex(entity: Creature | NPC | Player): number;
+    getEntity(index: number): import("../../../node_modules/@wayward/types/definitions/entity/IEntity").EntityPlayerCreatureNpc;
     logUpdate(): void;
     private initializeStats;
     private onStatChange;

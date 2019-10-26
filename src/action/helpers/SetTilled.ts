@@ -1,5 +1,6 @@
 import terrainDescriptions from "tile/Terrains";
 import TileHelpers from "utilities/TileHelpers";
+import { TileUpdateType } from "game/IGame";
 
 export default function (x: number, y: number, z: number, tilled: boolean) {
 	const tile = game.getTile(x, y, z);
@@ -22,5 +23,5 @@ export default function (x: number, y: number, z: number, tilled: boolean) {
 
 	TileHelpers.setTilled(tile, tilled);
 
-	world.updateTile(x, y, z, tile);
+	world.updateTile(x, y, z, tile, TileUpdateType.Tilled);
 }

@@ -1,14 +1,20 @@
+import { Events } from "event/EventEmitter";
+import { IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
 import { TranslationGenerator } from "newui/component/IComponent";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import { IVector2 } from "utilities/math/IVector";
 export declare type TabInformation = [number, TranslationGenerator];
+interface IInspectInformationSectionEvents extends Events<Component> {
+    change(): any;
+    update(): any;
+    switchAway(): any;
+    switchTo(): any;
+}
 export default abstract class InspectInformationSection extends Component {
-    protected readonly gsapi: IGameScreenApi;
+    event: IEventEmitter<this, IInspectInformationSectionEvents>;
     private shouldLog;
     readonly willLog: boolean;
-    constructor(gsapi: IGameScreenApi);
     setTab(tab: number): this;
     setShouldLog(): void;
     resetWillLog(): void;
@@ -16,3 +22,4 @@ export default abstract class InspectInformationSection extends Component {
     abstract update(position: IVector2, tile: ITile): void;
     abstract logUpdate(): void;
 }
+export {};

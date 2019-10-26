@@ -1,11 +1,15 @@
+import { Events } from "event/EventEmitter";
+import { IEventEmitter } from "event/EventEmitter";
+import { Quality } from "game/IObject";
+import { ItemType } from "item/IItem";
 import Component from "newui/component/Component";
-import { UiApi } from "newui/INewUi";
-export declare enum AddItemToInventoryEvent {
-    Execute = "Execute"
+interface IAddItemToInventoryEvents extends Events<Component> {
+    execute(type: ItemType, quality: Quality): any;
 }
 export default class AddItemToInventory extends Component {
+    event: IEventEmitter<this, IAddItemToInventoryEvents>;
     private static INSTANCE;
-    static init(api: UiApi): AddItemToInventory;
+    static init(): AddItemToInventory;
     private readonly dropdownItemType;
     private readonly dropdownItemQuality;
     private readonly wrapperAddItem;
@@ -15,3 +19,4 @@ export default class AddItemToInventory extends Component {
     private changeItem;
     private addItem;
 }
+export {};

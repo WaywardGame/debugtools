@@ -1,85 +1,72 @@
-import { ItemQuality, ItemType } from "Enums";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { TextContext } from "language/Translation";
-import Button, { ButtonEvent } from "newui/component/Button";
+import { Events } from "event/EventEmitter";
+import { IEventEmitter } from "event/EventEmitter";
+import { Quality } from "game/IObject";
+import { ItemType } from "item/IItem";
+import Translation from "language/Translation";
+import Button from "newui/component/Button";
 import Component from "newui/component/Component";
-import Dropdown, { DropdownEvent } from "newui/component/Dropdown";
-import { ComponentEvent } from "newui/component/IComponent";
+import Dropdown from "newui/component/Dropdown";
+import ItemDropdown from "newui/component/dropdown/ItemDropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
-import Text from "newui/component/Text";
-import { UiApi } from "newui/INewUi";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
-import Collectors from "utilities/iterable/Collectors";
-import { pipe, tuple } from "utilities/iterable/Generators";
-import { Bound } from "utilities/Objects";
+
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 
-export enum AddItemToInventoryEvent {
+interface IAddItemToInventoryEvents extends Events<Component> {
 	/**
 	 * @param type The `ItemType` of the item to add
 	 * @param quality The `ItemQuality` of the item to add
 	 */
-	Execute = "Execute",
+	execute(type: ItemType, quality: Quality): any;
 }
 
 export default class AddItemToInventory extends Component {
+	@Override public event: IEventEmitter<this, IAddItemToInventoryEvents>;
 
 	private static INSTANCE: AddItemToInventory | undefined;
 
-	public static init(api: UiApi) {
-		return AddItemToInventory.INSTANCE = AddItemToInventory.INSTANCE || new AddItemToInventory(api);
+	public static init() {
+		return AddItemToInventory.INSTANCE = AddItemToInventory.INSTANCE || new AddItemToInventory();
 	}
 
-	private readonly dropdownItemType: Dropdown<ItemType>;
-	private readonly dropdownItemQuality: Dropdown<ItemQuality>;
+	private readonly dropdownItemType: ItemDropdown<"None">;
+	private readonly dropdownItemQuality: Dropdown<Quality>;
 	private readonly wrapperAddItem: Component;
 
-	private constructor(api: UiApi) {
-		super(api);
+	private constructor() {
+		super();
 
-		new LabelledRow(api)
+		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelItem)))
-			.append(this.dropdownItemType = new Dropdown<ItemType>(api)
-				.setRefreshMethod(() => ({
-					defaultOption: ItemType.None,
-					options: pipe(tuple(ItemType.None, Translation.nameOf(Dictionary.Item, ItemType.None, false).inContext(TextContext.Title)))
-						.include(Enums.values(ItemType)
-							.filter(item => item)
-							.map(item => tuple(item, Translation.nameOf(Dictionary.Item, item, false).inContext(TextContext.Title)))
-							.collect(Collectors.toArray)
-							.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-							.values())
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
-				}))
-				.on(DropdownEvent.Selection, this.changeItem))
+			.append(this.dropdownItemType = new ItemDropdown("None", [["None", option => option.setText(translation(DebugToolsTranslation.None))]])
+				.event.subscribe("selection", this.changeItem))
 			.appendTo(this);
 
-		this.wrapperAddItem = new Component(api)
+		this.wrapperAddItem = new Component()
 			.classes.add("debug-tools-inspect-human-wrapper-add-item")
 			.hide()
-			.append(new LabelledRow(api)
+			.append(new LabelledRow()
 				.classes.add("dropdown-label")
 				.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelQuality)))
-				.append(this.dropdownItemQuality = new Dropdown<ItemQuality>(api)
+				.append(this.dropdownItemQuality = new Dropdown<Quality>()
 					.setRefreshMethod(() => ({
-						defaultOption: ItemQuality.Random,
-						options: Enums.values(ItemQuality)
-							.map(quality => tuple(quality, Translation.generator(ItemQuality[quality])))
-							.collect(Collectors.toArray)
-							.values()
-							.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
+						defaultOption: Quality.Random,
+						options: Enums.values(Quality)
+							.map(quality => Tuple(quality, Translation.generator(Quality[quality])))
+							.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 					}))))
-			.append(new Button(api)
+			.append(new Button()
 				.setText(translation(DebugToolsTranslation.AddToInventory))
-				.on(ButtonEvent.Activate, this.addItem))
+				.event.subscribe("activate", this.addItem))
 			.appendTo(this);
 
-		this.on(ComponentEvent.WillRemove, this.willRemove);
+		this.event.subscribe("willRemove", this.willRemove);
 	}
 
 	public releaseAndRemove() {
-		this.cancel(ComponentEvent.WillRemove, this.willRemove);
+		this.event.unsubscribe("willRemove", this.willRemove);
 		this.remove();
 		delete AddItemToInventory.INSTANCE;
 	}
@@ -91,12 +78,12 @@ export default class AddItemToInventory extends Component {
 	}
 
 	@Bound
-	private changeItem(_: any, item: ItemType) {
-		this.wrapperAddItem.toggle(item !== ItemType.None);
+	private changeItem(_: any, item: ItemType | "None") {
+		this.wrapperAddItem.toggle(item !== "None");
 	}
 
 	@Bound
 	private addItem() {
-		this.emit(AddItemToInventoryEvent.Execute, this.dropdownItemType.selection, this.dropdownItemQuality.selection);
+		this.event.emit("execute", this.dropdownItemType.selection as ItemType, this.dropdownItemQuality.selection);
 	}
 }

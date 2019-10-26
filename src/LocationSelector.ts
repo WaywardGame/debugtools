@@ -1,21 +1,21 @@
-import { Bindable } from "Enums";
+import { EventHandler, EventSubscriber } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
 import Register from "mod/ModRegistry";
-import { BindCatcherApi } from "newui/BindingManager";
-import { ScreenId } from "newui/screen/IScreen";
-import GameScreen from "newui/screen/screens/GameScreen";
+import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import MovementHandler from "newui/screen/screens/game/util/movement/MovementHandler";
+import { gameScreen } from "newui/screen/screens/GameScreen";
 import { ITile } from "tile/ITerrain";
 import Vector2 from "utilities/math/Vector2";
-import { Bound } from "utilities/Objects";
 import TileHelpers from "utilities/TileHelpers";
 import DebugTools from "./DebugTools";
 import { DEBUG_TOOLS_ID } from "./IDebugTools";
 import Overlays from "./overlay/Overlays";
 import CancelablePromise from "./util/CancelablePromise";
 
+@EventSubscriber
 export default class SelectLocation implements IHookHost {
 
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
@@ -61,35 +61,53 @@ export default class SelectLocation implements IHookHost {
 	// tslint:disable cyclomatic-complexity
 	@HookMethod(HookPriority.High)
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
-		const selectTilePressed = api.wasPressed(this.bindableSelectLocation) && newui.getScreen<GameScreen>(ScreenId.Game)!.isMouseWithin();
-		const cancelSelectTilePressed = api.wasPressed(this.bindableCancelSelectLocation) && newui.getScreen<GameScreen>(ScreenId.Game)!.isMouseWithin();
+		const selectTilePressed = api.wasPressed(this.bindableSelectLocation) && gameScreen!.isMouseWithin();
+		const cancelSelectTilePressed = api.wasPressed(this.bindableCancelSelectLocation) && gameScreen!.isMouseWithin();
 
-		// if we previously had the target overlay on a tile, remove it 
-		if (this.hoverTile) {
-			TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
-
-			delete this.hoverTile;
-		}
+		let updateRender = false;
 
 		if (this._selecting) {
 			const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
 
 			// add the target overlay to the tile currently being hovered
-			const tile = this.hoverTile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
-			TileHelpers.Overlay.add(tile, { type: this.DEBUG_TOOLS.overlayTarget }, Overlays.isHoverTarget);
+			const tile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
+
+			if (tile !== this.hoverTile) {
+				updateRender = true;
+
+				if (this.hoverTile) {
+					TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
+				}
+
+				this.hoverTile = tile;
+				TileHelpers.Overlay.add(tile, { type: this.DEBUG_TOOLS.overlayTarget }, Overlays.isHoverTarget);
+			}
 
 			if (cancelSelectTilePressed && !bindPressed) {
+				updateRender = true;
+
 				if (this.selectionPromise) this.selectionPromise.cancel();
 				else this.cancel();
 				bindPressed = this.bindableCancelSelectLocation;
 
 			} else if (selectTilePressed && !bindPressed) {
+				updateRender = true;
+
 				this.selectTile(tilePosition);
 
 				bindPressed = this.bindableSelectLocation;
 				this.selectTileHeld = true;
 			}
 
+		} else if (this.hoverTile) {
+			// if we previously had the target overlay on a tile, remove it
+			TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
+			delete this.hoverTile;
+
+			updateRender = true;
+		}
+
+		if (updateRender) {
 			game.updateView(RenderSource.Mod, false);
 		}
 
@@ -103,8 +121,8 @@ export default class SelectLocation implements IHookHost {
 	/**
 	 * Prevents movement if a tile is currently being selected or if the select tile bind is still held.
 	 */
-	@HookMethod
-	public canClientMove(api: BindCatcherApi): false | undefined {
+	@EventHandler(MovementHandler, "canMove")
+	public canClientMove(): false | undefined {
 		if (this._selecting || this.selectTileHeld) {
 			return false;
 		}

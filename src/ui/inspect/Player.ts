@@ -1,33 +1,24 @@
-import ActionExecutor from "action/ActionExecutor";
-import { ICreature } from "creature/ICreature";
+import ActionExecutor from "entity/action/ActionExecutor";
+import Creature from "entity/creature/Creature";
 import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
-import { SkillType } from "Enums";
+import { SkillType } from "entity/IHuman";
+import NPC from "entity/npc/NPC";
+import Player from "entity/player/Player";
 import UiTranslation from "language/dictionary/UiTranslation";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { BlockRow } from "newui/component/BlockRow";
-import Button from "newui/component/Button";
-import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
-import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdown";
-import { ComponentEvent } from "newui/component/IComponent";
+import { CheckButton } from "newui/component/CheckButton";
+import SkillDropdown from "newui/component/dropdown/SkillDropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
-import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
-import Text from "newui/component/Text";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { INPC } from "npc/INPC";
-import IPlayer from "player/IPlayer";
-import Enums from "utilities/enum/Enums";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
-import { Bound } from "utilities/Objects";
 import SetSkill from "../../action/SetSkill";
 import SetWeightBonus from "../../action/SetWeightBonus";
 import ToggleInvulnerable from "../../action/ToggleInvulnerable";
 import ToggleNoClip from "../../action/ToggleNoClip";
 import TogglePermissions from "../../action/TogglePermissions";
-import DebugTools, { DebugToolsEvent } from "../../DebugTools";
+import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, translation } from "../../IDebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
@@ -43,60 +34,49 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	private readonly checkButtonPermissions?: CheckButton;
 
 	private skill?: SkillType;
-	private player?: IPlayer;
+	private player?: Player;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		this.until(ComponentEvent.Remove)
-			.bind(this.DEBUG_TOOLS, DebugToolsEvent.PlayerDataChange, this.onPlayerDataChange);
+		this.DEBUG_TOOLS.event.until(this, "remove")
+			.subscribe("playerDataChange", this.onPlayerDataChange);
 
-		this.checkButtonPermissions = new CheckButton(this.api)
+		this.checkButtonPermissions = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonTogglePermissions))
 			.setRefreshMethod(() => this.player ? !!this.DEBUG_TOOLS.getPlayerData(this.player, "permissions") : false)
-			.on(CheckButtonEvent.Change, this.togglePermissions)
+			.event.subscribe("toggle", this.togglePermissions)
 			.appendTo(this);
 
-		new BlockRow(this.api)
-			.append(this.checkButtonNoClip = new CheckButton(this.api)
+		new BlockRow()
+			.append(this.checkButtonNoClip = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonToggleNoClip))
 				.setRefreshMethod(() => this.player ? !!this.DEBUG_TOOLS.getPlayerData(this.player, "noclip") : false)
-				.on(CheckButtonEvent.Change, this.toggleNoClip))
-			.append(this.checkButtonInvulnerable = new CheckButton(this.api)
+				.event.subscribe("toggle", this.toggleNoClip))
+			.append(this.checkButtonInvulnerable = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonToggleInvulnerable))
-				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "invulnerable") : false)
-				.on(CheckButtonEvent.Change, this.toggleInvulnerable))
+				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "invulnerable") === true : false)
+				.event.subscribe("toggle", this.toggleInvulnerable))
 			.appendTo(this);
 
-		this.rangeWeightBonus = new RangeRow(this.api)
+		this.rangeWeightBonus = new RangeRow()
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelWeightBonus)))
 			.editRange(range => range
 				.setMin(0)
 				.setMax(1000)
 				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "weightBonus") : 0))
 			.setDisplayValue(true)
-			.on(RangeInputEvent.Finish, this.setWeightBonus)
+			.event.subscribe("finish", this.setWeightBonus)
 			.appendTo(this);
 
-		new LabelledRow(this.api)
+		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelSkill)))
-			.append(new Dropdown(this.api)
-				.setRefreshMethod(() => ({
-					defaultOption: "none",
-					options: ([
-						["none", option => option.setText(translation(DebugToolsTranslation.None))],
-					] as IDropdownOption[]).values().include(Enums.values(SkillType)
-						.map(skill => tuple(SkillType[skill], Translation.generator(SkillType[skill])))
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
-				}))
-				.on(DropdownEvent.Selection, this.changeSkill))
+			.append(new SkillDropdown("none", [["none", option => option.setText(translation(DebugToolsTranslation.None))]])
+				.event.subscribe("selection", this.changeSkill))
 			.appendTo(this);
 
-		this.skillRangeRow = new RangeRow(this.api)
+		this.skillRangeRow = new RangeRow()
 			.hide()
 			.setLabel(label => label.setText(Translation.generator(() => this.skill === undefined ? "" : SkillType[this.skill])))
 			.editRange(range => range
@@ -104,11 +84,11 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				.setMax(100)
 				.setRefreshMethod(() => this.skill !== undefined && this.player && this.skill in this.player.skills ? this.player.skills[this.skill]!.core : 0))
 			.setDisplayValue(Translation.ui(UiTranslation.GameStatsPercentage).get)
-			.on(RangeInputEvent.Finish, this.setSkill)
+			.event.subscribe("finish", this.setSkill)
 			.appendTo(this);
 	}
 
-	public update(entity: ICreature | INPC | IPlayer) {
+	@Override public update(entity: Creature | NPC | Player) {
 		if (this.player === entity) return;
 
 		this.player = Entity.is(entity, EntityType.Player) ? entity : undefined;
@@ -116,12 +96,12 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 		if (!this.player) return;
 
-		this.emit("change");
+		this.event.emit("change");
 
 		this.refresh();
 
-		this.until([ComponentEvent.Remove, "change"])
-			.bind(this.DEBUG_TOOLS, DebugToolsEvent.PlayerDataChange, this.refresh);
+		this.DEBUG_TOOLS.event.until(this, "remove", "change")
+			.subscribe("playerDataChange", this.refresh);
 	}
 
 	@Bound
@@ -137,11 +117,11 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	}
 
 	@Bound
-	private changeSkill(_: any, skillName: keyof typeof SkillType | "none") {
-		this.skill = skillName === "none" ? undefined : SkillType[skillName];
+	private changeSkill(_: any, skill: SkillType | "none") {
+		this.skill = skill === "none" ? undefined : skill;
 		this.skillRangeRow.refresh();
 
-		this.skillRangeRow.toggle(skillName !== "none");
+		this.skillRangeRow.toggle(skill !== "none");
 	}
 
 	@Bound

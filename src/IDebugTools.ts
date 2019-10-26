@@ -1,4 +1,5 @@
 import Translation from "language/Translation";
+
 import DebugTools from "./DebugTools";
 import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import InspectEntityInformationSubsection from "./ui/component/InspectEntityInformationSubsection";
@@ -21,9 +22,6 @@ export enum DebugToolsTranslation {
 	LabelTime,
 	ButtonInspect,
 	ButtonInspectLocalPlayer,
-	ButtonUnlockRecipes,
-	InterruptConfirmationUnlockRecipes,
-	InterruptConfirmationUnlockRecipesDescription,
 	ButtonRemoveAllCreatures,
 	ButtonRemoveAllNPCs,
 	ButtonTravelAway,
@@ -44,6 +42,8 @@ export enum DebugToolsTranslation {
 	ButtonPaint,
 	PaintNoChange,
 	PaintRemove,
+	PaintRadius,
+	PaintRadiusTooltip,
 	LabelTerrain,
 	ButtonPaintClear,
 	TooltipPaintClear,
@@ -63,12 +63,16 @@ export enum DebugToolsTranslation {
 	SelectionFilter,
 	SelectionAction,
 	SelectionMatches,
+	SelectionAll,
 	MethodAll,
 	MethodNearest,
 	MethodRandom,
 	FilterCreatures,
 	FilterNPCs,
 	FilterTileEvents,
+	FilterDoodads,
+	FilterCorpses,
+	FilterPlayers,
 	ActionRemove,
 	ButtonExecute,
 	// Templates
@@ -128,6 +132,7 @@ export enum DebugToolsTranslation {
 	ActionResurrect,
 	ActionClone,
 	ActionTeleport,
+	To,
 }
 
 export interface ISaveData {
@@ -150,15 +155,15 @@ export interface IPlayerData {
 	/**
 	 * Whether the player is immune to damage
 	 */
-	invulnerable: boolean;
+	invulnerable?: boolean;
 	/**
 	 * Whether lighting is enabled
 	 */
-	lighting: boolean;
+	lighting?: boolean;
 	/**
 	 * Whether the fog/field of view/fog of war is enabled
 	 */
-	fog: boolean;
+	fog?: boolean;
 	/**
 	 * False if the player is not "noclipping", an object otherwise.
 	 */

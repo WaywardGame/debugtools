@@ -1,17 +1,26 @@
-import { ICreature } from "creature/ICreature";
+import Creature from "entity/creature/Creature";
 import { Stat } from "entity/IStats";
+import NPC from "entity/npc/NPC";
+import Player from "entity/player/Player";
+import { Events } from "event/EventEmitter";
+import { IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
-import { INPC } from "npc/INPC";
-import IPlayer from "player/IPlayer";
+
+interface IInspectEntityInformationSubsectionEvents extends Events<Component> {
+	change(): any;
+	switchTo(): any;
+	switchAway(): any;
+}
 
 export default abstract class InspectEntityInformationSubsection extends Component {
-	public constructor(protected readonly gsapi: IGameScreenApi) {
-		super(gsapi.uiApi);
+	@Override public event: IEventEmitter<this, IInspectEntityInformationSubsectionEvents>;
+
+	public constructor() {
+		super();
 		this.classes.add("debug-tools-inspect-entity-sub-section");
 	}
 
-	public abstract update(entity: IPlayer | ICreature | INPC): void;
+	public abstract update(entity: Player | Creature | NPC): void;
 
 	public getImmutableStats(): Stat[] { return []; }
 }

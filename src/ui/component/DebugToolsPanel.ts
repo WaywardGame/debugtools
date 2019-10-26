@@ -1,17 +1,17 @@
+import { Events } from "event/EventEmitter";
+import { IEventEmitter } from "event/EventEmitter";
 import Translation from "language/Translation";
 import Component from "newui/component/Component";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+
 import { DebugToolsTranslation } from "../../IDebugTools";
 
-export enum DebugToolsPanelEvent {
-	SwitchTo = "SwitchTo",
-	SwitchAway = "SwitchAway",
+interface IDebugToolsPanelEvents extends Events<Component> {
+	switchTo(): any;
+	switchAway(): any;
 }
 
 export default abstract class DebugToolsPanel extends Component {
-	public constructor(protected readonly gsapi: IGameScreenApi) {
-		super(gsapi.uiApi);
-	}
+	@Override public event: IEventEmitter<this, IDebugToolsPanelEvents>;
 
 	public abstract getTranslation(): DebugToolsTranslation | Translation;
 }

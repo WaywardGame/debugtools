@@ -1,34 +1,33 @@
-import ActionExecutor from "action/ActionExecutor";
-import { ActionType } from "action/IAction";
-import { Bindable, SfxType } from "Enums";
+import { SfxType } from "audio/IAudio";
+import ActionExecutor from "entity/action/ActionExecutor";
+import { ActionType } from "entity/action/IAction";
+import { EventHandler, EventSubscriber, OwnEventHandler } from "event/EventManager";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Translation from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
-import { BindCatcherApi } from "newui/BindingManager";
 import { BlockRow } from "newui/component/BlockRow";
-import Button, { ButtonEvent } from "newui/component/Button";
-import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
+import Button from "newui/component/Button";
+import { CheckButton } from "newui/component/CheckButton";
 import Dropdown from "newui/component/Dropdown";
-import { RangeInputEvent } from "newui/component/RangeInput";
 import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import newui from "newui/NewUi";
+import MovementHandler from "newui/screen/screens/game/util/movement/MovementHandler";
 import { ParticleType } from "renderer/particle/IParticle";
 import { particles } from "renderer/particle/Particles";
+import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
 import Vector2 from "utilities/math/Vector2";
-import { Bound } from "utilities/Objects";
 import SetTime from "../../action/SetTime";
-import UnlockRecipes from "../../action/UnlockRecipes";
-import DebugTools, { DebugToolsEvent } from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import DebugTools from "../../DebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import CancelablePromise from "../../util/CancelablePromise";
-import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
+import DebugToolsPanel from "../component/DebugToolsPanel";
 
+@EventSubscriber
 export default class GeneralPanel extends DebugToolsPanel {
 
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
@@ -43,10 +42,10 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 	private selectionPromise: CancelablePromise<Vector2> | undefined;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		this.timeRange = new RangeRow(this.api)
+		this.timeRange = new RangeRow()
 			.classes.add("debug-tools-range-row-no-default-button")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTime)))
 			.editRange(range => range
@@ -55,21 +54,21 @@ export default class GeneralPanel extends DebugToolsPanel {
 				.setMax(1)
 				.setRefreshMethod(() => game.time.getTime()))
 			.setDisplayValue(time => game.time.getTranslation(time))
-			.on(RangeInputEvent.Change, (_, time: number) => {
+			.event.subscribe("change", (_, time) => {
 				ActionExecutor.get(SetTime).execute(localPlayer, time);
 			})
 			.appendTo(this);
 
-		this.inspectButton = new CheckButton(this.api)
+		this.inspectButton = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonInspect))
 			.setRefreshMethod(() => !!this.selectionPromise)
-			.on(CheckButtonEvent.Change, (_, checked: boolean) => {
+			.event.subscribe("willToggle", (_, checked) => {
 				if (!!this.selectionPromise !== checked) {
 					if (checked && this.DEBUG_TOOLS.selector.selecting) return false;
 
 					if (!checked) {
 						if (this.selectionPromise && !this.selectionPromise.isResolved) {
-							this.selectionPromise!.cancel();
+							this.selectionPromise.cancel();
 						}
 
 						delete this.selectionPromise;
@@ -84,63 +83,51 @@ export default class GeneralPanel extends DebugToolsPanel {
 			})
 			.appendTo(this);
 
-		new Button(this.api)
+		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonInspectLocalPlayer))
-			.on(ButtonEvent.Activate, () => this.DEBUG_TOOLS.inspect(localPlayer))
+			.event.subscribe("activate", () => this.DEBUG_TOOLS.inspect(localPlayer))
 			.appendTo(this);
 
-		new Button(this.api)
-			.setText(translation(DebugToolsTranslation.ButtonUnlockRecipes))
-			.on(ButtonEvent.Activate, this.unlockRecipes)
-			.appendTo(this);
-
-		new Button(this.api)
+		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonTravelAway))
-			.on(ButtonEvent.Activate, this.travelAway)
+			.event.subscribe("activate", this.travelAway)
 			.appendTo(this);
 
-		new BlockRow(this.api)
+		new BlockRow()
 			.classes.add("debug-tools-dialog-checkbutton-dropdown-row")
-			.append(this.checkButtonAudio = new CheckButton(this.api)
+			.append(this.checkButtonAudio = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonAudio)))
-			.append(this.dropdownAudio = new Dropdown<SfxType>(this.api)
+			.append(this.dropdownAudio = new Dropdown<SfxType>()
 				.setRefreshMethod(() => ({
 					defaultOption: SfxType.Click,
 					options: Enums.values(SfxType)
-						.map(sfx => tuple(sfx, Translation.generator(SfxType[sfx])))
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
+						.map(sfx => Tuple(sfx, Translation.generator(SfxType[sfx])))
+						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				})))
 			.appendTo(this);
 
-		new BlockRow(this.api)
+		new BlockRow()
 			.classes.add("debug-tools-dialog-checkbutton-dropdown-row")
-			.append(this.checkButtonParticle = new CheckButton(this.api)
+			.append(this.checkButtonParticle = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonParticle)))
-			.append(this.dropdownParticle = new Dropdown<ParticleType>(this.api)
+			.append(this.dropdownParticle = new Dropdown<ParticleType>()
 				.setRefreshMethod(() => ({
 					defaultOption: ParticleType.Blood,
 					options: Enums.values(ParticleType)
-						.map(particle => tuple(particle, Translation.generator(ParticleType[particle])))
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t))),
+						.map(particle => Tuple(particle, Translation.generator(ParticleType[particle])))
+						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				})))
 			.appendTo(this);
-
-		this.on(DebugToolsPanelEvent.SwitchTo, this.onSwitchTo);
-		this.on(DebugToolsPanelEvent.SwitchAway, this.onSwitchAway);
 	}
 
-	public getTranslation() {
+	@Override public getTranslation() {
 		return DebugToolsTranslation.PanelGeneral;
 	}
 
-	@HookMethod
-	public canClientMove(api: BindCatcherApi): false | undefined {
+	@EventHandler(MovementHandler, "canMove")
+	public canClientMove(): false | undefined {
 		if (this.selectionPromise || this.checkButtonAudio.checked || this.checkButtonParticle.checked) return false;
 
 		return undefined;
@@ -153,7 +140,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 		}
 	}
 
-	@HookMethod(HookPriority.High)
+	@Override @HookMethod(HookPriority.High)
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
 		if (api.wasPressed(this.DEBUG_TOOLS.selector.bindableSelectLocation) && !bindPressed) {
 			if (this.checkButtonAudio.checked) {
@@ -172,21 +159,21 @@ export default class GeneralPanel extends DebugToolsPanel {
 		return bindPressed;
 	}
 
-	@Bound
-	private onSwitchTo() {
+	@OwnEventHandler(GeneralPanel, "switchTo")
+	protected onSwitchTo() {
 		this.timeRange.refresh();
 
-		hookManager.register(this, "DebugToolsDialog:GeneralPanel")
-			.until(DebugToolsPanelEvent.SwitchAway);
+		this.registerHookHost("DebugToolsDialog:GeneralPanel");
 
-		this.until(DebugToolsPanelEvent.SwitchAway)
-			.bind(this.DEBUG_TOOLS, DebugToolsEvent.Inspect, () => {
+		this.DEBUG_TOOLS.event.until(this, "switchAway")
+			.subscribe("inspect", () => {
 				if (this.selectionPromise) this.selectionPromise.cancel();
 			});
 	}
 
-	@Bound
-	private onSwitchAway() {
+	@OwnEventHandler(GeneralPanel, "switchAway")
+	protected onSwitchAway() {
+		hookManager.deregister(this);
 		if (this.selectionPromise) {
 			this.selectionPromise.cancel();
 			delete this.selectionPromise;
@@ -203,17 +190,6 @@ export default class GeneralPanel extends DebugToolsPanel {
 		this.DEBUG_TOOLS.inspect(tilePosition);
 	}
 
-	@Bound
-	private async unlockRecipes() {
-		const confirm = await this.api.interrupt(translation(DebugToolsTranslation.InterruptConfirmationUnlockRecipes))
-			.withDescription(translation(DebugToolsTranslation.InterruptConfirmationUnlockRecipesDescription))
-			.withConfirmation();
-
-		if (!confirm) return;
-
-		ActionExecutor.get(UnlockRecipes).execute(localPlayer);
-	}
-
 	/**
 	 * Travels Away
 	 * 
@@ -225,7 +201,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 		let action: ActionType;
 		if (!game.isChallenge) {
-			const choice = await this.api.interrupt(translation(DebugToolsTranslation.InterruptChoiceTravelAway))
+			const choice = await newui.interrupt(this.DEBUG_TOOLS.interruptTravelAway)
 				.withChoice(InterruptChoice.Cancel, this.DEBUG_TOOLS.choiceTravelAway, this.DEBUG_TOOLS.choiceSailToCivilization);
 
 			if (choice === InterruptChoice.Cancel) return;

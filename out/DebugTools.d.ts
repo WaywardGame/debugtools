@@ -1,32 +1,40 @@
-import { ActionType } from "action/IAction";
-import { ICreature, IDamageInfo } from "creature/ICreature";
-import IHuman from "entity/IHuman";
-import { Bindable, Direction, OverlayType, SpriteBatchLayer } from "Enums";
+import { ActionType } from "entity/action/IAction";
+import Creature from "entity/creature/Creature";
+import { IDamageInfo } from "entity/creature/ICreature";
+import Human from "entity/Human";
+import NPC from "entity/npc/NPC";
+import { Source } from "entity/player/IMessageManager";
+import Player from "entity/player/Player";
+import { Events, IEventEmitter } from "event/EventEmitter";
+import Game from "game/Game";
 import { Dictionary } from "language/Dictionaries";
+import Interrupt from "language/dictionary/Interrupt";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Message from "language/dictionary/Message";
 import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
-import { BindCatcherApi } from "newui/BindingManager";
+import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
 import { MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
-import { INPC } from "npc/INPC";
-import { Source } from "player/IMessageManager";
-import IPlayer from "player/IPlayer";
-import { ITile } from "tile/ITerrain";
+import { SpriteBatchLayer } from "renderer/IWorldRenderer";
+import WorldRenderer from "renderer/WorldRenderer";
+import { ITile, OverlayType } from "tile/ITerrain";
+import { IInjectionApi } from "utilities/Inject";
 import Log from "utilities/Log";
+import { Direction } from "utilities/math/Direction";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Actions from "./Actions";
 import { IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
-export declare enum DebugToolsEvent {
-    PlayerDataChange = "PlayerDataChange",
-    Inspect = "Inspect",
-    PermissionsChange = "PermissionsChange"
+interface IDebugToolsEvents extends Events<Mod> {
+    playerDataChange<K extends keyof IPlayerData>(playerId: number, property: K, newValue: IPlayerData[K]): any;
+    inspect(): any;
+    permissionsChange(): any;
 }
 export default class DebugTools extends Mod {
+    event: IEventEmitter<this, IDebugToolsEvents>;
     static readonly INSTANCE: DebugTools;
     static readonly LOG: Log;
     readonly actions: Actions;
@@ -43,6 +51,7 @@ export default class DebugTools extends Mod {
     readonly bindableTeleportLocalPlayer: Bindable;
     readonly bindableToggleNoClipOnLocalPlayer: Bindable;
     readonly bindableToggleCameraLock: Bindable;
+    readonly bindableToggleFullVisibility: Bindable;
     readonly bindablePaint: Bindable;
     readonly bindableErasePaint: Bindable;
     readonly bindableClearPaint: Bindable;
@@ -51,6 +60,8 @@ export default class DebugTools extends Mod {
     readonly dictionary: Dictionary;
     readonly messageFailureTileBlocked: Message;
     readonly source: Source;
+    readonly interruptUnlockRecipes: Interrupt;
+    readonly interruptTravelAway: Interrupt;
     readonly choiceSailToCivilization: InterruptChoice;
     readonly choiceTravelAway: InterruptChoice;
     readonly actionPlaceTemplate: ActionType;
@@ -69,7 +80,6 @@ export default class DebugTools extends Mod {
     readonly actionUpdateStatsAndAttributes: ActionType;
     readonly actionAddItemToInventory: ActionType;
     readonly actionPaint: ActionType;
-    readonly actionUnlockRecipes: ActionType;
     readonly actionToggleInvulnerable: ActionType;
     readonly actionSetSkill: ActionType;
     readonly actionSetGrowingStage: ActionType;
@@ -84,8 +94,8 @@ export default class DebugTools extends Mod {
     globalData: IGlobalData;
     private cameraState;
     readonly isCameraUnlocked: boolean;
-    getPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K): IPlayerData[K];
-    setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]): void;
+    getPlayerData<K extends keyof IPlayerData>(player: Player, key: K): IPlayerData[K];
+    setPlayerData<K extends keyof IPlayerData>(player: Player, key: K, value: IPlayerData[K]): void;
     initializeGlobalData(data?: IGlobalData): IGlobalData | undefined;
     initializeSaveData(data?: ISaveData): ISaveData | undefined;
     onLoad(): void;
@@ -93,24 +103,27 @@ export default class DebugTools extends Mod {
     onSave(): any;
     updateFog(): void;
     setCameraUnlocked(unlocked: boolean): void;
-    inspect(what: Vector2 | ICreature | IPlayer | INPC): void;
+    inspect(what: Vector2 | Creature | Player | NPC): void;
     toggleDialog(): void;
     hasPermission(): boolean | undefined;
+    toggleFog(fog: boolean): void;
+    toggleLighting(lighting: boolean): void;
     postFieldOfView(): void;
     onGameScreenVisible(): void;
     getZoomLevel(): number | undefined;
-    getCameraPosition(position: IVector2): IVector2 | undefined;
-    onPlayerDamage(player: IPlayer, info: IDamageInfo): number | undefined;
-    canCreatureAttack(creature: ICreature, enemy: IPlayer | ICreature): boolean | undefined;
-    onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined;
-    onNoInputReceived(player: IPlayer): void;
-    getPlayerWeightMovementPenalty(player: IPlayer): number | undefined;
-    getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined;
-    isHumanSwimming(human: IHuman, isSwimming: boolean): boolean | undefined;
-    getPlayerMaxWeight(weight: number, player: IPlayer): number;
+    protected getCameraPosition(_: any, position: IVector2): IVector2 | undefined;
+    onPlayerDamage(player: Player, info: IDamageInfo): number | undefined;
+    protected canCreatureAttack(creature: Creature, enemy: Player | Creature): boolean | undefined;
+    onMove(player: Player, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined;
+    onNoInputReceived(player: Player): void;
+    protected getPlayerWeightMovementPenalty(player: Player): number | undefined;
+    protected getPlayerSpriteBatchLayer(_: any, player: Player, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined;
+    protected isHumanSwimming(human: Human, isSwimming: boolean): boolean | undefined;
+    protected getPlayerMaxWeight(player: Player, weight: number): number;
     onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
-    getAmbientColor(colors: [number, number, number]): [number, number, number] | undefined;
-    getAmbientLightLevel(ambientLight: number, z: number): number | undefined;
-    getTileLightLevel(tile: ITile, x: number, y: number, z: number): number | undefined;
+    getAmbientColor(api: IInjectionApi<WorldRenderer, "calculateAmbientColor">): void;
+    getAmbientLightLevel(api: IInjectionApi<Game, "calculateAmbientLightLevel">, z: number): void;
+    getTileLightLevel(api: IInjectionApi<Game, "calculateTileLightLevel">, tile: ITile, x: number, y: number, z: number): void;
     private needsUpgrade;
 }
+export {};

@@ -1,7 +1,7 @@
-import { Action } from "action/Action";
-import { ActionArgument } from "action/IAction";
-import { EntityType } from "entity/IEntity";
-import { Delay, MoveType } from "Enums";
+import { Action } from "entity/action/Action";
+import { ActionArgument } from "entity/action/IAction";
+import { EntityType, MoveType } from "entity/IEntity";
+import { Delay } from "entity/IHuman";
 import { RenderSource } from "game/IGame";
 import Actions, { defaultUsability } from "../Actions";
 
@@ -18,6 +18,6 @@ export default new Action(ActionArgument.Player, ActionArgument.Boolean)
 		} : false);
 
 		player.setMoveType(noclip ? MoveType.Flying : MoveType.Land);
-		
+
 		game.updateView(RenderSource.Mod, true);
 	});

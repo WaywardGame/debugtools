@@ -1,12 +1,14 @@
-import { TerrainType } from "Enums";
+import { Events } from "event/EventEmitter";
+import { IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
-import { UiApi } from "newui/INewUi";
+import { TerrainType } from "tile/ITerrain";
 import { IPaintSection } from "../panel/PaintPanel";
 export default class TerrainPaint extends Component implements IPaintSection {
+    event: IEventEmitter<this, Events<IPaintSection>>;
     private readonly tilledCheckButton;
     private terrain;
-    private dropdown;
-    constructor(api: UiApi);
+    private readonly dropdown;
+    constructor();
     getTilePaintData(): {
         terrain: {
             type: TerrainType;

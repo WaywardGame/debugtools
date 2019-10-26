@@ -1,28 +1,38 @@
-import ActionExecutor from "action/ActionExecutor";
-import { ActionType } from "action/IAction";
-import { ICreature, IDamageInfo } from "creature/ICreature";
+import ActionExecutor from "entity/action/ActionExecutor";
+import { ActionType } from "entity/action/IAction";
+import Creature from "entity/creature/Creature";
+import { IDamageInfo } from "entity/creature/ICreature";
 import Entity from "entity/Entity";
-import { EntityType } from "entity/IEntity";
-import IHuman from "entity/IHuman";
-import { Bindable, Delay, Direction, MoveType, OverlayType, SpriteBatchLayer } from "Enums";
+import Human from "entity/Human";
+import { EntityType, MoveType } from "entity/IEntity";
+import { Delay } from "entity/IHuman";
+import NPC from "entity/npc/NPC";
+import { Source } from "entity/player/IMessageManager";
+import Player from "entity/player/Player";
+import { EventBus } from "event/EventBuses";
+import { Events, IEventEmitter } from "event/EventEmitter";
+import { EventHandler } from "event/EventManager";
+import Game from "game/Game";
 import { RenderSource } from "game/IGame";
 import { Dictionary } from "language/Dictionaries";
+import Interrupt from "language/dictionary/Interrupt";
 import InterruptChoice from "language/dictionary/InterruptChoice";
 import Message from "language/dictionary/Message";
 import { HookMethod } from "mod/IHookHost";
 import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
-import { BindCatcherApi, bindingManager, KeyModifier } from "newui/BindingManager";
-import { ScreenId } from "newui/screen/IScreen";
+import { bindingManager } from "newui/BindingManager";
+import { Bindable, BindCatcherApi, KeyModifier } from "newui/IBindingManager";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
 import { MenuBarButtonGroup, MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
-import GameScreen from "newui/screen/screens/GameScreen";
-import { INPC } from "npc/INPC";
-import { Source } from "player/IMessageManager";
-import IPlayer from "player/IPlayer";
-import { ITile } from "tile/ITerrain";
+import { gameScreen } from "newui/screen/screens/GameScreen";
+import { SpriteBatchLayer } from "renderer/IWorldRenderer";
+import WorldRenderer from "renderer/WorldRenderer";
+import { ITile, OverlayType } from "tile/ITerrain";
+import { IInjectionApi, Inject, InjectionPosition } from "utilities/Inject";
 import Log from "utilities/Log";
+import { Direction } from "utilities/math/Direction";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
@@ -46,7 +56,6 @@ import ToggleInvulnerable from "./action/ToggleInvulnerable";
 import ToggleNoClip from "./action/ToggleNoClip";
 import TogglePermissions from "./action/TogglePermissions";
 import ToggleTilled from "./action/ToggleTilled";
-import UnlockRecipes from "./action/UnlockRecipes";
 import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
 import Actions from "./Actions";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
@@ -75,25 +84,26 @@ enum CameraState {
 	Transition,
 }
 
-export enum DebugToolsEvent {
+interface IDebugToolsEvents extends Events<Mod> {
 	/**
 	 * Emitted when the data of the player is changing.
 	 * @param playerId The ID of the player whose data is changing
 	 * @param property The name of the property of the player's data which is changing
 	 * @param newValue The new value of the changed property in the player's data
 	 */
-	PlayerDataChange = "PlayerDataChange",
+	playerDataChange<K extends keyof IPlayerData>(playerId: number, property: K, newValue: IPlayerData[K]): any;
 	/**
 	 * Emitted when a tile or object is inspected.
 	 */
-	Inspect = "Inspect",
+	inspect(): any;
 	/**
 	 * Emitted when permissions are changed for this player.
 	 */
-	PermissionsChange = "PermissionsChange",
+	permissionsChange(): any;
 }
 
 export default class DebugTools extends Mod {
+	@Override public event: IEventEmitter<this, IDebugToolsEvents>;
 
 	////////////////////////////////////
 	// Static
@@ -148,6 +158,8 @@ export default class DebugTools extends Mod {
 
 	@Register.bindable("ToggleCameraLock", { key: "KeyC", modifiers: [KeyModifier.Alt] })
 	public readonly bindableToggleCameraLock: Bindable;
+	@Register.bindable("ToggleFullVisibility", { key: "KeyV", modifiers: [KeyModifier.Alt] })
+	public readonly bindableToggleFullVisibility: Bindable;
 
 	@Register.bindable("Paint", { mouseButton: 0 })
 	public readonly bindablePaint: Bindable;
@@ -172,6 +184,11 @@ export default class DebugTools extends Mod {
 
 	@Register.messageSource("DebugTools")
 	public readonly source: Source;
+
+	@Register.interrupt("ConfirmUnlockRecipes")
+	public readonly interruptUnlockRecipes: Interrupt;
+	@Register.interrupt("ChoiceTravelAway")
+	public readonly interruptTravelAway: Interrupt;
 
 	@Register.interruptChoice("SailToCivilization")
 	public readonly choiceSailToCivilization: InterruptChoice;
@@ -230,9 +247,6 @@ export default class DebugTools extends Mod {
 	@Register.action("Paint", Paint)
 	public readonly actionPaint: ActionType;
 
-	@Register.action("UnlockRecipes", UnlockRecipes)
-	public readonly actionUnlockRecipes: ActionType;
-
 	@Register.action("ToggleInvulnerable", ToggleInvulnerable)
 	public readonly actionToggleInvulnerable: ActionType;
 
@@ -260,11 +274,11 @@ export default class DebugTools extends Mod {
 	@Register.menuBarButton("Dialog", {
 		onActivate: () => DebugTools.INSTANCE.toggleDialog(),
 		group: MenuBarButtonGroup.Meta,
-		bindable: Registry<DebugTools, Bindable>().get("bindableToggleDialog"),
+		bindable: Registry<DebugTools>().get("bindableToggleDialog"),
 		tooltip: tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.DialogTitleMain))),
 		onCreate: button => {
 			button.toggle(DebugTools.INSTANCE.hasPermission());
-			DebugTools.INSTANCE.on(DebugToolsEvent.PlayerDataChange, () => button.toggle(DebugTools.INSTANCE.hasPermission()));
+			DebugTools.INSTANCE.event.subscribe("playerDataChange", () => button.toggle(DebugTools.INSTANCE.hasPermission()));
 		},
 	})
 	public readonly menuBarButton: MenuBarButtonType;
@@ -299,7 +313,7 @@ export default class DebugTools extends Mod {
 	 * 
 	 * Note: If the player data doesn't yet exist, it will be created.
 	 */
-	public getPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K): IPlayerData[K] {
+	public getPlayerData<K extends keyof IPlayerData>(player: Player, key: K): IPlayerData[K] {
 		const playerData = this.data.playerData;
 		const data = playerData[player.identifier];
 		if (data) {
@@ -326,15 +340,14 @@ export default class DebugTools extends Mod {
 	 * 
 	 * Note: Emits `DebugToolsEvent.PlayerDataChange` with the id of the player, the key of the changing data, and the new value.
 	 */
-	public setPlayerData<K extends keyof IPlayerData>(player: IPlayer, key: K, value: IPlayerData[K]) {
+	public setPlayerData<K extends keyof IPlayerData>(player: Player, key: K, value: IPlayerData[K]) {
 		this.getPlayerData(player, key); // initializes it if it doesn't exist
 		this.data.playerData[player.identifier][key] = value;
-		this.emit(DebugToolsEvent.PlayerDataChange, player.id, key, value);
+		this.event.emit("playerDataChange", player.id, key, value);
 
 		if (!this.hasPermission()) {
-			const gameScreen = newui.getScreen<GameScreen>(ScreenId.Game)!;
-			gameScreen.closeDialog(this.dialogMain);
-			gameScreen.closeDialog(this.dialogInspect);
+			gameScreen!.closeDialog(this.dialogMain);
+			gameScreen!.closeDialog(this.dialogInspect);
 		}
 	}
 
@@ -345,7 +358,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
 	 */
-	public initializeGlobalData(data?: IGlobalData) {
+	@Override public initializeGlobalData(data?: IGlobalData) {
 		return !this.needsUpgrade(data) ? data : {
 			lastVersion: modManager.getVersion(this.getIndex()),
 		};
@@ -354,7 +367,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
 	 */
-	public initializeSaveData(data?: ISaveData) {
+	@Override public initializeSaveData(data?: ISaveData) {
 		return !this.needsUpgrade(data) ? data : {
 			playerData: {},
 			lastVersion: modManager.getVersion(this.getIndex()),
@@ -365,7 +378,7 @@ export default class DebugTools extends Mod {
 	 * Called when Debug Tools is loaded (in a save)
 	 * - Registers the `LocationSelector` stored in `this.selector` as a hook host.
 	 */
-	public onLoad(): void {
+	@Override public onLoad(): void {
 		hookManager.register(this.selector, "DebugTools:LocationSelector");
 	}
 
@@ -374,9 +387,9 @@ export default class DebugTools extends Mod {
 	 * - Deregisters `this.selector` as a hook host.
 	 * - Removes the `AddItemToInventory` UI Component.
 	 */
-	public onUnload() {
+	@Override public onUnload() {
 		hookManager.deregister(this.selector);
-		AddItemToInventoryComponent.init(newui).releaseAndRemove();
+		AddItemToInventoryComponent.init().releaseAndRemove();
 	}
 
 	/**
@@ -422,12 +435,11 @@ export default class DebugTools extends Mod {
 	 * - Opens the `InspectDialog`.
 	 * - Emits `DebugToolsEvent.Inspect`
 	 */
-	public inspect(what: Vector2 | ICreature | IPlayer | INPC) {
-		newui.getScreen<GameScreen>(ScreenId.Game)!
-			.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
+	public inspect(what: Vector2 | Creature | Player | NPC) {
+		gameScreen!.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
 			.setInspection(what);
 
-		this.emit(DebugToolsEvent.Inspect);
+		this.event.emit("inspect");
 	}
 
 	/**
@@ -436,12 +448,22 @@ export default class DebugTools extends Mod {
 	public toggleDialog() {
 		if (!this.hasPermission()) return;
 
-		newui.getScreen<GameScreen>(ScreenId.Game)!
-			.toggleDialog(this.dialogMain);
+		gameScreen!.toggleDialog(this.dialogMain);
 	}
 
 	public hasPermission() {
 		return !multiplayer.isConnected() || multiplayer.isServer() || this.getPlayerData(localPlayer, "permissions");
+	}
+
+	public toggleFog(fog: boolean) {
+		this.setPlayerData(localPlayer, "fog", fog);
+		this.updateFog();
+	}
+
+	public toggleLighting(lighting: boolean) {
+		this.setPlayerData(localPlayer, "lighting", lighting);
+		ActionExecutor.get(UpdateStatsAndAttributes).execute(localPlayer, localPlayer);
+		game.updateView(RenderSource.Mod, true);
 	}
 
 	////////////////////////////////////
@@ -451,7 +473,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * When the field of view has initialized, we update the fog (enables/disables it based on the mod save data)
 	 */
-	@HookMethod
+	@Override @HookMethod
 	public postFieldOfView() {
 		this.updateFog();
 	}
@@ -461,9 +483,9 @@ export default class DebugTools extends Mod {
 	 * - Initializes the `AddItemToInventory` UI Component (it takes a second or two to be created, and there are multiple places in
 	 * the UI that use it. We initialize it only once so the slow initialization only happens once.)
 	 */
-	@HookMethod
+	@Override @HookMethod
 	public onGameScreenVisible() {
-		AddItemToInventoryComponent.init(newui);
+		AddItemToInventoryComponent.init();
 	}
 
 	/**
@@ -475,7 +497,7 @@ export default class DebugTools extends Mod {
 	 * - If our internal zoom level is `1`: `0.125`
 	 * - If our internal zoom level is `0`: `0.0625`
 	 */
-	@HookMethod
+	@EventHandler(EventBus.Game, "getZoomLevel")
 	public getZoomLevel() {
 		if (this.data.zoomLevel === undefined) {
 			return undefined;
@@ -496,8 +518,8 @@ export default class DebugTools extends Mod {
 	 * 		- If it is, we lock the camera again and return `undefined`.
 	 * 		- Otherwise, we return the transition camera position.
 	 */
-	@HookMethod
-	public getCameraPosition(position: IVector2): IVector2 | undefined {
+	@EventHandler(EventBus.Game, "getCameraPosition")
+	protected getCameraPosition(_: any, position: IVector2): IVector2 | undefined {
 		if (this.cameraState === CameraState.Locked) {
 			return undefined;
 		}
@@ -516,8 +538,8 @@ export default class DebugTools extends Mod {
 	/**
 	 * We cancel damage to the player if they're set as "invulnerable"
 	 */
-	@HookMethod
-	public onPlayerDamage(player: IPlayer, info: IDamageInfo): number | undefined {
+	@Override @HookMethod
+	public onPlayerDamage(player: Player, info: IDamageInfo): number | undefined {
 		if (this.getPlayerData(player, "invulnerable")) return 0;
 		return undefined;
 	}
@@ -525,8 +547,8 @@ export default class DebugTools extends Mod {
 	/**
 	 * We prevent creatures attacking the enemy if the enemy is a player who is set as "invulnerable" or "noclipping"
 	 */
-	@HookMethod
-	public canCreatureAttack(creature: ICreature, enemy: IPlayer | ICreature): boolean | undefined {
+	@EventHandler(Creature, "canAttack")
+	protected canCreatureAttack(creature: Creature, enemy: Player | Creature): boolean | undefined {
 		if (Entity.is(enemy, EntityType.Player)) {
 			if (this.getPlayerData(enemy, "invulnerable")) return false;
 			if (this.getPlayerData(enemy, "noclip")) return false;
@@ -543,8 +565,8 @@ export default class DebugTools extends Mod {
 	 * - Moves the player to the next tile instantly, then adds the calculated delay.
 	 * - Cancels the default movement by returning `false`.
 	 */
-	@HookMethod
-	public onMove(player: IPlayer, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined {
+	@Override @HookMethod
+	public onMove(player: Player, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined {
 		const noclip = this.getPlayerData(player, "noclip");
 		if (!noclip) return undefined;
 
@@ -575,8 +597,8 @@ export default class DebugTools extends Mod {
 	/**
 	 * Used to reset noclip movement speed.
 	 */
-	@HookMethod
-	public onNoInputReceived(player: IPlayer): void {
+	@Override @HookMethod
+	public onNoInputReceived(player: Player): void {
 		const noclip = this.getPlayerData(player, "noclip");
 		if (!noclip) return;
 
@@ -586,8 +608,8 @@ export default class DebugTools extends Mod {
 	/**
 	 * Used to prevent the weight movement penalty while noclipping.
 	 */
-	@HookMethod
-	public getPlayerWeightMovementPenalty(player: IPlayer): number | undefined {
+	@EventHandler(EventBus.Players, "getWeightMovementPenalty")
+	protected getPlayerWeightMovementPenalty(player: Player): number | undefined {
 		return this.getPlayerData(player, "noclip") ? 0 : undefined;
 	}
 
@@ -595,8 +617,8 @@ export default class DebugTools extends Mod {
 	 * If the player is "noclipping", we put them in `SpriteBatchLayer.CreatureFlying`.
 	 * Otherwise we return `undefined` and let the game or other mods handle it.
 	 */
-	@HookMethod
-	public getPlayerSpriteBatchLayer(player: IPlayer, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined {
+	@EventHandler(WorldRenderer, "getPlayerSpriteBatchLayer")
+	protected getPlayerSpriteBatchLayer(_: any, player: Player, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined {
 		return this.getPlayerData(player, "noclip") ? SpriteBatchLayer.CreatureFlying : undefined;
 	}
 
@@ -604,29 +626,27 @@ export default class DebugTools extends Mod {
 	 * If the player is "noclipping", we return `false` (not swimming). 
 	 * Otherwise we return `undefined` and let the game or other mods handle it. 
 	 */
-	@HookMethod
-	public isHumanSwimming(human: IHuman, isSwimming: boolean): boolean | undefined {
+	@EventHandler(Human, "isSwimming")
+	protected isHumanSwimming(human: Human, isSwimming: boolean): boolean | undefined {
 		if (Entity.is(human, EntityType.NPC)) return undefined;
 
-		return this.getPlayerData(human as IPlayer, "noclip") ? false : undefined;
+		return this.getPlayerData(human as Player, "noclip") ? false : undefined;
 	}
 
 	/**
 	 * We add the weight bonus from the player's save data to the existing strength.
 	 */
-	@HookMethod
-	public getPlayerMaxWeight(weight: number, player: IPlayer) {
+	@EventHandler(EventBus.Players, "getMaxWeight")
+	protected getPlayerMaxWeight(player: Player, weight: number) {
 		return weight + this.getPlayerData(player, "weightBonus");
 	}
 
 	// tslint:disable cyclomatic-complexity
-	@HookMethod
+	@Override @HookMethod
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable {
 		if (!this.hasPermission()) return bindPressed;
 
-		const gameScreen = newui.getScreen<GameScreen>(ScreenId.Game)!;
-
-		if (api.wasPressed(Bindable.GameZoomIn) && !bindPressed && gameScreen.isMouseWithin()) {
+		if (api.wasPressed(Bindable.GameZoomIn) && !bindPressed && gameScreen!.isMouseWithin()) {
 			this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;
 			this.data.zoomLevel = Math.min(11, ++this.data.zoomLevel);
 			game.updateZoomLevel();
@@ -634,7 +654,7 @@ export default class DebugTools extends Mod {
 			api.removePressState(Bindable.GameZoomIn);
 		}
 
-		if (api.wasPressed(Bindable.GameZoomOut) && !bindPressed && gameScreen.isMouseWithin()) {
+		if (api.wasPressed(Bindable.GameZoomOut) && !bindPressed && gameScreen!.isMouseWithin()) {
 			this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;
 			this.data.zoomLevel = Math.max(0, --this.data.zoomLevel);
 			game.updateZoomLevel();
@@ -647,7 +667,14 @@ export default class DebugTools extends Mod {
 			bindPressed = this.bindableToggleCameraLock;
 		}
 
-		if (api.wasPressed(this.bindableInspectTile) && !bindPressed && gameScreen.isMouseWithin()) {
+		if (api.wasPressed(this.bindableToggleFullVisibility) && !bindPressed) {
+			const visibility = !(this.getPlayerData(localPlayer, "fog") || this.getPlayerData(localPlayer, "lighting"));
+			this.toggleFog(visibility);
+			this.toggleLighting(visibility);
+			bindPressed = this.bindableToggleFullVisibility;
+		}
+
+		if (api.wasPressed(this.bindableInspectTile) && !bindPressed && gameScreen!.isMouseWithin()) {
 			this.inspect(renderer.screenToTile(...bindingManager.getMouse().xy));
 			bindPressed = this.bindableInspectTile;
 		}
@@ -680,37 +707,34 @@ export default class DebugTools extends Mod {
 	/**
 	 * If lighting is disabled, we return maximum light on all channels.
 	 */
-	@HookMethod
-	public getAmbientColor(colors: [number, number, number]) {
+	@Inject(WorldRenderer, "calculateAmbientColor", InjectionPosition.Pre)
+	public getAmbientColor(api: IInjectionApi<WorldRenderer, "calculateAmbientColor">) {
 		if (this.getPlayerData(localPlayer, "lighting") === false) {
-			return Vector3.ONE.xyz;
+			api.returnValue = Vector3.ONE.xyz;
+			api.cancelled = true;
 		}
-
-		return undefined;
 	}
 
 	/**
 	 * If lighting is disabled, we return the maximum light level.
 	 */
-	@HookMethod
-	public getAmbientLightLevel(ambientLight: number, z: number): number | undefined {
+	@Inject(Game, "calculateAmbientLightLevel", InjectionPosition.Pre)
+	public getAmbientLightLevel(api: IInjectionApi<Game, "calculateAmbientLightLevel">, z: number) {
 		if (this.getPlayerData(localPlayer, "lighting") === false) {
-			return 1;
+			api.returnValue = 1;
+			api.cancelled = true;
 		}
-
-		return undefined;
 	}
 
 	/**
 	 * If lighting is disabled, we return the minimum light level.
 	 */
-	@HookMethod
-	public getTileLightLevel(tile: ITile, x: number, y: number, z: number): number | undefined {
+	@Inject(Game, "calculateTileLightLevel", InjectionPosition.Pre)
+	public getTileLightLevel(api: IInjectionApi<Game, "calculateTileLightLevel">, tile: ITile, x: number, y: number, z: number) {
 		if (this.getPlayerData(localPlayer, "lighting") === false) {
-			return 0;
+			api.returnValue = 0;
+			api.cancelled = true;
 		}
-
-		return undefined;
 	}
 
 	private needsUpgrade(data?: { lastVersion?: string }) {

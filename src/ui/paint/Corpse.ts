@@ -1,59 +1,42 @@
-import { CreatureType } from "Enums";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { TextContext } from "language/Translation";
-import Button from "newui/component/Button";
+import { CreatureType } from "entity/creature/ICreature";
+import { Events } from "event/EventEmitter";
+import { IEventEmitter } from "event/EventEmitter";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
-import Dropdown, { DropdownEvent, IDropdownOption } from "newui/component/Dropdown";
+import CorpseDropdown from "newui/component/dropdown/CorpseDropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
-import Text from "newui/component/Text";
-import { UiApi } from "newui/INewUi";
-import Enums from "utilities/enum/Enums";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
-import { Bound } from "utilities/Objects";
+
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
 export default class CorpsePaint extends Component implements IPaintSection {
-	private readonly dropdown: Dropdown<"nochange" | "remove" | keyof typeof CreatureType>;
+	@Override public event: IEventEmitter<this, Events<IPaintSection>>;
+
+	private readonly dropdown: CorpseDropdown<"nochange" | "remove">;
 	private readonly aberrantCheckButton: CheckButton;
 	private readonly replaceExisting: CheckButton;
 
 	private corpse: CreatureType | "remove" | undefined;
 
-	public constructor(api: UiApi) {
-		super(api);
+	public constructor() {
+		super();
 
-		new LabelledRow(api)
+		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelCorpse)))
-			.append(this.dropdown = new Dropdown<"nochange" | "remove" | keyof typeof CreatureType>(api)
-				.setRefreshMethod(() => ({
-					defaultOption: "nochange",
-					options: ([
-						["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
-						["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
-					] as IDropdownOption<"nochange" | "remove" | keyof typeof CreatureType>[]).values().include(Enums.values(CreatureType)
-						.map(creature => tuple(
-							CreatureType[creature] as keyof typeof CreatureType,
-							Translation.nameOf(Dictionary.Creature, creature, false).inContext(TextContext.Title)
-								.setFailWith(corpseManager.getName(creature, false).inContext(TextContext.Title)),
-						))
-						.collect(Collectors.toArray)
-						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
-						.values()
-						.map(([id, t]) => tuple(id, (option: Button) => option.setText(t)))),
-				}))
-				.on(DropdownEvent.Selection, this.changeCorpse))
+			.append(this.dropdown = new CorpseDropdown("nochange", [
+				["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
+				["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
+			])
+				.event.subscribe("selection", this.changeCorpse))
 			.appendTo(this);
 
-		this.replaceExisting = new CheckButton(api)
+		this.replaceExisting = new CheckButton()
 			.hide()
 			.setText(translation(DebugToolsTranslation.ButtonReplaceExisting))
 			.appendTo(this);
 
-		this.aberrantCheckButton = new CheckButton(api)
+		this.aberrantCheckButton = new CheckButton()
 			.hide()
 			.setText(translation(DebugToolsTranslation.ButtonToggleAberrant))
 			.appendTo(this);
@@ -78,14 +61,14 @@ export default class CorpsePaint extends Component implements IPaintSection {
 	}
 
 	@Bound
-	private changeCorpse(_: any, corpse: keyof typeof CreatureType | "remove" | "nochange") {
-		this.corpse = corpse === "nochange" ? undefined : corpse === "remove" ? "remove" : CreatureType[corpse];
+	private changeCorpse(_: any, corpse: CreatureType | "remove" | "nochange") {
+		this.corpse = corpse === "nochange" ? undefined : corpse === "remove" ? "remove" : corpse;
 
 		const isReplaceable = this.corpse !== undefined && this.corpse !== "remove";
 		this.aberrantCheckButton.toggle(isReplaceable);
 		this.replaceExisting.toggle(isReplaceable);
 		if (!isReplaceable) this.replaceExisting.setChecked(false);
 
-		this.emit("change");
+		this.event.emit("change");
 	}
 }

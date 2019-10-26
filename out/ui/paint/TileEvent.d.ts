@@ -1,12 +1,14 @@
+import { Events } from "event/EventEmitter";
+import { IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
-import { UiApi } from "newui/INewUi";
 import { TileEventType } from "tile/ITileEvent";
 import { IPaintSection } from "../panel/PaintPanel";
 export default class TileEventPaint extends Component implements IPaintSection {
+    event: IEventEmitter<this, Events<IPaintSection>>;
     private readonly dropdown;
     private readonly replaceExisting;
     private tileEvent;
-    constructor(api: UiApi);
+    constructor();
     getTilePaintData(): {
         tileEvent: {
             type: TileEventType | "remove" | undefined;

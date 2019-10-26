@@ -1,30 +1,38 @@
-import ActionExecutor from "action/ActionExecutor";
-import { Bindable, CreatureType, DoodadType, NPCType, SpriteBatchLayer, TerrainType } from "Enums";
+import { DoodadType } from "doodad/IDoodad";
+import ActionExecutor from "entity/action/ActionExecutor";
+import { CreatureType } from "entity/creature/ICreature";
+import { NPCType } from "entity/npc/NPCS";
+import { Events, IEventEmitter } from "event/EventEmitter";
+import { EventHandler, EventSubscriber, OwnEventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import { HookMethod } from "mod/IHookHost";
 import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
-import { BindCatcherApi, bindingManager } from "newui/BindingManager";
+import { bindingManager } from "newui/BindingManager";
 import { BlockRow } from "newui/component/BlockRow";
-import Button, { ButtonEvent } from "newui/component/Button";
-import { CheckButton, CheckButtonEvent } from "newui/component/CheckButton";
+import Button from "newui/component/Button";
+import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
 import ContextMenu from "newui/component/ContextMenu";
-import { UiApi } from "newui/INewUi";
-import { ScreenId } from "newui/screen/IScreen";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import { RangeRow } from "newui/component/RangeRow";
+import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import MovementHandler from "newui/screen/screens/game/util/movement/MovementHandler";
+import { gameScreen } from "newui/screen/screens/GameScreen";
 import Spacer from "newui/screen/screens/menu/component/Spacer";
+import { SpriteBatchLayer } from "renderer/IWorldRenderer";
+import WorldRenderer from "renderer/WorldRenderer";
+import { TerrainType } from "tile/ITerrain";
 import { TileEventType } from "tile/ITileEvent";
 import Vector2 from "utilities/math/Vector2";
-import { Bound } from "utilities/Objects";
+import Vector3 from "utilities/math/Vector3";
 import TileHelpers from "utilities/TileHelpers";
 import Paint from "../../action/Paint";
 import DebugTools from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import Overlays from "../../overlay/Overlays";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
 import { getTileId, getTilePosition } from "../../util/TilePosition";
-import DebugToolsPanel, { DebugToolsPanelEvent } from "../component/DebugToolsPanel";
+import DebugToolsPanel from "../component/DebugToolsPanel";
 import CorpsePaint from "../paint/Corpse";
 import CreaturePaint from "../paint/Creature";
 import DoodadPaint from "../paint/Doodad";
@@ -58,13 +66,18 @@ export interface IPaintData {
 	};
 }
 
+interface IPaintSectionEvents extends Events<Component> {
+	change(): any;
+}
+
 export interface IPaintSection extends Component {
+	event: IEventEmitter<this, IPaintSectionEvents>;
 	isChanging(): boolean;
 	reset(): void;
 	getTilePaintData(): Partial<IPaintData> | undefined;
 }
 
-const paintSections: (new (api: UiApi) => IPaintSection)[] = [
+const paintSections: (new () => IPaintSection)[] = [
 	TerrainPaint,
 	CreaturePaint,
 	NPCPaint,
@@ -73,6 +86,7 @@ const paintSections: (new (api: UiApi) => IPaintSection)[] = [
 	TileEventPaint,
 ];
 
+@EventSubscriber
 export default class PaintPanel extends DebugToolsPanel {
 
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
@@ -81,65 +95,69 @@ export default class PaintPanel extends DebugToolsPanel {
 	private readonly paintSections: IPaintSection[] = [];
 	private readonly paintButton: CheckButton;
 	private readonly paintRow: Component;
+	private readonly paintRadius: RangeRow;
 
 	private painting = false;
 	private readonly paintTiles: number[] = [];
 	private lastPaintPosition?: Vector2;
 	private maxSprites = 1024;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
 		this.paintSections.splice(0, Infinity);
 
 		this.paintSections.push(...paintSections
-			.map(cls => new cls(this.api)
-				.on("change", this.onPaintSectionChange)
+			.map(cls => new cls()
+				.event.subscribe("change", this.onPaintSectionChange)
 				.appendTo(this)));
 
-		new Spacer(this.api).appendTo(this);
+		new Spacer().appendTo(this);
 
-		this.paintRow = new BlockRow(this.api)
+		this.paintRow = new Component()
 			.classes.add("debug-tools-paint-row")
-			.append(this.paintButton = new CheckButton(this.api)
-				.setText(translation(DebugToolsTranslation.ButtonPaint))
-				.on<[boolean]>(CheckButtonEvent.Change, (_, paint) => {
-					this.paintRow.classes.toggle(this.painting = paint, "painting");
-					if (!paint) this.clearPaint();
-				}))
-			.append(new Button(this.api)
-				.setText(translation(DebugToolsTranslation.ButtonPaintClear))
-				.setTooltip(tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.TooltipPaintClear))))
-				.on(ButtonEvent.Activate, this.clearPaint))
-			.append(new Button(this.api)
-				.setText(translation(DebugToolsTranslation.ButtonPaintComplete))
-				.setTooltip(tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.TooltipPaintComplete))))
-				.on(ButtonEvent.Activate, this.completePaint));
-
-		this.on(DebugToolsPanelEvent.SwitchTo, this.onSwitchTo);
-		this.on(DebugToolsPanelEvent.SwitchAway, this.onSwitchAway);
+			.append(this.paintRadius = new RangeRow()
+				.setLabel(label => label.setText(translation(DebugToolsTranslation.PaintRadius)))
+				.editRange(range => range
+					.setMin(0)
+					.setMax(5)
+					.setRefreshMethod(() => 0)
+					.setTooltip(tooltip => tooltip.addText(text => text
+						.setText(translation(DebugToolsTranslation.PaintRadiusTooltip)))))
+				.setDisplayValue(true)
+				.addDefaultButton(() => 0))
+			.append(new BlockRow()
+				.classes.add("real-paint-row")
+				.append(this.paintButton = new CheckButton()
+					.setText(translation(DebugToolsTranslation.ButtonPaint))
+					.event.subscribe("toggle", (_, paint) => {
+						this.paintRow.classes.toggle(this.painting = paint, "painting");
+						if (!paint) this.clearPaint();
+					}))
+				.append(new Button()
+					.setText(translation(DebugToolsTranslation.ButtonPaintClear))
+					.setTooltip(tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.TooltipPaintClear))))
+					.event.subscribe("activate", this.clearPaint))
+				.append(new Button()
+					.setText(translation(DebugToolsTranslation.ButtonPaintComplete))
+					.setTooltip(tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.TooltipPaintComplete))))
+					.event.subscribe("activate", this.completePaint)));
 	}
 
 	@Override public getTranslation() {
 		return DebugToolsTranslation.PanelPaint;
 	}
 
-	@HookMethod
-	public canClientMove(api: BindCatcherApi): false | undefined {
+	@EventHandler(MovementHandler, "canMove")
+	public canClientMove(): false | undefined {
 		if (this.painting) return false;
 
 		return undefined;
 	}
 
-	@HookMethod
-	public getMaxSpritesForLayer(layer: SpriteBatchLayer, maxSprites: number): number | undefined {
-		if (this.painting) {
-			return this.maxSprites = maxSprites + this.paintTiles.length * 4;
-		}
-
-		this.maxSprites = maxSprites;
-
-		return undefined;
+	@EventHandler(WorldRenderer, "getMaxSpritesForLayer")
+	public getMaxSpritesForLayer(_: any, maxSprites: number) {
+		return this.maxSprites = maxSprites + (this.painting ? this.paintTiles.length * 4 : 0);
 	}
 
 	// tslint:disable cyclomatic-complexity
@@ -156,7 +174,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		}
 
 		if (this.painting) {
-			if (api.isDown(this.DEBUG_TOOLS.bindablePaint) && this.gsapi.wasMouseStartWithin()) {
+			if (api.isDown(this.DEBUG_TOOLS.bindablePaint) && gameScreen!.wasMouseStartWithin()) {
 				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
 
 				const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
@@ -167,11 +185,13 @@ export default class PaintPanel extends DebugToolsPanel {
 
 					const paintPosition = interpolatedPosition.floor(new Vector2());
 
-					SelectionOverlay.add(paintPosition);
+					for (const [paintTilePosition] of TileHelpers.tilesInRange(new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
+						SelectionOverlay.add(paintTilePosition);
 
-					const tileId = getTileId(paintPosition.x, paintPosition.y, localPlayer.z);
+						const tileId = getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z);
 
-					if (!this.paintTiles.includes(tileId)) this.paintTiles.push(tileId);
+						if (!this.paintTiles.includes(tileId)) this.paintTiles.push(tileId);
+					}
 
 					if (paintPosition.equals(tilePosition)) break;
 				}
@@ -184,7 +204,7 @@ export default class PaintPanel extends DebugToolsPanel {
 				bindPressed = this.DEBUG_TOOLS.bindablePaint;
 			}
 
-			if (api.isDown(this.DEBUG_TOOLS.bindableErasePaint) && this.gsapi.wasMouseStartWithin()) {
+			if (api.isDown(this.DEBUG_TOOLS.bindableErasePaint) && gameScreen!.wasMouseStartWithin()) {
 				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
 
 				const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
@@ -195,12 +215,14 @@ export default class PaintPanel extends DebugToolsPanel {
 
 					const paintPosition = interpolatedPosition.floor(new Vector2());
 
-					SelectionOverlay.remove(paintPosition);
+					for (const [paintTilePosition] of TileHelpers.tilesInRange(new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
+						SelectionOverlay.remove(paintTilePosition);
 
-					const tileId = getTileId(paintPosition.x, paintPosition.y, localPlayer.z);
+						const tileId = getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z);
 
-					const index = this.paintTiles.indexOf(tileId);
-					if (index > -1) this.paintTiles.splice(index, 1);
+						const index = this.paintTiles.indexOf(tileId);
+						if (index > -1) this.paintTiles.splice(index, 1);
+					}
 
 					if (paintPosition.equals(tilePosition)) break;
 				}
@@ -235,23 +257,18 @@ export default class PaintPanel extends DebugToolsPanel {
 	}
 	// tslint:enable cyclomatic-complexity
 
-	private updateOverlayBatch() {
-		if (this.paintTiles.length * 4 - 512 < this.maxSprites || this.paintTiles.length * 4 + 512 > this.maxSprites) {
-			renderer.initializeSpriteBatch(SpriteBatchLayer.Overlay, true);
-		}
-	}
-
-	@Bound
-	private onSwitchTo() {
+	@OwnEventHandler(PaintPanel, "switchTo")
+	protected onSwitchTo() {
 		this.getParent()!.classes.add("debug-tools-paint-panel");
 		this.paintRow.appendTo(this.getParent()!.getParent()!);
 
-		hookManager.register(this, "DebugToolsDialog:PaintPanel")
-			.until(DebugToolsPanelEvent.SwitchAway);
+		this.registerHookHost("DebugToolsDialog:PaintPanel");
 	}
 
-	@Bound
-	private onSwitchAway() {
+	@OwnEventHandler(PaintPanel, "switchAway")
+	protected onSwitchAway() {
+		hookManager.deregister(this);
+
 		this.paintButton.setChecked(false);
 
 		this.paintRow.store();
@@ -259,6 +276,12 @@ export default class PaintPanel extends DebugToolsPanel {
 		const parent = this.getParent();
 		if (parent) {
 			parent.classes.remove("debug-tools-paint-panel");
+		}
+	}
+
+	private updateOverlayBatch() {
+		if (this.paintTiles.length * 4 - 512 < this.maxSprites || this.paintTiles.length * 4 + 512 > this.maxSprites) {
+			renderer.initializeSpriteBatch(SpriteBatchLayer.Overlay, true);
 		}
 	}
 
@@ -271,13 +294,13 @@ export default class PaintPanel extends DebugToolsPanel {
 
 	@Bound
 	private showPaintSectionResetMenu(paintSection: IPaintSection) {
-		new ContextMenu(this.api, ["Lock Inspection", {
+		new ContextMenu(["Lock Inspection", {
 			translation: translation(DebugToolsTranslation.ResetPaintSection),
 			onActivate: () => paintSection.reset(),
 		}])
 			.addAllDescribedOptions()
 			.setPosition(...bindingManager.getMouse().xy)
-			.schedule(this.api.getScreen(ScreenId.Game)!.setContextMenu);
+			.schedule(gameScreen!.setContextMenu);
 	}
 
 	@Bound

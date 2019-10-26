@@ -1,4 +1,13 @@
-import { Action } from "action/Action";
-import { ActionArgument } from "action/IAction";
-declare const _default: Action<[ActionArgument.Number, ActionArgument.Array], import("../../mod-reference/definitions/player/IPlayer").IPlayer, void>;
+import { Action } from "entity/action/Action";
+import { ActionArgument } from "entity/action/IAction";
+import Player from "entity/player/Player";
+declare const _default: Action<[ActionArgument.Number, ActionArgument.Array, [ActionArgument.Undefined, ActionArgument.String]], Player, void>;
 export default _default;
+export declare enum SelectionType {
+    Creature = 0,
+    NPC = 1,
+    TileEvent = 2,
+    Doodad = 3,
+    Corpse = 4,
+    Player = 5
+}

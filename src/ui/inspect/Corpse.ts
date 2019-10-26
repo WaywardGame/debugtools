@@ -1,16 +1,13 @@
-import ActionExecutor from "action/ActionExecutor";
-import { ICorpse } from "creature/corpse/ICorpse";
-import { CreatureType } from "Enums";
+import ActionExecutor from "entity/action/ActionExecutor";
+import { ICorpse } from "entity/creature/corpse/ICorpse";
 import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
-import Button, { ButtonEvent } from "newui/component/Button";
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
+import Button from "newui/component/Button";
 import { ITile } from "tile/ITerrain";
-import Collectors from "utilities/iterable/Collectors";
-import { tuple } from "utilities/iterable/Generators";
+import { Tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
-import { Bound } from "utilities/Objects";
+
 import Heal from "../../action/Heal";
 import Remove from "../../action/Remove";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -22,41 +19,36 @@ export default class CorpseInformation extends InspectInformationSection {
 	@Mod.log(DEBUG_TOOLS_ID)
 	public readonly LOG: Log;
 
-	private readonly resurrectButton: Button;
-
 	private corpses: ICorpse[] = [];
 	private corpse: ICorpse | undefined;
 
-	public constructor(gsapi: IGameScreenApi) {
-		super(gsapi);
+	public constructor() {
+		super();
 
-		this.resurrectButton = new Button(this.api)
+		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonResurrectCorpse))
-			.on(ButtonEvent.Activate, this.resurrect)
+			.event.subscribe("activate", this.resurrect)
 			.appendTo(this);
 
-		new Button(this.api)
+		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonRemoveThing))
-			.on(ButtonEvent.Activate, this.removeCorpse)
+			.event.subscribe("activate", this.removeCorpse)
 			.appendTo(this);
 	}
 
-	public getTabs(): TabInformation[] {
-		return this.corpses.entries()
-			.map(([i, corpse]) => tuple(i, () => translation(DebugToolsTranslation.CorpseName)
+	@Override public getTabs(): TabInformation[] {
+		return this.corpses.entries().stream()
+			.map(([i, corpse]) => Tuple(i, () => translation(DebugToolsTranslation.CorpseName)
 				.get(corpseManager.getName(corpse, false).inContext(TextContext.Title))))
-			.collect(Collectors.toArray);
+			.toArray();
 	}
 
-	public setTab(corpse: number) {
+	@Override public setTab(corpse: number) {
 		this.corpse = this.corpses[corpse];
-
-		this.resurrectButton.toggle(this.corpse.type !== CreatureType.Blood && this.corpse.type !== CreatureType.WaterBlood);
-
 		return this;
 	}
 
-	public update(position: IVector2, tile: ITile) {
+	@Override public update(position: IVector2, tile: ITile) {
 		const corpses = [...tile.corpses || []];
 
 		if (areArraysIdentical(corpses, this.corpses)) return;
@@ -67,7 +59,7 @@ export default class CorpseInformation extends InspectInformationSection {
 		this.setShouldLog();
 	}
 
-	public logUpdate() {
+	@Override public logUpdate() {
 		for (const corpse of this.corpses) {
 			this.LOG.info("Corpse:", corpse);
 		}
@@ -76,12 +68,12 @@ export default class CorpseInformation extends InspectInformationSection {
 	@Bound
 	private resurrect() {
 		ActionExecutor.get(Heal).execute(localPlayer, this.corpse!);
-		this.emit("update");
+		this.event.emit("update");
 	}
 
 	@Bound
 	private removeCorpse() {
 		ActionExecutor.get(Remove).execute(localPlayer, this.corpse!);
-		this.emit("update");
+		this.event.emit("update");
 	}
 }

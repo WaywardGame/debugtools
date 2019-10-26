@@ -1,4 +1,3 @@
-import IGameScreenApi from "newui/screen/screens/game/IGameScreenApi";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
@@ -9,7 +8,8 @@ export default class DoodadInformation extends InspectInformationSection {
     readonly LOG: Log;
     private doodad;
     private readonly buttonGrowthStage;
-    constructor(gsapi: IGameScreenApi);
+    constructor();
+    protected onSwitchTo(): void;
     getTabs(): TabInformation[];
     update(position: IVector2, tile: ITile): void;
     logUpdate(): void;

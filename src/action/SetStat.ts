@@ -1,5 +1,5 @@
-import { Action } from "action/Action";
-import { ActionArgument } from "action/IAction";
+import { Action } from "entity/action/Action";
+import { ActionArgument } from "entity/action/IAction";
 import { EntityType } from "entity/IEntity";
 import { Stat } from "entity/IStats";
 import { defaultUsability } from "../Actions";

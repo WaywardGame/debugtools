@@ -1,4 +1,4 @@
-import { Action } from "action/Action";
-import { ActionArgument } from "action/IAction";
-declare const _default: Action<[ActionArgument.Doodad, ActionArgument.Number], import("../../mod-reference/definitions/player/IPlayer").IPlayer, void>;
+import { Action } from "entity/action/Action";
+import { ActionArgument } from "entity/action/IAction";
+declare const _default: Action<[ActionArgument.Doodad, ActionArgument.Number], import("../../node_modules/@wayward/types/definitions/entity/player/Player").default, void>;
 export default _default;
