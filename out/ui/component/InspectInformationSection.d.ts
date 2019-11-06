@@ -14,7 +14,7 @@ interface IInspectInformationSectionEvents extends Events<Component> {
 export default abstract class InspectInformationSection extends Component {
     event: IEventEmitter<this, IInspectInformationSectionEvents>;
     private shouldLog;
-    readonly willLog: boolean;
+    get willLog(): boolean;
     setTab(tab: number): this;
     setShouldLog(): void;
     resetWillLog(): void;

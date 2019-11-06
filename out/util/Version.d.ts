@@ -1,9 +1,9 @@
 declare type VersionMappable = string | Version | [number, number, number?];
 export default class Version {
     private readonly version;
-    readonly major: number;
-    readonly minor: number;
-    readonly patch: number | undefined;
+    get major(): number;
+    get minor(): number;
+    get patch(): number | undefined;
     constructor(version: VersionMappable);
     getString(): string;
     isNewerThan(version: VersionMappable): boolean;
