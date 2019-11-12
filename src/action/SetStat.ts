@@ -8,5 +8,5 @@ export default new Action(ActionArgument.Entity, ActionArgument.Number, ActionAr
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, entity, stat: Stat, value) => {
-		entity.setStat(stat, value);
+		entity.stat.set(stat, value);
 	});

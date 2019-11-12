@@ -24,15 +24,15 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
 			return;
 		}
 
-		const health = entity.getStat<IStatMax>(Stat.Health);
-		const stamina = entity.getStat<IStatMax>(Stat.Stamina);
-		const hunger = entity.getStat<IStatMax>(Stat.Hunger);
-		const thirst = entity.getStat<IStatMax>(Stat.Thirst);
+		const health = entity.stat.get<IStatMax>(Stat.Health);
+		const stamina = entity.stat.get<IStatMax>(Stat.Stamina);
+		const hunger = entity.stat.get<IStatMax>(Stat.Hunger);
+		const thirst = entity.stat.get<IStatMax>(Stat.Thirst);
 
-		entity.setStat(health, Entity.is(entity, EntityType.Player) ? entity.getMaxHealth() : health.max);
-		if (stamina) entity.setStat(stamina, stamina.max);
-		if (hunger) entity.setStat(hunger, hunger.max);
-		if (thirst) entity.setStat(thirst, thirst.max);
+		entity.stat.set(health, Entity.is(entity, EntityType.Player) ? entity.getMaxHealth() : health.max);
+		if (stamina) entity.stat.set(stamina, stamina.max);
+		if (hunger) entity.stat.set(hunger, hunger.max);
+		if (thirst) entity.stat.set(thirst, thirst.max);
 
 		entity.setStatus(StatusType.Bleeding, false, StatusEffectChangeReason.Passed);
 		entity.setStatus(StatusType.Burned, false, StatusEffectChangeReason.Passed);

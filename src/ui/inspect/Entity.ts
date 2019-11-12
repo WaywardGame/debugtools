@@ -162,8 +162,8 @@ export default class EntityInformation extends InspectInformationSection {
 		this.statComponents.clear();
 
 		const stats = Enums.values(Stat)
-			.filter(stat => this.entity!.hasStat(stat) && (!this.subsections.some(subsection => subsection.getImmutableStats().includes(stat))))
-			.map(stat => this.entity!.getStat(stat))
+			.filter(stat => this.entity!.stat.has(stat) && (!this.subsections.some(subsection => subsection.getImmutableStats().includes(stat))))
+			.map(stat => this.entity!.stat.get(stat))
 			.filter2<IStat>(stat => stat !== undefined);
 
 		for (const stat of stats) {
@@ -174,7 +174,7 @@ export default class EntityInformation extends InspectInformationSection {
 						.noClampOnRefresh()
 						.setMin(0)
 						.setMax(stat.max!)
-						.setRefreshMethod(() => this.entity ? this.entity.getStatValue(stat.type)! : 0))
+						.setRefreshMethod(() => this.entity ? this.entity.stat.getValue(stat.type)! : 0))
 					.event.subscribe("finish", this.setStat(stat.type))
 					.setDisplayValue(true)
 					.appendTo(this.statWrapper));
@@ -190,7 +190,7 @@ export default class EntityInformation extends InspectInformationSection {
 						}
 					})
 					.setCanBeEmpty(false)
-					.setDefault(() => this.entity ? `${this.entity.getStatValue(stat.type)}` : "")
+					.setDefault(() => this.entity ? `${this.entity.stat.getValue(stat.type)}` : "")
 					.clear()
 					.appendTo(new LabelledRow()
 						.setLabel(label => label.setText(Translation.generator(Stat[stat.type])))
@@ -296,7 +296,7 @@ export default class EntityInformation extends InspectInformationSection {
 	@Bound
 	private setStat(stat: Stat) {
 		return (_: any, value: number) => {
-			if (this.entity!.getStatValue(stat) === value) return;
+			if (this.entity!.stat.getValue(stat) === value) return;
 
 			ActionExecutor.get(SetStat).execute(localPlayer, this.entity!, stat, value);
 		};
