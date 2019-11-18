@@ -1,5 +1,4 @@
-import { Events } from "event/EventEmitter";
-import { IEventEmitter } from "event/EventEmitter";
+import { Events, IEventEmitter } from "event/EventEmitter";
 import { Quality } from "game/IObject";
 import { ItemType } from "item/IItem";
 import Translation from "language/Translation";
@@ -10,7 +9,6 @@ import ItemDropdown from "newui/component/dropdown/ItemDropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
-
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 
 interface IAddItemToInventoryEvents extends Events<Component> {
