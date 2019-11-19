@@ -189,7 +189,7 @@ export default class EntityInformation extends InspectInformationSection {
 							this.setStat(stat.type)(input, +value);
 						}
 					})
-					.setClearOnBlurWhenEmpty(true)
+					.setClearToDefaultWhenEmpty()
 					.setDefault(() => this.entity ? `${this.entity.stat.getValue(stat.type)}` : "")
 					.clear()
 					.appendTo(new LabelledRow()
