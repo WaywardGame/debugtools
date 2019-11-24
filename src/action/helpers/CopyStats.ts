@@ -6,7 +6,7 @@ import { Stat } from "entity/IStats";
  * Copies stats and status effects from one entity to another.
  */
 export default function (from: Entity, to: Entity) {
-	for (const statName in from.stats) {
+	for (const statName of Object.keys(from.stats)) {
 		const stat = Stat[statName as keyof typeof Stat];
 		const statObject = from.stat.get(stat)!;
 		to.stat.set(stat, statObject.value);
@@ -15,7 +15,7 @@ export default function (from: Entity, to: Entity) {
 		if ("canExceedMax" in statObject) cloneStatObject.canExceedMax = statObject.canExceedMax;
 		if ("bonus" in statObject) to.stat.setBonus(stat, statObject.bonus!);
 		if ("changeTimer" in statObject) {
-			to.stat.setChangeTimer(stat, statObject.changeTimer!, statObject.changeAmount);
+			to.stat.setChangeTimer(stat, statObject.changeTimer!, t => t.setAmount(statObject.changeAmount));
 			(cloneStatObject as any).nextChangeTimer = statObject.nextChangeTimer!;
 		}
 	}
