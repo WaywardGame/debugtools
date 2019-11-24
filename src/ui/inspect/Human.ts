@@ -75,7 +75,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 			.editRange(range => range
 				.setMin(0)
 				.setMax(REPUTATION_MAX)
-				.setRefreshMethod(() => this.human ? this.human.getStatValue(type)! : 0))
+				.setRefreshMethod(() => this.human ? this.human.stat.getValue(type)! : 0))
 			.setDisplayValue(true)
 			.event.subscribe("finish", this.setReputation(type))
 			.appendTo(this);
@@ -83,7 +83,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 	private setReputation(type: Stat.Malignity | Stat.Benignity) {
 		return (_: any, value: number) => {
-			if (this.human!.getStatValue(type) === value) return;
+			if (this.human!.stat.getValue(type) === value) return;
 			ActionExecutor.get(SetStat).execute(localPlayer, this.human!, type, value);
 		};
 	}

@@ -93,7 +93,7 @@ export default class DebugTools extends Mod {
     data: ISaveData;
     globalData: IGlobalData;
     private cameraState;
-    readonly isCameraUnlocked: boolean;
+    get isCameraUnlocked(): boolean;
     getPlayerData<K extends keyof IPlayerData>(player: Player, key: K): IPlayerData[K];
     setPlayerData<K extends keyof IPlayerData>(player: Player, key: K, value: IPlayerData[K]): void;
     initializeGlobalData(data?: IGlobalData): IGlobalData | undefined;

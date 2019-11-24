@@ -8,7 +8,7 @@ export default class SelectLocation implements IHookHost {
     readonly bindableSelectLocation: Bindable;
     readonly bindableCancelSelectLocation: Bindable;
     private _selecting;
-    readonly selecting: boolean;
+    get selecting(): boolean;
     private hoverTile?;
     private selectTileHeld;
     private selectionPromise;
