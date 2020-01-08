@@ -606,10 +606,10 @@ export default class DebugTools extends Mod {
 	}
 
 	/**
-	 * Used to prevent the weight movement penalty while noclipping.
+	 * Used to prevent the weight/stamina movement penalty while noclipping.
 	 */
-	@EventHandler(EventBus.Players, "getWeightMovementPenalty")
-	protected getPlayerWeightMovementPenalty(player: Player): number | undefined {
+	@EventHandler(EventBus.Players, "getWeightOrStaminaMovementPenalty")
+	protected getPlayerWeightOrStaminaMovementPenalty(player: Player): number | undefined {
 		return this.getPlayerData(player, "noclip") ? 0 : undefined;
 	}
 
