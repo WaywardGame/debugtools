@@ -499,7 +499,7 @@ export default class DebugTools extends Mod {
 	 */
 	@EventHandler(EventBus.Game, "getZoomLevel")
 	public getZoomLevel() {
-		if (this.data.zoomLevel === undefined) {
+		if (this.data.zoomLevel === undefined || !this.hasPermission()) {
 			return undefined;
 		}
 
