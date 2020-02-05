@@ -163,6 +163,9 @@ export default class PaintPanel extends DebugToolsPanel {
 	// tslint:disable cyclomatic-complexity
 	@Override @HookMethod(HookPriority.High)
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
+		if (!gameScreen) {
+			return bindPressed;
+		}
 
 		if (api.wasPressed(Bindable.MenuContextMenu) && !bindPressed) {
 			for (const paintSection of this.paintSections) {
@@ -174,7 +177,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		}
 
 		if (this.painting) {
-			if (api.isDown(this.DEBUG_TOOLS.bindablePaint) && gameScreen!.wasMouseStartWithin()) {
+			if (api.isDown(this.DEBUG_TOOLS.bindablePaint) && gameScreen.wasMouseStartWithin()) {
 				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
 
 				const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
@@ -204,7 +207,7 @@ export default class PaintPanel extends DebugToolsPanel {
 				bindPressed = this.DEBUG_TOOLS.bindablePaint;
 			}
 
-			if (api.isDown(this.DEBUG_TOOLS.bindableErasePaint) && gameScreen!.wasMouseStartWithin()) {
+			if (api.isDown(this.DEBUG_TOOLS.bindableErasePaint) && gameScreen.wasMouseStartWithin()) {
 				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
 
 				const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);

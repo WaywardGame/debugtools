@@ -121,8 +121,12 @@ export default class TemplatePanel extends DebugToolsPanel {
 	// tslint:disable cyclomatic-complexity
 	@Override @HookMethod
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
-		const wasPlacePressed = api.wasPressed(this.DEBUG_TOOLS.selector.bindableSelectLocation) && gameScreen!.isMouseWithin();
-		const wasCancelPressed = api.wasPressed(this.DEBUG_TOOLS.selector.bindableCancelSelectLocation) && gameScreen!.isMouseWithin();
+		if (!gameScreen) {
+			return bindPressed;
+		}
+
+		const wasPlacePressed = api.wasPressed(this.DEBUG_TOOLS.selector.bindableSelectLocation) && gameScreen.isMouseWithin();
+		const wasCancelPressed = api.wasPressed(this.DEBUG_TOOLS.selector.bindableCancelSelectLocation) && gameScreen.isMouseWithin();
 
 		this.clearPreview();
 

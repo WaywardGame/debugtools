@@ -644,9 +644,13 @@ export default class DebugTools extends Mod {
 	// tslint:disable cyclomatic-complexity
 	@Override @HookMethod
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable {
+		if (!gameScreen) {
+			return bindPressed;
+		}
+
 		if (!this.hasPermission()) return bindPressed;
 
-		if (api.wasPressed(Bindable.GameZoomIn) && !bindPressed && gameScreen!.isMouseWithin()) {
+		if (api.wasPressed(Bindable.GameZoomIn) && !bindPressed && gameScreen.isMouseWithin()) {
 			this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;
 			this.data.zoomLevel = Math.min(11, ++this.data.zoomLevel);
 			game.updateZoomLevel();
@@ -654,7 +658,7 @@ export default class DebugTools extends Mod {
 			api.removePressState(Bindable.GameZoomIn);
 		}
 
-		if (api.wasPressed(Bindable.GameZoomOut) && !bindPressed && gameScreen!.isMouseWithin()) {
+		if (api.wasPressed(Bindable.GameZoomOut) && !bindPressed && gameScreen.isMouseWithin()) {
 			this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;
 			this.data.zoomLevel = Math.max(0, --this.data.zoomLevel);
 			game.updateZoomLevel();
@@ -674,7 +678,7 @@ export default class DebugTools extends Mod {
 			bindPressed = this.bindableToggleFullVisibility;
 		}
 
-		if (api.wasPressed(this.bindableInspectTile) && !bindPressed && gameScreen!.isMouseWithin()) {
+		if (api.wasPressed(this.bindableInspectTile) && !bindPressed && gameScreen.isMouseWithin()) {
 			this.inspect(renderer.screenToTile(...bindingManager.getMouse().xy));
 			bindPressed = this.bindableInspectTile;
 		}
