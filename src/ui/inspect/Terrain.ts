@@ -53,11 +53,12 @@ export default class TerrainInformation extends InspectInformationSection {
 
 		this.checkButtonTilled = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonToggleTilled))
-			.setRefreshMethod(() => this.tile && TileHelpers.isTilled(this.tile))
+			.setRefreshMethod(this.isTilled)
 			.event.subscribe("toggle", this.toggleTilled)
 			.appendTo(this);
 	}
 
+	@Override
 	public getTabs(): TabInformation[] {
 		return [
 			[0, this.getTabTranslation],
@@ -70,30 +71,45 @@ export default class TerrainInformation extends InspectInformationSection {
 			.get(new Translation(Dictionary.Terrain, TileHelpers.getType(this.tile)).inContext(TextContext.Title));
 	}
 
+	@Override
 	public update(position: IVector2, tile: ITile) {
 		this.position = new Vector3(position.x, position.y, localPlayer.z);
 		this.tile = tile;
 
-		const terrainType = TerrainType[TileHelpers.getType(this.tile!)];
-		if (terrainType === this.terrainType) return;
+		const terrainType = TerrainType[TileHelpers.getType(this.tile)];
+		const tillable = this.isTillable();
+		if (terrainType === this.terrainType && (!tillable || this.checkButtonTilled.checked === this.isTilled()))
+			return;
 
 		this.terrainType = terrainType;
 		this.dropdownTerrainType.refresh();
 		this.setShouldLog();
 
-		this.checkButtonTilled.toggle(terrainDescriptions[TileHelpers.getType(tile)]!.tillable === true)
+		this.checkButtonTilled.toggle(tillable)
 			.refresh();
 
 		return this;
 	}
 
+	@Override
 	public logUpdate() {
-		this.LOG.info("Terrain:", this.terrainType);
+		this.LOG.info("Terrain:", this.terrainType, ...this.isTillable() ? ["Tilled:", this.isTilled()] : []);
 	}
 
 	@Bound
 	private toggleTilled(_: any, tilled: boolean) {
-		ActionExecutor.get(ToggleTilled).execute(localPlayer, this.position, tilled);
+		if (this.isTilled() !== tilled) {
+			ActionExecutor.get(ToggleTilled).execute(localPlayer, this.position, tilled);
+		}
+	}
+
+	private isTillable() {
+		return terrainDescriptions[TileHelpers.getType(this.tile)]?.tillable === true;
+	}
+
+	@Bound
+	private isTilled() {
+		return this.tile && TileHelpers.isTilled(this.tile);
 	}
 
 	@Bound

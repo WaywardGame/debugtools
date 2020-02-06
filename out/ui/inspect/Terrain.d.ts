@@ -15,5 +15,7 @@ export default class TerrainInformation extends InspectInformationSection {
     update(position: IVector2, tile: ITile): this | undefined;
     logUpdate(): void;
     private toggleTilled;
+    private isTillable;
+    private isTilled;
     private changeTerrain;
 }
