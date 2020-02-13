@@ -13,7 +13,7 @@ export default function (player: Player, corpse: ICorpse) {
 
 	if (!location) return false;
 
-	const creature = creatureManager.spawn(corpse.type, corpse.x, corpse.y, corpse.z, true, corpse.aberrant);
+	const creature = creatureManager.spawn(corpse.type, corpse.x, corpse.y, corpse.z, true, corpse.aberrant, undefined, true);
 	creature!.renamed = corpse.renamed;
 	corpseManager.remove(corpse);
 

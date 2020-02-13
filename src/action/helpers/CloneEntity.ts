@@ -17,7 +17,7 @@ export default function (entity: Creature | NPC | Player, position: IVector3) {
 	let clone: Creature | NPC | Player;
 
 	if (Entity.is(entity, EntityType.Creature)) {
-		clone = creatureManager.spawn(entity.type, position.x, position.y, position.z, true, entity.aberrant)!;
+		clone = creatureManager.spawn(entity.type, position.x, position.y, position.z, true, entity.aberrant, undefined, true)!;
 
 		if (entity.isTamed()) clone.tame(entity.getOwner()!);
 		clone.renamed = entity.renamed;
