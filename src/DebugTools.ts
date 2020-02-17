@@ -58,7 +58,7 @@ import TogglePermissions from "./action/TogglePermissions";
 import ToggleTilled from "./action/ToggleTilled";
 import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
 import Actions from "./Actions";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation, ZOOM_LEVEL_MAX } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import AddItemToInventoryComponent from "./ui/component/AddItemToInventory";
 import MainDialog from "./ui/DebugToolsDialog";
@@ -652,7 +652,7 @@ export default class DebugTools extends Mod {
 
 		if (api.wasPressed(Bindable.GameZoomIn) && !bindPressed && gameScreen.isMouseWithin()) {
 			this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;
-			this.data.zoomLevel = Math.min(11, ++this.data.zoomLevel);
+			this.data.zoomLevel = Math.min(ZOOM_LEVEL_MAX + 3, ++this.data.zoomLevel);
 			game.updateZoomLevel();
 			bindPressed = Bindable.GameZoomIn;
 			api.removePressState(Bindable.GameZoomIn);
