@@ -61,8 +61,12 @@ export default class SelectLocation implements IHookHost {
 	// tslint:disable cyclomatic-complexity
 	@HookMethod(HookPriority.High)
 	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
-		const selectTilePressed = api.wasPressed(this.bindableSelectLocation) && gameScreen!.isMouseWithin();
-		const cancelSelectTilePressed = api.wasPressed(this.bindableCancelSelectLocation) && gameScreen!.isMouseWithin();
+		if (!gameScreen) {
+			return bindPressed;
+		}
+
+		const selectTilePressed = api.wasPressed(this.bindableSelectLocation) && gameScreen.isMouseWithin();
+		const cancelSelectTilePressed = api.wasPressed(this.bindableCancelSelectLocation) && gameScreen.isMouseWithin();
 
 		let updateRender = false;
 

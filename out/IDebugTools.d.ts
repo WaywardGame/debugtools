@@ -5,6 +5,9 @@ import InspectInformationSection from "./ui/component/InspectInformationSection"
 import { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect/Entity";
 import { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
+export declare const DEBUG_TOOLS_ID = "Debug Tools";
+export declare const ZOOM_LEVEL_MAX: number;
+export declare function translation(debugToolsTranslation: DebugToolsTranslation | Translation): Translation;
 export declare enum DebugToolsTranslation {
     OptionsAutoOpen = 0,
     DialogTitleMain = 1,
@@ -138,5 +141,3 @@ export interface IGlobalData {
 export declare type ModRegistrationMainDialogPanel = (cls: typeof DebugToolsPanel) => DebugToolsDialogPanelClass;
 export declare type ModRegistrationInspectDialogInformationSection = (cls: typeof InspectInformationSection) => InspectDialogInformationSectionClass;
 export declare type ModRegistrationInspectDialogEntityInformationSubsection = (cls: typeof InspectEntityInformationSubsection) => InspectDialogEntityInformationSubsectionClass;
-export declare const DEBUG_TOOLS_ID = "Debug Tools";
-export declare function translation(debugToolsTranslation: DebugToolsTranslation | Translation): Translation;

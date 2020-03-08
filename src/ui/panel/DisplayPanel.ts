@@ -1,5 +1,3 @@
-import { EventBus } from "event/EventBuses";
-import { Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import Mod from "mod/Mod";
@@ -7,10 +5,10 @@ import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import { RangeRow } from "newui/component/RangeRow";
 import { compileShaders, loadShaders } from "renderer/Shaders";
+import WorldRenderer from "renderer/WorldRenderer";
 import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, ISaveData, translation } from "../../IDebugTools";
+import { DebugToolsTranslation, ISaveData, translation, ZOOM_LEVEL_MAX } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
-
 
 export default class DisplayPanel extends DebugToolsPanel {
 	private readonly zoomRange: RangeRow;
@@ -41,7 +39,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelZoomLevel)))
 			.editRange(range => range
 				.setMin(0)
-				.setMax(11)
+				.setMax(ZOOM_LEVEL_MAX + 3)
 				.setRefreshMethod(() => this.saveData.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.saveData.zoomLevel))
 			.setDisplayValue(() => translation(DebugToolsTranslation.ZoomLevel)
 				.get(this.DEBUG_TOOLS.getZoomLevel() || saveDataGlobal.options.zoomLevel))
@@ -74,15 +72,6 @@ export default class DisplayPanel extends DebugToolsPanel {
 		return DebugToolsTranslation.PanelDisplay;
 	}
 
-	@EventHandler(EventBus.Game, "getZoomLevel", Priority.High)
-	public getZoomLevel(): number | undefined {
-		if (this.zoomRange) {
-			this.zoomRange.refresh();
-		}
-
-		return undefined;
-	}
-
 	@Bound
 	public toggleFog(_: any, fog: boolean) {
 		this.DEBUG_TOOLS.toggleFog(fog);
@@ -95,12 +84,13 @@ export default class DisplayPanel extends DebugToolsPanel {
 
 	@OwnEventHandler(DisplayPanel, "switchTo")
 	protected onSwitchTo() {
-		this.registerHookHost("DebugToolsDialog:DisplayPanel");
+		this.registerEventBusSubscriber("switchAway");
+		this.zoomRange?.refresh();
 	}
 
-	@OwnEventHandler(DisplayPanel, "switchAway")
-	protected onSwitchAway() {
-
+	@EventHandler(WorldRenderer, "updateZoom")
+	protected onUpdateZoom() {
+		this.zoomRange?.refresh();
 	}
 
 	@Bound

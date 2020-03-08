@@ -116,7 +116,7 @@ export default class DebugTools extends Mod {
     protected canCreatureAttack(creature: Creature, enemy: Player | Creature): boolean | undefined;
     onMove(player: Player, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined;
     onNoInputReceived(player: Player): void;
-    protected getPlayerWeightMovementPenalty(player: Player): number | undefined;
+    protected getPlayerWeightOrStaminaMovementPenalty(player: Player): number | undefined;
     protected getPlayerSpriteBatchLayer(_: any, player: Player, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined;
     protected isHumanSwimming(human: Human, isSwimming: boolean): boolean | undefined;
     protected getPlayerMaxWeight(player: Player, weight: number): number;

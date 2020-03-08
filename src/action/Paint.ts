@@ -34,7 +34,7 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 
 						const type = data.creature!.type;
 						if (type !== "remove") {
-							creatureManager.spawn(type, x, y, z, true, data.creature!.aberrant);
+							creatureManager.spawn(type, x, y, z, true, data.creature!.aberrant, undefined, true);
 						}
 
 						break;

@@ -335,6 +335,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		for (const infoSection of this.infoSections) {
 			if (infoSection.willLog) {
 				infoSection.logUpdate();
+				infoSection.resetWillLog();
 			}
 		}
 	}
