@@ -1,6 +1,5 @@
 import { ActionApi } from "entity/action/IAction";
 import Entity from "entity/Entity";
-import { EntityType } from "entity/IEntity";
 import Player from "entity/player/Player";
 import { gameScreen } from "newui/screen/screens/GameScreen";
 import { IVector3 } from "utilities/math/IVector";
@@ -14,18 +13,18 @@ export function teleportEntity(action: ActionApi<any>, entity: Entity, position?
 
 	if (!entity || !position) return;
 
-	if (Entity.is(entity, EntityType.Creature)) {
+	if (entity.asCreature) {
 		const tile = game.getTile(entity.x, entity.y, entity.z);
 		delete tile.creature;
 	}
 
-	if (Entity.is(entity, EntityType.NPC)) {
+	if (entity.asNPC) {
 		const tile = game.getTile(entity.x, entity.y, entity.z);
 		delete tile.npc;
 	}
 
-	if (Entity.is(entity, EntityType.Player)) {
-		entity.setPosition(position);
+	if (entity.asPlayer) {
+		entity.asPlayer.setPosition(position);
 
 	} else {
 		entity.x = entity.fromX = position.x;
@@ -33,14 +32,14 @@ export function teleportEntity(action: ActionApi<any>, entity: Entity, position?
 		entity.z = position.z;
 	}
 
-	if (Entity.is(entity, EntityType.Creature)) {
+	if (entity.asCreature) {
 		const tile = game.getTile(entity.x, entity.y, entity.z);
-		tile.creature = entity;
+		tile.creature = entity.asCreature;
 	}
 
-	if (Entity.is(entity, EntityType.NPC)) {
+	if (entity.asNPC) {
 		const tile = game.getTile(entity.x, entity.y, entity.z);
-		tile.npc = entity;
+		tile.npc = entity.asNPC;
 	}
 
 	if (entity === localPlayer) {

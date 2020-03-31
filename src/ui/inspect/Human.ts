@@ -1,11 +1,7 @@
 import ActionExecutor from "entity/action/ActionExecutor";
-import Creature from "entity/creature/Creature";
 import Entity from "entity/Entity";
-import { REPUTATION_MAX } from "entity/Human";
-import { EntityType } from "entity/IEntity";
+import Human, { REPUTATION_MAX } from "entity/Human";
 import { IStat, Stat } from "entity/IStats";
-import NPC from "entity/npc/NPC";
-import Player from "entity/player/Player";
 import { OwnEventHandler } from "event/EventManager";
 import { Quality } from "game/IObject";
 import { ItemType } from "item/IItem";
@@ -17,12 +13,11 @@ import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import AddItemToInventoryComponent from "../component/AddItemToInventory";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
-
 export default class HumanInformation extends InspectEntityInformationSubsection {
 	private readonly addItemContainer: Component;
 	private readonly reputationSliders: { [key in Stat.Malignity | Stat.Benignity]?: RangeRow } = {};
 
-	private human: Player | NPC | undefined;
+	private human: Human | undefined;
 
 	public constructor() {
 		super();
@@ -51,10 +46,10 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 		] : [];
 	}
 
-	@Override public update(entity: Creature | NPC | Player) {
+	@Override public update(entity: Entity) {
 		if (this.human === entity) return;
 
-		this.human = Entity.is(entity, EntityType.Creature) ? undefined : entity;
+		this.human = entity.asHuman;
 		this.toggle(!!this.human);
 
 		this.event.emit("change");
@@ -65,7 +60,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 			this.reputationSliders[type]!.refresh();
 		}
 
-		(entity as Entity).event.until(this, "switchAway")
+		entity.event.until(this, "switchAway")
 			.subscribe("statChanged", this.onStatChange);
 	}
 
@@ -90,7 +85,8 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 	@Bound
 	private addItem(_: any, type: ItemType, quality: Quality) {
-		ActionExecutor.get(AddItemToInventory).execute(localPlayer, Entity.is(this.human, EntityType.Player) ? this.human : this.human!.inventory, type, quality);
+		if (this.human)
+			ActionExecutor.get(AddItemToInventory).execute(localPlayer, this.human.asPlayer ?? this.human.inventory, type, quality);
 	}
 
 	@Bound

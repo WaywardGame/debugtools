@@ -21,7 +21,7 @@ export default class EntityInformation extends InspectInformationSection {
     setTab(entity: number): this;
     update(position: IVector2, tile: ITile): void;
     getEntityIndex(entity: Creature | NPC | Player): number;
-    getEntity(index: number): import("../../../node_modules/@wayward/types/definitions/entity/IEntity").EntityPlayerCreatureNpc;
+    getEntity(index: number): NPC | Player | Creature;
     logUpdate(): void;
     private initializeStats;
     private onStatChange;

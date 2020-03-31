@@ -1,12 +1,8 @@
 import ActionExecutor from "entity/action/ActionExecutor";
 import Creature from "entity/creature/Creature";
 import Entity from "entity/Entity";
-import { EntityType } from "entity/IEntity";
-import NPC from "entity/npc/NPC";
-import Player from "entity/player/Player";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
-
 import Remove from "../../action/Remove";
 import SetTamed from "../../action/SetTamed";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -30,8 +26,8 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 			.appendTo(this);
 	}
 
-	@Override public update(entity: Creature | NPC | Player) {
-		this.creature = Entity.is(entity, EntityType.Creature) ? entity : undefined;
+	@Override public update(entity: Entity) {
+		this.creature = entity.asCreature;
 		this.toggle(!!this.creature);
 	}
 

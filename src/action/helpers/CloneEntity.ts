@@ -1,36 +1,36 @@
 import Creature from "entity/creature/Creature";
 import Entity from "entity/Entity";
-import { AiType, EntityType } from "entity/IEntity";
+import { AiType } from "entity/IEntity";
 import NPC from "entity/npc/NPC";
 import { NPCType } from "entity/npc/NPCS";
-import Player from "entity/player/Player";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-
 import CloneInventory from "./CloneInventory";
 import CopyStats from "./CopyStats";
 
 /**
  * Clones an entity to another position. Given a player, clones a matching NPC.
  */
-export default function (entity: Creature | NPC | Player, position: IVector3) {
-	let clone: Creature | NPC | Player;
+export default function (entity: Entity, position: IVector3) {
+	let clone: Creature | NPC;
 
-	if (Entity.is(entity, EntityType.Creature)) {
-		clone = creatureManager.spawn(entity.type, position.x, position.y, position.z, true, entity.aberrant, undefined, true)!;
+	const creature = entity.asCreature;
+	if (creature) {
+		clone = creatureManager.spawn(creature.type, position.x, position.y, position.z, true, creature.aberrant, undefined, true)!;
 
-		if (entity.isTamed()) clone.tame(entity.getOwner()!);
+		if (creature.isTamed()) clone.tame(creature.getOwner()!);
 		clone.renamed = entity.renamed;
-		clone.ai = entity.ai;
-		clone.enemy = entity.enemy;
-		clone.enemyAttempts = entity.enemyAttempts;
-		clone.enemyIsPlayer = entity.enemyIsPlayer;
+		clone.ai = creature.ai;
+		clone.enemy = creature.enemy;
+		clone.enemyAttempts = creature.enemyAttempts;
+		clone.enemyIsPlayer = creature.enemyIsPlayer;
 
 	} else {
+		const npc = entity.asNPC!;
 		clone = npcManager.spawn(NPCType.Merchant, position.x, position.y, position.z)!;
-		clone.customization = { ...entity.customization };
+		clone.customization = { ...npc.customization };
 		clone.renamed = entity.getName().getString();
-		CloneInventory(entity, clone);
+		CloneInventory(npc, clone);
 	}
 
 	clone.direction = new Vector2(entity.direction).raw();
@@ -38,7 +38,7 @@ export default function (entity: Creature | NPC | Player, position: IVector3) {
 
 	CopyStats(entity, clone);
 
-	if (Entity.is(clone, EntityType.NPC)) {
+	if (clone.asNPC) {
 		clone.ai = AiType.Neutral;
 	}
 }

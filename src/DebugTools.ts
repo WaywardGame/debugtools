@@ -2,9 +2,8 @@ import ActionExecutor from "entity/action/ActionExecutor";
 import { ActionType } from "entity/action/IAction";
 import Creature from "entity/creature/Creature";
 import { IDamageInfo } from "entity/creature/ICreature";
-import Entity from "entity/Entity";
 import Human from "entity/Human";
-import { EntityType, MoveType } from "entity/IEntity";
+import { MoveType } from "entity/IEntity";
 import { Delay } from "entity/IHuman";
 import NPC from "entity/npc/NPC";
 import { Source } from "entity/player/IMessageManager";
@@ -58,7 +57,7 @@ import TogglePermissions from "./action/TogglePermissions";
 import ToggleTilled from "./action/ToggleTilled";
 import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
 import Actions from "./Actions";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation, ZOOM_LEVEL_MAX } from "./IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation, ZOOM_LEVEL_MAX } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import AddItemToInventoryComponent from "./ui/component/AddItemToInventory";
 import MainDialog from "./ui/DebugToolsDialog";
@@ -549,9 +548,9 @@ export default class DebugTools extends Mod {
 	 */
 	@EventHandler(Creature, "canAttack")
 	protected canCreatureAttack(creature: Creature, enemy: Player | Creature): boolean | undefined {
-		if (Entity.is(enemy, EntityType.Player)) {
-			if (this.getPlayerData(enemy, "invulnerable")) return false;
-			if (this.getPlayerData(enemy, "noclip")) return false;
+		if (enemy.asPlayer) {
+			if (this.getPlayerData(enemy.asPlayer, "invulnerable")) return false;
+			if (this.getPlayerData(enemy.asPlayer, "noclip")) return false;
 		}
 
 		return undefined;
@@ -628,7 +627,7 @@ export default class DebugTools extends Mod {
 	 */
 	@EventHandler(Human, "isSwimming")
 	protected isHumanSwimming(human: Human, isSwimming: boolean): boolean | undefined {
-		if (Entity.is(human, EntityType.NPC)) return undefined;
+		if (human.asNPC) return undefined;
 
 		return this.getPlayerData(human as Player, "noclip") ? false : undefined;
 	}

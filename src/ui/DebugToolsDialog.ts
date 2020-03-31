@@ -7,7 +7,7 @@ import { gameScreen } from "newui/screen/screens/GameScreen";
 import { Tuple } from "utilities/Arrays";
 import { sleep } from "utilities/Async";
 import DebugTools from "../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../IDebugTools";
 import DebugToolsPanel from "./component/DebugToolsPanel";
 import DisplayPanel from "./panel/DisplayPanel";
 import GeneralPanel from "./panel/GeneralPanel";

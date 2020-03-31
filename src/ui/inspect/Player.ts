@@ -1,7 +1,5 @@
 import ActionExecutor from "entity/action/ActionExecutor";
 import Creature from "entity/creature/Creature";
-import Entity from "entity/Entity";
-import { EntityType } from "entity/IEntity";
 import { SkillType } from "entity/IHuman";
 import NPC from "entity/npc/NPC";
 import Player from "entity/player/Player";
@@ -19,7 +17,7 @@ import ToggleInvulnerable from "../../action/ToggleInvulnerable";
 import ToggleNoClip from "../../action/ToggleNoClip";
 import TogglePermissions from "../../action/TogglePermissions";
 import DebugTools from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, translation } from "../../IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, IPlayerData, translation } from "../../IDebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
 export default class PlayerInformation extends InspectEntityInformationSubsection {
@@ -91,7 +89,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	@Override public update(entity: Creature | NPC | Player) {
 		if (this.player === entity) return;
 
-		this.player = Entity.is(entity, EntityType.Player) ? entity : undefined;
+		this.player = entity.asPlayer;
 		this.toggle(!!this.player);
 
 		if (!this.player) return;

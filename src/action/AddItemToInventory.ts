@@ -1,9 +1,6 @@
 import { Action } from "entity/action/Action";
 import { ActionArgument, anyOf } from "entity/action/IAction";
-import Entity from "entity/Entity";
 import { EntityType } from "entity/IEntity";
-import Player from "entity/player/Player";
-import { IContainer } from "item/IItem";
 import { defaultUsability } from "../Actions";
 import InspectDialog from "../ui/InspectDialog";
 
@@ -14,15 +11,12 @@ export default new Action(anyOf(ActionArgument.Container, ActionArgument.Player)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, target, item, quality) => {
-		if (target instanceof Player) {
+		if ("entityType" in target) {
 			target.createItemInInventory(item, quality);
-
-			if (Entity.is(target, EntityType.Player)) {
-				target.updateTablesAndWeight();
-			}
+			target.updateTablesAndWeight();
 
 		} else {
-			itemManager.create(item, target as IContainer, quality);
+			itemManager.create(item, target, quality);
 			action.setUpdateView();
 		}
 
