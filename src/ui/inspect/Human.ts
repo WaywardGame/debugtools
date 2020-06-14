@@ -31,7 +31,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 	@OwnEventHandler(HumanInformation, "switchTo")
 	protected onSwitchTo() {
 		const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this.addItemContainer);
-		addItemToInventory.event.until(this, "switchAway")
+		addItemToInventory.event.until(this, "switchAway", "remove")
 			.subscribe("execute", this.addItem);
 	}
 

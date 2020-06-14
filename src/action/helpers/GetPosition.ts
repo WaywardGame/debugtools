@@ -1,5 +1,5 @@
 import { MoveType } from "entity/IEntity";
-import { MessageType } from "entity/player/MessageManager";
+import { MessageType } from "entity/player/IMessageManager";
 import Player from "entity/player/Player";
 import { TranslationGenerator } from "newui/component/IComponent";
 import Text from "newui/component/Text";

@@ -1,17 +1,19 @@
 import ActionExecutor from "entity/action/ActionExecutor";
-import { EventHandler, EventSubscriber, OwnEventHandler } from "event/EventManager";
+import { Priority } from "event/EventEmitter";
+import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import Translation from "language/Translation";
 import { ITemplateOptions, manipulateTemplates } from "mapgen/MapGenHelpers";
-import { HookMethod } from "mod/IHookHost";
 import Mod from "mod/Mod";
+import { Registry } from "mod/ModRegistry";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Dropdown from "newui/component/Dropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
-import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import Bind from "newui/input/Bind";
+import InputManager from "newui/input/InputManager";
 import MovementHandler from "newui/screen/screens/game/util/movement/MovementHandler";
 import { gameScreen } from "newui/screen/screens/GameScreen";
 import Spacer from "newui/screen/screens/menu/component/Spacer";
@@ -28,7 +30,6 @@ import SelectionOverlay from "../../overlay/SelectionOverlay";
 import { getTileId, getTilePosition } from "../../util/TilePosition";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 
-@EventSubscriber
 export default class TemplatePanel extends DebugToolsPanel {
 
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
@@ -44,6 +45,8 @@ export default class TemplatePanel extends DebugToolsPanel {
 
 	private readonly previewTiles: number[] = [];
 	private selectHeld = false;
+	private center?: Vector2;
+	private templateOptions?: ITemplateOptions;
 
 	public constructor() {
 		super();
@@ -104,6 +107,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 
 		this.place = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonPlace))
+			.event.subscribe("toggle", this.tick)
 			.appendTo(this);
 	}
 
@@ -111,75 +115,100 @@ export default class TemplatePanel extends DebugToolsPanel {
 		return DebugToolsTranslation.PanelTemplates;
 	}
 
+	////////////////////////////////////
+	// Event Handlers
+	//
+
 	@EventHandler(MovementHandler, "canMove")
-	public canClientMove() {
-		if (this.place.checked || this.selectHeld) return false;
+	protected canClientMove() {
+		if (this.place.checked || this.selectHeld)
+			return false;
 
 		return undefined;
 	}
 
-	// tslint:disable cyclomatic-complexity
-	@Override @HookMethod
-	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
-		if (!gameScreen) {
-			return bindPressed;
-		}
+	@Bind.onUp(Registry<DebugTools>(DEBUG_TOOLS_ID).registry("selector").get("bindableSelectLocation"), Priority.High + 1)
+	protected onStopSelectLocation() {
+		this.selectHeld = false;
+		return false;
+	}
 
-		const wasPlacePressed = api.wasPressed(this.DEBUG_TOOLS.selector.bindableSelectLocation) && gameScreen.isMouseWithin();
-		const wasCancelPressed = api.wasPressed(this.DEBUG_TOOLS.selector.bindableCancelSelectLocation) && gameScreen.isMouseWithin();
+	////////////////////////////////////
+	// Internals
+	//
 
-		this.clearPreview();
+	@Bound private tick() {
+		let updateRender = false;
+
+		const isMouseWithin = gameScreen?.isMouseWithin();
+		if (!this.place.checked || !isMouseWithin)
+			updateRender = this.clearPreview();
 
 		if (this.place.checked) {
-			const template = this.getTemplate();
-			if (template) {
-				const [terrain] = template;
+			setTimeout(this.tick, game.interval);
 
-				const center = renderer.screenToTile(api.mouseX, api.mouseY);
-				const width = terrain[0].length;
-				const height = terrain.length;
-
-				const topLeft = new Vector2(center)
-					.subtract({ x: Math.floor(width / 2), y: Math.floor(height / 2) });
-
-				if (wasPlacePressed) {
-					this.placeTemplate(topLeft);
-					this.selectHeld = true;
-					bindPressed = this.DEBUG_TOOLS.selector.bindableSelectLocation;
-
-				} else if (wasCancelPressed) {
-					this.place.setChecked(false);
-					bindPressed = this.DEBUG_TOOLS.selector.bindableCancelSelectLocation;
-
-				} else {
-					for (let x = 0; x < width; x++) {
-						for (let y = 0; y < height; y++) {
-							if (!this.templateHasTile(template, x, y)) continue;
-
-							const position = new Vector2(topLeft).add({ x, y }).mod(game.mapSize);
-							SelectionOverlay.add(position);
-							this.previewTiles.push(getTileId(position.x, position.y, localPlayer.z));
-						}
-					}
-				}
-
-				game.updateView(RenderSource.Mod, false);
+			if (isMouseWithin) {
+				const options = this.getTemplateOptions();
+				const template = this.getTemplate(options);
+				if (template)
+					updateRender = this.updateTemplate(template, options);
 			}
 		}
 
-		if (api.wasReleased(this.DEBUG_TOOLS.selector.bindableSelectLocation) && this.selectHeld) {
-			this.selectHeld = false;
+		if (updateRender)
+			game.updateView(RenderSource.Mod, false);
+	}
+
+	private updateTemplate([terrain, doodads]: [string[], string[]?], options: ITemplateOptions) {
+		const center = renderer.screenToVector(...InputManager.mouse.position.xy);
+
+		const width = terrain[0].length;
+		const height = terrain.length;
+
+		const topLeft = new Vector2(center)
+			.subtract({ x: Math.floor(width / 2), y: Math.floor(height / 2) });
+
+		if (InputManager.input.isHolding(this.DEBUG_TOOLS.selector.bindableSelectLocation)) {
+			this.placeTemplate(topLeft);
+			this.selectHeld = true;
+			this.clearPreview();
+			return true;
 		}
 
-		return bindPressed;
+		if (InputManager.input.isHolding(this.DEBUG_TOOLS.selector.bindableCancelSelectLocation)) {
+			this.place.setChecked(false);
+			this.clearPreview();
+			return true;
+		}
+
+		if (center.equals(this.center) && !this.templateOptionsChanged(options))
+			return false;
+
+		this.center = center;
+		this.templateOptions = options;
+
+		this.clearPreview();
+
+		for (let x = 0; x < width; x++) {
+			for (let y = 0; y < height; y++) {
+				if (!this.templateHasTile([terrain, doodads], x, y))
+					continue;
+
+				const position = new Vector2(topLeft).add({ x, y }).mod(game.mapSize);
+				SelectionOverlay.add(position);
+				this.previewTiles.push(getTileId(position.x, position.y, localPlayer.z));
+			}
+		}
+
+		return true;
 	}
-	// tslint:enable cyclomatic-complexity
 
-	private getTemplate() {
+	private getTemplate(options: ITemplateOptions) {
 		const template = templateDescriptions[this.dropdownType.selection][this.dropdownTemplate.selection];
-		if (!template) return undefined;
+		if (!template)
+			return undefined;
 
-		return manipulateTemplates(this.getTemplateOptions(), [...template.terrain], template.doodad && [...template.doodad]);
+		return manipulateTemplates(options, [...template.terrain], template.doodad && [...template.doodad]);
 	}
 
 	private templateHasTile(templates: [string[], string[]?], x: number, y: number) {
@@ -196,14 +225,22 @@ export default class TemplatePanel extends DebugToolsPanel {
 		};
 	}
 
+	private templateOptionsChanged(options: ITemplateOptions) {
+		return !this.templateOptions
+			|| this.templateOptions.which !== options.which
+			|| this.templateOptions.mirrorHorizontally !== options.mirrorHorizontally
+			|| this.templateOptions.mirrorHorizontally !== options.mirrorVertically
+			|| this.templateOptions.rotate !== options.rotate;
+	}
+
 	@OwnEventHandler(TemplatePanel, "switchTo")
 	protected onSwitchTo() {
-		this.registerHookHost("DebugToolsDialog:TemplatePanel");
+		Bind.registerHandlers(this);
 	}
 
 	@OwnEventHandler(TemplatePanel, "switchAway")
 	protected onSwitchAway() {
-		hookManager.deregister(this);
+		Bind.deregisterHandlers(this);
 		this.place.setChecked(false);
 		this.clearPreview();
 	}
@@ -219,7 +256,8 @@ export default class TemplatePanel extends DebugToolsPanel {
 	}
 
 	private clearPreview() {
-		if (!this.previewTiles.length) return;
+		if (!this.previewTiles.length)
+			return false;
 
 		for (const previewTile of this.previewTiles) {
 			const tile = getTilePosition(previewTile);
@@ -228,6 +266,9 @@ export default class TemplatePanel extends DebugToolsPanel {
 
 		this.previewTiles.splice(0, Infinity);
 
-		if (!this.place.checked) game.updateView(RenderSource.Mod, false);
+		if (!this.place.checked)
+			game.updateView(RenderSource.Mod, false);
+
+		return true;
 	}
 }

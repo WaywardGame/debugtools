@@ -40,23 +40,23 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 	private readonly textPreposition = new Text().setText(translation(DebugToolsTranslation.To)).hide();
 
-	private readonly creatures = new SelectionSource(game.creatures, DebugToolsTranslation.FilterCreatures,
+	private readonly creatures = new SelectionSource(island.creatures, DebugToolsTranslation.FilterCreatures,
 		new CreatureDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
 		(creature, filter) => filter === "all" || (creature && creature.type === filter));
 
-	private readonly npcs = new SelectionSource(game.npcs, DebugToolsTranslation.FilterNPCs,
+	private readonly npcs = new SelectionSource(island.npcs, DebugToolsTranslation.FilterNPCs,
 		new NPCDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
 		(npc, filter) => filter === "all" || (npc && npc.type === filter));
 
-	private readonly tileEvents = new SelectionSource(game.tileEvents, DebugToolsTranslation.FilterTileEvents,
+	private readonly tileEvents = new SelectionSource(island.tileEvents, DebugToolsTranslation.FilterTileEvents,
 		new TileEventDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
 		(tileEvent, filter) => filter === "all" || (tileEvent && tileEvent.type === filter));
 
-	private readonly doodads = new SelectionSource(game.doodads, DebugToolsTranslation.FilterDoodads,
+	private readonly doodads = new SelectionSource(island.doodads, DebugToolsTranslation.FilterDoodads,
 		new DoodadDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
 		(doodad, filter) => filter === "all" || (doodad && doodad.type === filter));
 
-	private readonly corpses = new SelectionSource(game.corpses, DebugToolsTranslation.FilterCorpses,
+	private readonly corpses = new SelectionSource(island.corpses, DebugToolsTranslation.FilterCorpses,
 		new CorpseDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
 		(corpse, filter) => filter === "all" || (corpse && corpse.type === filter));
 

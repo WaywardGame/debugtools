@@ -3,9 +3,14 @@ import { RenderSource } from "game/IGame";
 import Mod from "mod/Mod";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
+import Divider from "newui/component/Divider";
 import { RangeRow } from "newui/component/RangeRow";
+import { Heading } from "newui/component/Text";
+import { RenderLayerFlag } from "renderer/IWorldRenderer";
 import { compileShaders, loadShaders } from "renderer/Shaders";
+import WorldLayerRenderer from "renderer/WorldLayerRenderer";
 import WorldRenderer from "renderer/WorldRenderer";
+import Enums from "utilities/enum/Enums";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, ISaveData, translation, ZOOM_LEVEL_MAX } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
@@ -66,6 +71,24 @@ export default class DisplayPanel extends DebugToolsPanel {
 			.setText(translation(DebugToolsTranslation.ButtonReloadShaders))
 			.event.subscribe("activate", this.reloadShaders)
 			.appendTo(this);
+
+		new Divider()
+			.appendTo(this);
+
+		new Heading()
+			.setText(translation(DebugToolsTranslation.HeadingLayers))
+			.appendTo(this);
+
+		Enums.values(RenderLayerFlag)
+			.filter(flag => flag !== RenderLayerFlag.None && flag !== RenderLayerFlag.All)
+			.map(layerFlag => new CheckButton()
+				.setText(translation(DebugToolsTranslation.ButtonToggleLayer)
+					.addArgs(RenderLayerFlag[layerFlag]))
+				.setRefreshMethod(() => this.saveData.renderLayerFlags !== undefined ? !!(this.saveData.renderLayerFlags & layerFlag) : true)
+				.event.subscribe("toggle", (_, checked) => {
+					this.updateRenderLayerFlag(layerFlag, checked);
+				}))
+			.splat(this.append);
 	}
 
 	@Override public getTranslation() {
@@ -84,7 +107,6 @@ export default class DisplayPanel extends DebugToolsPanel {
 
 	@OwnEventHandler(DisplayPanel, "switchTo")
 	protected onSwitchTo() {
-		this.registerEventBusSubscriber("switchAway");
 		this.zoomRange?.refresh();
 	}
 
@@ -105,4 +127,26 @@ export default class DisplayPanel extends DebugToolsPanel {
 		compileShaders();
 		game.updateView(RenderSource.Mod, true);
 	}
+
+	@Bound
+	private updateRenderLayerFlag(flag: RenderLayerFlag, checked: boolean) {
+		if (this.saveData.renderLayerFlags === undefined) {
+			this.saveData.renderLayerFlags = RenderLayerFlag.All;
+		}
+
+		if (checked) {
+			this.saveData.renderLayerFlags |= flag;
+
+		} else {
+			this.saveData.renderLayerFlags &= ~flag;
+		}
+
+		game.updateView(RenderSource.Mod);
+	}
+
+	@EventHandler(WorldLayerRenderer, "getRenderFlags")
+	protected getRenderFlags(): RenderLayerFlag {
+		return this.saveData.renderLayerFlags ?? RenderLayerFlag.All;
+	}
+
 }

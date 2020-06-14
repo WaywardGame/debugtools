@@ -1,19 +1,21 @@
 import Creature from "entity/creature/Creature";
 import Entity from "entity/Entity";
 import NPC from "entity/npc/NPC";
-import { PlayerState } from "entity/player/IPlayer";
 import Player from "entity/player/Player";
-import { OwnEventHandler } from "event/EventManager";
+import { EventBus } from "event/EventBuses";
+import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { RenderSource, TileUpdateType } from "game/IGame";
 import Translation from "language/Translation";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
-import { bindingManager } from "newui/BindingManager";
+import { Registry } from "mod/ModRegistry";
 import Button from "newui/component/Button";
 import Component from "newui/component/Component";
 import ContextMenu from "newui/component/ContextMenu";
 import Text from "newui/component/Text";
-import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import Bind, { IBindHandlerApi } from "newui/input/Bind";
+import Bindable from "newui/input/Bindable";
+import InputManager from "newui/input/InputManager";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
 import { gameScreen } from "newui/screen/screens/GameScreen";
 import { ITile } from "tile/ITerrain";
@@ -53,21 +55,12 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	 * The positioning settings for the dialog.
 	 */
 	public static description: IDialogDescription = {
-		minSize: {
-			x: 20,
-			y: 25,
-		},
-		size: {
-			x: 25,
-			y: 30,
-		},
-		maxSize: {
-			x: 40,
-			y: 70,
-		},
+		minSize: new Vector2(20, 25),
+		size: new Vector2(25, 27),
+		maxSize: new Vector2(40, 70),
 		edges: [
 			[Edge.Left, 50],
-			[Edge.Bottom, 0],
+			[Edge.Bottom, 33],
 		],
 		saveOpen: false,
 	};
@@ -197,30 +190,29 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		this.schedule(300, 300, this.updateSubpanels);
 	}
 
-	@Override @HookMethod
-	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
-		if (api.wasPressed(this.DEBUG_TOOLS.bindableCloseInspectDialog) && !bindPressed) {
-			this.close();
-			bindPressed = this.DEBUG_TOOLS.bindableCloseInspectDialog;
-		}
+	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableCloseInspectDialog"))
+	public onCloseBind() {
+		this.close();
+		return true;
+	}
 
-		if (api.wasPressed(Bindable.MenuContextMenu) && !bindPressed) {
-			for (let i = 0; i < this.entityButtons.length; i++) {
-				// the entity tabs can't use the `setContextMenu` functionality because they change so often. As a result, we have to
-				// catch the `MenuContextMenu` bind manually, and check whether it happened on one of them. If it did, we show the
-				// inspection lock menu.
-				if (api.isMouseWithin(this.entityButtons[i])) {
-					this.showInspectionLockMenu(i);
-					bindPressed = Bindable.MenuContextMenu;
-				}
+	@Bind.onDown(Bindable.MenuContextMenu)
+	public onContextMenuBind(api: IBindHandlerApi) {
+		for (let i = 0; i < this.entityButtons.length; i++) {
+			// the entity tabs can't use the `setContextMenu` functionality because they change so often. As a result, we have to
+			// catch the `MenuContextMenu` bind manually, and check whether it happened on one of them. If it did, we show the
+			// inspection lock menu.
+			if (api.mouse.isWithin(this.entityButtons[i])) {
+				this.showInspectionLockMenu(i);
+				return true;
 			}
 		}
 
-		return bindPressed;
+		return false;
 	}
 
-	@HookMethod
-	public onGameEnd(state: PlayerState) {
+	@EventHandler(EventBus.Game, "end")
+	public onGameEnd() {
 		this.close();
 	}
 
@@ -233,13 +225,13 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		this.update();
 	}
 
-	@HookMethod
-	public onMoveComplete(player: Player) {
+	@EventHandler(EventBus.Players, "moveComplete")
+	public onMoveComplete() {
 		this.update();
 	}
 
-	@HookMethod
-	public onTileUpdate(tile: ITile, x: number, y: number, z: number, tileUpdateType: TileUpdateType) {
+	@EventHandler(EventBus.Game, "tileUpdate")
+	public onTileUpdate(game: any, tile: ITile, x: number, y: number, z: number, tileUpdateType: TileUpdateType) {
 		this.update();
 	}
 
@@ -356,7 +348,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 				onActivate: this.lockInspection(index),
 			}])
 			.addAllDescribedOptions()
-			.setPosition(...bindingManager.getMouse().xy)
+			.setPosition(...InputManager.mouse.position.xy)
 			.schedule(gameScreen!.setContextMenu);
 	}
 

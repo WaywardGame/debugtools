@@ -10,19 +10,21 @@ import { Source } from "entity/player/IMessageManager";
 import Player from "entity/player/Player";
 import { EventBus } from "event/EventBuses";
 import { Events, IEventEmitter } from "event/EventEmitter";
-import { EventHandler } from "event/EventManager";
+import EventManager, { EventHandler } from "event/EventManager";
 import Game from "game/Game";
 import { RenderSource } from "game/IGame";
+import { InspectType } from "game/inspection/IInspection";
 import { Dictionary } from "language/Dictionaries";
 import Interrupt from "language/dictionary/Interrupt";
-import InterruptChoice from "language/dictionary/InterruptChoice";
 import Message from "language/dictionary/Message";
 import { HookMethod } from "mod/IHookHost";
 import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
-import { bindingManager } from "newui/BindingManager";
-import { Bindable, BindCatcherApi, KeyModifier } from "newui/IBindingManager";
+import Bind, { IBindHandlerApi } from "newui/input/Bind";
+import Bindable from "newui/input/Bindable";
+import { IBinding } from "newui/input/IBinding";
+import InputManager from "newui/input/InputManager";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
 import { MenuBarButtonGroup, MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
 import { gameScreen } from "newui/screen/screens/GameScreen";
@@ -43,6 +45,7 @@ import Kill from "./action/Kill";
 import Paint from "./action/Paint";
 import PlaceTemplate from "./action/PlaceTemplate";
 import Remove from "./action/Remove";
+import RenameIsland from "./action/RenameIsland";
 import SelectionExecute from "./action/SelectionExecute";
 import SetGrowingStage from "./action/SetGrowingStage";
 import SetSkill from "./action/SetSkill";
@@ -62,6 +65,7 @@ import LocationSelector from "./LocationSelector";
 import AddItemToInventoryComponent from "./ui/component/AddItemToInventory";
 import MainDialog from "./ui/DebugToolsDialog";
 import InspectDialog from "./ui/InspectDialog";
+import TemperatureInspection from "./ui/inspection/Temperature";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
 import Version from "./util/Version";
 
@@ -139,36 +143,36 @@ export default class DebugTools extends Mod {
 	// Bindables
 	//
 
-	@Register.bindable("ToggleDialog", { key: "Backslash" }, { key: "IntlBackslash" })
+	@Register.bindable("ToggleDialog", IBinding.key("Backslash"), IBinding.key("IntlBackslash"))
 	public readonly bindableToggleDialog: Bindable;
-	@Register.bindable("CloseInspectDialog", { key: "KeyI", modifiers: [KeyModifier.Alt] })
+	@Register.bindable("CloseInspectDialog", IBinding.key("KeyI", "Alt"))
 	public readonly bindableCloseInspectDialog: Bindable;
 
-	@Register.bindable("InspectTile", { mouseButton: 2, modifiers: [KeyModifier.Alt] })
+	@Register.bindable("InspectTile", IBinding.mouseButton(2, "Alt"))
 	public readonly bindableInspectTile: Bindable;
-	@Register.bindable("InspectLocalPlayer", { key: "KeyP", modifiers: [KeyModifier.Alt] })
+	@Register.bindable("InspectLocalPlayer", IBinding.key("KeyP", "Alt"))
 	public readonly bindableInspectLocalPlayer: Bindable;
-	@Register.bindable("HealLocalPlayer", { key: "KeyH", modifiers: [KeyModifier.Alt] })
+	@Register.bindable("HealLocalPlayer", IBinding.key("KeyH", "Alt"))
 	public readonly bindableHealLocalPlayer: Bindable;
-	@Register.bindable("TeleportLocalPlayer", { mouseButton: 0, modifiers: [KeyModifier.Alt] })
+	@Register.bindable("TeleportLocalPlayer", IBinding.mouseButton(0, "Alt"))
 	public readonly bindableTeleportLocalPlayer: Bindable;
-	@Register.bindable("ToggleNoClip", { key: "KeyN", modifiers: [KeyModifier.Alt] })
+	@Register.bindable("ToggleNoClip", IBinding.key("KeyN", "Alt"))
 	public readonly bindableToggleNoClipOnLocalPlayer: Bindable;
 
-	@Register.bindable("ToggleCameraLock", { key: "KeyC", modifiers: [KeyModifier.Alt] })
+	@Register.bindable("ToggleCameraLock", IBinding.key("KeyC", "Alt"))
 	public readonly bindableToggleCameraLock: Bindable;
-	@Register.bindable("ToggleFullVisibility", { key: "KeyV", modifiers: [KeyModifier.Alt] })
+	@Register.bindable("ToggleFullVisibility", IBinding.key("KeyV", "Alt"))
 	public readonly bindableToggleFullVisibility: Bindable;
 
-	@Register.bindable("Paint", { mouseButton: 0 })
+	@Register.bindable("Paint", IBinding.mouseButton(0))
 	public readonly bindablePaint: Bindable;
-	@Register.bindable("ErasePaint", { mouseButton: 2 })
+	@Register.bindable("ErasePaint", IBinding.mouseButton(2))
 	public readonly bindableErasePaint: Bindable;
-	@Register.bindable("ClearPaint", { key: "Backspace" })
+	@Register.bindable("ClearPaint", IBinding.key("Backspace"))
 	public readonly bindableClearPaint: Bindable;
-	@Register.bindable("CancelPaint", { key: "Escape" })
+	@Register.bindable("CancelPaint", IBinding.key("Escape"))
 	public readonly bindableCancelPaint: Bindable;
-	@Register.bindable("CompletePaint", { key: "Enter" })
+	@Register.bindable("CompletePaint", IBinding.key("Enter"))
 	public readonly bindableCompletePaint: Bindable;
 
 	////////////////////////////////////
@@ -186,13 +190,6 @@ export default class DebugTools extends Mod {
 
 	@Register.interrupt("ConfirmUnlockRecipes")
 	public readonly interruptUnlockRecipes: Interrupt;
-	@Register.interrupt("ChoiceTravelAway")
-	public readonly interruptTravelAway: Interrupt;
-
-	@Register.interruptChoice("SailToCivilization")
-	public readonly choiceSailToCivilization: InterruptChoice;
-	@Register.interruptChoice("TravelAway")
-	public readonly choiceTravelAway: InterruptChoice;
 
 	////////////////////////////////////
 	// Actions
@@ -261,6 +258,9 @@ export default class DebugTools extends Mod {
 	@Register.action("TogglePermissions", TogglePermissions)
 	public readonly actionTogglePermissions: ActionType;
 
+	@Register.action("RenameIsland", RenameIsland)
+	public readonly actionRenameIsland: ActionType;
+
 	////////////////////////////////////
 	// UI
 	//
@@ -269,6 +269,9 @@ export default class DebugTools extends Mod {
 	public readonly dialogMain: DialogId;
 	@Register.dialog("Inspect", InspectDialog.description, InspectDialog)
 	public readonly dialogInspect: DialogId;
+
+	@Register.inspectionType("temperature", TemperatureInspection)
+	public readonly inspectionTemperature: InspectType;
 
 	@Register.menuBarButton("Dialog", {
 		onActivate: () => DebugTools.INSTANCE.toggleDialog(),
@@ -373,12 +376,18 @@ export default class DebugTools extends Mod {
 		};
 	}
 
+	@Override public onInitialize() {
+		translation.setDebugToolsInstance(this);
+	}
+
 	/**
 	 * Called when Debug Tools is loaded (in a save)
 	 * - Registers the `LocationSelector` stored in `this.selector` as a hook host.
 	 */
-	@Override public onLoad(): void {
-		hookManager.register(this.selector, "DebugTools:LocationSelector");
+	@Override public onLoad() {
+		EventManager.registerEventBusSubscriber(this.selector);
+		Bind.registerHandlers(this.selector);
+		this.unlockedCameraMovementHandler.begin();
 	}
 
 	/**
@@ -387,8 +396,10 @@ export default class DebugTools extends Mod {
 	 * - Removes the `AddItemToInventory` UI Component.
 	 */
 	@Override public onUnload() {
-		hookManager.deregister(this.selector);
 		AddItemToInventoryComponent.init().releaseAndRemove();
+		EventManager.deregisterEventBusSubscriber(this.selector);
+		Bind.deregisterHandlers(this.selector);
+		this.unlockedCameraMovementHandler.end();
 	}
 
 	/**
@@ -451,7 +462,8 @@ export default class DebugTools extends Mod {
 	}
 
 	public hasPermission() {
-		return !multiplayer.isConnected() || multiplayer.isServer() || this.getPlayerData(localPlayer, "permissions");
+		return gameScreen
+			&& (!multiplayer.isConnected() || multiplayer.isServer() || this.getPlayerData(localPlayer, "permissions"));
 	}
 
 	public toggleFog(fog: boolean) {
@@ -596,7 +608,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * Used to reset noclip movement speed.
 	 */
-	@Override @HookMethod
+	@EventHandler(EventBus.Players, "noInput")
 	public onNoInputReceived(player: Player): void {
 		const noclip = this.getPlayerData(player, "noclip");
 		if (!noclip) return;
@@ -640,72 +652,90 @@ export default class DebugTools extends Mod {
 		return weight + this.getPlayerData(player, "weightBonus");
 	}
 
-	// tslint:disable cyclomatic-complexity
-	@Override @HookMethod
-	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable {
-		if (!gameScreen) {
-			return bindPressed;
-		}
+	@Bind.onDown(Bindable.GameZoomIn)
+	@Bind.onDown(Bindable.GameZoomOut)
+	public onZoomIn(api: IBindHandlerApi) {
+		if (!this.hasPermission() || !gameScreen?.isMouseWithin())
+			return false;
 
-		if (!this.hasPermission()) return bindPressed;
-
-		if (api.wasPressed(Bindable.GameZoomIn) && !bindPressed && gameScreen.isMouseWithin()) {
-			this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;
-			this.data.zoomLevel = Math.min(ZOOM_LEVEL_MAX + 3, ++this.data.zoomLevel);
-			game.updateZoomLevel();
-			bindPressed = Bindable.GameZoomIn;
-			api.removePressState(Bindable.GameZoomIn);
-		}
-
-		if (api.wasPressed(Bindable.GameZoomOut) && !bindPressed && gameScreen.isMouseWithin()) {
-			this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;
-			this.data.zoomLevel = Math.max(0, --this.data.zoomLevel);
-			game.updateZoomLevel();
-			bindPressed = Bindable.GameZoomOut;
-			api.removePressState(Bindable.GameZoomOut);
-		}
-
-		if (api.wasPressed(this.bindableToggleCameraLock) && !bindPressed) {
-			this.setCameraUnlocked(this.cameraState !== CameraState.Unlocked);
-			bindPressed = this.bindableToggleCameraLock;
-		}
-
-		if (api.wasPressed(this.bindableToggleFullVisibility) && !bindPressed) {
-			const visibility = !(this.getPlayerData(localPlayer, "fog") || this.getPlayerData(localPlayer, "lighting"));
-			this.toggleFog(visibility);
-			this.toggleLighting(visibility);
-			bindPressed = this.bindableToggleFullVisibility;
-		}
-
-		if (api.wasPressed(this.bindableInspectTile) && !bindPressed && gameScreen.isMouseWithin()) {
-			this.inspect(renderer.screenToTile(...bindingManager.getMouse().xy));
-			bindPressed = this.bindableInspectTile;
-		}
-
-		if (api.wasPressed(this.bindableInspectLocalPlayer) && !bindPressed) {
-			this.inspect(localPlayer);
-			bindPressed = this.bindableInspectLocalPlayer;
-		}
-
-		if (api.wasPressed(this.bindableHealLocalPlayer) && !bindPressed) {
-			ActionExecutor.get(Heal).execute(localPlayer, localPlayer);
-			bindPressed = this.bindableHealLocalPlayer;
-		}
-
-		if (api.wasPressed(this.bindableTeleportLocalPlayer) && !bindPressed) {
-			ActionExecutor.get(TeleportEntity).execute(localPlayer, localPlayer, { ...renderer.screenToTile(api.mouseX, api.mouseY).raw(), z: localPlayer.z });
-			bindPressed = this.bindableTeleportLocalPlayer;
-		}
-
-		if (api.wasPressed(this.bindableToggleNoClipOnLocalPlayer) && !bindPressed) {
-			ActionExecutor.get(ToggleNoClip).execute(localPlayer, localPlayer, !this.getPlayerData(localPlayer, "noclip"));
-			bindPressed = this.bindableToggleNoClipOnLocalPlayer;
-		}
-
-		// if the camera isn't locked, we let the camera movement handler handle binds
-		return this.cameraState === CameraState.Locked ? bindPressed : this.unlockedCameraMovementHandler.handle(bindPressed, api);
+		this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;
+		this.data.zoomLevel = api.bindable === Bindable.GameZoomIn ? Math.min(ZOOM_LEVEL_MAX + 3, ++this.data.zoomLevel) : Math.max(0, --this.data.zoomLevel);
+		game.updateZoomLevel();
+		return true;
 	}
-	// tslint:enable cyclomatic-complexity
+
+	@Bind.onDown(Registry<DebugTools>().get("bindableToggleCameraLock"))
+	public onToggleCameraLock() {
+		if (!this.hasPermission())
+			return false;
+
+		this.setCameraUnlocked(this.cameraState !== CameraState.Unlocked);
+		return true;
+	}
+
+	@Bind.onDown(Registry<DebugTools>().get("bindableToggleFullVisibility"))
+	public onToggleFullVisibility() {
+		if (!this.hasPermission())
+			return false;
+
+		const visibility = !(this.getPlayerData(localPlayer, "fog") || this.getPlayerData(localPlayer, "lighting"));
+		this.toggleFog(visibility);
+		this.toggleLighting(visibility);
+		return true;
+	}
+
+	@Bind.onDown(Registry<DebugTools>().get("bindableInspectTile"))
+	public onInspectTile() {
+		if (!this.hasPermission() || !gameScreen?.isMouseWithin())
+			return false;
+
+		const tile = renderer.screenToTile(...InputManager.mouse.position.xy);
+		if (!tile)
+			return false;
+
+		this.inspect(tile);
+		return true;
+	}
+
+	@Bind.onDown(Registry<DebugTools>().get("bindableInspectLocalPlayer"))
+	public onInspectLocalPlayer() {
+		if (!this.hasPermission())
+			return false;
+
+		this.inspect(localPlayer);
+		return true;
+	}
+
+	@Bind.onDown(Registry<DebugTools>().get("bindableHealLocalPlayer"))
+	public onHealLocalPlayer() {
+		if (!this.hasPermission())
+			return false;
+
+		ActionExecutor.get(Heal).execute(localPlayer, localPlayer);
+		return true;
+	}
+
+	@Bind.onDown(Registry<DebugTools>().get("bindableTeleportLocalPlayer"))
+	public onTeleportLocalPlayer(api: IBindHandlerApi) {
+		if (!this.hasPermission())
+			return false;
+
+		const tile = renderer.screenToTile(...api.mouse.position.xy);
+		if (!tile)
+			return false;
+
+		ActionExecutor.get(TeleportEntity).execute(localPlayer, localPlayer, { ...tile.raw(), z: localPlayer.z });
+		return true;
+	}
+
+	@Bind.onDown(Registry<DebugTools>().get("bindableToggleNoClipOnLocalPlayer"))
+	public onToggleNoClipOnLocalPlayer() {
+		if (!this.hasPermission())
+			return false;
+
+		ActionExecutor.get(ToggleNoClip).execute(localPlayer, localPlayer, !this.getPlayerData(localPlayer, "noclip"));
+		return true;
+	}
 
 	/**
 	 * If lighting is disabled, we return maximum light on all channels.

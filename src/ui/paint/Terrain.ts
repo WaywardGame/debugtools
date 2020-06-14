@@ -1,12 +1,10 @@
-import { Events } from "event/EventEmitter";
-import { IEventEmitter } from "event/EventEmitter";
+import { Events, IEventEmitter } from "event/EventEmitter";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
 import TerrainDropdown from "newui/component/dropdown/TerrainDropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import { TerrainType } from "tile/ITerrain";
-import { terrainDescriptions } from "tile/Terrains";
-
+import terrainDescriptions from "tile/Terrains";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 

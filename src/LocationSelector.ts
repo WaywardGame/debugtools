@@ -1,10 +1,12 @@
-import { EventHandler, EventSubscriber } from "event/EventManager";
+import { Priority } from "event/EventEmitter";
+import { EventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
-import { HookMethod, IHookHost } from "mod/IHookHost";
-import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
-import Register from "mod/ModRegistry";
-import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import Register, { Registry } from "mod/ModRegistry";
+import Bind from "newui/input/Bind";
+import Bindable from "newui/input/Bindable";
+import { IBinding } from "newui/input/IBinding";
+import InputManager from "newui/input/InputManager";
 import MovementHandler from "newui/screen/screens/game/util/movement/MovementHandler";
 import { gameScreen } from "newui/screen/screens/GameScreen";
 import { ITile } from "tile/ITerrain";
@@ -15,8 +17,7 @@ import { DEBUG_TOOLS_ID } from "./IDebugTools";
 import Overlays from "./overlay/Overlays";
 import CancelablePromise from "./util/CancelablePromise";
 
-@EventSubscriber
-export default class SelectLocation implements IHookHost {
+export default class SelectLocation {
 
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
 	public readonly DEBUG_TOOLS: DebugTools;
@@ -25,9 +26,9 @@ export default class SelectLocation implements IHookHost {
 	// Registrations
 	//
 
-	@Register.bindable("SelectLocation", { mouseButton: 0 })
+	@Register.bindable("SelectLocation", IBinding.mouseButton(0))
 	public readonly bindableSelectLocation: Bindable;
-	@Register.bindable("CancelSelectLocation", { mouseButton: 2 })
+	@Register.bindable("CancelSelectLocation", IBinding.mouseButton(2))
 	public readonly bindableCancelSelectLocation: Bindable;
 
 	////////////////////////////////////
@@ -50,57 +51,86 @@ export default class SelectLocation implements IHookHost {
 	 */
 	public select() {
 		this._selecting = true;
+		this.selectionTick();
 		return this.selectionPromise = new CancelablePromise<Vector2>()
 			.onCancel(this.cancel);
 	}
 
 	////////////////////////////////////
-	// Hooks
+	// Event Handlers
 	//
 
-	// tslint:disable cyclomatic-complexity
-	@HookMethod(HookPriority.High)
-	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
-		if (!gameScreen) {
-			return bindPressed;
+	/**
+	 * Prevents movement if a tile is currently being selected or if the select tile bind is still held.
+	 */
+	@EventHandler(MovementHandler, "canMove")
+	protected canClientMove(): false | undefined {
+		if (this._selecting || this.selectTileHeld) {
+			return false;
 		}
 
-		const selectTilePressed = api.wasPressed(this.bindableSelectLocation) && gameScreen.isMouseWithin();
-		const cancelSelectTilePressed = api.wasPressed(this.bindableCancelSelectLocation) && gameScreen.isMouseWithin();
+		return undefined;
+	}
+
+	@Bind.onDown(Registry<SelectLocation>().get("bindableSelectLocation"), Priority.High)
+	@Bind.onDown(Registry<SelectLocation>().get("bindableCancelSelectLocation"), Priority.High)
+	protected onSelectOrCancelSelectLocation() {
+		return this._selecting;
+	}
+
+	@Bind.onUp(Registry<SelectLocation>().get("bindableSelectLocation"))
+	protected onStopSelectLocation() {
+		this.selectTileHeld = false;
+		return false;
+	}
+
+	////////////////////////////////////
+	// Helpers
+	//
+
+	// tslint:disable-next-line cyclomatic-complexity
+	@Bound private selectionTick() {
+		if (!this._selecting)
+			return;
+
+		setTimeout(this.selectionTick, game.interval);
+
+		const selectTilePressed = InputManager.input.isHolding(this.bindableSelectLocation) && gameScreen?.isMouseWithin();
+		const cancelSelectTilePressed = InputManager.input.isHolding(this.bindableCancelSelectLocation) && gameScreen?.isMouseWithin();
 
 		let updateRender = false;
 
 		if (this._selecting) {
-			const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
+			const tilePosition = renderer.screenToTile(...InputManager.mouse.position.xy);
 
-			// add the target overlay to the tile currently being hovered
-			const tile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
+			if (tilePosition) {
+				// add the target overlay to the tile currently being hovered
+				const tile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
 
-			if (tile !== this.hoverTile) {
-				updateRender = true;
+				if (tile !== this.hoverTile) {
+					updateRender = true;
 
-				if (this.hoverTile) {
-					TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
+					if (this.hoverTile) {
+						TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
+					}
+
+					this.hoverTile = tile;
+					TileHelpers.Overlay.add(tile, { type: this.DEBUG_TOOLS.overlayTarget }, Overlays.isHoverTarget);
 				}
 
-				this.hoverTile = tile;
-				TileHelpers.Overlay.add(tile, { type: this.DEBUG_TOOLS.overlayTarget }, Overlays.isHoverTarget);
-			}
+				if (cancelSelectTilePressed) {
+					updateRender = true;
 
-			if (cancelSelectTilePressed && !bindPressed) {
-				updateRender = true;
+					if (this.selectionPromise) this.selectionPromise.cancel();
+					else this.cancel();
 
-				if (this.selectionPromise) this.selectionPromise.cancel();
-				else this.cancel();
-				bindPressed = this.bindableCancelSelectLocation;
+				} else if (selectTilePressed) {
+					updateRender = true;
 
-			} else if (selectTilePressed && !bindPressed) {
-				updateRender = true;
+					this.selectTile(tilePosition);
 
-				this.selectTile(tilePosition);
-
-				bindPressed = this.bindableSelectLocation;
-				this.selectTileHeld = true;
+					this.selectTileHeld = true;
+				}
 			}
 
 		} else if (this.hoverTile) {
@@ -111,32 +141,9 @@ export default class SelectLocation implements IHookHost {
 			updateRender = true;
 		}
 
-		if (updateRender) {
+		if (updateRender)
 			game.updateView(RenderSource.Mod, false);
-		}
-
-		if (api.wasReleased(this.bindableSelectLocation) && this.selectTileHeld) {
-			this.selectTileHeld = false;
-		}
-
-		return bindPressed;
 	}
-
-	/**
-	 * Prevents movement if a tile is currently being selected or if the select tile bind is still held.
-	 */
-	@EventHandler(MovementHandler, "canMove")
-	public canClientMove(): false | undefined {
-		if (this._selecting || this.selectTileHeld) {
-			return false;
-		}
-
-		return undefined;
-	}
-
-	////////////////////////////////////
-	// Helpers
-	//
 
 	/**
 	 * Cleanup after the location selection is canceled.

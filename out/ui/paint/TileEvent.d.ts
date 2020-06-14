@@ -11,7 +11,7 @@ export default class TileEventPaint extends Component implements IPaintSection {
     constructor();
     getTilePaintData(): {
         tileEvent: {
-            type: TileEventType | "remove" | undefined;
+            type: "remove" | TileEventType | undefined;
             replaceExisting: boolean;
         };
     };

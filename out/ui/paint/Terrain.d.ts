@@ -1,5 +1,4 @@
-import { Events } from "event/EventEmitter";
-import { IEventEmitter } from "event/EventEmitter";
+import { Events, IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
 import { TerrainType } from "tile/ITerrain";
 import { IPaintSection } from "../panel/PaintPanel";

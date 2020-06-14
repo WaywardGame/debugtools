@@ -20,6 +20,8 @@ import ChangeTerrain from "../../action/ChangeTerrain";
 import ToggleTilled from "../../action/ToggleTilled";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
+import { BlockRow } from "newui/component/BlockRow";
+import { RenderSource } from "game/IGame";
 
 export default class TerrainInformation extends InspectInformationSection {
 
@@ -30,8 +32,9 @@ export default class TerrainInformation extends InspectInformationSection {
 	private tile: ITile;
 	private terrainType: string;
 
-	private readonly checkButtonTilled: CheckButton;
 	private readonly dropdownTerrainType: Dropdown<TerrainType>;
+	private readonly checkButtonTilled: CheckButton;
+	private readonly checkButtonIncludeNeighbors: CheckButton;
 
 	public constructor() {
 		super();
@@ -56,6 +59,15 @@ export default class TerrainInformation extends InspectInformationSection {
 			.setRefreshMethod(this.isTilled)
 			.event.subscribe("toggle", this.toggleTilled)
 			.appendTo(this);
+
+		new BlockRow()
+			.append(new Button()
+				.setText(() => translation(DebugToolsTranslation.ButtonRefreshTile))
+				.event.subscribe("activate", this.refreshTile))
+			.append(this.checkButtonIncludeNeighbors = new CheckButton()
+				.setText(translation(DebugToolsTranslation.ButtonIncludeNeighbors)))
+			.appendTo(this);
+		;
 	}
 
 	@Override
@@ -120,5 +132,11 @@ export default class TerrainInformation extends InspectInformationSection {
 
 		ActionExecutor.get(ChangeTerrain).execute(localPlayer, terrain, this.position);
 		this.update(this.position, this.tile);
+	}
+
+	@Bound
+	public refreshTile() {
+		world.layers[this.position.z].updateTile(this.position.x, this.position.y, this.tile, true, this.checkButtonIncludeNeighbors.checked, true, true);
+		game.updateView(RenderSource.Mod, false);
 	}
 }

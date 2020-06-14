@@ -14,6 +14,8 @@ export default class EntityInformation extends InspectInformationSection {
     private readonly subsections;
     private readonly statWrapper;
     private readonly statComponents;
+    private readonly buttonHeal;
+    private readonly buttonTeleport;
     private entities;
     private entity;
     constructor();
@@ -21,7 +23,7 @@ export default class EntityInformation extends InspectInformationSection {
     setTab(entity: number): this;
     update(position: IVector2, tile: ITile): void;
     getEntityIndex(entity: Creature | NPC | Player): number;
-    getEntity(index: number): NPC | Player | Creature;
+    getEntity(index: number): Player | Creature | NPC;
     logUpdate(): void;
     private initializeStats;
     private onStatChange;

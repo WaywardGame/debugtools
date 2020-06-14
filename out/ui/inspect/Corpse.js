@@ -7,73 +7,76 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 define(["require", "exports", "entity/action/ActionExecutor", "language/Translation", "mod/Mod", "newui/component/Button", "utilities/Arrays", "../../action/Heal", "../../action/Remove", "../../IDebugTools", "../../util/Array", "../component/InspectInformationSection"], function (require, exports, ActionExecutor_1, Translation_1, Mod_1, Button_1, Arrays_1, Heal_1, Remove_1, IDebugTools_1, Array_1, InspectInformationSection_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class CorpseInformation extends InspectInformationSection_1.default {
-        constructor() {
-            super();
-            this.corpses = [];
-            new Button_1.default()
-                .setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.ButtonResurrectCorpse))
-                .event.subscribe("activate", this.resurrect)
-                .appendTo(this);
-            new Button_1.default()
-                .setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.ButtonRemoveThing))
-                .event.subscribe("activate", this.removeCorpse)
-                .appendTo(this);
-        }
-        getTabs() {
-            return this.corpses.entries().stream()
-                .map(([i, corpse]) => Arrays_1.Tuple(i, () => IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.CorpseName)
-                .get(corpseManager.getName(corpse, false).inContext(Translation_1.TextContext.Title))))
-                .toArray();
-        }
-        setTab(corpse) {
-            this.corpse = this.corpses[corpse];
-            return this;
-        }
-        update(position, tile) {
-            const corpses = [...tile.corpses || []];
-            if (Array_1.areArraysIdentical(corpses, this.corpses))
-                return;
-            this.corpses = corpses;
-            if (!this.corpses.length)
-                return;
-            this.setShouldLog();
-        }
-        logUpdate() {
-            for (const corpse of this.corpses) {
-                this.LOG.info("Corpse:", corpse);
+    let CorpseInformation = (() => {
+        class CorpseInformation extends InspectInformationSection_1.default {
+            constructor() {
+                super();
+                this.corpses = [];
+                new Button_1.default()
+                    .setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.ButtonResurrectCorpse))
+                    .event.subscribe("activate", this.resurrect)
+                    .appendTo(this);
+                new Button_1.default()
+                    .setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.ButtonRemoveThing))
+                    .event.subscribe("activate", this.removeCorpse)
+                    .appendTo(this);
+            }
+            getTabs() {
+                return this.corpses.entries().stream()
+                    .map(([i, corpse]) => Arrays_1.Tuple(i, () => IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.CorpseName)
+                    .get(corpseManager.getName(corpse, false).inContext(Translation_1.TextContext.Title))))
+                    .toArray();
+            }
+            setTab(corpse) {
+                this.corpse = this.corpses[corpse];
+                return this;
+            }
+            update(position, tile) {
+                const corpses = [...tile.corpses || []];
+                if (Array_1.areArraysIdentical(corpses, this.corpses))
+                    return;
+                this.corpses = corpses;
+                if (!this.corpses.length)
+                    return;
+                this.setShouldLog();
+            }
+            logUpdate() {
+                for (const corpse of this.corpses) {
+                    this.LOG.info("Corpse:", corpse);
+                }
+            }
+            resurrect() {
+                ActionExecutor_1.default.get(Heal_1.default).execute(localPlayer, this.corpse);
+                this.event.emit("update");
+            }
+            removeCorpse() {
+                ActionExecutor_1.default.get(Remove_1.default).execute(localPlayer, this.corpse);
+                this.event.emit("update");
             }
         }
-        resurrect() {
-            ActionExecutor_1.default.get(Heal_1.default).execute(localPlayer, this.corpse);
-            this.event.emit("update");
-        }
-        removeCorpse() {
-            ActionExecutor_1.default.get(Remove_1.default).execute(localPlayer, this.corpse);
-            this.event.emit("update");
-        }
-    }
-    __decorate([
-        Mod_1.default.log(IDebugTools_1.DEBUG_TOOLS_ID)
-    ], CorpseInformation.prototype, "LOG", void 0);
-    __decorate([
-        Override
-    ], CorpseInformation.prototype, "getTabs", null);
-    __decorate([
-        Override
-    ], CorpseInformation.prototype, "setTab", null);
-    __decorate([
-        Override
-    ], CorpseInformation.prototype, "update", null);
-    __decorate([
-        Override
-    ], CorpseInformation.prototype, "logUpdate", null);
-    __decorate([
-        Bound
-    ], CorpseInformation.prototype, "resurrect", null);
-    __decorate([
-        Bound
-    ], CorpseInformation.prototype, "removeCorpse", null);
+        __decorate([
+            Mod_1.default.log(IDebugTools_1.DEBUG_TOOLS_ID)
+        ], CorpseInformation.prototype, "LOG", void 0);
+        __decorate([
+            Override
+        ], CorpseInformation.prototype, "getTabs", null);
+        __decorate([
+            Override
+        ], CorpseInformation.prototype, "setTab", null);
+        __decorate([
+            Override
+        ], CorpseInformation.prototype, "update", null);
+        __decorate([
+            Override
+        ], CorpseInformation.prototype, "logUpdate", null);
+        __decorate([
+            Bound
+        ], CorpseInformation.prototype, "resurrect", null);
+        __decorate([
+            Bound
+        ], CorpseInformation.prototype, "removeCorpse", null);
+        return CorpseInformation;
+    })();
     exports.default = CorpseInformation;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ29ycHNlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL2luc3BlY3QvQ29ycHNlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7OztJQWdCQSxNQUFxQixpQkFBa0IsU0FBUSxtQ0FBeUI7UUFRdkU7WUFDQyxLQUFLLEVBQUUsQ0FBQztZQUpELFlBQU8sR0FBYyxFQUFFLENBQUM7WUFNL0IsSUFBSSxnQkFBTSxFQUFFO2lCQUNWLE9BQU8sQ0FBQyx5QkFBVyxDQUFDLG1DQUFxQixDQUFDLHFCQUFxQixDQUFDLENBQUM7aUJBQ2pFLEtBQUssQ0FBQyxTQUFTLENBQUMsVUFBVSxFQUFFLElBQUksQ0FBQyxTQUFTLENBQUM7aUJBQzNDLFFBQVEsQ0FBQyxJQUFJLENBQUMsQ0FBQztZQUVqQixJQUFJLGdCQUFNLEVBQUU7aUJBQ1YsT0FBTyxDQUFDLHlCQUFXLENBQUMsbUNBQXFCLENBQUMsaUJBQWlCLENBQUMsQ0FBQztpQkFDN0QsS0FBSyxDQUFDLFNBQVMsQ0FBQyxVQUFVLEVBQUUsSUFBSSxDQUFDLFlBQVksQ0FBQztpQkFDOUMsUUFBUSxDQUFDLElBQUksQ0FBQyxDQUFDO1FBQ2xCLENBQUM7UUFFZ0IsT0FBTztZQUN2QixPQUFPLElBQUksQ0FBQyxPQUFPLENBQUMsT0FBTyxFQUFFLENBQUMsTUFBTSxFQUFFO2lCQUNwQyxHQUFHLENBQUMsQ0FBQyxDQUFDLENBQUMsRUFBRSxNQUFNLENBQUMsRUFBRSxFQUFFLENBQUMsY0FBSyxDQUFDLENBQUMsRUFBRSxHQUFHLEVBQUUsQ0FBQyx5QkFBVyxDQUFDLG1DQUFxQixDQUFDLFVBQVUsQ0FBQztpQkFDaEYsR0FBRyxDQUFDLGFBQWEsQ0FBQyxPQUFPLENBQUMsTUFBTSxFQUFFLEtBQUssQ0FBQyxDQUFDLFNBQVMsQ0FBQyx5QkFBVyxDQUFDLEtBQUssQ0FBQyxDQUFDLENBQUMsQ0FBQztpQkFDekUsT0FBTyxFQUFFLENBQUM7UUFDYixDQUFDO1FBRWdCLE1BQU0sQ0FBQyxNQUFjO1lBQ3JDLElBQUksQ0FBQyxNQUFNLEdBQUcsSUFBSSxDQUFDLE9BQU8sQ0FBQyxNQUFNLENBQUMsQ0FBQztZQUNuQyxPQUFPLElBQUksQ0FBQztRQUNiLENBQUM7UUFFZ0IsTUFBTSxDQUFDLFFBQWtCLEVBQUUsSUFBVztZQUN0RCxNQUFNLE9BQU8sR0FBRyxDQUFDLEdBQUcsSUFBSSxDQUFDLE9BQU8sSUFBSSxFQUFFLENBQUMsQ0FBQztZQUV4QyxJQUFJLDBCQUFrQixDQUFDLE9BQU8sRUFBRSxJQUFJLENBQUMsT0FBTyxDQUFDO2dCQUFFLE9BQU87WUFDdEQsSUFBSSxDQUFDLE9BQU8sR0FBRyxPQUFPLENBQUM7WUFFdkIsSUFBSSxDQUFDLElBQUksQ0FBQyxPQUFPLENBQUMsTUFBTTtnQkFBRSxPQUFPO1lBRWpDLElBQUksQ0FBQyxZQUFZLEVBQUUsQ0FBQztRQUNyQixDQUFDO1FBRWdCLFNBQVM7WUFDekIsS0FBSyxNQUFNLE1BQU0sSUFBSSxJQUFJLENBQUMsT0FBTyxFQUFFO2dCQUNsQyxJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyxTQUFTLEVBQUUsTUFBTSxDQUFDLENBQUM7YUFDakM7UUFDRixDQUFDO1FBR08sU0FBUztZQUNoQix3QkFBYyxDQUFDLEdBQUcsQ0FBQyxjQUFJLENBQUMsQ0FBQyxPQUFPLENBQUMsV0FBVyxFQUFFLElBQUksQ0FBQyxNQUFPLENBQUMsQ0FBQztZQUM1RCxJQUFJLENBQUMsS0FBSyxDQUFDLElBQUksQ0FBQyxRQUFRLENBQUMsQ0FBQztRQUMzQixDQUFDO1FBR08sWUFBWTtZQUNuQix3QkFBYyxDQUFDLEdBQUcsQ0FBQyxnQkFBTSxDQUFDLENBQUMsT0FBTyxDQUFDLFdBQVcsRUFBRSxJQUFJLENBQUMsTUFBTyxDQUFDLENBQUM7WUFDOUQsSUFBSSxDQUFDLEtBQUssQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDLENBQUM7UUFDM0IsQ0FBQztLQUNEO0lBM0RBO1FBREMsYUFBRyxDQUFDLEdBQUcsQ0FBQyw0QkFBYyxDQUFDO2tEQUNDO0lBbUJmO1FBQVQsUUFBUTtvREFLUjtJQUVTO1FBQVQsUUFBUTttREFHUjtJQUVTO1FBQVQsUUFBUTttREFTUjtJQUVTO1FBQVQsUUFBUTtzREFJUjtJQUdEO1FBREMsS0FBSztzREFJTDtJQUdEO1FBREMsS0FBSzt5REFJTDtJQTdERixvQ0E4REMifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ29ycHNlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL2luc3BlY3QvQ29ycHNlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7OztJQWdCQTtRQUFBLE1BQXFCLGlCQUFrQixTQUFRLG1DQUF5QjtZQVF2RTtnQkFDQyxLQUFLLEVBQUUsQ0FBQztnQkFKRCxZQUFPLEdBQWMsRUFBRSxDQUFDO2dCQU0vQixJQUFJLGdCQUFNLEVBQUU7cUJBQ1YsT0FBTyxDQUFDLHlCQUFXLENBQUMsbUNBQXFCLENBQUMscUJBQXFCLENBQUMsQ0FBQztxQkFDakUsS0FBSyxDQUFDLFNBQVMsQ0FBQyxVQUFVLEVBQUUsSUFBSSxDQUFDLFNBQVMsQ0FBQztxQkFDM0MsUUFBUSxDQUFDLElBQUksQ0FBQyxDQUFDO2dCQUVqQixJQUFJLGdCQUFNLEVBQUU7cUJBQ1YsT0FBTyxDQUFDLHlCQUFXLENBQUMsbUNBQXFCLENBQUMsaUJBQWlCLENBQUMsQ0FBQztxQkFDN0QsS0FBSyxDQUFDLFNBQVMsQ0FBQyxVQUFVLEVBQUUsSUFBSSxDQUFDLFlBQVksQ0FBQztxQkFDOUMsUUFBUSxDQUFDLElBQUksQ0FBQyxDQUFDO1lBQ2xCLENBQUM7WUFFZ0IsT0FBTztnQkFDdkIsT0FBTyxJQUFJLENBQUMsT0FBTyxDQUFDLE9BQU8sRUFBRSxDQUFDLE1BQU0sRUFBRTtxQkFDcEMsR0FBRyxDQUFDLENBQUMsQ0FBQyxDQUFDLEVBQUUsTUFBTSxDQUFDLEVBQUUsRUFBRSxDQUFDLGNBQUssQ0FBQyxDQUFDLEVBQUUsR0FBRyxFQUFFLENBQUMseUJBQVcsQ0FBQyxtQ0FBcUIsQ0FBQyxVQUFVLENBQUM7cUJBQ2hGLEdBQUcsQ0FBQyxhQUFhLENBQUMsT0FBTyxDQUFDLE1BQU0sRUFBRSxLQUFLLENBQUMsQ0FBQyxTQUFTLENBQUMseUJBQVcsQ0FBQyxLQUFLLENBQUMsQ0FBQyxDQUFDLENBQUM7cUJBQ3pFLE9BQU8sRUFBRSxDQUFDO1lBQ2IsQ0FBQztZQUVnQixNQUFNLENBQUMsTUFBYztnQkFDckMsSUFBSSxDQUFDLE1BQU0sR0FBRyxJQUFJLENBQUMsT0FBTyxDQUFDLE1BQU0sQ0FBQyxDQUFDO2dCQUNuQyxPQUFPLElBQUksQ0FBQztZQUNiLENBQUM7WUFFZ0IsTUFBTSxDQUFDLFFBQWtCLEVBQUUsSUFBVztnQkFDdEQsTUFBTSxPQUFPLEdBQUcsQ0FBQyxHQUFHLElBQUksQ0FBQyxPQUFPLElBQUksRUFBRSxDQUFDLENBQUM7Z0JBRXhDLElBQUksMEJBQWtCLENBQUMsT0FBTyxFQUFFLElBQUksQ0FBQyxPQUFPLENBQUM7b0JBQUUsT0FBTztnQkFDdEQsSUFBSSxDQUFDLE9BQU8sR0FBRyxPQUFPLENBQUM7Z0JBRXZCLElBQUksQ0FBQyxJQUFJLENBQUMsT0FBTyxDQUFDLE1BQU07b0JBQUUsT0FBTztnQkFFakMsSUFBSSxDQUFDLFlBQVksRUFBRSxDQUFDO1lBQ3JCLENBQUM7WUFFZ0IsU0FBUztnQkFDekIsS0FBSyxNQUFNLE1BQU0sSUFBSSxJQUFJLENBQUMsT0FBTyxFQUFFO29CQUNsQyxJQUFJLENBQUMsR0FBRyxDQUFDLElBQUksQ0FBQyxTQUFTLEVBQUUsTUFBTSxDQUFDLENBQUM7aUJBQ2pDO1lBQ0YsQ0FBQztZQUdPLFNBQVM7Z0JBQ2hCLHdCQUFjLENBQUMsR0FBRyxDQUFDLGNBQUksQ0FBQyxDQUFDLE9BQU8sQ0FBQyxXQUFXLEVBQUUsSUFBSSxDQUFDLE1BQU8sQ0FBQyxDQUFDO2dCQUM1RCxJQUFJLENBQUMsS0FBSyxDQUFDLElBQUksQ0FBQyxRQUFRLENBQUMsQ0FBQztZQUMzQixDQUFDO1lBR08sWUFBWTtnQkFDbkIsd0JBQWMsQ0FBQyxHQUFHLENBQUMsZ0JBQU0sQ0FBQyxDQUFDLE9BQU8sQ0FBQyxXQUFXLEVBQUUsSUFBSSxDQUFDLE1BQU8sQ0FBQyxDQUFDO2dCQUM5RCxJQUFJLENBQUMsS0FBSyxDQUFDLElBQUksQ0FBQyxRQUFRLENBQUMsQ0FBQztZQUMzQixDQUFDO1NBQ0Q7UUEzREE7WUFEQyxhQUFHLENBQUMsR0FBRyxDQUFDLDRCQUFjLENBQUM7c0RBQ0M7UUFtQmY7WUFBVCxRQUFRO3dEQUtSO1FBRVM7WUFBVCxRQUFRO3VEQUdSO1FBRVM7WUFBVCxRQUFRO3VEQVNSO1FBRVM7WUFBVCxRQUFROzBEQUlSO1FBR0Q7WUFEQyxLQUFLOzBEQUlMO1FBR0Q7WUFEQyxLQUFLOzZEQUlMO1FBQ0Ysd0JBQUM7U0FBQTtzQkE5RG9CLGlCQUFpQiJ9

@@ -7,7 +7,6 @@ import NPC from "entity/npc/NPC";
 import Player from "entity/player/Player";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
-import { bindingManager } from "newui/BindingManager";
 import { BlockRow } from "newui/component/BlockRow";
 import Button from "newui/component/Button";
 import Component from "newui/component/Component";
@@ -17,6 +16,7 @@ import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeRow } from "newui/component/RangeRow";
 import { IRefreshable } from "newui/component/Refreshable";
 import Text from "newui/component/Text";
+import InputManager from "newui/input/InputManager";
 import newui from "newui/NewUi";
 import { ITile } from "tile/ITerrain";
 import { Tuple } from "utilities/Arrays";
@@ -24,18 +24,16 @@ import Enums from "utilities/enum/Enums";
 import Log from "utilities/Log";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
-
 import Clone from "../../action/Clone";
 import Heal from "../../action/Heal";
 import Kill from "../../action/Kill";
 import SetStat from "../../action/SetStat";
 import TeleportEntity from "../../action/TeleportEntity";
 import DebugTools from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 import InspectInformationSection from "../component/InspectInformationSection";
-
 import CreatureInformation from "./Creature";
 import HumanInformation from "./Human";
 import NpcInformation from "./Npc";
@@ -60,6 +58,8 @@ export default class EntityInformation extends InspectInformationSection {
 	private readonly subsections: InspectEntityInformationSubsection[];
 	private readonly statWrapper: Component;
 	private readonly statComponents = new Map<Stat, IRefreshable>();
+	private readonly buttonHeal: Button;
+	private readonly buttonTeleport: Button;
 
 	private entities: (Player | Creature | NPC)[] = [];
 	private entity: Player | Creature | NPC | undefined;
@@ -68,8 +68,8 @@ export default class EntityInformation extends InspectInformationSection {
 		super();
 
 		new BlockRow()
-			.append(new Button()
-				.setText(translation(DebugToolsTranslation.ButtonHealEntity))
+			.append(this.buttonHeal = new Button()
+				.setText(() => translation(this.entity === localPlayer ? DebugToolsTranslation.ButtonHealLocalPlayer : DebugToolsTranslation.ButtonHealEntity))
 				.event.subscribe("activate", this.heal)
 				.appendTo(this))
 			.append(new Button()
@@ -78,8 +78,8 @@ export default class EntityInformation extends InspectInformationSection {
 			.appendTo(this);
 
 		new BlockRow()
-			.append(new Button()
-				.setText(translation(DebugToolsTranslation.ButtonTeleportEntity))
+			.append(this.buttonTeleport = new Button()
+				.setText(() => translation(this.entity === localPlayer ? DebugToolsTranslation.ButtonTeleportLocalPlayer : DebugToolsTranslation.ButtonTeleportEntity))
 				.event.subscribe("activate", this.openTeleportMenu))
 			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonCloneEntity))
@@ -112,6 +112,9 @@ export default class EntityInformation extends InspectInformationSection {
 
 	@Override public setTab(entity: number) {
 		this.entity = this.entities[entity];
+
+		this.buttonHeal.refreshText();
+		this.buttonTeleport.refreshText();
 
 		for (const subsection of this.subsections) {
 			subsection.update(this.entity);
@@ -219,7 +222,7 @@ export default class EntityInformation extends InspectInformationSection {
 			return;
 		}
 
-		const mouse = bindingManager.getMouse();
+		const mouse = InputManager.mouse.position;
 
 		new ContextMenu(
 			["select location", {
@@ -268,7 +271,7 @@ export default class EntityInformation extends InspectInformationSection {
 
 	@Bound
 	private teleport(location: IVector2 | IVector3) {
-		ActionExecutor.get(TeleportEntity).execute(localPlayer, this.entity!, new Vector3(location, "z" in location ? location.z : this.entity!.z));
+		ActionExecutor.get(TeleportEntity).execute(localPlayer, this.entity!, new Vector3(location, "z" in location ? location.z : localPlayer.z));
 
 		this.event.emit("update");
 	}

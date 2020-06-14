@@ -7,13 +7,6 @@
 		"source": {
 			"modDebugToolsDebugTools": "Debug Tools"
 		},
-		"interrupt": {
-			"modDebugToolsChoiceTravelAway": "Where would you like to travel to?"
-		},
-		"interruptChoice": {
-			"modDebugToolsSailToCivilization": "Civilization",
-			"modDebugToolsTravelAway": "New Lands"
-		},
 		"bindable": {
 			"modDebugToolsToggleDialog": "Toggle Tools Dialog",
 			"modDebugToolsSelectLocation": "Select Location",
@@ -46,24 +39,34 @@
 			"panelGeneral": "General",
 			
 			"labelTime": "Time",
-			"buttonInspect": "Inspect",
-			"buttonInspectLocalPlayer": "Inspect Local Player",
+			"buttonInspect": "Inspect {#--text-color-faded:({Bindings:ModDebugToolsInspectTile})}",
+			"buttonInspectLocalPlayer": "Inspect Local Player {#--text-color-faded:({Bindings:ModDebugToolsInspectLocalPlayer})}",
 			"buttonRemoveAllCreatures": "Remove All Creatures",
 			"buttonRemoveAllNPCs": "Remove All NPCs",
-			"buttonTravelAway": "Travel Away",
 			"buttonAudio": "Play Sound",
 			"buttonParticle": "Spawn Particle",
-			
+			"labelLayer": "Layer",
+			"optionLayer": "The {1} {#--text-color-faded:({2?{2}, }{0})}",
+			"headingIslandCurrent": "Island: {0}",
+			"island": "{1?{1}:{0?Island {0}}}{#--text-color-faded: ({2})}",
+			"labelTravel": "Travel to",
+			"optionTravelNewIsland": "New Island {#--text-color-faded:({0})}",
+			"optionTravelCivilization": "Civilization",
+			"optionTravelRandomIsland": "Random Island",
+			"buttonTravel": "Travel!",
+				
 			
 			"panelDisplay": "Display",
 			
-			"buttonToggleFog": "Fog",
-			"buttonToggleLighting": "Lighting",
+			"buttonToggleFog": "Fog {#--text-color-faded:({Bindings:ModDebugToolsToggleFullVisibility})}",
+			"buttonToggleLighting": "Lighting {#--text-color-faded:({Bindings:ModDebugToolsToggleFullVisibility})}",
 			"labelZoomLevel": "Zoom Level",
 			"zoomLevel": "{0}x",
-			"buttonUnlockCamera": "Unlock Camera",
+			"buttonUnlockCamera": "Unlock Camera {#--text-color-faded:({Bindings:ModDebugToolsToggleCameraLock})}",
 			"buttonResetWebGL": "Reset WebGL",
 			"buttonReloadShaders": "Reload Shaders",
+			"headingLayers": "Layers",
+			"buttonToggleLayer": "{0}",
 			
 			
 			"panelPaint": "Tile Paint",
@@ -130,6 +133,9 @@
 			"entityName": "{#--text-color-faded:{0}:} {1}",
 			"buttonKillEntity": "Kill",
 			"buttonHealEntity": "Heal",
+			"buttonTeleportEntity": "Teleport",
+			"buttonHealLocalPlayer": "Heal {#--text-color-faded:({Bindings:ModDebugToolsHealLocalPlayer})}",
+			"buttonTeleportLocalPlayer": "Teleport {#--text-color-faded:({Bindings:ModDebugToolsTeleportLocalPlayer})}",
 			"buttonCloneEntity": "Clone",
 			"killEntityDeathMessage": "by l33t h4x0r",
 			"corpseName": "{#--text-color-faded:Corpse:} {0}",
@@ -138,17 +144,18 @@
 			"buttonTameCreature": "Tamed",
 			"labelWeightBonus": "Weight Bonus",
 			"buttonToggleTilled": "Tilled",
+			"buttonIncludeNeighbors": "Include Neighbors",
+			"buttonRefreshTile": "Refresh Tile",
 			"labelItem": "{#--text-color-faded:Item}",
 			"labelQuality": "Quality",
 			"labelBenignity": "Benignity",
 			"labelMalignity": "Malignity",
-			"buttonTeleportEntity": "Teleport",
 			"optionTeleportSelectLocation": "To Location",
 			"optionTeleportToLocalPlayer": "To Local Player",
 			"optionTeleportToHost": "To Host",
 			"optionTeleportToPlayer": "To Player",
 			"buttonToggleInvulnerable": "Invulnerable",
-			"buttonToggleNoClip": "Noclip",
+			"buttonToggleNoClip": "Noclip {#--text-color-faded:({Bindings:ModDebugToolsToggleNoClip})}",
 			"labelSkill": "{#--text-color-faded:Skill}",
 			"none": "None",
 			"addToInventory": "Add to Inventory",
@@ -164,7 +171,14 @@
 			
 			"actionResurrect": "resurrect {0}",
 			"actionClone": "clone {0}",
-			"actionTeleport": "{0?teleport {0}:Teleport}"
+			"actionTeleport": "{0?teleport {0}:Teleport}",
+			
+			
+			"inspectionTemperatureCalculated": "Temp: {0}",
+			"inspectionTemperatureCalculatedHeat": "Calculated heat: {0}",
+			"inspectionTemperatureCalculatedCold": "Calculated cold: {0}",
+			"inspectionTemperatureProducedHeat": "Produced heat: {0}",
+			"inspectionTemperatureProducedCold": "Produced cold: {0}"
 		},
 		"item": {
 			"none": "none"

@@ -1,11 +1,11 @@
 import Translation from "language/Translation";
-import { IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import Component from "newui/component/Component";
 import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
 import { gameScreen } from "newui/screen/screens/GameScreen";
 import { Tuple } from "utilities/Arrays";
 import { sleep } from "utilities/Async";
+import Vector2 from "utilities/math/Vector2";
 import DebugTools from "../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../IDebugTools";
 import DebugToolsPanel from "./component/DebugToolsPanel";
@@ -29,26 +29,17 @@ const subpanelClasses: DebugToolsDialogPanelClass[] = [
 	TemplatePanel,
 ];
 
-export default class DebugToolsDialog extends TabDialog implements IHookHost {
+export default class DebugToolsDialog extends TabDialog {
 	/**
 	 * The positioning settings for the dialog.
 	 */
 	public static description: IDialogDescription = {
-		minSize: {
-			x: 20,
-			y: 25,
-		},
-		size: {
-			x: 25,
-			y: 30,
-		},
-		maxSize: {
-			x: 40,
-			y: 70,
-		},
+		minSize: new Vector2(20, 25),
+		size: new Vector2(25, 27),
+		maxSize: new Vector2(40, 70),
 		edges: [
 			[Edge.Left, 25],
-			[Edge.Bottom, 0],
+			[Edge.Bottom, 33],
 		],
 	};
 

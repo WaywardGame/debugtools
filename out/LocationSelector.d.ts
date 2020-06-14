@@ -1,9 +1,8 @@
-import { IHookHost } from "mod/IHookHost";
-import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import Bindable from "newui/input/Bindable";
 import Vector2 from "utilities/math/Vector2";
 import DebugTools from "./DebugTools";
 import CancelablePromise from "./util/CancelablePromise";
-export default class SelectLocation implements IHookHost {
+export default class SelectLocation {
     readonly DEBUG_TOOLS: DebugTools;
     readonly bindableSelectLocation: Bindable;
     readonly bindableCancelSelectLocation: Bindable;
@@ -13,8 +12,10 @@ export default class SelectLocation implements IHookHost {
     private selectTileHeld;
     private selectionPromise;
     select(): CancelablePromise<Vector2>;
-    onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
-    canClientMove(): false | undefined;
+    protected canClientMove(): false | undefined;
+    protected onSelectOrCancelSelectLocation(): boolean;
+    protected onStopSelectLocation(): boolean;
+    private selectionTick;
     private cancel;
     private selectTile;
 }

@@ -7,20 +7,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 define(["require", "exports", "mod/Mod", "../IDebugTools"], function (require, exports, Mod_1, IDebugTools_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    class Overlays {
-        static isPaint(overlay) {
-            return overlay.type === Overlays.DEBUG_TOOLS.overlayPaint;
+    let Overlays = (() => {
+        class Overlays {
+            static isPaint(overlay) {
+                return overlay.type === Overlays.DEBUG_TOOLS.overlayPaint;
+            }
+            static isHoverTarget(overlay) {
+                return overlay.type === Overlays.DEBUG_TOOLS.overlayTarget && !("red" in overlay);
+            }
+            static isSelectedTarget(overlay) {
+                return overlay.type === Overlays.DEBUG_TOOLS.overlayTarget && "red" in overlay;
+            }
         }
-        static isHoverTarget(overlay) {
-            return overlay.type === Overlays.DEBUG_TOOLS.overlayTarget && !("red" in overlay);
-        }
-        static isSelectedTarget(overlay) {
-            return overlay.type === Overlays.DEBUG_TOOLS.overlayTarget && "red" in overlay;
-        }
-    }
-    __decorate([
-        Mod_1.default.instance(IDebugTools_1.DEBUG_TOOLS_ID)
-    ], Overlays, "DEBUG_TOOLS", void 0);
+        __decorate([
+            Mod_1.default.instance(IDebugTools_1.DEBUG_TOOLS_ID)
+        ], Overlays, "DEBUG_TOOLS", void 0);
+        return Overlays;
+    })();
     exports.default = Overlays;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiT3ZlcmxheXMuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvb3ZlcmxheS9PdmVybGF5cy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7SUFNQSxNQUFxQixRQUFRO1FBSXJCLE1BQU0sQ0FBQyxPQUFPLENBQUMsT0FBcUI7WUFDMUMsT0FBTyxPQUFPLENBQUMsSUFBSSxLQUFLLFFBQVEsQ0FBQyxXQUFXLENBQUMsWUFBWSxDQUFDO1FBQzNELENBQUM7UUFFTSxNQUFNLENBQUMsYUFBYSxDQUFDLE9BQXFCO1lBQ2hELE9BQU8sT0FBTyxDQUFDLElBQUksS0FBSyxRQUFRLENBQUMsV0FBVyxDQUFDLGFBQWEsSUFBSSxDQUFDLENBQUMsS0FBSyxJQUFJLE9BQU8sQ0FBQyxDQUFDO1FBQ25GLENBQUM7UUFFTSxNQUFNLENBQUMsZ0JBQWdCLENBQUMsT0FBcUI7WUFDbkQsT0FBTyxPQUFPLENBQUMsSUFBSSxLQUFLLFFBQVEsQ0FBQyxXQUFXLENBQUMsYUFBYSxJQUFJLEtBQUssSUFBSSxPQUFPLENBQUM7UUFDaEYsQ0FBQztLQUNEO0lBYkE7UUFEQyxhQUFHLENBQUMsUUFBUSxDQUFhLDRCQUFjLENBQUM7dUNBQ007SUFGaEQsMkJBZUMifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiT3ZlcmxheXMuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvb3ZlcmxheS9PdmVybGF5cy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7SUFNQTtRQUFBLE1BQXFCLFFBQVE7WUFJckIsTUFBTSxDQUFDLE9BQU8sQ0FBQyxPQUFxQjtnQkFDMUMsT0FBTyxPQUFPLENBQUMsSUFBSSxLQUFLLFFBQVEsQ0FBQyxXQUFXLENBQUMsWUFBWSxDQUFDO1lBQzNELENBQUM7WUFFTSxNQUFNLENBQUMsYUFBYSxDQUFDLE9BQXFCO2dCQUNoRCxPQUFPLE9BQU8sQ0FBQyxJQUFJLEtBQUssUUFBUSxDQUFDLFdBQVcsQ0FBQyxhQUFhLElBQUksQ0FBQyxDQUFDLEtBQUssSUFBSSxPQUFPLENBQUMsQ0FBQztZQUNuRixDQUFDO1lBRU0sTUFBTSxDQUFDLGdCQUFnQixDQUFDLE9BQXFCO2dCQUNuRCxPQUFPLE9BQU8sQ0FBQyxJQUFJLEtBQUssUUFBUSxDQUFDLFdBQVcsQ0FBQyxhQUFhLElBQUksS0FBSyxJQUFJLE9BQU8sQ0FBQztZQUNoRixDQUFDO1NBQ0Q7UUFiQTtZQURDLGFBQUcsQ0FBQyxRQUFRLENBQWEsNEJBQWMsQ0FBQzsyQ0FDTTtRQWFoRCxlQUFDO1NBQUE7c0JBZm9CLFFBQVEifQ==

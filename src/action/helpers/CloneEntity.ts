@@ -2,7 +2,7 @@ import Creature from "entity/creature/Creature";
 import Entity from "entity/Entity";
 import { AiType } from "entity/IEntity";
 import NPC from "entity/npc/NPC";
-import { NPCType } from "entity/npc/NPCS";
+import { NPCType } from "entity/npc/INPCs";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import CloneInventory from "./CloneInventory";

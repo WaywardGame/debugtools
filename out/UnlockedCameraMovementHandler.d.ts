@@ -1,6 +1,8 @@
-import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import Bindable from "newui/input/Bindable";
 import Vector2 from "utilities/math/Vector2";
+import type DebugTools from "./DebugTools";
 export default class UnlockedCameraMovementHandler {
+    readonly DEBUG_TOOLS: DebugTools;
     readonly bindMoveCameraUp: Bindable;
     readonly bindMoveCameraLeft: Bindable;
     readonly bindMoveCameraDown: Bindable;
@@ -9,5 +11,8 @@ export default class UnlockedCameraMovementHandler {
     position: Vector2;
     transition?: Vector2;
     homingVelocity: number;
-    handle(bindPressed: Bindable, api: BindCatcherApi): Bindable;
+    private running;
+    begin(): void;
+    end(): void;
+    tick(): void;
 }

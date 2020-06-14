@@ -1,4 +1,3 @@
-import { Bindable, BindCatcherApi } from "newui/IBindingManager";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
@@ -13,13 +12,18 @@ export default class TemplatePanel extends DebugToolsPanel {
     private readonly place;
     private readonly previewTiles;
     private selectHeld;
+    private center?;
+    private templateOptions?;
     constructor();
     getTranslation(): DebugToolsTranslation;
-    canClientMove(): false | undefined;
-    onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
+    protected canClientMove(): false | undefined;
+    protected onStopSelectLocation(): boolean;
+    private tick;
+    private updateTemplate;
     private getTemplate;
     private templateHasTile;
     private getTemplateOptions;
+    private templateOptionsChanged;
     protected onSwitchTo(): void;
     protected onSwitchAway(): void;
     private changeTemplateType;

@@ -171,8 +171,6 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				break;
 			case "noclip":
 				this.checkButtonNoClip.refresh();
-				this.checkButtonInvulnerable.setDisabled(this.checkButtonNoClip.checked);
-				if (this.checkButtonNoClip.checked) this.checkButtonInvulnerable.setChecked(false);
 				break;
 		}
 	}
