@@ -1,10 +1,7 @@
 import ActionExecutor from "entity/action/ActionExecutor";
-import Creature from "entity/creature/Creature";
 import Entity from "entity/Entity";
 import { EntityType, IStatChangeInfo } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
-import NPC from "entity/npc/NPC";
-import Player from "entity/player/Player";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { BlockRow } from "newui/component/BlockRow";
@@ -61,8 +58,8 @@ export default class EntityInformation extends InspectInformationSection {
 	private readonly buttonHeal: Button;
 	private readonly buttonTeleport: Button;
 
-	private entities: (Player | Creature | NPC)[] = [];
-	private entity: Player | Creature | NPC | undefined;
+	private entities: Entity[] = [];
+	private entity?: Entity;
 
 	public constructor() {
 		super();
@@ -126,7 +123,7 @@ export default class EntityInformation extends InspectInformationSection {
 	}
 
 	@Override public update(position: IVector2, tile: ITile) {
-		const entities: (Player | Creature | NPC)[] = game.getPlayersAtTile(tile, true);
+		const entities: Entity[] = game.getPlayersAtTile(tile, true);
 
 		if (tile.creature) entities.push(tile.creature);
 		if (tile.npc) entities.push(tile.npc);
@@ -141,12 +138,12 @@ export default class EntityInformation extends InspectInformationSection {
 		this.setShouldLog();
 
 		for (const entity of this.entities) {
-			(entity as Entity).event.until(this, "remove", "change")
+			entity.event.until(this, "remove", "change")
 				.subscribe("statChanged", this.onStatChange);
 		}
 	}
 
-	public getEntityIndex(entity: Creature | NPC | Player) {
+	public getEntityIndex(entity: Entity) {
 		return this.entities.indexOf(entity);
 	}
 
@@ -165,9 +162,9 @@ export default class EntityInformation extends InspectInformationSection {
 		this.statComponents.clear();
 
 		const stats = Enums.values(Stat)
-			.filter(stat => this.entity!.stat.has(stat) && (!this.subsections.some(subsection => subsection.getImmutableStats().includes(stat))))
-			.map(stat => this.entity!.stat.get(stat))
-			.filter2<IStat>(stat => stat !== undefined);
+			.filter(stat => this.entity?.stat.has(stat) && (!this.subsections.some(subsection => subsection.getImmutableStats().includes(stat))))
+			.map(stat => this.entity?.stat.get<IStat>(stat))
+			.filterNullish();
 
 		for (const stat of stats) {
 			if ("max" in stat && !stat.canExceedMax) {

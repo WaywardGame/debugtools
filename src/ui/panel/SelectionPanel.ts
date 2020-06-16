@@ -17,7 +17,7 @@ import TileEventDropdown from "newui/component/dropdown/TileEventDropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
 import { RangeRow } from "newui/component/RangeRow";
 import Text from "newui/component/Text";
-import { ITileEvent } from "tile/ITileEvent";
+import TileEvent from "tile/TileEvent";
 import Arrays, { Tuple } from "utilities/Arrays";
 import Vector2 from "utilities/math/Vector2";
 import SelectionExecute, { SelectionType } from "../../action/SelectionExecute";
@@ -30,7 +30,7 @@ const entityTypeToSelectionTypeMap = {
 	[EntityType.Player]: SelectionType.Player,
 };
 
-function getSelectionType(target: Creature | NPC | ITileEvent | Doodad | ICorpse | Player) {
+function getSelectionType(target: Creature | NPC | TileEvent | Doodad | ICorpse | Player) {
 	return "entityType" in target ? entityTypeToSelectionTypeMap[target.entityType]
 		: target instanceof Doodad ? SelectionType.Doodad
 			: SelectionType.TileEvent;
@@ -135,7 +135,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 	@Bound
 	public execute() {
-		const targets = Stream.of<(undefined | Creature | NPC | ITileEvent | Doodad | ICorpse | Player)[][]>(
+		const targets = Stream.of<(undefined | Creature | NPC | TileEvent | Doodad | ICorpse | Player)[][]>(
 			this.creatures.getTargetable(),
 			this.npcs.getTargetable(),
 			this.tileEvents.getTargetable(),

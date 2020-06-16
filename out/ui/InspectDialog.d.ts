@@ -1,6 +1,4 @@
-import Creature from "entity/creature/Creature";
-import NPC from "entity/npc/NPC";
-import Player from "entity/player/Player";
+import Entity from "entity/Entity";
 import { TileUpdateType } from "game/IGame";
 import Translation from "language/Translation";
 import { IHookHost } from "mod/IHookHost";
@@ -31,7 +29,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
     constructor(id: DialogId);
     getSubpanels(): SubpanelInformation[];
     getName(): Translation;
-    setInspection(what: Vector2 | Player | Creature | NPC): this;
+    setInspection(what: Vector2 | Entity): this;
     update(): void;
     onCloseBind(): boolean;
     onContextMenuBind(api: IBindHandlerApi): boolean;

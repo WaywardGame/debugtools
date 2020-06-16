@@ -180,7 +180,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 					defaultOption: SfxType.Click,
 					options: Enums.values(SfxType)
 						.map(sfx => Tuple(sfx, Translation.generator(SfxType[sfx])))
-						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				})))
 			.appendTo(this);
@@ -194,7 +194,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 					defaultOption: ParticleType.Blood,
 					options: Enums.values(ParticleType)
 						.map(particle => Tuple(particle, Translation.generator(ParticleType[particle])))
-						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				})))
 			.appendTo(this);
@@ -309,7 +309,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 			};
 
 			const biome = Enums.values(BiomeType)
-				.first(b => this.dropdownTravel.selection === getTravelDropdownNewIslandOptionId(b));
+				.find(b => this.dropdownTravel.selection === getTravelDropdownNewIslandOptionId(b));
 
 			const islandId = Island.positionToId(nextPosition);
 			if (!game.islands.has(islandId)) {
@@ -367,6 +367,6 @@ class IslandDropdown<OTHER_OPTIONS extends string = never> extends GroupDropdown
 	}
 
 	@Override protected getGroups() {
-		return Enums.values(BiomeType).drop(1);
+		return Enums.values(BiomeType).slice(1);
 	}
 }

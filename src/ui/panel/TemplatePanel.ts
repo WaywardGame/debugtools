@@ -59,7 +59,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 					defaultOption: TileTemplateType.House,
 					options: Enums.values(TileTemplateType)
 						.map(type => Tuple(type, Translation.generator(TileTemplateType[type])))
-						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				}))
 				.event.subscribe("selection", this.changeTemplateType))

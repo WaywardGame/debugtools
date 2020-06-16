@@ -4,10 +4,10 @@ import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button from "newui/component/Button";
 import { ITile } from "tile/ITerrain";
-import { ITileEvent } from "tile/ITileEvent";
 import { Tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
+import TileEvent from "tile/TileEvent";
 
 import Remove from "../../action/Remove";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -19,9 +19,9 @@ export default class TileEventInformation extends InspectInformationSection {
 	@Mod.log(DEBUG_TOOLS_ID)
 	public readonly LOG: Log;
 
-	private tileEvents: ITileEvent[] = [];
+	private tileEvents: TileEvent[] = [];
 	// @ts-ignore
-	private tileEvent: ITileEvent | undefined;
+	private tileEvent: TileEvent | undefined;
 
 	public constructor() {
 		super();
