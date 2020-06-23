@@ -7,20 +7,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 define(["require", "exports", "event/EventManager", "newui/component/Component"], function (require, exports, EventManager_1, Component_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    let DebugToolsPanel = (() => {
-        class DebugToolsPanel extends Component_1.default {
-            onPanelShow() {
-                this.registerEventBusSubscriber("switchAway", "remove");
-            }
+    class DebugToolsPanel extends Component_1.default {
+        onPanelShow() {
+            this.registerEventBusSubscriber("switchAway", "remove");
         }
-        __decorate([
-            Override
-        ], DebugToolsPanel.prototype, "event", void 0);
-        __decorate([
-            EventManager_1.OwnEventHandler(DebugToolsPanel, "switchTo")
-        ], DebugToolsPanel.prototype, "onPanelShow", null);
-        return DebugToolsPanel;
-    })();
+    }
+    __decorate([
+        Override
+    ], DebugToolsPanel.prototype, "event", void 0);
+    __decorate([
+        EventManager_1.OwnEventHandler(DebugToolsPanel, "switchTo")
+    ], DebugToolsPanel.prototype, "onPanelShow", null);
     exports.default = DebugToolsPanel;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiRGVidWdUb29sc1BhbmVsLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL2NvbXBvbmVudC9EZWJ1Z1Rvb2xzUGFuZWwudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0lBV0E7UUFBQSxNQUE4QixlQUFnQixTQUFRLG1CQUFTO1lBTXBELFdBQVc7Z0JBQ3BCLElBQUksQ0FBQywwQkFBMEIsQ0FBQyxZQUFZLEVBQUUsUUFBUSxDQUFDLENBQUM7WUFDekQsQ0FBQztTQUNEO1FBUlU7WUFBVCxRQUFRO3NEQUEyRDtRQUtwRTtZQURDLDhCQUFlLENBQUMsZUFBZSxFQUFFLFVBQVUsQ0FBQzswREFHNUM7UUFDRixzQkFBQztTQUFBO3NCQVQ2QixlQUFlIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiRGVidWdUb29sc1BhbmVsLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL2NvbXBvbmVudC9EZWJ1Z1Rvb2xzUGFuZWwudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7O0lBV0EsTUFBOEIsZUFBZ0IsU0FBUSxtQkFBUztRQU1wRCxXQUFXO1lBQ3BCLElBQUksQ0FBQywwQkFBMEIsQ0FBQyxZQUFZLEVBQUUsUUFBUSxDQUFDLENBQUM7UUFDekQsQ0FBQztLQUNEO0lBUlU7UUFBVCxRQUFRO2tEQUEyRDtJQUtwRTtRQURDLDhCQUFlLENBQUMsZUFBZSxFQUFFLFVBQVUsQ0FBQztzREFHNUM7SUFSRixrQ0FTQyJ9

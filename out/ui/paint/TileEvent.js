@@ -7,55 +7,52 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 define(["require", "exports", "newui/component/CheckButton", "newui/component/Component", "newui/component/dropdown/TileEventDropdown", "newui/component/LabelledRow", "../../IDebugTools"], function (require, exports, CheckButton_1, Component_1, TileEventDropdown_1, LabelledRow_1, IDebugTools_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    let TileEventPaint = (() => {
-        class TileEventPaint extends Component_1.default {
-            constructor() {
-                super();
-                new LabelledRow_1.LabelledRow()
-                    .classes.add("dropdown-label")
-                    .setLabel(label => label.setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.LabelTileEvent)))
-                    .append(this.dropdown = new TileEventDropdown_1.default("nochange", [
-                    ["nochange", option => option.setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.PaintNoChange))],
-                    ["remove", option => option.setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.PaintRemove))],
-                ])
-                    .event.subscribe("selection", this.changeEvent))
-                    .appendTo(this);
-                this.replaceExisting = new CheckButton_1.CheckButton()
-                    .hide()
-                    .setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.ButtonReplaceExisting))
-                    .appendTo(this);
-            }
-            getTilePaintData() {
-                return {
-                    tileEvent: {
-                        type: this.tileEvent,
-                        replaceExisting: this.replaceExisting.checked,
-                    },
-                };
-            }
-            isChanging() {
-                return this.tileEvent !== undefined;
-            }
-            reset() {
-                this.dropdown.select("nochange");
-            }
-            changeEvent(_, event) {
-                this.tileEvent = event === "nochange" ? undefined : event === "remove" ? "remove" : event;
-                const isReplaceable = this.tileEvent !== undefined && this.tileEvent !== "remove";
-                this.replaceExisting.toggle(isReplaceable);
-                if (!isReplaceable)
-                    this.replaceExisting.setChecked(false);
-                this.event.emit("change");
-            }
+    class TileEventPaint extends Component_1.default {
+        constructor() {
+            super();
+            new LabelledRow_1.LabelledRow()
+                .classes.add("dropdown-label")
+                .setLabel(label => label.setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.LabelTileEvent)))
+                .append(this.dropdown = new TileEventDropdown_1.default("nochange", [
+                ["nochange", option => option.setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.PaintNoChange))],
+                ["remove", option => option.setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.PaintRemove))],
+            ])
+                .event.subscribe("selection", this.changeEvent))
+                .appendTo(this);
+            this.replaceExisting = new CheckButton_1.CheckButton()
+                .hide()
+                .setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.ButtonReplaceExisting))
+                .appendTo(this);
         }
-        __decorate([
-            Override
-        ], TileEventPaint.prototype, "event", void 0);
-        __decorate([
-            Bound
-        ], TileEventPaint.prototype, "changeEvent", null);
-        return TileEventPaint;
-    })();
+        getTilePaintData() {
+            return {
+                tileEvent: {
+                    type: this.tileEvent,
+                    replaceExisting: this.replaceExisting.checked,
+                },
+            };
+        }
+        isChanging() {
+            return this.tileEvent !== undefined;
+        }
+        reset() {
+            this.dropdown.select("nochange");
+        }
+        changeEvent(_, event) {
+            this.tileEvent = event === "nochange" ? undefined : event === "remove" ? "remove" : event;
+            const isReplaceable = this.tileEvent !== undefined && this.tileEvent !== "remove";
+            this.replaceExisting.toggle(isReplaceable);
+            if (!isReplaceable)
+                this.replaceExisting.setChecked(false);
+            this.event.emit("change");
+        }
+    }
+    __decorate([
+        Override
+    ], TileEventPaint.prototype, "event", void 0);
+    __decorate([
+        Bound
+    ], TileEventPaint.prototype, "changeEvent", null);
     exports.default = TileEventPaint;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVGlsZUV2ZW50LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL3BhaW50L1RpbGVFdmVudC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7SUFXQTtRQUFBLE1BQXFCLGNBQWUsU0FBUSxtQkFBUztZQVFwRDtnQkFDQyxLQUFLLEVBQUUsQ0FBQztnQkFFUixJQUFJLHlCQUFXLEVBQUU7cUJBQ2YsT0FBTyxDQUFDLEdBQUcsQ0FBQyxnQkFBZ0IsQ0FBQztxQkFDN0IsUUFBUSxDQUFDLEtBQUssQ0FBQyxFQUFFLENBQUMsS0FBSyxDQUFDLE9BQU8sQ0FBQyx5QkFBVyxDQUFDLG1DQUFxQixDQUFDLGNBQWMsQ0FBQyxDQUFDLENBQUM7cUJBQ25GLE1BQU0sQ0FBQyxJQUFJLENBQUMsUUFBUSxHQUFHLElBQUksMkJBQWlCLENBQUMsVUFBVSxFQUFFO29CQUN6RCxDQUFDLFVBQVUsRUFBRSxNQUFNLENBQUMsRUFBRSxDQUFDLE1BQU0sQ0FBQyxPQUFPLENBQUMseUJBQVcsQ0FBQyxtQ0FBcUIsQ0FBQyxhQUFhLENBQUMsQ0FBQyxDQUFDO29CQUN4RixDQUFDLFFBQVEsRUFBRSxNQUFNLENBQUMsRUFBRSxDQUFDLE1BQU0sQ0FBQyxPQUFPLENBQUMseUJBQVcsQ0FBQyxtQ0FBcUIsQ0FBQyxXQUFXLENBQUMsQ0FBQyxDQUFDO2lCQUNwRixDQUFDO3FCQUNBLEtBQUssQ0FBQyxTQUFTLENBQUMsV0FBVyxFQUFFLElBQUksQ0FBQyxXQUFXLENBQUMsQ0FBQztxQkFDaEQsUUFBUSxDQUFDLElBQUksQ0FBQyxDQUFDO2dCQUVqQixJQUFJLENBQUMsZUFBZSxHQUFHLElBQUkseUJBQVcsRUFBRTtxQkFDdEMsSUFBSSxFQUFFO3FCQUNOLE9BQU8sQ0FBQyx5QkFBVyxDQUFDLG1DQUFxQixDQUFDLHFCQUFxQixDQUFDLENBQUM7cUJBQ2pFLFFBQVEsQ0FBQyxJQUFJLENBQUMsQ0FBQztZQUNsQixDQUFDO1lBRU0sZ0JBQWdCO2dCQUN0QixPQUFPO29CQUNOLFNBQVMsRUFBRTt3QkFDVixJQUFJLEVBQUUsSUFBSSxDQUFDLFNBQVM7d0JBQ3BCLGVBQWUsRUFBRSxJQUFJLENBQUMsZUFBZSxDQUFDLE9BQU87cUJBQzdDO2lCQUNELENBQUM7WUFDSCxDQUFDO1lBRU0sVUFBVTtnQkFDaEIsT0FBTyxJQUFJLENBQUMsU0FBUyxLQUFLLFNBQVMsQ0FBQztZQUNyQyxDQUFDO1lBRU0sS0FBSztnQkFDWCxJQUFJLENBQUMsUUFBUSxDQUFDLE1BQU0sQ0FBQyxVQUFVLENBQUMsQ0FBQztZQUNsQyxDQUFDO1lBR08sV0FBVyxDQUFDLENBQU0sRUFBRSxLQUE0QztnQkFDdkUsSUFBSSxDQUFDLFNBQVMsR0FBRyxLQUFLLEtBQUssVUFBVSxDQUFDLENBQUMsQ0FBQyxTQUFTLENBQUMsQ0FBQyxDQUFDLEtBQUssS0FBSyxRQUFRLENBQUMsQ0FBQyxDQUFDLFFBQVEsQ0FBQyxDQUFDLENBQUMsS0FBSyxDQUFDO2dCQUUxRixNQUFNLGFBQWEsR0FBRyxJQUFJLENBQUMsU0FBUyxLQUFLLFNBQVMsSUFBSSxJQUFJLENBQUMsU0FBUyxLQUFLLFFBQVEsQ0FBQztnQkFDbEYsSUFBSSxDQUFDLGVBQWUsQ0FBQyxNQUFNLENBQUMsYUFBYSxDQUFDLENBQUM7Z0JBQzNDLElBQUksQ0FBQyxhQUFhO29CQUFFLElBQUksQ0FBQyxlQUFlLENBQUMsVUFBVSxDQUFDLEtBQUssQ0FBQyxDQUFDO2dCQUUzRCxJQUFJLENBQUMsS0FBSyxDQUFDLElBQUksQ0FBQyxRQUFRLENBQUMsQ0FBQztZQUMzQixDQUFDO1NBQ0Q7UUFyRFU7WUFBVCxRQUFRO3FEQUEwRDtRQTRDbkU7WUFEQyxLQUFLO3lEQVNMO1FBQ0YscUJBQUM7U0FBQTtzQkF0RG9CLGNBQWMifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVGlsZUV2ZW50LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3VpL3BhaW50L1RpbGVFdmVudC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7SUFXQSxNQUFxQixjQUFlLFNBQVEsbUJBQVM7UUFRcEQ7WUFDQyxLQUFLLEVBQUUsQ0FBQztZQUVSLElBQUkseUJBQVcsRUFBRTtpQkFDZixPQUFPLENBQUMsR0FBRyxDQUFDLGdCQUFnQixDQUFDO2lCQUM3QixRQUFRLENBQUMsS0FBSyxDQUFDLEVBQUUsQ0FBQyxLQUFLLENBQUMsT0FBTyxDQUFDLHlCQUFXLENBQUMsbUNBQXFCLENBQUMsY0FBYyxDQUFDLENBQUMsQ0FBQztpQkFDbkYsTUFBTSxDQUFDLElBQUksQ0FBQyxRQUFRLEdBQUcsSUFBSSwyQkFBaUIsQ0FBQyxVQUFVLEVBQUU7Z0JBQ3pELENBQUMsVUFBVSxFQUFFLE1BQU0sQ0FBQyxFQUFFLENBQUMsTUFBTSxDQUFDLE9BQU8sQ0FBQyx5QkFBVyxDQUFDLG1DQUFxQixDQUFDLGFBQWEsQ0FBQyxDQUFDLENBQUM7Z0JBQ3hGLENBQUMsUUFBUSxFQUFFLE1BQU0sQ0FBQyxFQUFFLENBQUMsTUFBTSxDQUFDLE9BQU8sQ0FBQyx5QkFBVyxDQUFDLG1DQUFxQixDQUFDLFdBQVcsQ0FBQyxDQUFDLENBQUM7YUFDcEYsQ0FBQztpQkFDQSxLQUFLLENBQUMsU0FBUyxDQUFDLFdBQVcsRUFBRSxJQUFJLENBQUMsV0FBVyxDQUFDLENBQUM7aUJBQ2hELFFBQVEsQ0FBQyxJQUFJLENBQUMsQ0FBQztZQUVqQixJQUFJLENBQUMsZUFBZSxHQUFHLElBQUkseUJBQVcsRUFBRTtpQkFDdEMsSUFBSSxFQUFFO2lCQUNOLE9BQU8sQ0FBQyx5QkFBVyxDQUFDLG1DQUFxQixDQUFDLHFCQUFxQixDQUFDLENBQUM7aUJBQ2pFLFFBQVEsQ0FBQyxJQUFJLENBQUMsQ0FBQztRQUNsQixDQUFDO1FBRU0sZ0JBQWdCO1lBQ3RCLE9BQU87Z0JBQ04sU0FBUyxFQUFFO29CQUNWLElBQUksRUFBRSxJQUFJLENBQUMsU0FBUztvQkFDcEIsZUFBZSxFQUFFLElBQUksQ0FBQyxlQUFlLENBQUMsT0FBTztpQkFDN0M7YUFDRCxDQUFDO1FBQ0gsQ0FBQztRQUVNLFVBQVU7WUFDaEIsT0FBTyxJQUFJLENBQUMsU0FBUyxLQUFLLFNBQVMsQ0FBQztRQUNyQyxDQUFDO1FBRU0sS0FBSztZQUNYLElBQUksQ0FBQyxRQUFRLENBQUMsTUFBTSxDQUFDLFVBQVUsQ0FBQyxDQUFDO1FBQ2xDLENBQUM7UUFHTyxXQUFXLENBQUMsQ0FBTSxFQUFFLEtBQTRDO1lBQ3ZFLElBQUksQ0FBQyxTQUFTLEdBQUcsS0FBSyxLQUFLLFVBQVUsQ0FBQyxDQUFDLENBQUMsU0FBUyxDQUFDLENBQUMsQ0FBQyxLQUFLLEtBQUssUUFBUSxDQUFDLENBQUMsQ0FBQyxRQUFRLENBQUMsQ0FBQyxDQUFDLEtBQUssQ0FBQztZQUUxRixNQUFNLGFBQWEsR0FBRyxJQUFJLENBQUMsU0FBUyxLQUFLLFNBQVMsSUFBSSxJQUFJLENBQUMsU0FBUyxLQUFLLFFBQVEsQ0FBQztZQUNsRixJQUFJLENBQUMsZUFBZSxDQUFDLE1BQU0sQ0FBQyxhQUFhLENBQUMsQ0FBQztZQUMzQyxJQUFJLENBQUMsYUFBYTtnQkFBRSxJQUFJLENBQUMsZUFBZSxDQUFDLFVBQVUsQ0FBQyxLQUFLLENBQUMsQ0FBQztZQUUzRCxJQUFJLENBQUMsS0FBSyxDQUFDLElBQUksQ0FBQyxRQUFRLENBQUMsQ0FBQztRQUMzQixDQUFDO0tBQ0Q7SUFyRFU7UUFBVCxRQUFRO2lEQUEwRDtJQTRDbkU7UUFEQyxLQUFLO3FEQVNMO0lBckRGLGlDQXNEQyJ9

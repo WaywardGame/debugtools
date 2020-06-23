@@ -5,7 +5,7 @@ import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
 import Bind from "newui/input/Bind";
 import Bindable from "newui/input/Bindable";
-import { IBinding } from "newui/input/IBinding";
+import { IInput } from "newui/input/IInput";
 import InputManager from "newui/input/InputManager";
 import MovementHandler from "newui/screen/screens/game/util/movement/MovementHandler";
 import { gameScreen } from "newui/screen/screens/GameScreen";
@@ -26,9 +26,9 @@ export default class SelectLocation {
 	// Registrations
 	//
 
-	@Register.bindable("SelectLocation", IBinding.mouseButton(0))
+	@Register.bindable("SelectLocation", IInput.mouseButton(0))
 	public readonly bindableSelectLocation: Bindable;
-	@Register.bindable("CancelSelectLocation", IBinding.mouseButton(2))
+	@Register.bindable("CancelSelectLocation", IInput.mouseButton(2))
 	public readonly bindableCancelSelectLocation: Bindable;
 
 	////////////////////////////////////

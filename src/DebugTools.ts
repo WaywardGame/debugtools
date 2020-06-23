@@ -23,7 +23,7 @@ import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
 import Bind, { IBindHandlerApi } from "newui/input/Bind";
 import Bindable from "newui/input/Bindable";
-import { IBinding } from "newui/input/IBinding";
+import { IInput } from "newui/input/IInput";
 import InputManager from "newui/input/InputManager";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
 import { MenuBarButtonGroup, MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
@@ -143,36 +143,36 @@ export default class DebugTools extends Mod {
 	// Bindables
 	//
 
-	@Register.bindable("ToggleDialog", IBinding.key("Backslash"), IBinding.key("IntlBackslash"))
+	@Register.bindable("ToggleDialog", IInput.key("Backslash"), IInput.key("IntlBackslash"))
 	public readonly bindableToggleDialog: Bindable;
-	@Register.bindable("CloseInspectDialog", IBinding.key("KeyI", "Alt"))
+	@Register.bindable("CloseInspectDialog", IInput.key("KeyI", "Alt"))
 	public readonly bindableCloseInspectDialog: Bindable;
 
-	@Register.bindable("InspectTile", IBinding.mouseButton(2, "Alt"))
+	@Register.bindable("InspectTile", IInput.mouseButton(2, "Alt"))
 	public readonly bindableInspectTile: Bindable;
-	@Register.bindable("InspectLocalPlayer", IBinding.key("KeyP", "Alt"))
+	@Register.bindable("InspectLocalPlayer", IInput.key("KeyP", "Alt"))
 	public readonly bindableInspectLocalPlayer: Bindable;
-	@Register.bindable("HealLocalPlayer", IBinding.key("KeyH", "Alt"))
+	@Register.bindable("HealLocalPlayer", IInput.key("KeyH", "Alt"))
 	public readonly bindableHealLocalPlayer: Bindable;
-	@Register.bindable("TeleportLocalPlayer", IBinding.mouseButton(0, "Alt"))
+	@Register.bindable("TeleportLocalPlayer", IInput.mouseButton(0, "Alt"))
 	public readonly bindableTeleportLocalPlayer: Bindable;
-	@Register.bindable("ToggleNoClip", IBinding.key("KeyN", "Alt"))
+	@Register.bindable("ToggleNoClip", IInput.key("KeyN", "Alt"))
 	public readonly bindableToggleNoClipOnLocalPlayer: Bindable;
 
-	@Register.bindable("ToggleCameraLock", IBinding.key("KeyC", "Alt"))
+	@Register.bindable("ToggleCameraLock", IInput.key("KeyC", "Alt"))
 	public readonly bindableToggleCameraLock: Bindable;
-	@Register.bindable("ToggleFullVisibility", IBinding.key("KeyV", "Alt"))
+	@Register.bindable("ToggleFullVisibility", IInput.key("KeyV", "Alt"))
 	public readonly bindableToggleFullVisibility: Bindable;
 
-	@Register.bindable("Paint", IBinding.mouseButton(0))
+	@Register.bindable("Paint", IInput.mouseButton(0))
 	public readonly bindablePaint: Bindable;
-	@Register.bindable("ErasePaint", IBinding.mouseButton(2))
+	@Register.bindable("ErasePaint", IInput.mouseButton(2))
 	public readonly bindableErasePaint: Bindable;
-	@Register.bindable("ClearPaint", IBinding.key("Backspace"))
+	@Register.bindable("ClearPaint", IInput.key("Backspace"))
 	public readonly bindableClearPaint: Bindable;
-	@Register.bindable("CancelPaint", IBinding.key("Escape"))
+	@Register.bindable("CancelPaint", IInput.key("Escape"))
 	public readonly bindableCancelPaint: Bindable;
-	@Register.bindable("CompletePaint", IBinding.key("Enter"))
+	@Register.bindable("CompletePaint", IInput.key("Enter"))
 	public readonly bindableCompletePaint: Bindable;
 
 	////////////////////////////////////
@@ -549,10 +549,10 @@ export default class DebugTools extends Mod {
 	/**
 	 * We cancel damage to the player if they're set as "invulnerable"
 	 */
-	@Override @HookMethod
-	public onPlayerDamage(player: Player, info: IDamageInfo): number | undefined {
-		if (this.getPlayerData(player, "invulnerable")) return 0;
-		return undefined;
+	@EventHandler(EventBus.Players, "damage")
+	public onPlayerDamage(player: Player, info: IDamageInfo): number | void {
+		if (this.getPlayerData(player, "invulnerable"))
+			return 0;
 	}
 
 	/**

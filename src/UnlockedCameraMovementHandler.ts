@@ -2,8 +2,9 @@ import { RenderSource } from "game/IGame";
 import Mod from "mod/Mod";
 import Register from "mod/ModRegistry";
 import Bindable from "newui/input/Bindable";
-import { IBinding } from "newui/input/IBinding";
+import { IInput } from "newui/input/IInput";
 import InputManager from "newui/input/InputManager";
+import { gameScreen } from "newui/screen/screens/GameScreen";
 import Vector2 from "utilities/math/Vector2";
 import type DebugTools from "./DebugTools";
 import { DEBUG_TOOLS_ID } from "./IDebugTools";
@@ -21,13 +22,13 @@ export default class UnlockedCameraMovementHandler {
 	// Registrations
 	//
 
-	@Register.bindable("CameraMoveUp", IBinding.key("KeyW", "Alt"))
+	@Register.bindable("CameraMoveUp", IInput.key("KeyW", "Alt"))
 	public readonly bindMoveCameraUp: Bindable;
-	@Register.bindable("CameraMoveLeft", IBinding.key("KeyA", "Alt"))
+	@Register.bindable("CameraMoveLeft", IInput.key("KeyA", "Alt"))
 	public readonly bindMoveCameraLeft: Bindable;
-	@Register.bindable("CameraMoveDown", IBinding.key("KeyS", "Alt"))
+	@Register.bindable("CameraMoveDown", IInput.key("KeyS", "Alt"))
 	public readonly bindMoveCameraDown: Bindable;
-	@Register.bindable("CameraMoveRight", IBinding.key("KeyD", "Alt"))
+	@Register.bindable("CameraMoveRight", IInput.key("KeyD", "Alt"))
 	public readonly bindMoveCameraRight: Bindable;
 
 	////////////////////////////////////
@@ -94,7 +95,9 @@ export default class UnlockedCameraMovementHandler {
 			this.position.add(new Vector2(this.transition).subtract(this.position).multiply(this.homingVelocity));
 		}
 
-		if (!this.position.equals(beforePosition))
+		if (!this.position.equals(beforePosition)) {
+			gameScreen?.worldTooltipHandler.updatePosition();
 			game.updateView(RenderSource.Mod, false);
+		}
 	}
 }

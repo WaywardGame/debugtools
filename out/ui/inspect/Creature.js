@@ -7,42 +7,39 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 define(["require", "exports", "entity/action/ActionExecutor", "newui/component/Button", "newui/component/CheckButton", "../../action/Remove", "../../action/SetTamed", "../../IDebugTools", "../component/InspectEntityInformationSubsection"], function (require, exports, ActionExecutor_1, Button_1, CheckButton_1, Remove_1, SetTamed_1, IDebugTools_1, InspectEntityInformationSubsection_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    let CreatureInformation = (() => {
-        class CreatureInformation extends InspectEntityInformationSubsection_1.default {
-            constructor() {
-                super();
-                new CheckButton_1.CheckButton()
-                    .setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.ButtonTameCreature))
-                    .setRefreshMethod(() => this.creature ? this.creature.isTamed() : false)
-                    .event.subscribe("toggle", this.setTamed)
-                    .appendTo(this);
-                new Button_1.default()
-                    .setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.ButtonRemoveThing))
-                    .event.subscribe("activate", this.removeCreature)
-                    .appendTo(this);
-            }
-            update(entity) {
-                this.creature = entity.asCreature;
-                this.toggle(!!this.creature);
-            }
-            setTamed(_, tamed) {
-                ActionExecutor_1.default.get(SetTamed_1.default).execute(localPlayer, this.creature, tamed);
-            }
-            removeCreature() {
-                ActionExecutor_1.default.get(Remove_1.default).execute(localPlayer, this.creature);
-            }
+    class CreatureInformation extends InspectEntityInformationSubsection_1.default {
+        constructor() {
+            super();
+            new CheckButton_1.CheckButton()
+                .setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.ButtonTameCreature))
+                .setRefreshMethod(() => this.creature ? this.creature.isTamed() : false)
+                .event.subscribe("toggle", this.setTamed)
+                .appendTo(this);
+            new Button_1.default()
+                .setText(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.ButtonRemoveThing))
+                .event.subscribe("activate", this.removeCreature)
+                .appendTo(this);
         }
-        __decorate([
-            Override
-        ], CreatureInformation.prototype, "update", null);
-        __decorate([
-            Bound
-        ], CreatureInformation.prototype, "setTamed", null);
-        __decorate([
-            Bound
-        ], CreatureInformation.prototype, "removeCreature", null);
-        return CreatureInformation;
-    })();
+        update(entity) {
+            this.creature = entity.asCreature;
+            this.toggle(!!this.creature);
+        }
+        setTamed(_, tamed) {
+            ActionExecutor_1.default.get(SetTamed_1.default).execute(localPlayer, this.creature, tamed);
+        }
+        removeCreature() {
+            ActionExecutor_1.default.get(Remove_1.default).execute(localPlayer, this.creature);
+        }
+    }
+    __decorate([
+        Override
+    ], CreatureInformation.prototype, "update", null);
+    __decorate([
+        Bound
+    ], CreatureInformation.prototype, "setTamed", null);
+    __decorate([
+        Bound
+    ], CreatureInformation.prototype, "removeCreature", null);
     exports.default = CreatureInformation;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ3JlYXR1cmUuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdWkvaW5zcGVjdC9DcmVhdHVyZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7SUFVQTtRQUFBLE1BQXFCLG1CQUFvQixTQUFRLDRDQUFrQztZQUdsRjtnQkFDQyxLQUFLLEVBQUUsQ0FBQztnQkFFUixJQUFJLHlCQUFXLEVBQUU7cUJBQ2YsT0FBTyxDQUFDLHlCQUFXLENBQUMsbUNBQXFCLENBQUMsa0JBQWtCLENBQUMsQ0FBQztxQkFDOUQsZ0JBQWdCLENBQUMsR0FBRyxFQUFFLENBQUMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxDQUFDLENBQUMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxPQUFPLEVBQUUsQ0FBQyxDQUFDLENBQUMsS0FBSyxDQUFDO3FCQUN2RSxLQUFLLENBQUMsU0FBUyxDQUFDLFFBQVEsRUFBRSxJQUFJLENBQUMsUUFBUSxDQUFDO3FCQUN4QyxRQUFRLENBQUMsSUFBSSxDQUFDLENBQUM7Z0JBRWpCLElBQUksZ0JBQU0sRUFBRTtxQkFDVixPQUFPLENBQUMseUJBQVcsQ0FBQyxtQ0FBcUIsQ0FBQyxpQkFBaUIsQ0FBQyxDQUFDO3FCQUM3RCxLQUFLLENBQUMsU0FBUyxDQUFDLFVBQVUsRUFBRSxJQUFJLENBQUMsY0FBYyxDQUFDO3FCQUNoRCxRQUFRLENBQUMsSUFBSSxDQUFDLENBQUM7WUFDbEIsQ0FBQztZQUVnQixNQUFNLENBQUMsTUFBYztnQkFDckMsSUFBSSxDQUFDLFFBQVEsR0FBRyxNQUFNLENBQUMsVUFBVSxDQUFDO2dCQUNsQyxJQUFJLENBQUMsTUFBTSxDQUFDLENBQUMsQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDLENBQUM7WUFDOUIsQ0FBQztZQUdPLFFBQVEsQ0FBQyxDQUFNLEVBQUUsS0FBYztnQkFDdEMsd0JBQWMsQ0FBQyxHQUFHLENBQUMsa0JBQVEsQ0FBQyxDQUFDLE9BQU8sQ0FBQyxXQUFXLEVBQUUsSUFBSSxDQUFDLFFBQVMsRUFBRSxLQUFLLENBQUMsQ0FBQztZQUMxRSxDQUFDO1lBR08sY0FBYztnQkFDckIsd0JBQWMsQ0FBQyxHQUFHLENBQUMsZ0JBQU0sQ0FBQyxDQUFDLE9BQU8sQ0FBQyxXQUFXLEVBQUUsSUFBSSxDQUFDLFFBQVMsQ0FBQyxDQUFDO1lBQ2pFLENBQUM7U0FDRDtRQWRVO1lBQVQsUUFBUTt5REFHUjtRQUdEO1lBREMsS0FBSzsyREFHTDtRQUdEO1lBREMsS0FBSztpRUFHTDtRQUNGLDBCQUFDO1NBQUE7c0JBaENvQixtQkFBbUIifQ==
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ3JlYXR1cmUuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdWkvaW5zcGVjdC9DcmVhdHVyZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7SUFVQSxNQUFxQixtQkFBb0IsU0FBUSw0Q0FBa0M7UUFHbEY7WUFDQyxLQUFLLEVBQUUsQ0FBQztZQUVSLElBQUkseUJBQVcsRUFBRTtpQkFDZixPQUFPLENBQUMseUJBQVcsQ0FBQyxtQ0FBcUIsQ0FBQyxrQkFBa0IsQ0FBQyxDQUFDO2lCQUM5RCxnQkFBZ0IsQ0FBQyxHQUFHLEVBQUUsQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDLENBQUMsQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDLE9BQU8sRUFBRSxDQUFDLENBQUMsQ0FBQyxLQUFLLENBQUM7aUJBQ3ZFLEtBQUssQ0FBQyxTQUFTLENBQUMsUUFBUSxFQUFFLElBQUksQ0FBQyxRQUFRLENBQUM7aUJBQ3hDLFFBQVEsQ0FBQyxJQUFJLENBQUMsQ0FBQztZQUVqQixJQUFJLGdCQUFNLEVBQUU7aUJBQ1YsT0FBTyxDQUFDLHlCQUFXLENBQUMsbUNBQXFCLENBQUMsaUJBQWlCLENBQUMsQ0FBQztpQkFDN0QsS0FBSyxDQUFDLFNBQVMsQ0FBQyxVQUFVLEVBQUUsSUFBSSxDQUFDLGNBQWMsQ0FBQztpQkFDaEQsUUFBUSxDQUFDLElBQUksQ0FBQyxDQUFDO1FBQ2xCLENBQUM7UUFFZ0IsTUFBTSxDQUFDLE1BQWM7WUFDckMsSUFBSSxDQUFDLFFBQVEsR0FBRyxNQUFNLENBQUMsVUFBVSxDQUFDO1lBQ2xDLElBQUksQ0FBQyxNQUFNLENBQUMsQ0FBQyxDQUFDLElBQUksQ0FBQyxRQUFRLENBQUMsQ0FBQztRQUM5QixDQUFDO1FBR08sUUFBUSxDQUFDLENBQU0sRUFBRSxLQUFjO1lBQ3RDLHdCQUFjLENBQUMsR0FBRyxDQUFDLGtCQUFRLENBQUMsQ0FBQyxPQUFPLENBQUMsV0FBVyxFQUFFLElBQUksQ0FBQyxRQUFTLEVBQUUsS0FBSyxDQUFDLENBQUM7UUFDMUUsQ0FBQztRQUdPLGNBQWM7WUFDckIsd0JBQWMsQ0FBQyxHQUFHLENBQUMsZ0JBQU0sQ0FBQyxDQUFDLE9BQU8sQ0FBQyxXQUFXLEVBQUUsSUFBSSxDQUFDLFFBQVMsQ0FBQyxDQUFDO1FBQ2pFLENBQUM7S0FDRDtJQWRVO1FBQVQsUUFBUTtxREFHUjtJQUdEO1FBREMsS0FBSzt1REFHTDtJQUdEO1FBREMsS0FBSzs2REFHTDtJQS9CRixzQ0FnQ0MifQ==

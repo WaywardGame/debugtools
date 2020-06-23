@@ -113,7 +113,7 @@ export default class DebugTools extends Mod {
     onGameScreenVisible(): void;
     getZoomLevel(): number | undefined;
     protected getCameraPosition(_: any, position: IVector2): IVector2 | undefined;
-    onPlayerDamage(player: Player, info: IDamageInfo): number | undefined;
+    onPlayerDamage(player: Player, info: IDamageInfo): number | void;
     protected canCreatureAttack(creature: Creature, enemy: Player | Creature): boolean | undefined;
     onMove(player: Player, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined;
     onNoInputReceived(player: Player): void;
