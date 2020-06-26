@@ -65,6 +65,7 @@ export enum DebugToolsTranslation {
 	ButtonUnlockCamera,
 	ButtonResetWebGL,
 	ButtonReloadShaders,
+	ButtonReloadUIImages,
 	HeadingLayers,
 	ButtonToggleLayer,
 	// Manipulation

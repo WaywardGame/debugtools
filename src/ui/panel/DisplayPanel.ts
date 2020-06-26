@@ -6,6 +6,7 @@ import { CheckButton } from "newui/component/CheckButton";
 import Divider from "newui/component/Divider";
 import { RangeRow } from "newui/component/RangeRow";
 import { Heading } from "newui/component/Text";
+import ImagePath from "newui/util/ImagePath";
 import { RenderLayerFlag } from "renderer/IWorldRenderer";
 import { compileShaders, loadShaders } from "renderer/Shaders";
 import WorldLayerRenderer from "renderer/WorldLayerRenderer";
@@ -70,6 +71,11 @@ export default class DisplayPanel extends DebugToolsPanel {
 			.classes.add("warning")
 			.setText(translation(DebugToolsTranslation.ButtonReloadShaders))
 			.event.subscribe("activate", this.reloadShaders)
+			.appendTo(this);
+
+		new Button()
+			.setText(translation(DebugToolsTranslation.ButtonReloadUIImages))
+			.event.subscribe("activate", ImagePath.cachebust)
 			.appendTo(this);
 
 		new Divider()

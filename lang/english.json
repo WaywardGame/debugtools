@@ -65,6 +65,7 @@
 			"buttonUnlockCamera": "Unlock Camera {#--text-color-faded:({Bindings:ModDebugToolsToggleCameraLock})}",
 			"buttonResetWebGL": "Reset WebGL",
 			"buttonReloadShaders": "Reload Shaders",
+			"buttonReloadUIImages": "Reload UI Images",
 			"headingLayers": "Layers",
 			"buttonToggleLayer": "{0}",
 			
