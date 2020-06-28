@@ -75,7 +75,7 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 	//
 
 	private getTemperature(tempType: TempType, calcOrProduce: "calculated" | "produced") {
-		return island.temperature[calcOrProduce === "calculated" ? "getCachedCalculated" : "getCachedProduced"]
-			(this.value.x, this.value.y, this.value.z, tempType);
+		return island.temperature?.[calcOrProduce === "calculated" ? "getCachedCalculated" : "getCachedProduced"]
+			(this.value.x, this.value.y, this.value.z, tempType) ?? -1;
 	}
 }
