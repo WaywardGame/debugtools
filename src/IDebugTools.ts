@@ -88,6 +88,7 @@ export enum DebugToolsTranslation {
 	ButtonReplaceExisting,
 	LabelTileEvent,
 	ResetPaintSection,
+
 	// Selection
 	PanelSelection,
 	SelectionMethod,
@@ -105,7 +106,15 @@ export enum DebugToolsTranslation {
 	FilterCorpses,
 	FilterPlayers,
 	ActionRemove,
+	ActionSelect,
+	// ActionCount,
 	ButtonExecute,
+	SelectionCount,
+	LabelSelectionCount,
+	SelectionFilterNamed,
+	SelectionFilterAll,
+	SelectionAllPlayers,
+
 	// Templates
 	PanelTemplates,
 	LabelTemplateType,

@@ -85,6 +85,15 @@
 	gap: 0 !important;
 }
 
+.debug-tools-dialog-selection-source {
+	grid-template-columns: min(50%, calc(150px * var(--scale-floor))) 1fr;
+	gap: 2px;
+}
+
+.debug-tools-dialog-selection-source > .dropdown-label {
+	gap: 2px;
+}
+
 .debug-tools-dialog-checkbutton-dropdown-row {
 	grid-template-columns: auto 1fr;
 }

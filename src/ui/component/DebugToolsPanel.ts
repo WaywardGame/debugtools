@@ -14,6 +14,9 @@ export default abstract class DebugToolsPanel extends Component {
 
 	public abstract getTranslation(): DebugToolsTranslation | Translation;
 
+	/**
+	 * Don't override me
+	 */
 	@OwnEventHandler(DebugToolsPanel, "switchTo")
 	protected onPanelShow() {
 		this.registerEventBusSubscriber("switchAway", "remove");

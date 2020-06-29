@@ -1,7 +1,12 @@
+import DebugTools from "src/DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 export default class SelectionPanel extends DebugToolsPanel {
+    static DEBUG_TOOLS: DebugTools;
+    private readonly targets;
     private readonly textPreposition;
+    private readonly countRow;
+    private readonly buttonExecute;
     private readonly creatures;
     private readonly npcs;
     private readonly tileEvents;
@@ -16,4 +21,6 @@ export default class SelectionPanel extends DebugToolsPanel {
     getTranslation(): DebugToolsTranslation;
     execute(): void;
     private onActionChange;
+    private onMethodChange;
+    private updateTargets;
 }
