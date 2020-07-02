@@ -12,7 +12,6 @@ export default function (doodad: Doodad, position: IVector3) {
 		gatherReady: doodad.gatherReady,
 		gfx: doodad.gfx,
 		spread: doodad.spread,
-		treasure: doodad.treasure,
 		weight: doodad.weight,
 		legendary: doodad.legendary ? { ...doodad.legendary } : undefined,
 		disassembly: !doodad.disassembly ? undefined : doodad.disassembly
