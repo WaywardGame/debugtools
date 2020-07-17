@@ -84,6 +84,7 @@ export default class DebugTools extends Mod {
     readonly actionToggleNoclip: ActionType;
     readonly actionTogglePermissions: ActionType;
     readonly actionRenameIsland: ActionType;
+    readonly actionForceSailToCivilization: ActionType;
     readonly dialogMain: DialogId;
     readonly dialogInspect: DialogId;
     readonly inspectionTemperature: InspectType;

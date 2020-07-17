@@ -189,6 +189,9 @@
 		},
 		"item": {
 			"none": "none"
+		},
+		"inspectType": {
+			"modDebugToolsTemperature": "Debug: Temperature"
 		}
 	}
 }

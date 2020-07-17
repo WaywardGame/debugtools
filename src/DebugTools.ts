@@ -40,6 +40,7 @@ import Vector3 from "utilities/math/Vector3";
 import AddItemToInventory from "./action/AddItemToInventory";
 import ChangeTerrain from "./action/ChangeTerrain";
 import Clone from "./action/Clone";
+import ForceSailToCivilization from "./action/ForceSailToCivilization";
 import Heal from "./action/Heal";
 import Kill from "./action/Kill";
 import Paint from "./action/Paint";
@@ -260,6 +261,9 @@ export default class DebugTools extends Mod {
 
 	@Register.action("RenameIsland", RenameIsland)
 	public readonly actionRenameIsland: ActionType;
+
+	@Register.action("ForceSailToCivilization", ForceSailToCivilization)
+	public readonly actionForceSailToCivilization: ActionType;
 
 	////////////////////////////////////
 	// UI

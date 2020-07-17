@@ -1,6 +1,5 @@
 import { SfxType } from "audio/IAudio";
 import ActionExecutor from "entity/action/ActionExecutor";
-import { ActionType } from "entity/action/IAction";
 import { EventBus } from "event/EventBuses";
 import { Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
@@ -30,6 +29,7 @@ import { Tuple } from "utilities/Arrays";
 import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import ChangeLayer from "../../action/ChangeLayer";
+import ForceSailToCivilization from "../../action/ForceSailToCivilization";
 import RenameIsland from "../../action/RenameIsland";
 import SetTime from "../../action/SetTime";
 import DebugTools from "../../DebugTools";
@@ -319,15 +319,9 @@ export default class GeneralPanel extends DebugToolsPanel {
 		}
 	}
 
-	/**
-	 * Travels Away
-	 * 
-	 * Note: Since "traveling away" isn't possible on multiplayer, this doesn't need to be an action.
-	 */
 	private async sailToCivilization() {
 		if (multiplayer.isConnected() && !game.isChallenge) return;
-		const anyExecutor = (ActionExecutor as any).get(ActionType.SailToCivilization);
-		anyExecutor.execute(localPlayer, undefined, true, true, true);
+		ActionExecutor.get(ForceSailToCivilization).execute(localPlayer);
 	}
 
 	@Bound private renameIsland(input: Input) {

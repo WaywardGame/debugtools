@@ -10,6 +10,7 @@
  */
 
 import { EventHandler } from "event/EventManager";
+import { basicInspectionPriorities, InspectType } from "game/inspection/IInspection";
 import { Context } from "game/inspection/InfoProvider";
 import Inspection from "game/inspection/Inspection";
 import { TempType } from "game/temperature/TemperatureManager";
@@ -34,6 +35,10 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 
 	@Override public getId() {
 		return this.createIdFromVector3(this.value);
+	}
+
+	@Override public getPriority() {
+		return basicInspectionPriorities[InspectType.Tile] + 100;
 	}
 
 	// @Override public getBorder() {

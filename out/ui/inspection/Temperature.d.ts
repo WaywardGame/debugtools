@@ -17,6 +17,7 @@ export default class TemperatureInspection extends Inspection<IVector3> {
     static getFromTile(position: IVector3): TemperatureInspection;
     constructor(tile: IVector3);
     getId(): string;
+    getPriority(): number;
     get(context: Context): import("../../../node_modules/@wayward/types/definitions/language/Translation").default[];
     onUpdateTile(_: any, x: number, y: number, z: number): void;
     private getTemperature;
