@@ -26,8 +26,10 @@ export default new Action(ActionArgument.Number, ActionArgument.Array, optional(
 					Remove(action, target);
 					break;
 				case DebugToolsTranslation.ActionTeleport:
-					const playerToTeleport = players.find(player => player.identifier === alternativeTarget) || localPlayer;
-					teleportEntity(action, playerToTeleport, target);
+					const playerToTeleport = players.find(player => player.identifier === alternativeTarget);
+					if (playerToTeleport) {
+						teleportEntity(action, playerToTeleport, target);
+					}
 					return;
 			}
 		}

@@ -42,7 +42,7 @@ export function teleportEntity(action: ActionApi<any>, entity: Entity, position?
 		tile.npc = entity.asNPC;
 	}
 
-	if (entity === localPlayer) {
+	if (entity.asPlayer?.isLocalPlayer()) {
 		gameScreen!.movementHandler.walkToTileHandler.reset();
 	}
 
