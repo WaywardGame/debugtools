@@ -28,7 +28,6 @@ import InputManager from "newui/input/InputManager";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
 import { MenuBarButtonGroup, MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
 import { gameScreen } from "newui/screen/screens/GameScreen";
-import { SpriteBatchLayer } from "renderer/IWorldRenderer";
 import WorldRenderer from "renderer/WorldRenderer";
 import { ITile, OverlayType } from "tile/ITerrain";
 import { IInjectionApi, Inject, InjectionPosition } from "utilities/Inject";
@@ -421,7 +420,7 @@ export default class DebugTools extends Mod {
 	 * Updates the field of view based on whether it's disabled in the mod.
 	 */
 	public updateFog() {
-		fieldOfView.disabled = this.getPlayerData(localPlayer, "fog") === false;
+		fieldOfView.disabled = (localPlayer.isGhost() && !game.getGameOptions().respawn) ? true : this.getPlayerData(localPlayer, "fog") === false;
 		game.updateView(RenderSource.Mod, true);
 	}
 
@@ -626,15 +625,6 @@ export default class DebugTools extends Mod {
 	@EventHandler(EventBus.Players, "getWeightOrStaminaMovementPenalty")
 	protected getPlayerWeightOrStaminaMovementPenalty(player: Player): number | undefined {
 		return this.getPlayerData(player, "noclip") ? 0 : undefined;
-	}
-
-	/**
-	 * If the player is "noclipping", we put them in `SpriteBatchLayer.CreatureFlying`.
-	 * Otherwise we return `undefined` and let the game or other mods handle it.
-	 */
-	@EventHandler(WorldRenderer, "getPlayerSpriteBatchLayer")
-	protected getPlayerSpriteBatchLayer(_: any, player: Player, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined {
-		return this.getPlayerData(player, "noclip") ? SpriteBatchLayer.CreatureFlying : undefined;
 	}
 
 	/**

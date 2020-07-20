@@ -17,7 +17,6 @@ import { IBindHandlerApi } from "newui/input/Bind";
 import Bindable from "newui/input/Bindable";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
 import { MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
-import { SpriteBatchLayer } from "renderer/IWorldRenderer";
 import WorldRenderer from "renderer/WorldRenderer";
 import { ITile, OverlayType } from "tile/ITerrain";
 import { IInjectionApi } from "utilities/Inject";
@@ -119,7 +118,6 @@ export default class DebugTools extends Mod {
     onMove(player: Player, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined;
     onNoInputReceived(player: Player): void;
     protected getPlayerWeightOrStaminaMovementPenalty(player: Player): number | undefined;
-    protected getPlayerSpriteBatchLayer(_: any, player: Player, batchLayer: SpriteBatchLayer): SpriteBatchLayer | undefined;
     protected isHumanSwimming(human: Human, isSwimming: boolean): boolean | undefined;
     protected getPlayerMaxWeight(player: Player, weight: number): number;
     onZoomIn(api: IBindHandlerApi): boolean;
