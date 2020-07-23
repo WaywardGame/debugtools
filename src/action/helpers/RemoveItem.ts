@@ -14,7 +14,7 @@ export default function (action: IActionApi<Player>, item: Item) {
 
 		} else if ("entityType" in container) {
 			const entity = container as Entity;
-			entity.asPlayer?.updateTablesAndWeight();
+			entity.asPlayer?.updateTablesAndWeight("M");
 		}
 	}
 

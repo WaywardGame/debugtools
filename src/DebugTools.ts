@@ -746,8 +746,8 @@ export default class DebugTools extends Mod {
 	 * If lighting is disabled, we return the maximum light level.
 	 */
 	@Inject(Game, "calculateAmbientLightLevel", InjectionPosition.Pre)
-	public getAmbientLightLevel(api: IInjectionApi<Game, "calculateAmbientLightLevel">, z: number) {
-		if (this.getPlayerData(localPlayer, "lighting") === false) {
+	public getAmbientLightLevel(api: IInjectionApi<Game, "calculateAmbientLightLevel">, player: Player | undefined, z: number) {
+		if (player === localPlayer && this.getPlayerData(localPlayer, "lighting") === false) {
 			api.returnValue = 1;
 			api.cancelled = true;
 		}

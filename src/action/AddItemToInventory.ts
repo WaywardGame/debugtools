@@ -13,7 +13,7 @@ export default new Action(anyOf(ActionArgument.Container, ActionArgument.Player)
 	.setHandler((action, target, item, quality) => {
 		if ("entityType" in target) {
 			target.createItemInInventory(item, quality);
-			target.updateTablesAndWeight();
+			target.updateTablesAndWeight("M");
 
 		} else {
 			itemManager.create(item, target, quality);

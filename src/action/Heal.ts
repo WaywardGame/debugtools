@@ -1,6 +1,6 @@
 import { Action } from "entity/action/Action";
 import { ActionArgument, anyOf } from "entity/action/IAction";
-import { EntityType, StatusEffectChangeReason, StatusType } from "entity/IEntity";
+import { EntityType, MoveType, StatusEffectChangeReason, StatusType } from "entity/IEntity";
 import { IStatMax, Stat } from "entity/IStats";
 import { PlayerState } from "entity/player/IPlayer";
 import { gameScreen } from "newui/screen/screens/GameScreen";
@@ -40,6 +40,8 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
 		if (entity.asPlayer) {
 			entity.asPlayer.state = PlayerState.None;
 			entity.asPlayer.updateStatsAndAttributes();
+			const moveType = Actions.DEBUG_TOOLS.getPlayerData(entity.asPlayer, "noclip") ? MoveType.Flying : MoveType.Land;
+			entity.asPlayer.setMoveType(moveType);
 		}
 
 		action.setUpdateRender();

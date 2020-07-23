@@ -129,7 +129,7 @@ export default class DebugTools extends Mod {
     onTeleportLocalPlayer(api: IBindHandlerApi): boolean;
     onToggleNoClipOnLocalPlayer(): boolean;
     getAmbientColor(api: IInjectionApi<WorldRenderer, "calculateAmbientColor">): void;
-    getAmbientLightLevel(api: IInjectionApi<Game, "calculateAmbientLightLevel">, z: number): void;
+    getAmbientLightLevel(api: IInjectionApi<Game, "calculateAmbientLightLevel">, player: Player | undefined, z: number): void;
     getTileLightLevel(api: IInjectionApi<Game, "calculateTileLightLevel">, tile: ITile, x: number, y: number, z: number): void;
     private needsUpgrade;
 }
