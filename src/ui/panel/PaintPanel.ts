@@ -1,21 +1,21 @@
 import { DoodadType } from "doodad/IDoodad";
 import ActionExecutor from "entity/action/ActionExecutor";
 import { CreatureType } from "entity/creature/ICreature";
-import { NPCType } from "entity/npc/NPCS";
-import { Events, IEventEmitter } from "event/EventEmitter";
-import { EventHandler, EventSubscriber, OwnEventHandler } from "event/EventManager";
+import { NPCType } from "entity/npc/INPCs";
+import { Events, IEventEmitter, Priority } from "event/EventEmitter";
+import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
-import { HookMethod } from "mod/IHookHost";
-import { HookPriority } from "mod/IHookManager";
 import Mod from "mod/Mod";
-import { bindingManager } from "newui/BindingManager";
+import { Registry } from "mod/ModRegistry";
 import { BlockRow } from "newui/component/BlockRow";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Component from "newui/component/Component";
 import ContextMenu from "newui/component/ContextMenu";
 import { RangeRow } from "newui/component/RangeRow";
-import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import Bind, { IBindHandlerApi } from "newui/input/Bind";
+import Bindable from "newui/input/Bindable";
+import InputManager from "newui/input/InputManager";
 import MovementHandler from "newui/screen/screens/game/util/movement/MovementHandler";
 import { gameScreen } from "newui/screen/screens/GameScreen";
 import Spacer from "newui/screen/screens/menu/component/Spacer";
@@ -23,6 +23,7 @@ import { SpriteBatchLayer } from "renderer/IWorldRenderer";
 import WorldRenderer from "renderer/WorldRenderer";
 import { TerrainType } from "tile/ITerrain";
 import { TileEventType } from "tile/ITileEvent";
+import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import TileHelpers from "utilities/TileHelpers";
@@ -86,7 +87,6 @@ const paintSections: (new () => IPaintSection)[] = [
 	TileEventPaint,
 ];
 
-@EventSubscriber
 export default class PaintPanel extends DebugToolsPanel {
 
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
@@ -99,7 +99,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 	private painting = false;
 	private readonly paintTiles: number[] = [];
-	private lastPaintPosition?: Vector2;
+	private lastPaintPosition?: IVector2;
 	private maxSprites = 1024;
 
 	public constructor() {
@@ -148,139 +148,170 @@ export default class PaintPanel extends DebugToolsPanel {
 		return DebugToolsTranslation.PanelPaint;
 	}
 
+	////////////////////////////////////
+	// Event Handlers
+	//
+
 	@EventHandler(MovementHandler, "canMove")
-	public canClientMove(): false | undefined {
+	protected canClientMove(): false | undefined {
 		if (this.painting) return false;
 
 		return undefined;
 	}
 
 	@EventHandler(WorldRenderer, "getMaxSpritesForLayer")
-	public getMaxSpritesForLayer(_: any, maxSprites: number) {
+	protected getMaxSpritesForLayer(_: any, maxSprites: number) {
 		return this.maxSprites = maxSprites + (this.painting ? this.paintTiles.length * 4 : 0);
 	}
 
-	// tslint:disable cyclomatic-complexity
-	@Override @HookMethod(HookPriority.High)
-	public onBindLoop(bindPressed: Bindable, api: BindCatcherApi) {
-		if (!gameScreen) {
-			return bindPressed;
-		}
-
-		if (api.wasPressed(Bindable.MenuContextMenu) && !bindPressed) {
-			for (const paintSection of this.paintSections) {
-				if (paintSection.isChanging() && api.isMouseWithin(paintSection)) {
-					this.showPaintSectionResetMenu(paintSection);
-					bindPressed = Bindable.MenuContextMenu;
-				}
+	@Bind.onDown(Bindable.MenuContextMenu, Priority.High)
+	protected onContextMenuBind(api: IBindHandlerApi) {
+		for (const paintSection of this.paintSections) {
+			if (paintSection.isChanging() && api.mouse.isWithin(paintSection)) {
+				this.showPaintSectionResetMenu(paintSection);
+				return true;
 			}
 		}
 
-		if (this.painting) {
-			if (api.isDown(this.DEBUG_TOOLS.bindablePaint) && gameScreen.wasMouseStartWithin()) {
-				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
-
-				const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
-
-				let interpolatedPosition = new Vector2(this.lastPaintPosition);
-				for (let i = 0; i < 300; i++) { // this is only used for if it goes into an infinite loop
-					interpolatedPosition = interpolatedPosition.add(direction).clamp(this.lastPaintPosition, tilePosition);
-
-					const paintPosition = interpolatedPosition.floor(new Vector2());
-
-					for (const [paintTilePosition] of TileHelpers.tilesInRange(new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
-						SelectionOverlay.add(paintTilePosition);
-
-						const tileId = getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z);
-
-						if (!this.paintTiles.includes(tileId)) this.paintTiles.push(tileId);
-					}
-
-					if (paintPosition.equals(tilePosition)) break;
-				}
-
-				this.lastPaintPosition = tilePosition;
-
-				this.updateOverlayBatch();
-				game.updateView(RenderSource.Mod, false);
-
-				bindPressed = this.DEBUG_TOOLS.bindablePaint;
-			}
-
-			if (api.isDown(this.DEBUG_TOOLS.bindableErasePaint) && gameScreen.wasMouseStartWithin()) {
-				const tilePosition = renderer.screenToTile(api.mouseX, api.mouseY);
-
-				const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
-
-				let interpolatedPosition = new Vector2(this.lastPaintPosition);
-				for (let i = 0; i < 300; i++) { // this is only used for if it goes into an infinite loop
-					interpolatedPosition = interpolatedPosition.add(direction).clamp(this.lastPaintPosition, tilePosition);
-
-					const paintPosition = interpolatedPosition.floor(new Vector2());
-
-					for (const [paintTilePosition] of TileHelpers.tilesInRange(new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
-						SelectionOverlay.remove(paintTilePosition);
-
-						const tileId = getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z);
-
-						const index = this.paintTiles.indexOf(tileId);
-						if (index > -1) this.paintTiles.splice(index, 1);
-					}
-
-					if (paintPosition.equals(tilePosition)) break;
-				}
-
-				this.lastPaintPosition = tilePosition;
-
-				this.updateOverlayBatch();
-				game.updateView(RenderSource.Mod, false);
-
-				bindPressed = this.DEBUG_TOOLS.bindableErasePaint;
-			}
-
-			if (!bindPressed) delete this.lastPaintPosition;
-
-			if (api.wasPressed(this.DEBUG_TOOLS.bindableCancelPaint)) {
-				this.paintButton.setChecked(false);
-				bindPressed = this.DEBUG_TOOLS.bindableCancelPaint;
-			}
-
-			if (api.wasPressed(this.DEBUG_TOOLS.bindableClearPaint)) {
-				this.clearPaint();
-				bindPressed = this.DEBUG_TOOLS.bindableClearPaint;
-			}
-
-			if (api.wasPressed(this.DEBUG_TOOLS.bindableCompletePaint)) {
-				this.completePaint();
-				bindPressed = this.DEBUG_TOOLS.bindableCompletePaint;
-			}
-		}
-
-		return bindPressed;
+		return false;
 	}
-	// tslint:enable cyclomatic-complexity
+
+	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindablePaint"), Priority.High)
+	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableErasePaint"), Priority.High)
+	protected onStartPaintOrErasePaint(api: IBindHandlerApi) {
+		return this.painting && !!gameScreen?.mouseStartWasWithin(api);
+	}
+
+	@Bind.onHolding(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindablePaint"))
+	protected onPaint(api: IBindHandlerApi) {
+		if (!this.painting || !gameScreen?.mouseStartWasWithin(api))
+			return false;
+
+		const tilePosition = renderer.screenToTile(...api.mouse.position.xy);
+		if (!tilePosition)
+			return false;
+
+		const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
+
+		let interpolatedPosition = new Vector2(this.lastPaintPosition);
+		for (let i = 0; i < 300; i++) { // this is only used for if it goes into an infinite loop
+			interpolatedPosition = interpolatedPosition.add(direction).clamp(this.lastPaintPosition, tilePosition);
+
+			const paintPosition = interpolatedPosition.floor(new Vector2());
+
+			for (const [paintTilePosition] of TileHelpers.tilesInRange(new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
+				SelectionOverlay.add(paintTilePosition);
+
+				const tileId = getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z);
+
+				if (!this.paintTiles.includes(tileId)) this.paintTiles.push(tileId);
+			}
+
+			if (paintPosition.equals(tilePosition)) break;
+		}
+
+		this.lastPaintPosition = tilePosition;
+
+		this.updateOverlayBatch();
+		game.updateView(RenderSource.Mod, false);
+		return true;
+	}
+
+	@Bind.onHolding(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableErasePaint"))
+	protected onErasePaint(api: IBindHandlerApi) {
+		if (!this.painting || !gameScreen?.mouseStartWasWithin(api))
+			return false;
+
+		const tilePosition = renderer.screenToTile(...api.mouse.position.xy);
+		if (!tilePosition)
+			return false;
+
+		const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
+
+		let interpolatedPosition = new Vector2(this.lastPaintPosition);
+		for (let i = 0; i < 300; i++) { // this is only used for if it goes into an infinite loop
+			interpolatedPosition = interpolatedPosition.add(direction).clamp(this.lastPaintPosition, tilePosition);
+
+			const paintPosition = interpolatedPosition.floor(new Vector2());
+
+			for (const [paintTilePosition] of TileHelpers.tilesInRange(new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
+				SelectionOverlay.remove(paintTilePosition);
+
+				const tileId = getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z);
+
+				const index = this.paintTiles.indexOf(tileId);
+				if (index > -1) this.paintTiles.splice(index, 1);
+			}
+
+			if (paintPosition.equals(tilePosition)) break;
+		}
+
+		this.lastPaintPosition = tilePosition;
+
+		this.updateOverlayBatch();
+		game.updateView(RenderSource.Mod, false);
+		return true;
+	}
+
+	@Bind.onUp(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindablePaint"))
+	@Bind.onUp(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableErasePaint"))
+	protected onStopPaint(api: IBindHandlerApi) {
+		if (this.painting && !api.input.isHolding(this.DEBUG_TOOLS.bindablePaint) && !api.input.isHolding(this.DEBUG_TOOLS.bindableErasePaint))
+			delete this.lastPaintPosition;
+
+		return false;
+	}
+
+	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableCancelPaint"), Priority.High)
+	protected onCancelPaint() {
+		if (!this.painting)
+			return false;
+
+		this.paintButton.setChecked(false);
+		return true;
+	}
+
+	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableClearPaint"), Priority.High)
+	protected onClearPaint() {
+		if (!this.painting)
+			return false;
+
+		this.clearPaint();
+		return true;
+	}
+
+	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableCompletePaint"), Priority.High)
+	protected onCompletePaint() {
+		if (!this.painting)
+			return false;
+
+		this.completePaint();
+		return true;
+	}
 
 	@OwnEventHandler(PaintPanel, "switchTo")
 	protected onSwitchTo() {
 		this.getParent()!.classes.add("debug-tools-paint-panel");
+
 		this.paintRow.appendTo(this.getParent()!.getParent()!);
 
-		this.registerHookHost("DebugToolsDialog:PaintPanel");
+		Bind.registerHandlers(this);
 	}
 
 	@OwnEventHandler(PaintPanel, "switchAway")
 	protected onSwitchAway() {
-		hookManager.deregister(this);
+		Bind.deregisterHandlers(this);
 
 		this.paintButton.setChecked(false);
 
 		this.paintRow.store();
 
-		const parent = this.getParent();
-		if (parent) {
-			parent.classes.remove("debug-tools-paint-panel");
-		}
+		this.getParent()?.classes.remove("debug-tools-paint-panel");
 	}
+
+	////////////////////////////////////
+	// Internals
+	//
 
 	private updateOverlayBatch() {
 		if (this.paintTiles.length * 4 - 512 < this.maxSprites || this.paintTiles.length * 4 + 512 > this.maxSprites) {
@@ -302,7 +333,7 @@ export default class PaintPanel extends DebugToolsPanel {
 			onActivate: () => paintSection.reset(),
 		}])
 			.addAllDescribedOptions()
-			.setPosition(...bindingManager.getMouse().xy)
+			.setPosition(...InputManager.mouse.position.xy)
 			.schedule(gameScreen!.setContextMenu);
 	}
 

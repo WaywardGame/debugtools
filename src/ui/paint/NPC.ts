@@ -1,10 +1,8 @@
-import { NPCType } from "entity/npc/NPCS";
-import { Events } from "event/EventEmitter";
-import { IEventEmitter } from "event/EventEmitter";
+import { NPCType } from "entity/npc/INPCs";
+import { Events, IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
 import NPCDropdown from "newui/component/dropdown/NPCDropdown";
 import { LabelledRow } from "newui/component/LabelledRow";
-
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 

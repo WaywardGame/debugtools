@@ -20,7 +20,7 @@ export default function (from: Entity, to: Entity) {
 		}
 	}
 
-	for (const statusEffect of from.statuses()) {
-		to.setStatus(statusEffect, true, StatusEffectChangeReason.Gained);
+	for (const statusEffect of from.getStatuses()) {
+		to.setStatus(statusEffect.type, true, StatusEffectChangeReason.Gained);
 	}
 }

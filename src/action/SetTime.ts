@@ -8,6 +8,6 @@ export default new Action(ActionArgument.Number)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, time) => {
-		game.time.setTime(time);
+		island.time.setTime(time);
 		action.setUpdateView(true);
 	});

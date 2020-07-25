@@ -1,22 +1,32 @@
 import * as Consts from "game/IGame";
 import Translation from "language/Translation";
-import DebugTools from "./DebugTools";
-import DebugToolsPanel from "./ui/component/DebugToolsPanel";
-import InspectEntityInformationSubsection from "./ui/component/InspectEntityInformationSubsection";
-import InspectInformationSection from "./ui/component/InspectInformationSection";
-import { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
-import { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect/Entity";
-import { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
+import { RenderLayerFlag } from "renderer/IWorldRenderer";
+import type DebugTools from "./DebugTools";
+import type DebugToolsPanel from "./ui/component/DebugToolsPanel";
+import type InspectEntityInformationSubsection from "./ui/component/InspectEntityInformationSubsection";
+import type InspectInformationSection from "./ui/component/InspectInformationSection";
+import type { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
+import type { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect/Entity";
+import type { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
 
 export const DEBUG_TOOLS_ID = "Debug Tools";
 export const ZOOM_LEVEL_MAX = Math.max(Consts.ZOOM_LEVEL_MAX, 16);
+
+let debugTools: DebugTools | undefined;
 
 /**
  * Returns a translation object using the `DebugToolsTranslation` dictionary
  * @param debugToolsTranslation The `DebugToolsTranslation` to get a `Translation` instance of
  */
 export function translation(debugToolsTranslation: DebugToolsTranslation | Translation) {
-	return typeof debugToolsTranslation === "number" ? new Translation(DebugTools.INSTANCE.dictionary, debugToolsTranslation) : debugToolsTranslation;
+	return !debugTools ? Translation.empty()
+		: typeof debugToolsTranslation !== "number" ? debugToolsTranslation : new Translation(debugTools.dictionary, debugToolsTranslation);
+}
+
+export module translation {
+	export function setDebugToolsInstance(instance: DebugTools) {
+		debugTools = instance;
+	}
 }
 
 export enum DebugToolsTranslation {
@@ -35,10 +45,17 @@ export enum DebugToolsTranslation {
 	ButtonInspectLocalPlayer,
 	ButtonRemoveAllCreatures,
 	ButtonRemoveAllNPCs,
-	ButtonTravelAway,
-	InterruptChoiceTravelAway,
 	ButtonAudio,
 	ButtonParticle,
+	LabelLayer,
+	OptionLayer,
+	HeadingIslandCurrent,
+	Island,
+	LabelTravel,
+	OptionTravelNewIsland,
+	OptionTravelCivilization,
+	OptionTravelRandomIsland,
+	ButtonTravel,
 	// Display
 	PanelDisplay,
 	ButtonToggleFog,
@@ -48,6 +65,9 @@ export enum DebugToolsTranslation {
 	ButtonUnlockCamera,
 	ButtonResetWebGL,
 	ButtonReloadShaders,
+	ButtonReloadUIImages,
+	HeadingLayers,
+	ButtonToggleLayer,
 	// Manipulation
 	PanelPaint,
 	ButtonPaint,
@@ -68,6 +88,7 @@ export enum DebugToolsTranslation {
 	ButtonReplaceExisting,
 	LabelTileEvent,
 	ResetPaintSection,
+
 	// Selection
 	PanelSelection,
 	SelectionMethod,
@@ -85,7 +106,15 @@ export enum DebugToolsTranslation {
 	FilterCorpses,
 	FilterPlayers,
 	ActionRemove,
+	ActionSelect,
+	// ActionCount,
 	ButtonExecute,
+	SelectionCount,
+	LabelSelectionCount,
+	SelectionFilterNamed,
+	SelectionFilterAll,
+	SelectionAllPlayers,
+
 	// Templates
 	PanelTemplates,
 	LabelTemplateType,
@@ -105,10 +134,14 @@ export enum DebugToolsTranslation {
 	InspectTerrain,
 	LabelChangeTerrain,
 	ButtonToggleTilled,
+	ButtonIncludeNeighbors,
+	ButtonRefreshTile,
 	EntityName,
 	ButtonKillEntity,
 	ButtonHealEntity,
 	ButtonTeleportEntity,
+	ButtonHealLocalPlayer,
+	ButtonTeleportLocalPlayer,
 	ButtonCloneEntity,
 	KillEntityDeathMessage,
 	CorpseName,
@@ -138,6 +171,14 @@ export enum DebugToolsTranslation {
 	ButtonTogglePermissions,
 	ButtonSetGrowthStage,
 	////////////////////////////////////
+	// Inspection
+	//
+	InspectionTemperatureCalculated,
+	InspectionTemperatureCalculatedHeat,
+	InspectionTemperatureCalculatedCold,
+	InspectionTemperatureProducedHeat,
+	InspectionTemperatureProducedCold,
+	////////////////////////////////////
 	// Misc
 	//
 	ActionResurrect,
@@ -156,6 +197,10 @@ export interface ISaveData {
 	 * Data for each player in this save, indexed by their IDs.
 	 */
 	playerData: { [key: string]: IPlayerData };
+	/**
+	 * Layers to render
+	 */
+	renderLayerFlags?: RenderLayerFlag;
 }
 
 export interface IPlayerData {

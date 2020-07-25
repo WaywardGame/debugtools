@@ -1,7 +1,5 @@
-import Creature from "entity/creature/Creature";
+import Entity from "entity/Entity";
 import { Stat } from "entity/IStats";
-import NPC from "entity/npc/NPC";
-import Player from "entity/player/Player";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 export default class HumanInformation extends InspectEntityInformationSubsection {
     private readonly addItemContainer;
@@ -10,7 +8,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
     constructor();
     protected onSwitchTo(): void;
     getImmutableStats(): Stat[];
-    update(entity: Creature | NPC | Player): void;
+    update(entity: Entity): void;
     private addReputationSlider;
     private setReputation;
     private addItem;

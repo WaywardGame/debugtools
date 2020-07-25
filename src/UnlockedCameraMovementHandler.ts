@@ -1,7 +1,13 @@
 import { RenderSource } from "game/IGame";
+import Mod from "mod/Mod";
 import Register from "mod/ModRegistry";
-import { Bindable, BindCatcherApi, KeyModifier } from "newui/IBindingManager";
+import Bindable from "newui/input/Bindable";
+import { IInput } from "newui/input/IInput";
+import InputManager from "newui/input/InputManager";
+import { gameScreen } from "newui/screen/screens/GameScreen";
 import Vector2 from "utilities/math/Vector2";
+import type DebugTools from "./DebugTools";
+import { DEBUG_TOOLS_ID } from "./IDebugTools";
 
 const ACCELERATION = 0.12;
 const MOVE_FRICTION = 0.98;
@@ -9,17 +15,20 @@ const STOP_FRICTION = 0.9;
 
 export default class UnlockedCameraMovementHandler {
 
+	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
+	public readonly DEBUG_TOOLS: DebugTools;
+
 	////////////////////////////////////
 	// Registrations
 	//
 
-	@Register.bindable("CameraMoveUp", { key: "KeyW", modifiers: [KeyModifier.Alt] })
+	@Register.bindable("CameraMoveUp", IInput.key("KeyW", "Alt"))
 	public readonly bindMoveCameraUp: Bindable;
-	@Register.bindable("CameraMoveLeft", { key: "KeyA", modifiers: [KeyModifier.Alt] })
+	@Register.bindable("CameraMoveLeft", IInput.key("KeyA", "Alt"))
 	public readonly bindMoveCameraLeft: Bindable;
-	@Register.bindable("CameraMoveDown", { key: "KeyS", modifiers: [KeyModifier.Alt] })
+	@Register.bindable("CameraMoveDown", IInput.key("KeyS", "Alt"))
 	public readonly bindMoveCameraDown: Bindable;
-	@Register.bindable("CameraMoveRight", { key: "KeyD", modifiers: [KeyModifier.Alt] })
+	@Register.bindable("CameraMoveRight", IInput.key("KeyD", "Alt"))
 	public readonly bindMoveCameraRight: Bindable;
 
 	////////////////////////////////////
@@ -27,33 +36,48 @@ export default class UnlockedCameraMovementHandler {
 	//
 
 	public velocity = Vector2.ZERO;
-	public position: Vector2;
+	public position = Vector2.ZERO;
 	public transition?: Vector2;
 	public homingVelocity = 0;
+	private running = false;
+
+	public begin() {
+		this.running = true;
+		this.tick();
+	}
+
+	public end() {
+		this.running = false;
+	}
 
 	/**
 	 * Simple velocity movement implementation
 	 */
-	public handle(bindPressed: Bindable, api: BindCatcherApi) {
+	@Bound public tick() {
+		if (!this.running)
+			return;
+
+		setTimeout(this.tick, game.interval);
+
 		let friction = STOP_FRICTION;
 
 		if (!this.transition) {
-			if (api.isDown(this.bindMoveCameraLeft)) {
+			if (InputManager.input.isHolding(this.bindMoveCameraLeft)) {
 				this.velocity.x -= ACCELERATION / renderer.getTileScale();
 				friction = MOVE_FRICTION;
 			}
 
-			if (api.isDown(this.bindMoveCameraRight)) {
+			if (InputManager.input.isHolding(this.bindMoveCameraRight)) {
 				this.velocity.x += ACCELERATION / renderer.getTileScale();
 				friction = MOVE_FRICTION;
 			}
 
-			if (api.isDown(this.bindMoveCameraUp)) {
+			if (InputManager.input.isHolding(this.bindMoveCameraUp)) {
 				this.velocity.y -= ACCELERATION / renderer.getTileScale();
 				friction = MOVE_FRICTION;
 			}
 
-			if (api.isDown(this.bindMoveCameraDown)) {
+			if (InputManager.input.isHolding(this.bindMoveCameraDown)) {
 				this.velocity.y += ACCELERATION / renderer.getTileScale();
 				friction = MOVE_FRICTION;
 			}
@@ -61,6 +85,7 @@ export default class UnlockedCameraMovementHandler {
 
 		this.velocity.multiply(friction);
 
+		const beforePosition = this.position.raw();
 		this.position.add(this.velocity).mod(game.mapSize);
 
 		// homes in on the player again if in the 'transition' state
@@ -70,8 +95,9 @@ export default class UnlockedCameraMovementHandler {
 			this.position.add(new Vector2(this.transition).subtract(this.position).multiply(this.homingVelocity));
 		}
 
-		game.updateView(RenderSource.Mod, false);
-
-		return bindPressed;
+		if (!this.position.equals(beforePosition)) {
+			gameScreen?.worldTooltipHandler.updatePosition();
+			game.updateView(RenderSource.Mod, false);
+		}
 	}
 }

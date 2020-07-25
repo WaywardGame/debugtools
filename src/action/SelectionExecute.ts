@@ -26,8 +26,10 @@ export default new Action(ActionArgument.Number, ActionArgument.Array, optional(
 					Remove(action, target);
 					break;
 				case DebugToolsTranslation.ActionTeleport:
-					const playerToTeleport = players.find(player => player.identifier === alternativeTarget) || localPlayer;
-					teleportEntity(action, playerToTeleport, target);
+					const playerToTeleport = players.find(player => player.identifier === alternativeTarget);
+					if (playerToTeleport) {
+						teleportEntity(action, playerToTeleport, target);
+					}
 					return;
 			}
 		}
@@ -38,11 +40,11 @@ export default new Action(ActionArgument.Number, ActionArgument.Array, optional(
 
 function getTarget(type: SelectionType, id: string | number) {
 	switch (type) {
-		case SelectionType.Creature: return game.creatures[id as number];
-		case SelectionType.NPC: return game.npcs[id as number];
-		case SelectionType.TileEvent: return game.tileEvents[id as number];
-		case SelectionType.Doodad: return game.doodads[id as number];
-		case SelectionType.Corpse: return game.corpses[id as number];
+		case SelectionType.Creature: return island.creatures[id as number];
+		case SelectionType.NPC: return island.npcs[id as number];
+		case SelectionType.TileEvent: return island.tileEvents[id as number];
+		case SelectionType.Doodad: return island.doodads[id as number];
+		case SelectionType.Corpse: return island.corpses[id as number];
 		case SelectionType.Player: return players.find(player => player.identifier === id);
 	}
 }

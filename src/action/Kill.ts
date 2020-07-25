@@ -20,7 +20,7 @@ export default new Action(ActionArgument.Entity)
 		renderer.computeSpritesInViewport();
 		action.setUpdateRender();
 
-		if (!multiplayer.isConnected() && entity === localPlayer) {
+		if (!multiplayer.isConnected() && entity.asPlayer?.isLocalPlayer()) {
 			action.setPassTurn();
 		}
 	});

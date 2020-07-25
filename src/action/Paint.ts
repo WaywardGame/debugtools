@@ -1,6 +1,7 @@
 import { Action } from "entity/action/Action";
 import { ActionArgument } from "entity/action/IAction";
 import { EntityType } from "entity/IEntity";
+import TileHelpers from "utilities/TileHelpers";
 import { defaultUsability } from "../Actions";
 import { IPaintData } from "../ui/panel/PaintPanel";
 import { getTilePosition } from "../util/TilePosition";
@@ -19,17 +20,18 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 
 		for (const tileId of tiles) {
 			const [x, y, z] = getTilePosition(tileId);
-			// const tile = game.getTile(x, y, z);
-			for (const k in data) {
+			const tile = game.getTile(x, y, z);
+			for (const k of Object.keys(data)) {
 				const paintType = k as keyof IPaintData;
 				switch (paintType) {
 					case "terrain": {
 						game.changeTile(data.terrain!.type, x, y, z, false);
-						if (data.terrain!.tilled !== undefined) SetTilled(x, y, z, data.terrain!.tilled);
+						if (data.terrain!.tilled !== undefined && data.terrain!.tilled !== TileHelpers.isTilled(tile))
+							SetTilled(x, y, z, data.terrain!.tilled);
 						break;
 					}
 					case "creature": {
-						const creature = game.getTile(x, y, z).creature;
+						const creature = tile.creature;
 						if (creature) creatureManager.remove(creature);
 
 						const type = data.creature!.type;
@@ -40,7 +42,7 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 						break;
 					}
 					case "npc": {
-						const npc = game.getTile(x, y, z).npc;
+						const npc = tile.npc;
 						if (npc) npcManager.remove(npc);
 
 						const type = data.npc!.type;
@@ -51,7 +53,7 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 						break;
 					}
 					case "doodad": {
-						const doodad = game.getTile(x, y, z).doodad;
+						const doodad = tile.doodad;
 						if (doodad) doodadManager.remove(doodad);
 
 						const type = data.doodad!.type;
@@ -63,7 +65,7 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 					}
 					case "corpse": {
 						if (data.corpse!.replaceExisting || data.corpse!.type === "remove") {
-							const corpses = game.getTile(x, y, z).corpses;
+							const corpses = tile.corpses;
 							if (corpses) {
 								for (const corpse of corpses) {
 									corpseManager.remove(corpse);
@@ -80,7 +82,7 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 					}
 					case "tileEvent": {
 						if (data.tileEvent!.replaceExisting || data.tileEvent!.type === "remove") {
-							const tileEvents = game.getTile(x, y, z).events;
+							const tileEvents = tile.events;
 							if (tileEvents) {
 								for (const event of tileEvents) {
 									tileEventManager.remove(event);

@@ -7,8 +7,9 @@ export default class TerrainInformation extends InspectInformationSection {
     private position;
     private tile;
     private terrainType;
-    private readonly checkButtonTilled;
     private readonly dropdownTerrainType;
+    private readonly checkButtonTilled;
+    private readonly checkButtonIncludeNeighbors;
     constructor();
     getTabs(): TabInformation[];
     getTabTranslation(): import("../../../node_modules/@wayward/types/definitions/utilities/string/Interpolator").IStringSection[];
@@ -18,4 +19,5 @@ export default class TerrainInformation extends InspectInformationSection {
     private isTillable;
     private isTilled;
     private changeTerrain;
+    refreshTile(): void;
 }

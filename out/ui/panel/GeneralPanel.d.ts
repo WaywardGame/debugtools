@@ -1,4 +1,4 @@
-import { Bindable, BindCatcherApi } from "newui/IBindingManager";
+import { IBindHandlerApi } from "newui/input/Bind";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
@@ -9,15 +9,22 @@ export default class GeneralPanel extends DebugToolsPanel {
     private readonly checkButtonAudio;
     private readonly dropdownAudio;
     private readonly dropdownParticle;
+    private readonly dropdownLayer;
+    private readonly dropdownTravel;
     private readonly checkButtonParticle;
     private selectionPromise;
     constructor();
     getTranslation(): DebugToolsTranslation;
     canClientMove(): false | undefined;
+    protected onChangeZ(_: any, z: number): void;
     onGameTickEnd(): void;
-    onBindLoop(bindPressed: Bindable, api: BindCatcherApi): Bindable;
+    onSelectLocation(api: IBindHandlerApi): boolean;
     protected onSwitchTo(): void;
     protected onSwitchAway(): void;
     private inspectTile;
-    private travelAway;
+    private changeLayer;
+    private travel;
+    private travelToNewIsland;
+    private sailToCivilization;
+    private renameIsland;
 }

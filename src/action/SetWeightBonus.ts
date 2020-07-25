@@ -9,5 +9,5 @@ export default new Action(ActionArgument.Player, ActionArgument.Number)
 	.setHandler((action, player, weightBonus) => {
 		Actions.DEBUG_TOOLS.setPlayerData(player, "weightBonus", weightBonus);
 		player.updateStrength();
-		player.updateTablesAndWeight();
+		player.updateTablesAndWeight("M");
 	});

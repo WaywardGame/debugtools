@@ -47,7 +47,7 @@
 	position: absolute;
 	bottom: -10px;
 	width: calc(100% - 10px * var(--scale-floor));
-	background: rgba(var(--element-color-r), var(--element-color-b), var(--element-color-g), var(--dialog-opacity));
+	background: var(--background-dialog);
 }
 
 .debug-tools-paint-row > * {
@@ -83,6 +83,15 @@
 
 .debug-tools-dialog-selection-quantity {
 	gap: 0 !important;
+}
+
+.debug-tools-dialog-selection-source {
+	grid-template-columns: min(50%, calc(150px * var(--scale-floor))) 1fr;
+	gap: 2px;
+}
+
+.debug-tools-dialog-selection-source > .dropdown-label {
+	gap: 2px;
 }
 
 .debug-tools-dialog-checkbutton-dropdown-row {
@@ -126,4 +135,18 @@
 
 .debug-tools-selection-action > .text {
 	margin-top: calc(10px * var(--scale-floor));
+}
+
+.debug-tools-island-heading .input > input {
+    width: 100%;
+    border: none;
+    height: 100%;
+    padding: calc(2px * var(--scale-floor)) calc(5px * var(--scale-floor));
+    margin-top: calc(-2px * var(--scale-floor));
+    margin-bottom: calc(-1px * var(--scale-floor));
+}
+
+.debug-tools-island-heading {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
 }

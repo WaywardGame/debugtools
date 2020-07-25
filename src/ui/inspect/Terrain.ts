@@ -1,7 +1,9 @@
 import ActionExecutor from "entity/action/ActionExecutor";
+import { RenderSource } from "game/IGame";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
+import { BlockRow } from "newui/component/BlockRow";
 import Button from "newui/component/Button";
 import { CheckButton } from "newui/component/CheckButton";
 import Dropdown from "newui/component/Dropdown";
@@ -15,10 +17,9 @@ import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import TileHelpers from "utilities/TileHelpers";
-
 import ChangeTerrain from "../../action/ChangeTerrain";
 import ToggleTilled from "../../action/ToggleTilled";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
 export default class TerrainInformation extends InspectInformationSection {
@@ -30,8 +31,9 @@ export default class TerrainInformation extends InspectInformationSection {
 	private tile: ITile;
 	private terrainType: string;
 
-	private readonly checkButtonTilled: CheckButton;
 	private readonly dropdownTerrainType: Dropdown<TerrainType>;
+	private readonly checkButtonTilled: CheckButton;
+	private readonly checkButtonIncludeNeighbors: CheckButton;
 
 	public constructor() {
 		super();
@@ -45,7 +47,7 @@ export default class TerrainInformation extends InspectInformationSection {
 					options: Enums.values(TerrainType)
 						.filter(terrain => terrain)
 						.map(terrain => Tuple(terrain, new Translation(Dictionary.Terrain, terrain).inContext(TextContext.Title)))
-						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				}))
 				.event.subscribe("selection", this.changeTerrain))
@@ -56,6 +58,15 @@ export default class TerrainInformation extends InspectInformationSection {
 			.setRefreshMethod(this.isTilled)
 			.event.subscribe("toggle", this.toggleTilled)
 			.appendTo(this);
+
+		new BlockRow()
+			.append(new Button()
+				.setText(() => translation(DebugToolsTranslation.ButtonRefreshTile))
+				.event.subscribe("activate", this.refreshTile))
+			.append(this.checkButtonIncludeNeighbors = new CheckButton()
+				.setText(translation(DebugToolsTranslation.ButtonIncludeNeighbors)))
+			.appendTo(this);
+		;
 	}
 
 	@Override
@@ -120,5 +131,11 @@ export default class TerrainInformation extends InspectInformationSection {
 
 		ActionExecutor.get(ChangeTerrain).execute(localPlayer, terrain, this.position);
 		this.update(this.position, this.tile);
+	}
+
+	@Bound
+	public refreshTile() {
+		world.layers[this.position.z].updateTile(this.position.x, this.position.y, this.tile, true, this.checkButtonIncludeNeighbors.checked, true, true);
+		game.updateView(RenderSource.Mod, false);
 	}
 }

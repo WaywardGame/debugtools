@@ -1,9 +1,6 @@
-import Creature from "entity/creature/Creature";
+import Entity from "entity/Entity";
 import { Stat } from "entity/IStats";
-import NPC from "entity/npc/NPC";
-import Player from "entity/player/Player";
-import { Events } from "event/EventEmitter";
-import { IEventEmitter } from "event/EventEmitter";
+import { Events, IEventEmitter } from "event/EventEmitter";
 import Component from "newui/component/Component";
 
 interface IInspectEntityInformationSubsectionEvents extends Events<Component> {
@@ -20,7 +17,7 @@ export default abstract class InspectEntityInformationSubsection extends Compone
 		this.classes.add("debug-tools-inspect-entity-sub-section");
 	}
 
-	public abstract update(entity: Player | Creature | NPC): void;
+	public abstract update(entity: Entity): void;
 
 	public getImmutableStats(): Stat[] { return []; }
 }

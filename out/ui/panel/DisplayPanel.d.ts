@@ -1,3 +1,4 @@
+import { RenderLayerFlag } from "renderer/IWorldRenderer";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, ISaveData } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
@@ -13,4 +14,6 @@ export default class DisplayPanel extends DebugToolsPanel {
     protected onUpdateZoom(): void;
     private resetWebGL;
     private reloadShaders;
+    private updateRenderLayerFlag;
+    protected getRenderFlags(): RenderLayerFlag;
 }

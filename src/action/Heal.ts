@@ -1,7 +1,6 @@
 import { Action } from "entity/action/Action";
 import { ActionArgument, anyOf } from "entity/action/IAction";
-import Entity from "entity/Entity";
-import { EntityType, StatusEffectChangeReason, StatusType } from "entity/IEntity";
+import { EntityType, MoveType, StatusEffectChangeReason, StatusType } from "entity/IEntity";
 import { IStatMax, Stat } from "entity/IStats";
 import { PlayerState } from "entity/player/IPlayer";
 import { gameScreen } from "newui/screen/screens/GameScreen";
@@ -29,7 +28,7 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
 		const hunger = entity.stat.get<IStatMax>(Stat.Hunger);
 		const thirst = entity.stat.get<IStatMax>(Stat.Thirst);
 
-		entity.stat.set(health, Entity.is(entity, EntityType.Player) ? entity.getMaxHealth() : health.max);
+		entity.stat.set(health, entity.asPlayer?.getMaxHealth() ?? health.max);
 		if (stamina) entity.stat.set(stamina, stamina.max);
 		if (hunger) entity.stat.set(hunger, hunger.max);
 		if (thirst) entity.stat.set(thirst, thirst.max);
@@ -38,9 +37,11 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
 		entity.setStatus(StatusType.Burned, false, StatusEffectChangeReason.Passed);
 		entity.setStatus(StatusType.Poisoned, false, StatusEffectChangeReason.Passed);
 
-		if (Entity.is(entity, EntityType.Player)) {
-			entity.state = PlayerState.None;
-			entity.updateStatsAndAttributes();
+		if (entity.asPlayer) {
+			entity.asPlayer.state = PlayerState.None;
+			entity.asPlayer.updateStatsAndAttributes();
+			const moveType = Actions.DEBUG_TOOLS.getPlayerData(entity.asPlayer, "noclip") ? MoveType.Flying : MoveType.Land;
+			entity.asPlayer.setMoveType(moveType);
 		}
 
 		action.setUpdateRender();

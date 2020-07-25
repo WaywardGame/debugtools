@@ -11,13 +11,13 @@ import { Paragraph } from "newui/component/Text";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
-
 import AddItemToInventory from "../../action/AddItemToInventory";
 import Remove from "../../action/Remove";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import AddItemToInventoryComponent from "../component/AddItemToInventory";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
+
 
 export default class ItemInformation extends InspectInformationSection {
 
@@ -45,7 +45,7 @@ export default class ItemInformation extends InspectInformationSection {
 
 	@Override public setTab() {
 		const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this.wrapperAddItem);
-		addItemToInventory.event.until(this, "willRemove")
+		addItemToInventory.event.until(this, "remove", "switchAway")
 			.subscribe("execute", this.addItem);
 
 		return this;

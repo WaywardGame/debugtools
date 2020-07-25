@@ -1,6 +1,4 @@
-import Creature from "entity/creature/Creature";
-import NPC from "entity/npc/NPC";
-import Player from "entity/player/Player";
+import Entity from "entity/Entity";
 import { ITile } from "tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
@@ -14,14 +12,16 @@ export default class EntityInformation extends InspectInformationSection {
     private readonly subsections;
     private readonly statWrapper;
     private readonly statComponents;
+    private readonly buttonHeal;
+    private readonly buttonTeleport;
     private entities;
-    private entity;
+    private entity?;
     constructor();
     getTabs(): [number, () => import("../../../node_modules/@wayward/types/definitions/utilities/string/Interpolator").IStringSection[]][];
     setTab(entity: number): this;
     update(position: IVector2, tile: ITile): void;
-    getEntityIndex(entity: Creature | NPC | Player): number;
-    getEntity(index: number): import("../../../node_modules/@wayward/types/definitions/entity/IEntity").EntityPlayerCreatureNpc;
+    getEntityIndex(entity: Entity): number;
+    getEntity(index: number): Entity;
     logUpdate(): void;
     private initializeStats;
     private onStatChange;
