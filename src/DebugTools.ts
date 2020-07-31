@@ -9,7 +9,7 @@ import NPC from "entity/npc/NPC";
 import { Source } from "entity/player/IMessageManager";
 import Player from "entity/player/Player";
 import { EventBus } from "event/EventBuses";
-import { Events, IEventEmitter } from "event/EventEmitter";
+import { Events, IEventEmitter, Priority } from "event/EventEmitter";
 import EventManager, { EventHandler } from "event/EventManager";
 import Game from "game/Game";
 import { RenderSource } from "game/IGame";
@@ -646,8 +646,8 @@ export default class DebugTools extends Mod {
 		return weight + this.getPlayerData(player, "weightBonus");
 	}
 
-	@Bind.onDown(Bindable.GameZoomIn)
-	@Bind.onDown(Bindable.GameZoomOut)
+	@Bind.onDown(Bindable.GameZoomIn, Priority.High)
+	@Bind.onDown(Bindable.GameZoomOut, Priority.High)
 	public onZoomIn(api: IBindHandlerApi) {
 		if (!this.hasPermission() || !gameScreen?.isMouseWithin())
 			return false;
