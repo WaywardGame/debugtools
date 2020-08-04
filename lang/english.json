@@ -192,6 +192,9 @@
 		},
 		"inspectType": {
 			"modDebugToolsTemperature": "Debug: Temperature"
+		},
+		"command": {
+			"modDebugToolsDebugToolsPermission": "debugtoolspermission"
 		}
 	}
 }

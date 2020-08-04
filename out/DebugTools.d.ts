@@ -109,6 +109,7 @@ export default class DebugTools extends Mod {
     hasPermission(): boolean | undefined;
     toggleFog(fog: boolean): void;
     toggleLighting(lighting: boolean): void;
+    debugToolsAccessCommand(player: Player, args: string): void;
     postFieldOfView(): void;
     onGameScreenVisible(): void;
     getZoomLevel(): number | undefined;

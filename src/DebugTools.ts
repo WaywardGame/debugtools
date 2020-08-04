@@ -350,9 +350,9 @@ export default class DebugTools extends Mod {
 		this.data.playerData[player.identifier][key] = value;
 		this.event.emit("playerDataChange", player.id, key, value);
 
-		if (!this.hasPermission()) {
-			gameScreen!.closeDialog(this.dialogMain);
-			gameScreen!.closeDialog(this.dialogInspect);
+		if (!this.hasPermission() && gameScreen) {
+			gameScreen.closeDialog(this.dialogMain);
+			gameScreen.closeDialog(this.dialogInspect);
 		}
 	}
 
@@ -449,7 +449,11 @@ export default class DebugTools extends Mod {
 	 * - Emits `DebugToolsEvent.Inspect`
 	 */
 	public inspect(what: Vector2 | Creature | Player | NPC) {
-		gameScreen!.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
+		if (!gameScreen) {
+			return;
+		}
+
+		gameScreen.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
 			.setInspection(what);
 
 		this.event.emit("inspect");
@@ -459,14 +463,13 @@ export default class DebugTools extends Mod {
 	 * Toggles the main dialog.
 	 */
 	public toggleDialog() {
-		if (!this.hasPermission()) return;
+		if (!this.hasPermission() || !gameScreen) return;
 
-		gameScreen!.toggleDialog(this.dialogMain);
+		gameScreen.toggleDialog(this.dialogMain);
 	}
 
 	public hasPermission() {
-		return gameScreen
-			&& (!multiplayer.isConnected() || multiplayer.isServer() || this.getPlayerData(localPlayer, "permissions"));
+		return !multiplayer.isConnected() || multiplayer.isServer() || this.getPlayerData(localPlayer, "permissions");
 	}
 
 	public toggleFog(fog: boolean) {
@@ -478,6 +481,24 @@ export default class DebugTools extends Mod {
 		this.setPlayerData(localPlayer, "lighting", lighting);
 		ActionExecutor.get(UpdateStatsAndAttributes).execute(localPlayer, localPlayer);
 		game.updateView(RenderSource.Mod, true);
+	}
+
+	////////////////////////////////////
+	// Commands
+	//
+
+	@Register.command("DebugToolsPermission")
+	public debugToolsAccessCommand(player: Player, args: string) {
+		if (!this.hasPermission()) {
+			return;
+		}
+
+		const targetPlayer = game.getPlayerByName(args);
+		if (targetPlayer !== undefined && !targetPlayer.isLocalPlayer()) {
+			const newPermissions = !this.getPlayerData(targetPlayer, "permissions");
+			ActionExecutor.get(TogglePermissions).execute(localPlayer, targetPlayer, newPermissions);
+			DebugTools.LOG.info(`Updating permissions for ${targetPlayer.getName().toString()} to ${newPermissions}`);
+		}
 	}
 
 	////////////////////////////////////
