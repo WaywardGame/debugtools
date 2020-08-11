@@ -342,7 +342,7 @@ class IslandDropdown<OTHER_OPTIONS extends string = never> extends GroupDropdown
 	@Override protected getTranslation(islandId: string) {
 		const island = game.islands.get(islandId);
 		return translation(DebugToolsTranslation.Island)
-			.addArgs(islandId, island?.name, new Translation(Dictionary.Biome, island?.biomeType ?? BiomeType.Random));
+			.addArgs(islandId, island?.name, new Translation(Dictionary.Biome, island?.biomeType ?? BiomeType.Random), island?.seeds.base);
 	}
 
 	@Override protected getGroupName(biome: BiomeType) {
