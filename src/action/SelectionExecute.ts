@@ -34,7 +34,7 @@ export default new Action(ActionArgument.Number, ActionArgument.Array, optional(
 			}
 		}
 
-		renderer.computeSpritesInViewport();
+		renderer?.computeSpritesInViewport();
 		action.setUpdateRender();
 	});
 

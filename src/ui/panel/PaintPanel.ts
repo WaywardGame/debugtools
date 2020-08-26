@@ -184,7 +184,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 	@Bind.onHolding(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindablePaint"))
 	protected onPaint(api: IBindHandlerApi) {
-		if (!this.painting || !gameScreen?.mouseStartWasWithin(api))
+		if (!this.painting || !gameScreen?.mouseStartWasWithin(api) || !renderer)
 			return false;
 
 		const tilePosition = renderer.screenToTile(...api.mouse.position.xy);
@@ -219,7 +219,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 	@Bind.onHolding(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableErasePaint"))
 	protected onErasePaint(api: IBindHandlerApi) {
-		if (!this.painting || !gameScreen?.mouseStartWasWithin(api))
+		if (!this.painting || !gameScreen?.mouseStartWasWithin(api) || !renderer)
 			return false;
 
 		const tilePosition = renderer.screenToTile(...api.mouse.position.xy);
@@ -315,7 +315,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 	private updateOverlayBatch() {
 		if (this.paintTiles.length * 4 - 512 < this.maxSprites || this.paintTiles.length * 4 + 512 > this.maxSprites) {
-			renderer.initializeSpriteBatch(SpriteBatchLayer.Overlay, true);
+			renderer!.initializeSpriteBatch(SpriteBatchLayer.Overlay, true);
 		}
 	}
 

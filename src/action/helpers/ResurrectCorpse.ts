@@ -17,6 +17,6 @@ export default function (player: Player, corpse: ICorpse) {
 	creature!.renamed = corpse.renamed;
 	corpseManager.remove(corpse);
 
-	renderer.computeSpritesInViewport();
+	renderer?.computeSpritesInViewport();
 	return true;
 }

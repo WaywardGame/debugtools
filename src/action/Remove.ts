@@ -15,9 +15,9 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Doodad, Ac
 		if (toRemove instanceof Player) {
 			return;
 		}
-		
+
 		Remove(action, toRemove as any);
 
-		renderer.computeSpritesInViewport();
+		renderer?.computeSpritesInViewport();
 		action.setUpdateRender();
 	});

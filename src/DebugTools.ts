@@ -701,7 +701,7 @@ export default class DebugTools extends Mod {
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableInspectTile"))
 	public onInspectTile() {
-		if (!this.hasPermission() || !gameScreen?.isMouseWithin())
+		if (!this.hasPermission() || !gameScreen?.isMouseWithin() || !renderer)
 			return false;
 
 		const tile = renderer.screenToTile(...InputManager.mouse.position.xy);
@@ -732,7 +732,7 @@ export default class DebugTools extends Mod {
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableTeleportLocalPlayer"))
 	public onTeleportLocalPlayer(api: IBindHandlerApi) {
-		if (!this.hasPermission())
+		if (!this.hasPermission() || !renderer)
 			return false;
 
 		const tile = renderer.screenToTile(...api.mouse.position.xy);

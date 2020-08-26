@@ -10,11 +10,12 @@ import InspectEntityInformationSubsection from "../component/InspectEntityInform
 
 export default class CreatureInformation extends InspectEntityInformationSubsection {
 	private creature: Creature | undefined;
+	private tamedButton: CheckButton;
 
 	public constructor() {
 		super();
 
-		new CheckButton()
+		this.tamedButton = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonTameCreature))
 			.setRefreshMethod(() => this.creature ? this.creature.isTamed() : false)
 			.event.subscribe("toggle", this.setTamed)
@@ -28,6 +29,7 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 
 	@Override public update(entity: Entity) {
 		this.creature = entity.asCreature;
+		this.tamedButton.refresh();
 		this.toggle(!!this.creature);
 	}
 

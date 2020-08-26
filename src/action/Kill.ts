@@ -17,7 +17,7 @@ export default new Action(ActionArgument.Entity)
 			damageMessage: translation(DebugToolsTranslation.KillEntityDeathMessage),
 		});
 
-		renderer.computeSpritesInViewport();
+		renderer?.computeSpritesInViewport();
 		action.setUpdateRender();
 
 		if (!multiplayer.isConnected() && entity.asPlayer?.isLocalPlayer()) {

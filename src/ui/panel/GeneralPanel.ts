@@ -231,7 +231,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 		if (!this.checkButtonAudio.checked && !this.checkButtonParticle.checked)
 			return false;
 
-		const position = renderer.screenToTile(...api.mouse.position.xy);
+		const position = renderer?.screenToTile(...api.mouse.position.xy);
 		if (!position)
 			return false;
 

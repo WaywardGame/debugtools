@@ -12,6 +12,6 @@ export default new Action(ActionArgument.Vector3, ActionArgument.Boolean)
 
 		SetTilled(position.x, position.y, position.z, tilled);
 
-		renderer.computeSpritesInViewport();
+		renderer?.computeSpritesInViewport();
 		action.setUpdateRender();
 	});
