@@ -33,6 +33,7 @@ export default new Action()
 		}
 
 		if (action.executor.isLocalPlayer()) {
+			ActionExecutor.get(ActionType.Paddle).execute(action.executor, sailboat);
 			ActionExecutor.get(ActionType.SailToCivilization).execute(action.executor, sailboat, true);
 		}
 	});
