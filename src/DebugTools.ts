@@ -60,7 +60,7 @@ import TogglePermissions from "./action/TogglePermissions";
 import ToggleTilled from "./action/ToggleTilled";
 import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
 import Actions from "./Actions";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation, ZOOM_LEVEL_MAX } from "./IDebugTools";
+import { DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation, ZOOM_LEVEL_MAX } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import AddItemToInventoryComponent from "./ui/component/AddItemToInventory";
 import MainDialog from "./ui/DebugToolsDialog";
@@ -112,9 +112,9 @@ export default class DebugTools extends Mod {
 	// Static
 	//
 
-	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
+	@Mod.instance<DebugTools>()
 	public static readonly INSTANCE: DebugTools;
-	@Mod.log(DEBUG_TOOLS_ID)
+	@Mod.log()
 	public static readonly LOG: Log;
 
 	////////////////////////////////////
@@ -297,9 +297,9 @@ export default class DebugTools extends Mod {
 	// Fields & Other Data Storage
 	//
 
-	@Mod.saveData<DebugTools>(DEBUG_TOOLS_ID)
+	@Mod.saveData<DebugTools>()
 	public data: ISaveData;
-	@Mod.globalData<DebugTools>(DEBUG_TOOLS_ID)
+	@Mod.globalData<DebugTools>()
 	public globalData: IGlobalData;
 
 	private cameraState = CameraState.Locked;
