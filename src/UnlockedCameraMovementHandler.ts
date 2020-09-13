@@ -54,7 +54,7 @@ export default class UnlockedCameraMovementHandler {
 	 * Simple velocity movement implementation
 	 */
 	@Bound public tick() {
-		if (!this.running)
+		if (!this.running || !renderer)
 			return;
 
 		setTimeout(this.tick, game.interval);

@@ -101,8 +101,7 @@ export default class SelectLocation {
 		let updateRender = false;
 
 		if (this._selecting) {
-			const tilePosition = renderer.screenToTile(...InputManager.mouse.position.xy);
-
+			const tilePosition = renderer?.screenToTile(...InputManager.mouse.position.xy);
 			if (tilePosition) {
 				// add the target overlay to the tile currently being hovered
 				const tile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);

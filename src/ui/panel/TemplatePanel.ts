@@ -160,7 +160,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 	}
 
 	private updateTemplate([terrain, doodads]: [string[], string[]?], options: ITemplateOptions) {
-		const center = renderer.screenToVector(...InputManager.mouse.position.xy);
+		const center = renderer!.screenToVector(...InputManager.mouse.position.xy);
 
 		const width = terrain[0].length;
 		const height = terrain.length;

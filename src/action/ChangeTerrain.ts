@@ -14,6 +14,6 @@ export default new Action(ActionArgument.Number, ActionArgument.Vector3)
 		game.changeTile(terrain, position.x, position.y, position.z, false);
 		SetTilled(position.x, position.y, position.z, false);
 
-		renderer.computeSpritesInViewport();
+		renderer?.computeSpritesInViewport();
 		action.setUpdateRender();
 	});
