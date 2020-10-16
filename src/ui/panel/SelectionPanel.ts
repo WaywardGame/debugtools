@@ -1,5 +1,4 @@
 import Doodad from "doodad/Doodad";
-import ActionExecutor from "entity/action/ActionExecutor";
 import { ICorpse } from "entity/creature/corpse/ICorpse";
 import Creature from "entity/creature/Creature";
 import { EntityType } from "entity/IEntity";
@@ -166,7 +165,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 		if (!this.targets.length)
 			return;
 
-		ActionExecutor.get(SelectionExecute).execute(localPlayer, this.dropdownAction.selection, this.targets
+		SelectionExecute.execute(localPlayer, this.dropdownAction.selection, this.targets
 			.map(target => Tuple(getSelectionType(target), target instanceof Player ? target.identifier : target.id)), this.dropdownAlternativeTarget.selection);
 
 		this.updateTargets();

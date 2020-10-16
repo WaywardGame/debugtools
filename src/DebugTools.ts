@@ -1,4 +1,3 @@
-import ActionExecutor from "entity/action/ActionExecutor";
 import { ActionType } from "entity/action/IAction";
 import Creature from "entity/creature/Creature";
 import { IDamageInfo } from "entity/creature/ICreature";
@@ -479,7 +478,7 @@ export default class DebugTools extends Mod {
 
 	public toggleLighting(lighting: boolean) {
 		this.setPlayerData(localPlayer, "lighting", lighting);
-		ActionExecutor.get(UpdateStatsAndAttributes).execute(localPlayer, localPlayer);
+		UpdateStatsAndAttributes.execute(localPlayer, localPlayer);
 		game.updateView(RenderSource.Mod, true);
 	}
 
@@ -496,7 +495,7 @@ export default class DebugTools extends Mod {
 		const targetPlayer = game.getPlayerByName(args);
 		if (targetPlayer !== undefined && !targetPlayer.isLocalPlayer()) {
 			const newPermissions = !this.getPlayerData(targetPlayer, "permissions");
-			ActionExecutor.get(TogglePermissions).execute(localPlayer, targetPlayer, newPermissions);
+			TogglePermissions.execute(localPlayer, targetPlayer, newPermissions);
 			DebugTools.LOG.info(`Updating permissions for ${targetPlayer.getName().toString()} to ${newPermissions}`);
 		}
 	}
@@ -726,7 +725,7 @@ export default class DebugTools extends Mod {
 		if (!this.hasPermission())
 			return false;
 
-		ActionExecutor.get(Heal).execute(localPlayer, localPlayer);
+		Heal.execute(localPlayer, localPlayer);
 		return true;
 	}
 
@@ -739,7 +738,7 @@ export default class DebugTools extends Mod {
 		if (!tile)
 			return false;
 
-		ActionExecutor.get(TeleportEntity).execute(localPlayer, localPlayer, { ...tile.raw(), z: localPlayer.z });
+		TeleportEntity.execute(localPlayer, localPlayer, { ...tile.raw(), z: localPlayer.z });
 		return true;
 	}
 
@@ -748,7 +747,7 @@ export default class DebugTools extends Mod {
 		if (!this.hasPermission())
 			return false;
 
-		ActionExecutor.get(ToggleNoClip).execute(localPlayer, localPlayer, !this.getPlayerData(localPlayer, "noclip"));
+		ToggleNoClip.execute(localPlayer, localPlayer, !this.getPlayerData(localPlayer, "noclip"));
 		return true;
 	}
 

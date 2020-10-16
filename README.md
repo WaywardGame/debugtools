@@ -1,5 +1,5 @@
 # Debug Tools
-Adds a special debug tools menu into the game. By default you can open it by pressing '\'.
+Adds a special debug tools menu into the game. By default you can open it by pressing `\`.
 
 In the menu, you can give yourself items, change terrain, spawn creatures, refresh health, no-clip and more!
 

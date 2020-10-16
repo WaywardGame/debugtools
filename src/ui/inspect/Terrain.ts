@@ -1,4 +1,3 @@
-import ActionExecutor from "entity/action/ActionExecutor";
 import { RenderSource } from "game/IGame";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
@@ -110,7 +109,7 @@ export default class TerrainInformation extends InspectInformationSection {
 	@Bound
 	private toggleTilled(_: any, tilled: boolean) {
 		if (this.isTilled() !== tilled) {
-			ActionExecutor.get(ToggleTilled).execute(localPlayer, this.position, tilled);
+			ToggleTilled.execute(localPlayer, this.position, tilled);
 		}
 	}
 
@@ -129,7 +128,7 @@ export default class TerrainInformation extends InspectInformationSection {
 			return;
 		}
 
-		ActionExecutor.get(ChangeTerrain).execute(localPlayer, terrain, this.position);
+		ChangeTerrain.execute(localPlayer, terrain, this.position);
 		this.update(this.position, this.tile);
 	}
 

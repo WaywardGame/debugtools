@@ -1,4 +1,3 @@
-import ActionExecutor from "entity/action/ActionExecutor";
 import { Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
@@ -252,7 +251,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 
 	private placeTemplate(topLeft: Vector2) {
 		this.place.setChecked(false);
-		ActionExecutor.get(PlaceTemplate).execute(localPlayer, this.dropdownType.selection, topLeft.raw(), this.getTemplateOptions());
+		PlaceTemplate.execute(localPlayer, this.dropdownType.selection, topLeft.raw(), this.getTemplateOptions());
 	}
 
 	private clearPreview() {

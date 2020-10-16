@@ -1,4 +1,3 @@
-import ActionExecutor from "entity/action/ActionExecutor";
 import Creature from "entity/creature/Creature";
 import NPC from "entity/npc/NPC";
 import Player from "entity/player/Player";
@@ -26,6 +25,6 @@ export default class NpcInformation extends InspectEntityInformationSubsection {
 
 	@Bound
 	private removeNPC() {
-		ActionExecutor.get(Remove).execute(localPlayer, this.npc!);
+		Remove.execute(localPlayer, this.npc!);
 	}
 }

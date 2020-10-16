@@ -1,4 +1,3 @@
-import ActionExecutor from "entity/action/ActionExecutor";
 import Entity from "entity/Entity";
 import { EntityType, IStatChangeInfo } from "entity/IEntity";
 import { IStat, Stat } from "entity/IStats";
@@ -268,14 +267,14 @@ export default class EntityInformation extends InspectInformationSection {
 
 	@Bound
 	private teleport(location: IVector2 | IVector3) {
-		ActionExecutor.get(TeleportEntity).execute(localPlayer, this.entity!, new Vector3(location, "z" in location ? location.z : localPlayer.z));
+		TeleportEntity.execute(localPlayer, this.entity!, new Vector3(location, "z" in location ? location.z : localPlayer.z));
 
 		this.event.emit("update");
 	}
 
 	@Bound
 	private kill() {
-		ActionExecutor.get(Kill).execute(localPlayer, this.entity!);
+		Kill.execute(localPlayer, this.entity!);
 		this.event.emit("update");
 	}
 
@@ -284,12 +283,12 @@ export default class EntityInformation extends InspectInformationSection {
 		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
 		if (!teleportLocation) return;
 
-		ActionExecutor.get(Clone).execute(localPlayer, this.entity!, new Vector3(teleportLocation, localPlayer.z));
+		Clone.execute(localPlayer, this.entity!, new Vector3(teleportLocation, localPlayer.z));
 	}
 
 	@Bound
 	private heal() {
-		ActionExecutor.get(Heal).execute(localPlayer, this.entity!);
+		Heal.execute(localPlayer, this.entity!);
 		this.event.emit("update");
 	}
 
@@ -298,7 +297,7 @@ export default class EntityInformation extends InspectInformationSection {
 		return (_: any, value: number) => {
 			if (this.entity!.stat.getValue(stat) === value) return;
 
-			ActionExecutor.get(SetStat).execute(localPlayer, this.entity!, stat, value);
+			SetStat.execute(localPlayer, this.entity!, stat, value);
 		};
 	}
 }

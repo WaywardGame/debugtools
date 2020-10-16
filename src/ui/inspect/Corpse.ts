@@ -1,4 +1,3 @@
-import ActionExecutor from "entity/action/ActionExecutor";
 import { ICorpse } from "entity/creature/corpse/ICorpse";
 import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
@@ -7,12 +6,12 @@ import { ITile } from "tile/ITerrain";
 import { Tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
-
 import Heal from "../../action/Heal";
 import Remove from "../../action/Remove";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
+
 
 export default class CorpseInformation extends InspectInformationSection {
 
@@ -67,13 +66,13 @@ export default class CorpseInformation extends InspectInformationSection {
 
 	@Bound
 	private resurrect() {
-		ActionExecutor.get(Heal).execute(localPlayer, this.corpse!);
+		Heal.execute(localPlayer, this.corpse!);
 		this.event.emit("update");
 	}
 
 	@Bound
 	private removeCorpse() {
-		ActionExecutor.get(Remove).execute(localPlayer, this.corpse!);
+		Remove.execute(localPlayer, this.corpse!);
 		this.event.emit("update");
 	}
 }

@@ -1,4 +1,3 @@
-import ActionExecutor from "entity/action/ActionExecutor";
 import Creature from "entity/creature/Creature";
 import Entity from "entity/Entity";
 import Button from "newui/component/Button";
@@ -35,11 +34,11 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 
 	@Bound
 	private setTamed(_: any, tamed: boolean) {
-		ActionExecutor.get(SetTamed).execute(localPlayer, this.creature!, tamed);
+		SetTamed.execute(localPlayer, this.creature!, tamed);
 	}
 
 	@Bound
 	private removeCreature() {
-		ActionExecutor.get(Remove).execute(localPlayer, this.creature!);
+		Remove.execute(localPlayer, this.creature!);
 	}
 }

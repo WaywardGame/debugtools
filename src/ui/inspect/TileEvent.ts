@@ -1,18 +1,17 @@
-import ActionExecutor from "entity/action/ActionExecutor";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button from "newui/component/Button";
 import { ITile } from "tile/ITerrain";
+import TileEvent from "tile/TileEvent";
 import { Tuple } from "utilities/Arrays";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
-import TileEvent from "tile/TileEvent";
-
 import Remove from "../../action/Remove";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
+
 
 export default class TileEventInformation extends InspectInformationSection {
 
@@ -61,6 +60,6 @@ export default class TileEventInformation extends InspectInformationSection {
 
 	@Bound
 	private removeTileEvent() {
-		ActionExecutor.get(Remove).execute(localPlayer, this.tileEvent!);
+		Remove.execute(localPlayer, this.tileEvent!);
 	}
 }

@@ -1,4 +1,3 @@
-import ActionExecutor from "entity/action/ActionExecutor";
 import Creature from "entity/creature/Creature";
 import { SkillType } from "entity/IHuman";
 import NPC from "entity/npc/NPC";
@@ -124,35 +123,35 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 	@Bound
 	private setSkill(_: any, value: number) {
-		ActionExecutor.get(SetSkill).execute(localPlayer, this.player!, this.skill!, value);
+		SetSkill.execute(localPlayer, this.player!, this.skill!, value);
 	}
 
 	@Bound
 	private toggleInvulnerable(_: any, invulnerable: boolean) {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "invulnerable") === invulnerable) return;
 
-		ActionExecutor.get(ToggleInvulnerable).execute(localPlayer, this.player!, invulnerable);
+		ToggleInvulnerable.execute(localPlayer, this.player!, invulnerable);
 	}
 
 	@Bound
 	private toggleNoClip(_: any, noclip: boolean) {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "noclip") === noclip) return;
 
-		ActionExecutor.get(ToggleNoClip).execute(localPlayer, this.player!, noclip);
+		ToggleNoClip.execute(localPlayer, this.player!, noclip);
 	}
 
 	@Bound
 	private togglePermissions(_: any, permissions: boolean) {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "permissions") === permissions) return;
 
-		ActionExecutor.get(TogglePermissions).execute(localPlayer, this.player!, permissions);
+		TogglePermissions.execute(localPlayer, this.player!, permissions);
 	}
 
 	@Bound
 	private setWeightBonus(_: any, weightBonus: number) {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "weightBonus") === weightBonus) return;
 
-		ActionExecutor.get(SetWeightBonus).execute(localPlayer, this.player!, weightBonus);
+		SetWeightBonus.execute(localPlayer, this.player!, weightBonus);
 	}
 
 	@Bound

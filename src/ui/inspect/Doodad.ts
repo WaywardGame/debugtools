@@ -1,6 +1,5 @@
 import Doodad from "doodad/Doodad";
 import { GrowingStage } from "doodad/IDoodad";
-import ActionExecutor from "entity/action/ActionExecutor";
 import { OwnEventHandler } from "event/EventManager";
 import { Quality } from "game/IObject";
 import { IContainer, ItemType } from "item/IItem";
@@ -85,12 +84,12 @@ export default class DoodadInformation extends InspectInformationSection {
 
 	@Bound
 	private addItem(_: any, type: ItemType, quality: Quality) {
-		ActionExecutor.get(AddItemToInventory).execute(localPlayer, this.doodad! as IContainer, type, quality);
+		AddItemToInventory.execute(localPlayer, this.doodad! as IContainer, type, quality);
 	}
 
 	@Bound
 	private removeDoodad() {
-		ActionExecutor.get(Remove).execute(localPlayer, this.doodad!);
+		Remove.execute(localPlayer, this.doodad!);
 	}
 
 	@Bound
@@ -98,7 +97,7 @@ export default class DoodadInformation extends InspectInformationSection {
 		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
 		if (!teleportLocation) return;
 
-		ActionExecutor.get(Clone).execute(localPlayer, this.doodad!, new Vector3(teleportLocation, localPlayer.z));
+		Clone.execute(localPlayer, this.doodad!, new Vector3(teleportLocation, localPlayer.z));
 	}
 
 	@Bound
@@ -112,6 +111,6 @@ export default class DoodadInformation extends InspectInformationSection {
 			return;
 		}
 
-		ActionExecutor.get(SetGrowingStage).execute(localPlayer, this.doodad!, growthStage);
+		SetGrowingStage.execute(localPlayer, this.doodad!, growthStage);
 	}
 }

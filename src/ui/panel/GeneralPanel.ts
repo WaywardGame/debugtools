@@ -1,5 +1,4 @@
 import { SfxType } from "audio/IAudio";
-import ActionExecutor from "entity/action/ActionExecutor";
 import { EventBus } from "event/EventBuses";
 import { Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
@@ -126,7 +125,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 				.setRefreshMethod(() => island.time.getTime()))
 			.setDisplayValue(time => island.time.getTranslation(time))
 			.event.subscribe("change", (_, time) => {
-				ActionExecutor.get(SetTime).execute(localPlayer, time);
+				SetTime.execute(localPlayer, time);
 			})
 			.appendTo(this);
 
@@ -276,7 +275,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 	}
 
 	@Bound private changeLayer(_: any, layer: WorldZ) {
-		ActionExecutor.get(ChangeLayer).execute(localPlayer, layer);
+		ChangeLayer.execute(localPlayer, layer);
 	}
 
 	@Bound private travel() {
@@ -321,11 +320,11 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 	private async sailToCivilization() {
 		if (multiplayer.isConnected() && !game.isChallenge) return;
-		ActionExecutor.get(ForceSailToCivilization).execute(localPlayer);
+		ForceSailToCivilization.execute(localPlayer);
 	}
 
 	@Bound private renameIsland(input: Input) {
-		ActionExecutor.get(RenameIsland).execute(localPlayer, input.text);
+		RenameIsland.execute(localPlayer, input.text);
 		this.dropdownTravel.refresh();
 	}
 }

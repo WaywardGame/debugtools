@@ -1,4 +1,3 @@
-import ActionExecutor from "entity/action/ActionExecutor";
 import Entity from "entity/Entity";
 import Human, { REPUTATION_MAX } from "entity/Human";
 import { IStat, Stat } from "entity/IStats";
@@ -79,14 +78,14 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 	private setReputation(type: Stat.Malignity | Stat.Benignity) {
 		return (_: any, value: number) => {
 			if (this.human!.stat.getValue(type) === value) return;
-			ActionExecutor.get(SetStat).execute(localPlayer, this.human!, type, value);
+			SetStat.execute(localPlayer, this.human!, type, value);
 		};
 	}
 
 	@Bound
 	private addItem(_: any, type: ItemType, quality: Quality) {
 		if (this.human)
-			ActionExecutor.get(AddItemToInventory).execute(localPlayer, this.human.asPlayer ?? this.human.inventory, type, quality);
+			AddItemToInventory.execute(localPlayer, this.human.asPlayer ?? this.human.inventory, type, quality);
 	}
 
 	@Bound

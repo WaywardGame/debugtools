@@ -1,4 +1,3 @@
-import ActionExecutor from "entity/action/ActionExecutor";
 import { Quality } from "game/IObject";
 import { ItemType } from "item/IItem";
 import Item from "item/Item";
@@ -82,13 +81,13 @@ export default class ItemInformation extends InspectInformationSection {
 
 	@Bound
 	private addItem(_: any, type: ItemType, quality: Quality) {
-		ActionExecutor.get(AddItemToInventory).execute(localPlayer, itemManager.getTileContainer(this.position.x, this.position.y, localPlayer.z), type, quality);
+		AddItemToInventory.execute(localPlayer, itemManager.getTileContainer(this.position.x, this.position.y, localPlayer.z), type, quality);
 	}
 
 	@Bound
 	private removeItem(item: Item) {
 		return () => {
-			ActionExecutor.get(Remove).execute(localPlayer, item);
+			Remove.execute(localPlayer, item);
 		};
 	}
 }

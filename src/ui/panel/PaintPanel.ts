@@ -1,5 +1,4 @@
 import { DoodadType } from "doodad/IDoodad";
-import ActionExecutor from "entity/action/ActionExecutor";
 import { CreatureType } from "entity/creature/ICreature";
 import { NPCType } from "entity/npc/INPCs";
 import { Events, IEventEmitter, Priority } from "event/EventEmitter";
@@ -344,7 +343,7 @@ export default class PaintPanel extends DebugToolsPanel {
 			Object.assign(paintData, paintSection.getTilePaintData());
 		}
 
-		ActionExecutor.get(Paint).execute(localPlayer, [...this.paintTiles], paintData);
+		Paint.execute(localPlayer, [...this.paintTiles], paintData);
 
 		this.clearPaint();
 	}
