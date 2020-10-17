@@ -219,6 +219,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 	}
 
 	@HookMethod
+	@Debounce(100)
 	public onGameTickEnd() {
 		if (this.timeRange) {
 			this.timeRange.refresh();

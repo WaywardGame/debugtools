@@ -218,6 +218,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	//
 
 	@HookMethod
+	@Debounce(100)
 	public onGameTickEnd() {
 		this.update();
 	}
