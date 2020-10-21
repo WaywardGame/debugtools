@@ -11,7 +11,7 @@
 
 import { EventHandler } from "event/EventManager";
 import { basicInspectionPriorities, InspectType } from "game/inspection/IInspection";
-import { Context } from "game/inspection/InfoProvider";
+import { InfoProviderContext } from "game/inspection/InfoProvider";
 import Inspection from "game/inspection/Inspection";
 import { TempType } from "game/temperature/TemperatureManager";
 import Mod from "mod/Mod";
@@ -49,7 +49,7 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 	// Content
 	//
 
-	@Override public get(context: Context) {
+	@Override public get(context: InfoProviderContext) {
 		return [
 			translation(DebugToolsTranslation.InspectionTemperatureCalculated)
 				.addArgs(this.getTemperature(TempType.Heat, "calculated") - this.getTemperature(TempType.Cold, "calculated")),
