@@ -296,7 +296,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 				.filter(id => id !== island.id)
 				.random()!;
 
-		game.travelToIslandId(islandId);
+		game.travelToIslandId(islandId, localPlayer);
 	}
 
 	private travelToNewIsland() {
@@ -313,7 +313,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 			const islandId = Island.positionToId(nextPosition);
 			if (!game.islands.has(islandId)) {
-				game.travelToIslandId(islandId, { newWorldBiomeTypeOverride: biome });
+				game.travelToIslandId(islandId, localPlayer, { newWorldBiomeTypeOverride: biome });
 				return;
 			}
 		}
