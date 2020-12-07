@@ -36,6 +36,7 @@ import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import AddItemToInventory from "./action/AddItemToInventory";
+import ChangeLayer from "./action/ChangeLayer";
 import ChangeTerrain from "./action/ChangeTerrain";
 import Clone from "./action/Clone";
 import ForceSailToCivilization from "./action/ForceSailToCivilization";
@@ -226,6 +227,9 @@ export default class DebugTools extends Mod {
 
 	@Register.action("SetWeightBonus", SetWeightBonus)
 	public readonly actionSetWeightBonus: ActionType;
+
+	@Register.action("ChangeLayer", ChangeLayer)
+	public readonly actionChangeLayer: ActionType;
 
 	@Register.action("ChangeTerrain", ChangeTerrain)
 	public readonly actionChangeTerrain: ActionType;

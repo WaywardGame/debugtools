@@ -72,6 +72,7 @@ export default class DebugTools extends Mod {
     readonly actionSetTamed: ActionType;
     readonly actionRemove: ActionType;
     readonly actionSetWeightBonus: ActionType;
+    readonly actionChangeLayer: ActionType;
     readonly actionChangeTerrain: ActionType;
     readonly actionToggleTilled: ActionType;
     readonly actionUpdateStatsAndAttributes: ActionType;

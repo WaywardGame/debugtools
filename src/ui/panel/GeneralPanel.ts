@@ -247,6 +247,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 	@OwnEventHandler(GeneralPanel, "switchTo")
 	protected onSwitchTo() {
 		this.timeRange.refresh();
+		this.dropdownLayer.refresh();
 
 		this.registerHookHost("DebugToolsDialog:GeneralPanel");
 
@@ -276,7 +277,9 @@ export default class GeneralPanel extends DebugToolsPanel {
 	}
 
 	@Bound private changeLayer(_: any, layer: WorldZ) {
-		ChangeLayer.execute(localPlayer, layer);
+		if (localPlayer.z !== layer) {
+			ChangeLayer.execute(localPlayer, layer);
+		}
 	}
 
 	@Bound private travel() {
