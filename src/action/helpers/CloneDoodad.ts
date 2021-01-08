@@ -13,7 +13,7 @@ export default function (doodad: Doodad, position: IVector3) {
 		gfx: doodad.gfx,
 		spread: doodad.spread,
 		weight: doodad.weight,
-		legendary: doodad.legendary ? { ...doodad.legendary } : undefined,
+		magicalProperties: doodad.magicalProperties ? { ...doodad.magicalProperties } : undefined,
 		disassembly: !doodad.disassembly ? undefined : doodad.disassembly
 			.map(item => itemManager.createFake(item.type, item.quality)),
 		ownerIdentifier: doodad.ownerIdentifier,
