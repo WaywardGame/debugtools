@@ -1,4 +1,4 @@
-import { ICorpse } from "entity/creature/corpse/ICorpse";
+import Corpse from "entity/creature/corpse/Corpse";
 import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
 import Button from "newui/component/Button";
@@ -18,8 +18,8 @@ export default class CorpseInformation extends InspectInformationSection {
 	@Mod.log(DEBUG_TOOLS_ID)
 	public readonly LOG: Log;
 
-	private corpses: ICorpse[] = [];
-	private corpse: ICorpse | undefined;
+	private corpses: Corpse[] = [];
+	private corpse: Corpse | undefined;
 
 	public constructor() {
 		super();

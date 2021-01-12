@@ -16,7 +16,7 @@ import Mod from "mod/Mod";
 import { IBindHandlerApi } from "newui/input/Bind";
 import Bindable from "newui/input/Bindable";
 import { DialogId } from "newui/screen/screens/game/Dialogs";
-import { MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
+import { MenuBarButtonType } from "newui/screen/screens/game/static/menubar/IMenuBarButton";
 import WorldRenderer from "renderer/WorldRenderer";
 import { ITile, OverlayType } from "tile/ITerrain";
 import { IInjectionApi } from "utilities/Inject";

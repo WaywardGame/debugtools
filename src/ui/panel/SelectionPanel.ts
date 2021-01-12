@@ -1,5 +1,5 @@
 import Doodad from "doodad/Doodad";
-import { ICorpse } from "entity/creature/corpse/ICorpse";
+import Corpse from "entity/creature/corpse/Corpse";
 import Creature from "entity/creature/Creature";
 import { EntityType } from "entity/IEntity";
 import NPC from "entity/npc/NPC";
@@ -35,7 +35,7 @@ const entityTypeToSelectionTypeMap = {
 	[EntityType.Player]: SelectionType.Player,
 };
 
-type Target = Creature | NPC | TileEvent | Doodad | ICorpse | Player;
+type Target = Creature | NPC | TileEvent | Doodad | Corpse | Player;
 
 function getSelectionType(target: Target) {
 	return "entityType" in target ? entityTypeToSelectionTypeMap[target.entityType]
