@@ -14,6 +14,6 @@ export default function (action: IActionApi<Player>, target: Creature | NPC | Do
 	if (target instanceof NPC) return npcManager.remove(target);
 	if (target instanceof Doodad) return doodadManager.remove(target, true);
 	if (target instanceof Item) return RemoveItem(action, target);
-	if (tileEventManager.is(target)) return tileEventManager.remove(target);
-	if (corpseManager.is(target)) return corpseManager.remove(target);
+	if (target instanceof TileEvent) return tileEventManager.remove(target);
+	if (target instanceof Corpse) return corpseManager.remove(target);
 }
