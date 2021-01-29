@@ -251,7 +251,7 @@ export default class EntityInformation extends InspectInformationSection {
 				translation: Translation.generator(player.name),
 				onActivate: () => this.teleport(player),
 			}))
-			.sorted(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))
+			.sort(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))
 			// create the context menu from them
 			.collect<ContextMenu>(options => new ContextMenu(...options))
 			.addAllDescribedOptions();

@@ -72,7 +72,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 					defaultOption: Stream.keys<string>(templateDescriptions[this.dropdownType.selection]).first()!,
 					options: Stream.keys<string>(templateDescriptions[this.dropdownType.selection])
 						.map(name => Tuple(name, Translation.generator(name)))
-						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				})))
 			.appendTo(this);
