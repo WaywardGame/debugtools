@@ -1,21 +1,13 @@
-/*!
- * Copyright Unlok, Vaughn Royko 2011-2020
- * http://www.unlok.ca
- *
- * Credits & Thanks:
- * http://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
+import { EventBus } from "event/EventBuses";
 import { EventHandler } from "event/EventManager";
+import { InfoDisplayLevel } from "game/inspection/IInfoProvider";
 import { basicInspectionPriorities, InspectType } from "game/inspection/IInspection";
-import { InfoProviderContext } from "game/inspection/InfoProvider";
+import { InfoProvider, InfoProviderContext } from "game/inspection/InfoProvider";
 import Inspection from "game/inspection/Inspection";
 import { TempType } from "game/temperature/TemperatureManager";
+import Translation from "language/Translation";
 import Mod from "mod/Mod";
-import World from "renderer/World";
+import { Paragraph } from "newui/component/Text";
 import { IVector3 } from "utilities/math/IVector";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
@@ -41,26 +33,54 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 		return basicInspectionPriorities[InspectType.Tile] + 100;
 	}
 
-	// @Override public getBorder() {
-	// 	return quality && `var(--item-quality-${quality})`;
-	// }
-
 	////////////////////////////////////
 	// Content
 	//
 
+	@Override public hasContent() {
+		return this.getTemperature(TempType.Heat, "calculated") !== -1;
+	}
+
 	@Override public get(context: InfoProviderContext) {
 		return [
-			translation(DebugToolsTranslation.InspectionTemperatureCalculated)
-				.addArgs(this.getTemperature(TempType.Heat, "calculated") - this.getTemperature(TempType.Cold, "calculated")),
-			translation(DebugToolsTranslation.InspectionTemperatureCalculatedHeat)
-				.addArgs(this.getTemperature(TempType.Heat, "calculated")),
-			translation(DebugToolsTranslation.InspectionTemperatureCalculatedCold)
-				.addArgs(this.getTemperature(TempType.Cold, "calculated")),
-			translation(DebugToolsTranslation.InspectionTemperatureProducedHeat)
-				.addArgs(this.getTemperature(TempType.Heat, "produced")),
-			translation(DebugToolsTranslation.InspectionTemperatureProducedCold)
-				.addArgs(this.getTemperature(TempType.Cold, "produced")),
+			InfoProvider.create()
+				.setDisplayLevel(InfoDisplayLevel.NonExtra)
+				.add(translation(DebugToolsTranslation.InspectionTemperature)
+					.addArgs(island.temperature.get(this.value.x, this.value.y, this.value.z, true))),
+			InfoProvider.title()
+				.setDisplayLevel(InfoDisplayLevel.Extra)
+				.add(translation(DebugToolsTranslation.InspectionTemperature)
+					.addArgs(island.temperature.get(this.value.x, this.value.y, this.value.z, true))),
+			InfoProvider.create()
+				.setDisplayLevel(InfoDisplayLevel.Extra)
+				.setComponent(Paragraph)
+				.setChildComponent(Paragraph)
+				.add(translation(DebugToolsTranslation.InspectionTemperatureBiome)
+					.addArgs(island.temperature.getBase()))
+				// the following bit is only used for if biomes themselves have time modifiers,
+				// but so far we only use layer-specific time modifiers so it's not very useful hence hidden!
+				// .add(translation(DebugToolsTranslation.InspectionTemperatureTimeModifier)
+				// 	.addArgs(Translation.difference(island.temperature.getTime())))
+				.add(translation(DebugToolsTranslation.InspectionTemperatureLayerModifier)
+					.addArgs(Translation.difference(island.temperature.getLayer(this.value.z)))),
+			InfoProvider.create()
+				.setDisplayLevel(InfoDisplayLevel.Extra)
+				.setComponent(Paragraph)
+				.setChildComponent(Paragraph)
+				.add(translation(DebugToolsTranslation.InspectionTemperatureTileCalculated)
+					.addArgs(Translation.difference(this.getTemperature(TempType.Heat, "calculated") - this.getTemperature(TempType.Cold, "calculated")))),
+			InfoProvider.create()
+				.setDisplayLevel(InfoDisplayLevel.Verbose)
+				.setComponent(Paragraph)
+				.setChildComponent(Paragraph)
+				.add(translation(DebugToolsTranslation.InspectionTemperatureTileCalculatedHeat)
+					.addArgs(this.getTemperature(TempType.Heat, "calculated")))
+				.add(translation(DebugToolsTranslation.InspectionTemperatureTileCalculatedCold)
+					.addArgs(this.getTemperature(TempType.Cold, "calculated")))
+				.add(translation(DebugToolsTranslation.InspectionTemperatureTileProducedHeat)
+					.addArgs(this.getTemperature(TempType.Heat, "produced")))
+				.add(translation(DebugToolsTranslation.InspectionTemperatureTileProducedCold)
+					.addArgs(this.getTemperature(TempType.Cold, "produced"))),
 		];
 	}
 
@@ -68,11 +88,16 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 	// Event Handlers
 	//
 
-	@EventHandler(World, "updateTile")
-	public onUpdateTile(_: any, x: number, y: number, z: number) {
-		if (x === this.value.x && y === this.value.y && z === this.value.z) {
-			this.refresh();
-		}
+	// @EventHandler(World, "updateTile")
+	// public onUpdateTile(_: any, x: number, y: number, z: number) {
+	// 	if (x === this.value.x && y === this.value.y && z === this.value.z) {
+	// 		this.refresh();
+	// 	}
+	// }
+
+	@EventHandler(EventBus.Game, "tickEnd")
+	public onTickEnd() {
+		this.refresh();
 	}
 
 	////////////////////////////////////

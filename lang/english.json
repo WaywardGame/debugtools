@@ -181,11 +181,15 @@
 			"actionTeleport": "{0?teleport {0}:Teleport}",
 			
 			
-			"inspectionTemperatureCalculated": "Temp: {0}",
-			"inspectionTemperatureCalculatedHeat": "Calculated heat: {0}",
-			"inspectionTemperatureCalculatedCold": "Calculated cold: {0}",
-			"inspectionTemperatureProducedHeat": "Produced heat: {0}",
-			"inspectionTemperatureProducedCold": "Produced cold: {0}"
+			"inspectionTemperature": "Temp: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureBiome": "Biome temp: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureTimeModifier": "Time mod: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureLayerModifier": "Layer mod: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureTileCalculated": "Tile mod: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureTileCalculatedHeat": "Tile calc heat: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureTileCalculatedCold": "Tile calc cold: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureTileProducedHeat": "Tile produced heat: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureTileProducedCold": "Tile produced cold: {#--TEXT-PRIMARY:{0}}"
 		},
 		"item": {
 			"none": "none"

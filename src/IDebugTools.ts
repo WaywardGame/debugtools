@@ -173,11 +173,15 @@ export enum DebugToolsTranslation {
 	////////////////////////////////////
 	// Inspection
 	//
-	InspectionTemperatureCalculated,
-	InspectionTemperatureCalculatedHeat,
-	InspectionTemperatureCalculatedCold,
-	InspectionTemperatureProducedHeat,
-	InspectionTemperatureProducedCold,
+	InspectionTemperature,
+	InspectionTemperatureBiome,
+	InspectionTemperatureTimeModifier,
+	InspectionTemperatureLayerModifier,
+	InspectionTemperatureTileCalculated,
+	InspectionTemperatureTileCalculatedHeat,
+	InspectionTemperatureTileCalculatedCold,
+	InspectionTemperatureTileProducedHeat,
+	InspectionTemperatureTileProducedCold,
 	////////////////////////////////////
 	// Misc
 	//

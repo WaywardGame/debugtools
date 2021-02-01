@@ -137,15 +137,19 @@ export declare enum DebugToolsTranslation {
     ItemName = 120,
     ButtonTogglePermissions = 121,
     ButtonSetGrowthStage = 122,
-    InspectionTemperatureCalculated = 123,
-    InspectionTemperatureCalculatedHeat = 124,
-    InspectionTemperatureCalculatedCold = 125,
-    InspectionTemperatureProducedHeat = 126,
-    InspectionTemperatureProducedCold = 127,
-    ActionResurrect = 128,
-    ActionClone = 129,
-    ActionTeleport = 130,
-    To = 131
+    InspectionTemperature = 123,
+    InspectionTemperatureBiome = 124,
+    InspectionTemperatureTimeModifier = 125,
+    InspectionTemperatureLayerModifier = 126,
+    InspectionTemperatureTileCalculated = 127,
+    InspectionTemperatureTileCalculatedHeat = 128,
+    InspectionTemperatureTileCalculatedCold = 129,
+    InspectionTemperatureTileProducedHeat = 130,
+    InspectionTemperatureTileProducedCold = 131,
+    ActionResurrect = 132,
+    ActionClone = 133,
+    ActionTeleport = 134,
+    To = 135
 }
 export interface ISaveData {
     lastVersion: string;
