@@ -5,6 +5,7 @@ import { basicInspectionPriorities, InspectType } from "game/inspection/IInspect
 import { InfoProvider, InfoProviderContext } from "game/inspection/InfoProvider";
 import Inspection from "game/inspection/Inspection";
 import { TempType } from "game/temperature/TemperatureManager";
+import { MiscTranslation } from "language/dictionary/Misc";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { Paragraph } from "newui/component/Text";
@@ -62,13 +63,15 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 				// .add(translation(DebugToolsTranslation.InspectionTemperatureTimeModifier)
 				// 	.addArgs(Translation.difference(island.temperature.getTime())))
 				.add(translation(DebugToolsTranslation.InspectionTemperatureLayerModifier)
-					.addArgs(Translation.difference(island.temperature.getLayer(this.value.z)))),
+					.addArgs(Translation.misc(MiscTranslation.Difference)
+						.addArgs(island.temperature.getLayer(this.value.z)))),
 			InfoProvider.create()
 				.setDisplayLevel(InfoDisplayLevel.Extra)
 				.setComponent(Paragraph)
 				.setChildComponent(Paragraph)
 				.add(translation(DebugToolsTranslation.InspectionTemperatureTileCalculated)
-					.addArgs(Translation.difference(this.getTemperature(TempType.Heat, "calculated") - this.getTemperature(TempType.Cold, "calculated")))),
+					.addArgs(Translation.misc(MiscTranslation.Difference)
+						.addArgs(this.getTemperature(TempType.Heat, "calculated") - this.getTemperature(TempType.Cold, "calculated")))),
 			InfoProvider.create()
 				.setDisplayLevel(InfoDisplayLevel.Verbose)
 				.setComponent(Paragraph)
