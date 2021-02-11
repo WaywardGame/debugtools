@@ -1,4 +1,4 @@
-import { InfoProviderContext } from "game/inspection/InfoProvider";
+import { InfoProviderContext } from "game/inspection/InfoProviderContext";
 import Inspection from "game/inspection/Inspection";
 import { IVector3 } from "utilities/math/IVector";
 import DebugTools from "../../DebugTools";
