@@ -14,6 +14,6 @@ export default function (from: Partial<IContainer>, to: Partial<IContainer>) {
 		clone.renamed = item.renamed;
 		clone.weight = item.weight;
 		clone.weightCapacity = item.weightCapacity;
-		clone.magicalProperties = item.magicalProperties && { ...item.magicalProperties };
+		clone.magic.inherit(item.magic);
 	}
 }

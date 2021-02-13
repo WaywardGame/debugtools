@@ -20,7 +20,7 @@ export default function (from: Human, to: Human) {
 		clone.renamed = item.renamed;
 		clone.weight = item.weight;
 		clone.weightCapacity = item.weightCapacity;
-		clone.magicalProperties = item.magicalProperties && { ...item.magicalProperties };
+		clone.magic.inherit(item.magic);
 		if (item.isEquipped()) to.equip(clone, item.getEquipSlot()!);
 	}
 }
