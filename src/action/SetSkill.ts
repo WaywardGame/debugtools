@@ -10,5 +10,5 @@ export default new Action(ActionArgument.Player, ActionArgument.Number, ActionAr
 	.setHandler((action, player, skill: SkillType, value) => {
 		if (!player) return;
 
-		player.setSkillCore(skill, value);
+		player.skill.setCore(skill, value);
 	});

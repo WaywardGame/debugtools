@@ -79,7 +79,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.editRange(range => range
 				.setMin(0)
 				.setMax(100)
-				.setRefreshMethod(() => this.skill !== undefined && this.player && this.skill in this.player.skills ? this.player.skills[this.skill]!.core : 0))
+				.setRefreshMethod(() => this.player?.skill.getCore(this.skill!) ?? 0))
 			.setDisplayValue(Translation.ui(UiTranslation.GameStatsPercentage).get)
 			.event.subscribe("finish", this.setSkill)
 			.appendTo(this);
