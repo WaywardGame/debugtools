@@ -12,4 +12,5 @@ export default class TemperatureInspection extends Inspection<IVector3> {
     get(context: InfoProviderContext): import("../../../node_modules/@wayward/types/definitions/game/inspection/InfoProvider").SimpleInfoProvider[];
     onTickEnd(): void;
     private getTemperature;
+    private getTileMod;
 }

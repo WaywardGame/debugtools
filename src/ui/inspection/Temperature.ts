@@ -5,7 +5,7 @@ import { basicInspectionPriorities, InspectType } from "game/inspection/IInspect
 import { InfoProvider } from "game/inspection/InfoProvider";
 import { InfoProviderContext } from "game/inspection/InfoProviderContext";
 import Inspection from "game/inspection/Inspection";
-import { TempType } from "game/temperature/TemperatureManager";
+import { TEMPERATURE_INVALID, TempType } from "game/temperature/TemperatureManager";
 import { MiscTranslation } from "language/dictionary/Misc";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
@@ -40,7 +40,7 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 	//
 
 	@Override public hasContent() {
-		return this.getTemperature(TempType.Heat, "calculated") !== -1;
+		return this.getTileMod() !== "?";
 	}
 
 	@Override public get(context: InfoProviderContext) {
@@ -71,8 +71,7 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 				.setComponent(Paragraph)
 				.setChildComponent(Paragraph)
 				.add(translation(DebugToolsTranslation.InspectionTemperatureTileCalculated)
-					.addArgs(Translation.misc(MiscTranslation.Difference)
-						.addArgs(this.getTemperature(TempType.Heat, "calculated") - this.getTemperature(TempType.Cold, "calculated")))),
+					.addArgs(this.getTileMod())),
 			InfoProvider.create()
 				.setDisplayLevel(InfoDisplayLevel.Verbose)
 				.setComponent(Paragraph)
@@ -109,7 +108,16 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 	//
 
 	private getTemperature(tempType: TempType, calcOrProduce: "calculated" | "produced") {
-		return island.temperature?.[calcOrProduce === "calculated" ? "getCachedCalculated" : "getCachedProduced"]
-			(this.value.x, this.value.y, this.value.z, tempType) ?? -1;
+		const temp = island.temperature?.[calcOrProduce === "calculated" ? "getCachedCalculated" : "getCachedProduced"]
+			(this.value.x, this.value.y, this.value.z, tempType);
+		return temp === TEMPERATURE_INVALID || temp === undefined ? "?" : temp;
+	}
+
+	private getTileMod() {
+		const heat = this.getTemperature(TempType.Heat, "calculated");
+		const cold = this.getTemperature(TempType.Cold, "calculated");
+		if (heat === "?" || cold === "?") return "?";
+		return Translation.misc(MiscTranslation.Difference)
+			.addArgs(heat - cold);
 	}
 }
