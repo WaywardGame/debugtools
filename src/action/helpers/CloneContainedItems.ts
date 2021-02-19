@@ -9,9 +9,9 @@ export default function (from: Partial<IContainer>, to: Partial<IContainer>) {
 	for (const item of from.containedItems || []) {
 		const clone = itemManager.create(item.type, to as IContainer, item.quality);
 		clone.ownerIdentifier = item.ownerIdentifier;
-		game.notifier?.suspend(true);
+		game.notifier?.suspend();
 		clone.minDur = item.minDur;
-		game.notifier?.suspend(false);
+		game.notifier?.resume();
 		clone.maxDur = item.maxDur;
 		clone.renamed = item.renamed;
 		clone.weight = item.weight;
