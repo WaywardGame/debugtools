@@ -1,7 +1,6 @@
-import { DoodadType } from "doodad/IDoodad";
-import { Events } from "event/EventEmitter";
-import { IEventEmitter } from "event/EventEmitter";
-import Component from "newui/component/Component";
+import { Events, IEventEmitter } from "event/EventEmitter";
+import { DoodadType } from "game/doodad/IDoodad";
+import Component from "ui/component/Component";
 import { IPaintSection } from "../panel/PaintPanel";
 export default class DoodadPaint extends Component implements IPaintSection {
     event: IEventEmitter<this, Events<IPaintSection>>;

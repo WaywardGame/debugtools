@@ -9,7 +9,7 @@ import { TEMPERATURE_INVALID, TempType } from "game/temperature/TemperatureManag
 import { MiscTranslation } from "language/dictionary/Misc";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
-import { Paragraph } from "newui/component/Text";
+import { Paragraph } from "ui/component/Text";
 import { IVector3 } from "utilities/math/IVector";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";

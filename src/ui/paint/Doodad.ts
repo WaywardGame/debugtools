@@ -1,9 +1,8 @@
-import { DoodadType } from "doodad/IDoodad";
-import { Events } from "event/EventEmitter";
-import { IEventEmitter } from "event/EventEmitter";
-import Component from "newui/component/Component";
-import { DoodadDropdown } from "newui/component/dropdown/DoodadDropdown";
-import { LabelledRow } from "newui/component/LabelledRow";
+import { Events, IEventEmitter } from "event/EventEmitter";
+import { DoodadType } from "game/doodad/IDoodad";
+import Component from "ui/component/Component";
+import { DoodadDropdown } from "ui/component/dropdown/DoodadDropdown";
+import { LabelledRow } from "ui/component/LabelledRow";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 

@@ -1,7 +1,6 @@
-import { CreatureType } from "entity/creature/ICreature";
-import { Events } from "event/EventEmitter";
-import { IEventEmitter } from "event/EventEmitter";
-import Component from "newui/component/Component";
+import { Events, IEventEmitter } from "event/EventEmitter";
+import { CreatureType } from "game/entity/creature/ICreature";
+import Component from "ui/component/Component";
 import { IPaintSection } from "../panel/PaintPanel";
 export default class CorpsePaint extends Component implements IPaintSection {
     event: IEventEmitter<this, Events<IPaintSection>>;

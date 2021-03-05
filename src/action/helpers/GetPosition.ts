@@ -1,12 +1,12 @@
-import { MoveType } from "entity/IEntity";
-import { MessageType } from "entity/player/IMessageManager";
-import Player from "entity/player/Player";
-import { TranslationGenerator } from "newui/component/IComponent";
-import Text from "newui/component/Text";
+import { MoveType } from "game/entity/IEntity";
+import { MessageType } from "game/entity/player/IMessageManager";
+import Player from "game/entity/player/Player";
+import { TranslationGenerator } from "ui/component/IComponent";
+import Text from "ui/component/Text";
+import TileHelpers from "utilities/game/TileHelpers";
 import { IVector3 } from "utilities/math/IVector";
-import TileHelpers from "utilities/TileHelpers";
-
 import Actions from "../../Actions";
+
 
 /**
  * Given a position, finds an open tile, or sends an error message to executing player.

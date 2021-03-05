@@ -1,4 +1,4 @@
-import Bindable from "newui/input/Bindable";
+import Bindable from "ui/input/Bindable";
 import Vector2 from "utilities/math/Vector2";
 import type DebugTools from "./DebugTools";
 export default class UnlockedCameraMovementHandler {

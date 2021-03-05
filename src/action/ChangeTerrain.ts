@@ -1,7 +1,7 @@
-import { Action } from "entity/action/Action";
-import { ActionArgument } from "entity/action/IAction";
-import { EntityType } from "entity/IEntity";
-import { TerrainType } from "tile/ITerrain";
+import { Action } from "game/entity/action/Action";
+import { ActionArgument } from "game/entity/action/IAction";
+import { EntityType } from "game/entity/IEntity";
+import { TerrainType } from "game/tile/ITerrain";
 import { defaultUsability } from "../Actions";
 import SetTilled from "./helpers/SetTilled";
 

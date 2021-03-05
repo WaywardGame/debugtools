@@ -1,7 +1,7 @@
 import { Events, IEventEmitter } from "event/EventEmitter";
 import { Quality } from "game/IObject";
-import { ItemType } from "item/IItem";
-import Component from "newui/component/Component";
+import { ItemType } from "game/item/IItem";
+import Component from "ui/component/Component";
 interface IAddItemToInventoryEvents extends Events<Component> {
     execute(type: ItemType, quality: Quality): any;
 }

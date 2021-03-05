@@ -1,13 +1,12 @@
-import { CreatureType } from "entity/creature/ICreature";
-import { Events } from "event/EventEmitter";
-import { IEventEmitter } from "event/EventEmitter";
-import { CheckButton } from "newui/component/CheckButton";
-import Component from "newui/component/Component";
-import CreatureDropdown from "newui/component/dropdown/CreatureDropdown";
-import { LabelledRow } from "newui/component/LabelledRow";
-
+import { Events, IEventEmitter } from "event/EventEmitter";
+import { CreatureType } from "game/entity/creature/ICreature";
+import { CheckButton } from "ui/component/CheckButton";
+import Component from "ui/component/Component";
+import CreatureDropdown from "ui/component/dropdown/CreatureDropdown";
+import { LabelledRow } from "ui/component/LabelledRow";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
+
 
 export default class CreaturePaint extends Component implements IPaintSection {
 	@Override public event: IEventEmitter<this, Events<IPaintSection>>;

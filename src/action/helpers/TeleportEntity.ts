@@ -1,7 +1,7 @@
-import { ActionApi } from "entity/action/IAction";
-import Entity from "entity/Entity";
-import Player from "entity/player/Player";
-import { gameScreen } from "newui/screen/screens/GameScreen";
+import { ActionApi } from "game/entity/action/IAction";
+import Entity from "game/entity/Entity";
+import Player from "game/entity/player/Player";
+import { gameScreen } from "ui/screen/screens/GameScreen";
 import { IVector3 } from "utilities/math/IVector";
 import GetPosition from "../../action/helpers/GetPosition";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";

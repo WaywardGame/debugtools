@@ -1,4 +1,4 @@
-import Human from "entity/Human";
+import Human from "game/entity/Human";
 
 /**
  * Clones the inventory from one human entity to another.

@@ -1,7 +1,7 @@
-import { IActionApi } from "entity/action/IAction";
-import Entity from "entity/Entity";
-import Player from "entity/player/Player";
-import Item from "item/Item";
+import { IActionApi } from "game/entity/action/IAction";
+import Entity from "game/entity/Entity";
+import Player from "game/entity/player/Player";
+import Item from "game/item/Item";
 import InspectDialog from "../../ui/InspectDialog";
 
 export default function (action: IActionApi<Player>, item: Item) {

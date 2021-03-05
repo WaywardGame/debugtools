@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "event/EventManager", "game/IGame", "mod/Mod", "newui/component/Button", "newui/component/CheckButton", "newui/component/Divider", "newui/component/RangeRow", "newui/component/Text", "newui/util/ImagePath", "renderer/IWorldRenderer", "renderer/Shaders", "renderer/WorldLayerRenderer", "renderer/WorldRenderer", "utilities/enum/Enums", "../../IDebugTools", "../component/DebugToolsPanel"], function (require, exports, EventManager_1, IGame_1, Mod_1, Button_1, CheckButton_1, Divider_1, RangeRow_1, Text_1, ImagePath_1, IWorldRenderer_1, Shaders_1, WorldLayerRenderer_1, WorldRenderer_1, Enums_1, IDebugTools_1, DebugToolsPanel_1) {
+define(["require", "exports", "event/EventManager", "game/IGame", "mod/Mod", "renderer/IWorldRenderer", "renderer/Shaders", "renderer/WorldLayerRenderer", "renderer/WorldRenderer", "ui/component/Button", "ui/component/CheckButton", "ui/component/Divider", "ui/component/RangeRow", "ui/component/Text", "ui/util/ImagePath", "utilities/enum/Enums", "../../IDebugTools", "../component/DebugToolsPanel"], function (require, exports, EventManager_1, IGame_1, Mod_1, IWorldRenderer_1, Shaders_1, WorldLayerRenderer_1, WorldRenderer_1, Button_1, CheckButton_1, Divider_1, RangeRow_1, Text_1, ImagePath_1, Enums_1, IDebugTools_1, DebugToolsPanel_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class DisplayPanel extends DebugToolsPanel_1.default {

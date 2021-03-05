@@ -1,7 +1,7 @@
-import Creature from "entity/creature/Creature";
-import Entity from "entity/Entity";
-import Button from "newui/component/Button";
-import { CheckButton } from "newui/component/CheckButton";
+import Creature from "game/entity/creature/Creature";
+import Entity from "game/entity/Entity";
+import Button from "ui/component/Button";
+import { CheckButton } from "ui/component/CheckButton";
 import Remove from "../../action/Remove";
 import SetTamed from "../../action/SetTamed";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";

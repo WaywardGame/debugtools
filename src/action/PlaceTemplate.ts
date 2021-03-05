@@ -1,8 +1,8 @@
-import { Action } from "entity/action/Action";
-import { ActionArgument } from "entity/action/IAction";
-import { EntityType } from "entity/IEntity";
-import { ITemplateOptions, spawnTemplate } from "mapgen/MapGenHelpers";
-import { TileTemplateType } from "tile/ITerrain";
+import { Action } from "game/entity/action/Action";
+import { ActionArgument } from "game/entity/action/IAction";
+import { EntityType } from "game/entity/IEntity";
+import { ITemplateOptions, spawnTemplate } from "game/mapgen/MapGenHelpers";
+import { TileTemplateType } from "game/tile/ITerrain";
 import { defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.Number, ActionArgument.Vector2, ActionArgument.Object)

@@ -1,4 +1,4 @@
-import Bindable from "newui/input/Bindable";
+import Bindable from "ui/input/Bindable";
 import Vector2 from "utilities/math/Vector2";
 import DebugTools from "./DebugTools";
 import CancelablePromise from "./util/CancelablePromise";

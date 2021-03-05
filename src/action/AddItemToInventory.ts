@@ -1,6 +1,6 @@
-import { Action } from "entity/action/Action";
-import { ActionArgument, anyOf } from "entity/action/IAction";
-import { EntityType } from "entity/IEntity";
+import { Action } from "game/entity/action/Action";
+import { ActionArgument, anyOf } from "game/entity/action/IAction";
+import { EntityType } from "game/entity/IEntity";
 import { defaultUsability } from "../Actions";
 import InspectDialog from "../ui/InspectDialog";
 

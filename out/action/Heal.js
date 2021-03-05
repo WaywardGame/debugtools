@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/Action", "entity/action/IAction", "entity/IEntity", "entity/IStats", "entity/player/IPlayer", "newui/screen/screens/GameScreen", "../Actions", "./helpers/ResurrectCorpse"], function (require, exports, Action_1, IAction_1, IEntity_1, IStats_1, IPlayer_1, GameScreen_1, Actions_1, ResurrectCorpse_1) {
+define(["require", "exports", "game/entity/action/Action", "game/entity/action/IAction", "game/entity/IEntity", "game/entity/IStats", "game/entity/player/IPlayer", "ui/screen/screens/GameScreen", "../Actions", "./helpers/ResurrectCorpse"], function (require, exports, Action_1, IAction_1, IEntity_1, IStats_1, IPlayer_1, GameScreen_1, Actions_1, ResurrectCorpse_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = new Action_1.Action(IAction_1.anyOf(IAction_1.ActionArgument.Entity, IAction_1.ActionArgument.Corpse))

@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/IEntity", "entity/player/IMessageManager", "newui/component/Text", "utilities/TileHelpers", "../../Actions"], function (require, exports, IEntity_1, IMessageManager_1, Text_1, TileHelpers_1, Actions_1) {
+define(["require", "exports", "game/entity/IEntity", "game/entity/player/IMessageManager", "ui/component/Text", "utilities/game/TileHelpers", "../../Actions"], function (require, exports, IEntity_1, IMessageManager_1, Text_1, TileHelpers_1, Actions_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function default_1(player, position, actionName) {

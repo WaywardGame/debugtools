@@ -1,6 +1,6 @@
-import Creature from "entity/creature/Creature";
-import NPC from "entity/npc/NPC";
-import Player from "entity/player/Player";
+import Creature from "game/entity/creature/Creature";
+import NPC from "game/entity/npc/NPC";
+import Player from "game/entity/player/Player";
 import DebugTools from "../../DebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 export default class PlayerInformation extends InspectEntityInformationSubsection {

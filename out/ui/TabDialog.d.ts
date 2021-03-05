@@ -1,9 +1,9 @@
 import { Events, IEventEmitter } from "event/EventEmitter";
-import Button from "newui/component/Button";
-import Component from "newui/component/Component";
-import { TranslationGenerator } from "newui/component/IComponent";
-import Dialog from "newui/screen/screens/game/component/Dialog";
-import { DialogId } from "newui/screen/screens/game/Dialogs";
+import Button from "ui/component/Button";
+import Component from "ui/component/Component";
+import { TranslationGenerator } from "ui/component/IComponent";
+import Dialog from "ui/screen/screens/game/component/Dialog";
+import { DialogId } from "ui/screen/screens/game/Dialogs";
 export declare type SubpanelInformation = [string | number, TranslationGenerator, (component: Component) => any, ((button: Button) => any)?, Button?];
 interface ITabDialogEvents extends Events<Dialog> {
     changeSubpanel(): any;

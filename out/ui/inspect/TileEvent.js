@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "language/Dictionaries", "language/Translation", "mod/Mod", "newui/component/Button", "utilities/Arrays", "../../action/Remove", "../../IDebugTools", "../../util/Array", "../component/InspectInformationSection"], function (require, exports, Dictionaries_1, Translation_1, Mod_1, Button_1, Arrays_1, Remove_1, IDebugTools_1, Array_1, InspectInformationSection_1) {
+define(["require", "exports", "language/Dictionaries", "language/Translation", "mod/Mod", "ui/component/Button", "utilities/collection/Arrays", "../../action/Remove", "../../IDebugTools", "../../util/Array", "../component/InspectInformationSection"], function (require, exports, Dictionaries_1, Translation_1, Mod_1, Button_1, Arrays_1, Remove_1, IDebugTools_1, Array_1, InspectInformationSection_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class TileEventInformation extends InspectInformationSection_1.default {

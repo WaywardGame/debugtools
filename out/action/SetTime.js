@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/Action", "entity/action/IAction", "entity/IEntity", "../Actions"], function (require, exports, Action_1, IAction_1, IEntity_1, Actions_1) {
+define(["require", "exports", "game/entity/action/Action", "game/entity/action/IAction", "game/entity/IEntity", "../Actions"], function (require, exports, Action_1, IAction_1, IEntity_1, Actions_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = new Action_1.Action(IAction_1.ActionArgument.Number)

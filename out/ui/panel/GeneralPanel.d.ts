@@ -1,4 +1,4 @@
-import { IBindHandlerApi } from "newui/input/Bind";
+import { IBindHandlerApi } from "ui/input/Bind";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";

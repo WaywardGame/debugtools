@@ -1,10 +1,10 @@
 import { RenderSource } from "game/IGame";
 import Mod from "mod/Mod";
 import Register from "mod/ModRegistry";
-import Bindable from "newui/input/Bindable";
-import { IInput } from "newui/input/IInput";
-import InputManager from "newui/input/InputManager";
-import { gameScreen } from "newui/screen/screens/GameScreen";
+import Bindable from "ui/input/Bindable";
+import { IInput } from "ui/input/IInput";
+import InputManager from "ui/input/InputManager";
+import { gameScreen } from "ui/screen/screens/GameScreen";
 import Vector2 from "utilities/math/Vector2";
 import type DebugTools from "./DebugTools";
 import { DEBUG_TOOLS_ID } from "./IDebugTools";

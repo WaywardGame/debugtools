@@ -1,4 +1,4 @@
-import { ActionUsability } from "entity/action/IAction";
+import { ActionUsability } from "game/entity/action/IAction";
 import Log from "utilities/Log";
 import DebugTools from "./DebugTools";
 export declare const defaultUsability: ActionUsability[];

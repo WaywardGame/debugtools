@@ -1,4 +1,4 @@
-import { IOverlayInfo } from "tile/ITerrain";
+import { IOverlayInfo } from "game/tile/ITerrain";
 import DebugTools from "../DebugTools";
 export default class Overlays {
     static readonly DEBUG_TOOLS: DebugTools;

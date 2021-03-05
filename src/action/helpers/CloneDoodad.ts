@@ -1,4 +1,4 @@
-import Doodad from "doodad/Doodad";
+import Doodad from "game/doodad/Doodad";
 import { IVector3 } from "utilities/math/IVector";
 import CloneContainedItems from "./CloneContainedItems";
 

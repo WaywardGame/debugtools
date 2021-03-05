@@ -1,11 +1,11 @@
-import Entity from "entity/Entity";
-import Human, { REPUTATION_MAX } from "entity/Human";
-import { IStat, Stat } from "entity/IStats";
 import { OwnEventHandler } from "event/EventManager";
+import Entity from "game/entity/Entity";
+import Human, { REPUTATION_MAX } from "game/entity/Human";
+import { IStat, Stat } from "game/entity/IStats";
 import { Quality } from "game/IObject";
-import { ItemType } from "item/IItem";
-import Component from "newui/component/Component";
-import { RangeRow } from "newui/component/RangeRow";
+import { ItemType } from "game/item/IItem";
+import Component from "ui/component/Component";
+import { RangeRow } from "ui/component/RangeRow";
 import AddItemToInventory from "../../action/AddItemToInventory";
 import SetStat from "../../action/SetStat";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";

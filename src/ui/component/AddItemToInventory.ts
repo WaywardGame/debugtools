@@ -1,13 +1,13 @@
 import { Events, IEventEmitter } from "event/EventEmitter";
 import { Quality } from "game/IObject";
-import { ItemType } from "item/IItem";
+import { ItemType } from "game/item/IItem";
 import Translation from "language/Translation";
-import Button from "newui/component/Button";
-import Component from "newui/component/Component";
-import Dropdown from "newui/component/Dropdown";
-import ItemDropdown from "newui/component/dropdown/ItemDropdown";
-import { LabelledRow } from "newui/component/LabelledRow";
-import { Tuple } from "utilities/Arrays";
+import Button from "ui/component/Button";
+import Component from "ui/component/Component";
+import Dropdown from "ui/component/Dropdown";
+import ItemDropdown from "ui/component/dropdown/ItemDropdown";
+import { LabelledRow } from "ui/component/LabelledRow";
+import { Tuple } from "utilities/collection/Arrays";
 import Enums from "utilities/enum/Enums";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 

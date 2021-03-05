@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "entity/Human", "entity/IStats", "event/EventManager", "newui/component/Component", "newui/component/RangeRow", "../../action/AddItemToInventory", "../../action/SetStat", "../../IDebugTools", "../component/AddItemToInventory", "../component/InspectEntityInformationSubsection"], function (require, exports, Human_1, IStats_1, EventManager_1, Component_1, RangeRow_1, AddItemToInventory_1, SetStat_1, IDebugTools_1, AddItemToInventory_2, InspectEntityInformationSubsection_1) {
+define(["require", "exports", "event/EventManager", "game/entity/Human", "game/entity/IStats", "ui/component/Component", "ui/component/RangeRow", "../../action/AddItemToInventory", "../../action/SetStat", "../../IDebugTools", "../component/AddItemToInventory", "../component/InspectEntityInformationSubsection"], function (require, exports, EventManager_1, Human_1, IStats_1, Component_1, RangeRow_1, AddItemToInventory_1, SetStat_1, IDebugTools_1, AddItemToInventory_2, InspectEntityInformationSubsection_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class HumanInformation extends InspectEntityInformationSubsection_1.default {

@@ -1,7 +1,7 @@
 import { Events, IEventEmitter } from "event/EventEmitter";
 import { OwnEventHandler } from "event/EventManager";
 import Translation from "language/Translation";
-import Component from "newui/component/Component";
+import Component from "ui/component/Component";
 import { DebugToolsTranslation } from "../../IDebugTools";
 
 interface IDebugToolsPanelEvents extends Events<Component> {

@@ -1,4 +1,4 @@
-define(["require", "exports", "newui/screen/screens/GameScreen", "../../action/helpers/GetPosition", "../../IDebugTools"], function (require, exports, GameScreen_1, GetPosition_1, IDebugTools_1) {
+define(["require", "exports", "ui/screen/screens/GameScreen", "../../action/helpers/GetPosition", "../../IDebugTools"], function (require, exports, GameScreen_1, GetPosition_1, IDebugTools_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.teleportEntity = void 0;

@@ -1,4 +1,4 @@
-import Entity from "entity/Entity";
+import Entity from "game/entity/Entity";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 export default class CreatureInformation extends InspectEntityInformationSubsection {
     private creature;

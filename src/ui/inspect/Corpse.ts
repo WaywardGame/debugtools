@@ -1,9 +1,9 @@
-import Corpse from "entity/creature/corpse/Corpse";
+import Corpse from "game/entity/creature/corpse/Corpse";
+import { ITile } from "game/tile/ITerrain";
 import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
-import Button from "newui/component/Button";
-import { ITile } from "tile/ITerrain";
-import { Tuple } from "utilities/Arrays";
+import Button from "ui/component/Button";
+import { Tuple } from "utilities/collection/Arrays";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Heal from "../../action/Heal";

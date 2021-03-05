@@ -1,10 +1,10 @@
-import { Action } from "entity/action/Action";
-import Paddle from "entity/action/actions/Paddle";
-import SailToCivilization from "entity/action/actions/SailToCivilization";
-import { EntityType } from "entity/IEntity";
-import { ItemType } from "item/IItem";
-import { TerrainType } from "tile/ITerrain";
-import TileHelpers from "utilities/TileHelpers";
+import { Action } from "game/entity/action/Action";
+import Paddle from "game/entity/action/actions/Paddle";
+import SailToCivilization from "game/entity/action/actions/SailToCivilization";
+import { EntityType } from "game/entity/IEntity";
+import { ItemType } from "game/item/IItem";
+import { TerrainType } from "game/tile/ITerrain";
+import TileHelpers from "utilities/game/TileHelpers";
 import { defaultUsability } from "../Actions";
 
 export default new Action()

@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "newui/component/Button", "newui/component/CheckButton", "../../action/Remove", "../../action/SetTamed", "../../IDebugTools", "../component/InspectEntityInformationSubsection"], function (require, exports, Button_1, CheckButton_1, Remove_1, SetTamed_1, IDebugTools_1, InspectEntityInformationSubsection_1) {
+define(["require", "exports", "ui/component/Button", "ui/component/CheckButton", "../../action/Remove", "../../action/SetTamed", "../../IDebugTools", "../component/InspectEntityInformationSubsection"], function (require, exports, Button_1, CheckButton_1, Remove_1, SetTamed_1, IDebugTools_1, InspectEntityInformationSubsection_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class CreatureInformation extends InspectEntityInformationSubsection_1.default {

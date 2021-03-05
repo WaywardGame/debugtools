@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "game/IGame", "mod/Mod", "mod/ModRegistry", "newui/input/IInput", "newui/input/InputManager", "newui/screen/screens/GameScreen", "utilities/math/Vector2", "./IDebugTools"], function (require, exports, IGame_1, Mod_1, ModRegistry_1, IInput_1, InputManager_1, GameScreen_1, Vector2_1, IDebugTools_1) {
+define(["require", "exports", "game/IGame", "mod/Mod", "mod/ModRegistry", "ui/input/IInput", "ui/input/InputManager", "ui/screen/screens/GameScreen", "utilities/math/Vector2", "./IDebugTools"], function (require, exports, IGame_1, Mod_1, ModRegistry_1, IInput_1, InputManager_1, GameScreen_1, Vector2_1, IDebugTools_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const ACCELERATION = 0.12;

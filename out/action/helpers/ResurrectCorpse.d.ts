@@ -1,3 +1,3 @@
-import Corpse from "entity/creature/corpse/Corpse";
-import Player from "entity/player/Player";
+import Corpse from "game/entity/creature/corpse/Corpse";
+import Player from "game/entity/player/Player";
 export default function (player: Player, corpse: Corpse): boolean;

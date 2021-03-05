@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/IEntity", "entity/npc/INPCs", "utilities/math/Vector2", "./CloneInventory", "./CopyStats"], function (require, exports, IEntity_1, INPCs_1, Vector2_1, CloneInventory_1, CopyStats_1) {
+define(["require", "exports", "game/entity/IEntity", "game/entity/npc/INPCs", "utilities/math/Vector2", "./CloneInventory", "./CopyStats"], function (require, exports, IEntity_1, INPCs_1, Vector2_1, CloneInventory_1, CopyStats_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function default_1(entity, position) {

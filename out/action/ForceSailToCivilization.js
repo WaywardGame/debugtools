@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/action/Action", "entity/action/actions/Paddle", "entity/action/actions/SailToCivilization", "entity/IEntity", "item/IItem", "tile/ITerrain", "utilities/TileHelpers", "../Actions"], function (require, exports, Action_1, Paddle_1, SailToCivilization_1, IEntity_1, IItem_1, ITerrain_1, TileHelpers_1, Actions_1) {
+define(["require", "exports", "game/entity/action/Action", "game/entity/action/actions/Paddle", "game/entity/action/actions/SailToCivilization", "game/entity/IEntity", "game/item/IItem", "game/tile/ITerrain", "utilities/game/TileHelpers", "../Actions"], function (require, exports, Action_1, Paddle_1, SailToCivilization_1, IEntity_1, IItem_1, ITerrain_1, TileHelpers_1, Actions_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = new Action_1.Action()

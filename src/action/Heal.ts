@@ -1,9 +1,9 @@
-import { Action } from "entity/action/Action";
-import { ActionArgument, anyOf } from "entity/action/IAction";
-import { EntityType, MoveType, StatusEffectChangeReason, StatusType } from "entity/IEntity";
-import { IStatMax, Stat } from "entity/IStats";
-import { PlayerState } from "entity/player/IPlayer";
-import { gameScreen } from "newui/screen/screens/GameScreen";
+import { Action } from "game/entity/action/Action";
+import { ActionArgument, anyOf } from "game/entity/action/IAction";
+import { EntityType, MoveType, StatusEffectChangeReason, StatusType } from "game/entity/IEntity";
+import { IStatMax, Stat } from "game/entity/IStats";
+import { PlayerState } from "game/entity/player/IPlayer";
+import { gameScreen } from "ui/screen/screens/GameScreen";
 import Actions, { defaultUsability } from "../Actions";
 import ResurrectCorpse from "./helpers/ResurrectCorpse";
 

@@ -1,7 +1,7 @@
-import Entity from "entity/Entity";
-import { Stat } from "entity/IStats";
 import { Events, IEventEmitter } from "event/EventEmitter";
-import Component from "newui/component/Component";
+import Entity from "game/entity/Entity";
+import { Stat } from "game/entity/IStats";
+import Component from "ui/component/Component";
 
 interface IInspectEntityInformationSubsectionEvents extends Events<Component> {
 	change(): any;

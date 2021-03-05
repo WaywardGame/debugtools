@@ -1,4 +1,4 @@
-import { IContainer } from "item/IItem";
+import { IContainer } from "game/item/IItem";
 
 /**
  * Clones the items in one container to another. If a container is empty or invalid, returns silently.

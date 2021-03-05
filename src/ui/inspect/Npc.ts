@@ -1,7 +1,7 @@
-import Creature from "entity/creature/Creature";
-import NPC from "entity/npc/NPC";
-import Player from "entity/player/Player";
-import Button from "newui/component/Button";
+import Creature from "game/entity/creature/Creature";
+import NPC from "game/entity/npc/NPC";
+import Player from "game/entity/player/Player";
+import Button from "ui/component/Button";
 import Remove from "../../action/Remove";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";

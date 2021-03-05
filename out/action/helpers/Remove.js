@@ -1,4 +1,4 @@
-define(["require", "exports", "doodad/Doodad", "entity/creature/corpse/Corpse", "entity/creature/Creature", "entity/npc/NPC", "item/Item", "tile/TileEvent", "./RemoveItem"], function (require, exports, Doodad_1, Corpse_1, Creature_1, NPC_1, Item_1, TileEvent_1, RemoveItem_1) {
+define(["require", "exports", "game/doodad/Doodad", "game/entity/creature/corpse/Corpse", "game/entity/creature/Creature", "game/entity/npc/NPC", "game/item/Item", "game/tile/TileEvent", "./RemoveItem"], function (require, exports, Doodad_1, Corpse_1, Creature_1, NPC_1, Item_1, TileEvent_1, RemoveItem_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function default_1(action, target) {
