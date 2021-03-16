@@ -55,9 +55,6 @@ export default class DebugToolsDialog extends TabDialog {
 		super(id);
 		this.classes.add("debug-tools-dialog");
 
-		// we register this component as a "hook host" — this means that, like the `Mod` class, it can implement hook methods
-		this.registerHookHost("DebugToolsDialog");
-
 		// when the dialog is removed from the DOM, we force remove all of the panels (they're cached otherwise)
 		this.event.subscribe("willRemove", () => {
 			this.storePanels = false;

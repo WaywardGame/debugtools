@@ -86,9 +86,6 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 
 		this.classes.add("debug-tools-inspect-dialog");
 
-		// we register this component as a "hook host" — this means that, like the `Mod` class, it can implement hook methods
-		this.registerHookHost("DebugToolsInspectDialog");
-
 		InspectDialog.INSTANCE = this;
 	}
 
