@@ -38,6 +38,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 	private readonly dropdownTemplate: Dropdown<string>;
 	private readonly mirrorVertically: CheckButton;
 	private readonly mirrorHorizontally: CheckButton;
+	private readonly overlap: CheckButton;
 	private readonly rotate: RangeRow;
 	private readonly degrade: RangeRow;
 	private readonly place: CheckButton;
@@ -83,6 +84,10 @@ export default class TemplatePanel extends DebugToolsPanel {
 
 		this.mirrorHorizontally = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonMirrorHorizontally))
+			.appendTo(this);
+			
+		this.overlap = new CheckButton()
+			.setText(translation(DebugToolsTranslation.ButtonOverlap))
 			.appendTo(this);
 
 		this.rotate = new RangeRow()
@@ -218,6 +223,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 		return {
 			mirrorHorizontally: this.mirrorHorizontally.checked,
 			mirrorVertically: this.mirrorVertically.checked,
+			overlap: this.overlap.checked,
 			rotate: this.rotate.value as 0 | 90 | 180 | 270,
 			degrade: this.degrade.value / 100,
 			which: this.dropdownTemplate.selection,
@@ -229,6 +235,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 			|| this.templateOptions.which !== options.which
 			|| this.templateOptions.mirrorHorizontally !== options.mirrorHorizontally
 			|| this.templateOptions.mirrorHorizontally !== options.mirrorVertically
+			|| this.templateOptions.overlap !== options.overlap
 			|| this.templateOptions.rotate !== options.rotate;
 	}
 

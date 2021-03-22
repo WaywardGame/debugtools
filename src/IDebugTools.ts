@@ -121,6 +121,7 @@ export enum DebugToolsTranslation {
 	LabelTemplate,
 	ButtonMirrorVertically,
 	ButtonMirrorHorizontally,
+	ButtonOverlap,
 	ButtonPlace,
 	LabelRotate,
 	RangeRotateDegrees,
