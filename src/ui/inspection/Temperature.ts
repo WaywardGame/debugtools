@@ -5,7 +5,8 @@ import { basicInspectionPriorities, InspectType } from "game/inspection/IInspect
 import { InfoProvider } from "game/inspection/InfoProvider";
 import { InfoProviderContext } from "game/inspection/InfoProviderContext";
 import Inspection from "game/inspection/Inspection";
-import { TEMPERATURE_INVALID, TempType } from "game/temperature/TemperatureManager";
+import { TempType } from "game/temperature/ITemperature";
+import { TEMPERATURE_INVALID } from "game/temperature/TemperatureManager";
 import { MiscTranslation } from "language/dictionary/Misc";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
