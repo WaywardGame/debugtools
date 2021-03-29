@@ -64,6 +64,7 @@
 			"zoomLevel": "{0}x",
 			"buttonUnlockCamera": "Unlock Camera {#--text-secondary:({Bindings:ModDebugToolsToggleCameraLock})}",
 			"buttonResetWebGL": "Reset WebGL",
+			"buttonRefreshTiles": "Refresh Tiles",
 			"buttonReloadShaders": "Reload Shaders",
 			"buttonReloadUIImages": "Reload UI Images",
 			"headingLayers": "Layers",

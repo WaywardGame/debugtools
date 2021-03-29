@@ -69,6 +69,12 @@ export default class DisplayPanel extends DebugToolsPanel {
 
 		new Button()
 			.classes.add("warning")
+			.setText(translation(DebugToolsTranslation.ButtonRefreshTiles))
+			.event.subscribe("activate", this.refreshTiles)
+			.appendTo(this);
+
+		new Button()
+			.classes.add("warning")
 			.setText(translation(DebugToolsTranslation.ButtonReloadShaders))
 			.event.subscribe("activate", this.reloadShaders)
 			.appendTo(this);
@@ -124,6 +130,11 @@ export default class DisplayPanel extends DebugToolsPanel {
 	@Bound
 	private resetWebGL() {
 		game.resetWebGL();
+	}
+
+	@Bound
+	private refreshTiles() {
+		renderer?.updateAll();
 	}
 
 	@Bound
