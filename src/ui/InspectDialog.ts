@@ -315,7 +315,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	@Bound
 	private logUpdate() {
 		if (this.shouldLog) {
-			this.LOG.info("Tile:", this.tile, this.tilePosition !== undefined ? this.tilePosition.toString() : undefined);
+			this.LOG.info("Tile:", this.tile, this.tilePosition !== undefined ? this.tilePosition.toString() : undefined, this.tilePosition ? game.getTileData(this.tilePosition.x, this.tilePosition.y, this.tilePosition.z) : undefined);
 			this.shouldLog = false;
 		}
 
