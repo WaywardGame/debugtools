@@ -2,7 +2,7 @@ import { EventBus } from "event/EventBuses";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import Entity from "game/entity/Entity";
 import { RenderSource, TileUpdateType } from "game/IGame";
-import { ITile } from "game/tile/ITerrain";
+import { ITile, TerrainType } from "game/tile/ITerrain";
 import Translation from "language/Translation";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
@@ -315,7 +315,8 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	@Bound
 	private logUpdate() {
 		if (this.shouldLog) {
-			this.LOG.info("Tile:", this.tile, this.tilePosition !== undefined ? this.tilePosition.toString() : undefined, this.tilePosition ? game.getTileData(this.tilePosition.x, this.tilePosition.y, this.tilePosition.z) : undefined);
+			const tileData = this.tilePosition ? game.getTileData(this.tilePosition.x, this.tilePosition.y, this.tilePosition.z) : undefined;
+			this.LOG.info("Tile:", this.tile, this.tilePosition?.toString(), tileData?.map(data => TerrainType[data.type]).join(", "), tileData,);
 			this.shouldLog = false;
 		}
 
