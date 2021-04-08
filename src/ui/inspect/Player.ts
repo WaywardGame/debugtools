@@ -60,7 +60,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelWeightBonus)))
 			.editRange(range => range
 				.setMin(0)
-				.setMax(1000)
+				.setMax(10000)
 				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "weightBonus") : 0))
 			.setDisplayValue(true)
 			.event.subscribe("finish", this.setWeightBonus)
