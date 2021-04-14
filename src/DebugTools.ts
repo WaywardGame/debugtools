@@ -39,6 +39,7 @@ import Vector3 from "utilities/math/Vector3";
 import AddItemToInventory from "./action/AddItemToInventory";
 import ChangeLayer from "./action/ChangeLayer";
 import ChangeTerrain from "./action/ChangeTerrain";
+import ClearInventory from "./action/ClearInventory";
 import Clone from "./action/Clone";
 import ForceSailToCivilization from "./action/ForceSailToCivilization";
 import Heal from "./action/Heal";
@@ -243,6 +244,9 @@ export default class DebugTools extends Mod {
 
 	@Register.action("AddItemToInventory", AddItemToInventory)
 	public readonly actionAddItemToInventory: ActionType;
+
+	@Register.action("ClearInventory", ClearInventory)
+	public readonly actionClearInventory: ActionType;
 
 	@Register.action("Paint", Paint)
 	public readonly actionPaint: ActionType;

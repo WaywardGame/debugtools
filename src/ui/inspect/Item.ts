@@ -10,7 +10,7 @@ import Component from "ui/component/Component";
 import { Paragraph } from "ui/component/Text";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
-import AddItemToInventory from "../../action/AddItemToInventory";
+import AddItemToInventory, { ADD_ITEM_ALL, ADD_ITEM_RANDOM } from "../../action/AddItemToInventory";
 import Remove from "../../action/Remove";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
@@ -80,8 +80,8 @@ export default class ItemInformation extends InspectInformationSection {
 	}
 
 	@Bound
-	private addItem(_: any, type: ItemType, quality: Quality) {
-		AddItemToInventory.execute(localPlayer, itemManager.getTileContainer(this.position.x, this.position.y, localPlayer.z), type, quality);
+	private addItem(_: any, type: ItemType | typeof ADD_ITEM_ALL | typeof ADD_ITEM_RANDOM, quality: Quality, quantity: number) {
+		AddItemToInventory.execute(localPlayer, itemManager.getTileContainer(this.position.x, this.position.y, localPlayer.z), type, quality, quantity);
 	}
 
 	@Bound

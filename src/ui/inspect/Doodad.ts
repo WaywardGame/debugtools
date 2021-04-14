@@ -83,8 +83,8 @@ export default class DoodadInformation extends InspectInformationSection {
 	}
 
 	@Bound
-	private addItem(_: any, type: ItemType, quality: Quality) {
-		AddItemToInventory.execute(localPlayer, this.doodad! as IContainer, type, quality);
+	private addItem(_: any, type: ItemType, quality: Quality, quantity: number) {
+		AddItemToInventory.execute(localPlayer, this.doodad! as IContainer, type, quality, quantity);
 	}
 
 	@Bound
