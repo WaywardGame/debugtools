@@ -1,30 +1,29 @@
-import Doodad from "doodad/Doodad";
-import ActionExecutor from "entity/action/ActionExecutor";
-import { ICorpse } from "entity/creature/corpse/ICorpse";
-import Creature from "entity/creature/Creature";
-import { EntityType } from "entity/IEntity";
-import NPC from "entity/npc/NPC";
-import Player from "entity/player/Player";
 import { Events, IEventEmitter } from "event/EventEmitter";
 import { OwnEventHandler } from "event/EventManager";
+import Doodad from "game/doodad/Doodad";
+import Corpse from "game/entity/creature/corpse/Corpse";
+import Creature from "game/entity/creature/Creature";
+import { EntityType } from "game/entity/IEntity";
+import NPC from "game/entity/npc/NPC";
+import Player from "game/entity/player/Player";
+import TileEvent from "game/tile/TileEvent";
 import Mod from "mod/Mod";
-import { BlockRow } from "newui/component/BlockRow";
-import Button from "newui/component/Button";
-import { CheckButton } from "newui/component/CheckButton";
-import Component from "newui/component/Component";
-import Dropdown, { IDropdownOption } from "newui/component/Dropdown";
-import CorpseDropdown from "newui/component/dropdown/CorpseDropdown";
-import CreatureDropdown from "newui/component/dropdown/CreatureDropdown";
-import { DoodadDropdown } from "newui/component/dropdown/DoodadDropdown";
-import NPCDropdown from "newui/component/dropdown/NPCDropdown";
-import TileEventDropdown from "newui/component/dropdown/TileEventDropdown";
-import { LabelledRow } from "newui/component/LabelledRow";
-import { RangeRow } from "newui/component/RangeRow";
-import Text from "newui/component/Text";
-import Spacer from "newui/screen/screens/menu/component/Spacer";
 import DebugTools from "src/DebugTools";
-import TileEvent from "tile/TileEvent";
-import Arrays, { Tuple } from "utilities/Arrays";
+import { BlockRow } from "ui/component/BlockRow";
+import Button from "ui/component/Button";
+import { CheckButton } from "ui/component/CheckButton";
+import Component from "ui/component/Component";
+import Dropdown, { IDropdownOption } from "ui/component/Dropdown";
+import CorpseDropdown from "ui/component/dropdown/CorpseDropdown";
+import CreatureDropdown from "ui/component/dropdown/CreatureDropdown";
+import { DoodadDropdown } from "ui/component/dropdown/DoodadDropdown";
+import NPCDropdown from "ui/component/dropdown/NPCDropdown";
+import TileEventDropdown from "ui/component/dropdown/TileEventDropdown";
+import { LabelledRow } from "ui/component/LabelledRow";
+import { RangeRow } from "ui/component/RangeRow";
+import Text from "ui/component/Text";
+import Spacer from "ui/screen/screens/menu/component/Spacer";
+import Arrays, { Tuple } from "utilities/collection/Arrays";
 import Vector2 from "utilities/math/Vector2";
 import SelectionExecute, { SelectionType } from "../../action/SelectionExecute";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
@@ -36,7 +35,7 @@ const entityTypeToSelectionTypeMap = {
 	[EntityType.Player]: SelectionType.Player,
 };
 
-type Target = Creature | NPC | TileEvent | Doodad | ICorpse | Player;
+type Target = Creature | NPC | TileEvent | Doodad | Corpse | Player;
 
 function getSelectionType(target: Target) {
 	return "entityType" in target ? entityTypeToSelectionTypeMap[target.entityType]
@@ -166,7 +165,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 		if (!this.targets.length)
 			return;
 
-		ActionExecutor.get(SelectionExecute).execute(localPlayer, this.dropdownAction.selection, this.targets
+		SelectionExecute.execute(localPlayer, this.dropdownAction.selection, this.targets
 			.map(target => Tuple(getSelectionType(target), target instanceof Player ? target.identifier : target.id)), this.dropdownAlternativeTarget.selection);
 
 		this.updateTargets();

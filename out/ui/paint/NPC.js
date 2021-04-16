@@ -4,7 +4,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "newui/component/Component", "newui/component/dropdown/NPCDropdown", "newui/component/LabelledRow", "../../IDebugTools"], function (require, exports, Component_1, NPCDropdown_1, LabelledRow_1, IDebugTools_1) {
+define(["require", "exports", "ui/component/Component", "ui/component/dropdown/NPCDropdown", "ui/component/LabelledRow", "../../IDebugTools"], function (require, exports, Component_1, NPCDropdown_1, LabelledRow_1, IDebugTools_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class NPCPaint extends Component_1.default {

@@ -1,7 +1,7 @@
-import { Action } from "entity/action/Action";
-import { ActionArgument, optional } from "entity/action/IAction";
-import { EntityType } from "entity/IEntity";
-import Player from "entity/player/Player";
+import { Action } from "game/entity/action/Action";
+import { ActionArgument, optional } from "game/entity/action/IAction";
+import { EntityType } from "game/entity/IEntity";
+import Player from "game/entity/player/Player";
 import { defaultUsability } from "../Actions";
 import { DebugToolsTranslation } from "../IDebugTools";
 import Remove from "./helpers/Remove";

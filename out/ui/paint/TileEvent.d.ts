@@ -1,7 +1,6 @@
-import { Events } from "event/EventEmitter";
-import { IEventEmitter } from "event/EventEmitter";
-import Component from "newui/component/Component";
-import { TileEventType } from "tile/ITileEvent";
+import { Events, IEventEmitter } from "event/EventEmitter";
+import { TileEventType } from "game/tile/ITileEvent";
+import Component from "ui/component/Component";
 import { IPaintSection } from "../panel/PaintPanel";
 export default class TileEventPaint extends Component implements IPaintSection {
     event: IEventEmitter<this, Events<IPaintSection>>;

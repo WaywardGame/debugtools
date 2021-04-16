@@ -1,20 +1,10 @@
-/*!
- * Copyright Unlok, Vaughn Royko 2011-2020
- * http://www.unlok.ca
- *
- * Credits & Thanks:
- * http://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "event/EventManager", "game/inspection/IInspection", "game/inspection/Inspection", "game/temperature/TemperatureManager", "mod/Mod", "renderer/World", "../../IDebugTools"], function (require, exports, EventManager_1, IInspection_1, Inspection_1, TemperatureManager_1, Mod_1, World_1, IDebugTools_1) {
+define(["require", "exports", "event/EventBuses", "event/EventManager", "game/inspection/IInfoProvider", "game/inspection/IInspection", "game/inspection/InfoProvider", "game/inspection/Inspection", "game/temperature/ITemperature", "game/temperature/TemperatureManager", "language/dictionary/Misc", "language/Translation", "mod/Mod", "ui/component/Text", "../../IDebugTools"], function (require, exports, EventBuses_1, EventManager_1, IInfoProvider_1, IInspection_1, InfoProvider_1, Inspection_1, ITemperature_1, TemperatureManager_1, Misc_1, Translation_1, Mod_1, Text_1, IDebugTools_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class TemperatureInspection extends Inspection_1.default {
@@ -30,28 +20,63 @@ define(["require", "exports", "event/EventManager", "game/inspection/IInspection
         getPriority() {
             return IInspection_1.basicInspectionPriorities[IInspection_1.InspectType.Tile] + 100;
         }
+        hasContent() {
+            return this.getTileMod() !== "?";
+        }
         get(context) {
             return [
-                IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.InspectionTemperatureCalculated)
-                    .addArgs(this.getTemperature(TemperatureManager_1.TempType.Heat, "calculated") - this.getTemperature(TemperatureManager_1.TempType.Cold, "calculated")),
-                IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.InspectionTemperatureCalculatedHeat)
-                    .addArgs(this.getTemperature(TemperatureManager_1.TempType.Heat, "calculated")),
-                IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.InspectionTemperatureCalculatedCold)
-                    .addArgs(this.getTemperature(TemperatureManager_1.TempType.Cold, "calculated")),
-                IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.InspectionTemperatureProducedHeat)
-                    .addArgs(this.getTemperature(TemperatureManager_1.TempType.Heat, "produced")),
-                IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.InspectionTemperatureProducedCold)
-                    .addArgs(this.getTemperature(TemperatureManager_1.TempType.Cold, "produced")),
+                InfoProvider_1.InfoProvider.create()
+                    .setDisplayLevel(IInfoProvider_1.InfoDisplayLevel.NonExtra)
+                    .add(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.InspectionTemperature)
+                    .addArgs(island.temperature.get(this.value.x, this.value.y, this.value.z, true))),
+                InfoProvider_1.InfoProvider.title()
+                    .setDisplayLevel(IInfoProvider_1.InfoDisplayLevel.Extra)
+                    .add(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.InspectionTemperature)
+                    .addArgs(island.temperature.get(this.value.x, this.value.y, this.value.z, true))),
+                InfoProvider_1.InfoProvider.create()
+                    .setDisplayLevel(IInfoProvider_1.InfoDisplayLevel.Extra)
+                    .setComponent(Text_1.Paragraph)
+                    .setChildComponent(Text_1.Paragraph)
+                    .add(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.InspectionTemperatureBiome)
+                    .addArgs(island.temperature.getBase()))
+                    .add(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.InspectionTemperatureLayerModifier)
+                    .addArgs(Translation_1.default.misc(Misc_1.MiscTranslation.Difference)
+                    .addArgs(island.temperature.getLayer(this.value.z)))),
+                InfoProvider_1.InfoProvider.create()
+                    .setDisplayLevel(IInfoProvider_1.InfoDisplayLevel.Extra)
+                    .setComponent(Text_1.Paragraph)
+                    .setChildComponent(Text_1.Paragraph)
+                    .add(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.InspectionTemperatureTileCalculated)
+                    .addArgs(this.getTileMod())),
+                InfoProvider_1.InfoProvider.create()
+                    .setDisplayLevel(IInfoProvider_1.InfoDisplayLevel.Verbose)
+                    .setComponent(Text_1.Paragraph)
+                    .setChildComponent(Text_1.Paragraph)
+                    .add(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.InspectionTemperatureTileCalculatedHeat)
+                    .addArgs(this.getTemperature(ITemperature_1.TempType.Heat, "calculated")))
+                    .add(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.InspectionTemperatureTileCalculatedCold)
+                    .addArgs(this.getTemperature(ITemperature_1.TempType.Cold, "calculated")))
+                    .add(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.InspectionTemperatureTileProducedHeat)
+                    .addArgs(this.getTemperature(ITemperature_1.TempType.Heat, "produced")))
+                    .add(IDebugTools_1.translation(IDebugTools_1.DebugToolsTranslation.InspectionTemperatureTileProducedCold)
+                    .addArgs(this.getTemperature(ITemperature_1.TempType.Cold, "produced"))),
             ];
         }
-        onUpdateTile(_, x, y, z) {
-            if (x === this.value.x && y === this.value.y && z === this.value.z) {
-                this.refresh();
-            }
+        onTickEnd() {
+            this.refresh();
         }
         getTemperature(tempType, calcOrProduce) {
-            var _a, _b;
-            return (_b = (_a = island.temperature) === null || _a === void 0 ? void 0 : _a[calcOrProduce === "calculated" ? "getCachedCalculated" : "getCachedProduced"](this.value.x, this.value.y, this.value.z, tempType)) !== null && _b !== void 0 ? _b : -1;
+            var _a;
+            const temp = (_a = island.temperature) === null || _a === void 0 ? void 0 : _a[calcOrProduce === "calculated" ? "getCachedCalculated" : "getCachedProduced"](this.value.x, this.value.y, this.value.z, tempType);
+            return temp === TemperatureManager_1.TEMPERATURE_INVALID || temp === undefined ? "?" : temp;
+        }
+        getTileMod() {
+            const heat = this.getTemperature(ITemperature_1.TempType.Heat, "calculated");
+            const cold = this.getTemperature(ITemperature_1.TempType.Cold, "calculated");
+            if (heat === "?" || cold === "?")
+                return "?";
+            return Translation_1.default.misc(Misc_1.MiscTranslation.Difference)
+                .addArgs(heat - cold);
         }
     }
     __decorate([
@@ -62,13 +87,16 @@ define(["require", "exports", "event/EventManager", "game/inspection/IInspection
     ], TemperatureInspection.prototype, "getPriority", null);
     __decorate([
         Override
+    ], TemperatureInspection.prototype, "hasContent", null);
+    __decorate([
+        Override
     ], TemperatureInspection.prototype, "get", null);
     __decorate([
-        EventManager_1.EventHandler(World_1.default, "updateTile")
-    ], TemperatureInspection.prototype, "onUpdateTile", null);
+        EventManager_1.EventHandler(EventBuses_1.EventBus.Game, "tickEnd")
+    ], TemperatureInspection.prototype, "onTickEnd", null);
     __decorate([
         Mod_1.default.instance(IDebugTools_1.DEBUG_TOOLS_ID)
     ], TemperatureInspection, "DEBUG_TOOLS", void 0);
     exports.default = TemperatureInspection;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVGVtcGVyYXR1cmUuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdWkvaW5zcGVjdGlvbi9UZW1wZXJhdHVyZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQTs7Ozs7Ozs7O0dBU0c7Ozs7Ozs7Ozs7SUFhSCxNQUFxQixxQkFBc0IsU0FBUSxvQkFBb0I7UUFTdEUsWUFBbUIsSUFBYztZQUNoQyxLQUFLLENBQUMscUJBQXFCLENBQUMsV0FBVyxDQUFDLHFCQUFxQixFQUFFLElBQUksQ0FBQyxDQUFDO1FBQ3RFLENBQUM7UUFOTSxNQUFNLENBQUMsV0FBVyxDQUFDLFFBQWtCO1lBQzNDLE9BQU8sSUFBSSxxQkFBcUIsQ0FBQyxRQUFRLENBQUMsQ0FBQztRQUM1QyxDQUFDO1FBTWdCLEtBQUs7WUFDckIsT0FBTyxJQUFJLENBQUMsbUJBQW1CLENBQUMsSUFBSSxDQUFDLEtBQUssQ0FBQyxDQUFDO1FBQzdDLENBQUM7UUFFZ0IsV0FBVztZQUMzQixPQUFPLHVDQUF5QixDQUFDLHlCQUFXLENBQUMsSUFBSSxDQUFDLEdBQUcsR0FBRyxDQUFDO1FBQzFELENBQUM7UUFVZ0IsR0FBRyxDQUFDLE9BQWdCO1lBQ3BDLE9BQU87Z0JBQ04seUJBQVcsQ0FBQyxtQ0FBcUIsQ0FBQywrQkFBK0IsQ0FBQztxQkFDaEUsT0FBTyxDQUFDLElBQUksQ0FBQyxjQUFjLENBQUMsNkJBQVEsQ0FBQyxJQUFJLEVBQUUsWUFBWSxDQUFDLEdBQUcsSUFBSSxDQUFDLGNBQWMsQ0FBQyw2QkFBUSxDQUFDLElBQUksRUFBRSxZQUFZLENBQUMsQ0FBQztnQkFDOUcseUJBQVcsQ0FBQyxtQ0FBcUIsQ0FBQyxtQ0FBbUMsQ0FBQztxQkFDcEUsT0FBTyxDQUFDLElBQUksQ0FBQyxjQUFjLENBQUMsNkJBQVEsQ0FBQyxJQUFJLEVBQUUsWUFBWSxDQUFDLENBQUM7Z0JBQzNELHlCQUFXLENBQUMsbUNBQXFCLENBQUMsbUNBQW1DLENBQUM7cUJBQ3BFLE9BQU8sQ0FBQyxJQUFJLENBQUMsY0FBYyxDQUFDLDZCQUFRLENBQUMsSUFBSSxFQUFFLFlBQVksQ0FBQyxDQUFDO2dCQUMzRCx5QkFBVyxDQUFDLG1DQUFxQixDQUFDLGlDQUFpQyxDQUFDO3FCQUNsRSxPQUFPLENBQUMsSUFBSSxDQUFDLGNBQWMsQ0FBQyw2QkFBUSxDQUFDLElBQUksRUFBRSxVQUFVLENBQUMsQ0FBQztnQkFDekQseUJBQVcsQ0FBQyxtQ0FBcUIsQ0FBQyxpQ0FBaUMsQ0FBQztxQkFDbEUsT0FBTyxDQUFDLElBQUksQ0FBQyxjQUFjLENBQUMsNkJBQVEsQ0FBQyxJQUFJLEVBQUUsVUFBVSxDQUFDLENBQUM7YUFDekQsQ0FBQztRQUNILENBQUM7UUFPTSxZQUFZLENBQUMsQ0FBTSxFQUFFLENBQVMsRUFBRSxDQUFTLEVBQUUsQ0FBUztZQUMxRCxJQUFJLENBQUMsS0FBSyxJQUFJLENBQUMsS0FBSyxDQUFDLENBQUMsSUFBSSxDQUFDLEtBQUssSUFBSSxDQUFDLEtBQUssQ0FBQyxDQUFDLElBQUksQ0FBQyxLQUFLLElBQUksQ0FBQyxLQUFLLENBQUMsQ0FBQyxFQUFFO2dCQUNuRSxJQUFJLENBQUMsT0FBTyxFQUFFLENBQUM7YUFDZjtRQUNGLENBQUM7UUFNTyxjQUFjLENBQUMsUUFBa0IsRUFBRSxhQUF3Qzs7WUFDbEYsbUJBQU8sTUFBTSxDQUFDLFdBQVcsMENBQUcsYUFBYSxLQUFLLFlBQVksQ0FBQyxDQUFDLENBQUMscUJBQXFCLENBQUMsQ0FBQyxDQUFDLG1CQUFtQixFQUN0RyxJQUFJLENBQUMsS0FBSyxDQUFDLENBQUMsRUFBRSxJQUFJLENBQUMsS0FBSyxDQUFDLENBQUMsRUFBRSxJQUFJLENBQUMsS0FBSyxDQUFDLENBQUMsRUFBRSxRQUFRLG9DQUFLLENBQUMsQ0FBQyxDQUFDO1FBQzdELENBQUM7S0FDRDtJQWxEVTtRQUFULFFBQVE7c0RBRVI7SUFFUztRQUFULFFBQVE7NERBRVI7SUFVUztRQUFULFFBQVE7b0RBYVI7SUFPRDtRQURDLDJCQUFZLENBQUMsZUFBSyxFQUFFLFlBQVksQ0FBQzs2REFLakM7SUFsREQ7UUFEQyxhQUFHLENBQUMsUUFBUSxDQUFhLDRCQUFjLENBQUM7b0RBQ007SUFIaEQsd0NBK0RDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVGVtcGVyYXR1cmUuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvdWkvaW5zcGVjdGlvbi9UZW1wZXJhdHVyZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7SUFpQkEsTUFBcUIscUJBQXNCLFNBQVEsb0JBQW9CO1FBU3RFLFlBQW1CLElBQWM7WUFDaEMsS0FBSyxDQUFDLHFCQUFxQixDQUFDLFdBQVcsQ0FBQyxxQkFBcUIsRUFBRSxJQUFJLENBQUMsQ0FBQztRQUN0RSxDQUFDO1FBTk0sTUFBTSxDQUFDLFdBQVcsQ0FBQyxRQUFrQjtZQUMzQyxPQUFPLElBQUkscUJBQXFCLENBQUMsUUFBUSxDQUFDLENBQUM7UUFDNUMsQ0FBQztRQU1nQixLQUFLO1lBQ3JCLE9BQU8sSUFBSSxDQUFDLG1CQUFtQixDQUFDLElBQUksQ0FBQyxLQUFLLENBQUMsQ0FBQztRQUM3QyxDQUFDO1FBRWdCLFdBQVc7WUFDM0IsT0FBTyx1Q0FBeUIsQ0FBQyx5QkFBVyxDQUFDLElBQUksQ0FBQyxHQUFHLEdBQUcsQ0FBQztRQUMxRCxDQUFDO1FBTWdCLFVBQVU7WUFDMUIsT0FBTyxJQUFJLENBQUMsVUFBVSxFQUFFLEtBQUssR0FBRyxDQUFDO1FBQ2xDLENBQUM7UUFFZ0IsR0FBRyxDQUFDLE9BQTRCO1lBQ2hELE9BQU87Z0JBQ04sMkJBQVksQ0FBQyxNQUFNLEVBQUU7cUJBQ25CLGVBQWUsQ0FBQyxnQ0FBZ0IsQ0FBQyxRQUFRLENBQUM7cUJBQzFDLEdBQUcsQ0FBQyx5QkFBVyxDQUFDLG1DQUFxQixDQUFDLHFCQUFxQixDQUFDO3FCQUMzRCxPQUFPLENBQUMsTUFBTSxDQUFDLFdBQVcsQ0FBQyxHQUFHLENBQUMsSUFBSSxDQUFDLEtBQUssQ0FBQyxDQUFDLEVBQUUsSUFBSSxDQUFDLEtBQUssQ0FBQyxDQUFDLEVBQUUsSUFBSSxDQUFDLEtBQUssQ0FBQyxDQUFDLEVBQUUsSUFBSSxDQUFDLENBQUMsQ0FBQztnQkFDbkYsMkJBQVks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

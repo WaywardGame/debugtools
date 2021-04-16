@@ -1,4 +1,4 @@
-define(["require", "exports", "entity/IEntity", "entity/IStats"], function (require, exports, IEntity_1, IStats_1) {
+define(["require", "exports", "game/entity/IEntity", "game/entity/IStats"], function (require, exports, IEntity_1, IStats_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function default_1(from, to) {

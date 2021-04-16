@@ -1,11 +1,11 @@
-import { DoodadType } from "doodad/IDoodad";
-import { CreatureType } from "entity/creature/ICreature";
-import { NPCType } from "entity/npc/INPCs";
 import { Events, IEventEmitter } from "event/EventEmitter";
-import Component from "newui/component/Component";
-import { IBindHandlerApi } from "newui/input/Bind";
-import { TerrainType } from "tile/ITerrain";
-import { TileEventType } from "tile/ITileEvent";
+import { DoodadType } from "game/doodad/IDoodad";
+import { CreatureType } from "game/entity/creature/ICreature";
+import { NPCType } from "game/entity/npc/INPCs";
+import { TerrainType } from "game/tile/ITerrain";
+import { TileEventType } from "game/tile/ITileEvent";
+import Component from "ui/component/Component";
+import { IBindHandlerApi } from "ui/input/Bind";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";

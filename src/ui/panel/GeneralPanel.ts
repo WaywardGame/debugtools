@@ -1,9 +1,8 @@
 import { SfxType } from "audio/IAudio";
-import ActionExecutor from "entity/action/ActionExecutor";
 import { EventBus } from "event/EventBuses";
 import { Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
-import { BiomeType } from "game/IBiome";
+import { BiomeType } from "game/biome/IBiome";
 import Island from "game/Island";
 import { WorldZ } from "game/WorldZ";
 import { Dictionary } from "language/Dictionaries";
@@ -11,21 +10,21 @@ import Translation, { TextContext } from "language/Translation";
 import { HookMethod } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import { Registry } from "mod/ModRegistry";
-import { BlockRow } from "newui/component/BlockRow";
-import Button from "newui/component/Button";
-import { CheckButton } from "newui/component/CheckButton";
-import Divider from "newui/component/Divider";
-import Dropdown, { IDropdownOption } from "newui/component/Dropdown";
-import GroupDropdown from "newui/component/GroupDropdown";
-import Input from "newui/component/Input";
-import { LabelledRow } from "newui/component/LabelledRow";
-import { RangeRow } from "newui/component/RangeRow";
-import Text, { Heading } from "newui/component/Text";
-import Bind, { IBindHandlerApi } from "newui/input/Bind";
-import MovementHandler from "newui/screen/screens/game/util/movement/MovementHandler";
 import { ParticleType } from "renderer/particle/IParticle";
 import particles from "renderer/particle/Particles";
-import { Tuple } from "utilities/Arrays";
+import { BlockRow } from "ui/component/BlockRow";
+import Button from "ui/component/Button";
+import { CheckButton } from "ui/component/CheckButton";
+import Divider from "ui/component/Divider";
+import Dropdown, { IDropdownOption } from "ui/component/Dropdown";
+import GroupDropdown from "ui/component/GroupDropdown";
+import Input from "ui/component/Input";
+import { LabelledRow } from "ui/component/LabelledRow";
+import { RangeRow } from "ui/component/RangeRow";
+import Text, { Heading } from "ui/component/Text";
+import Bind, { IBindHandlerApi } from "ui/input/Bind";
+import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
+import { Tuple } from "utilities/collection/Arrays";
 import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import ChangeLayer from "../../action/ChangeLayer";
@@ -126,7 +125,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 				.setRefreshMethod(() => island.time.getTime()))
 			.setDisplayValue(time => island.time.getTranslation(time))
 			.event.subscribe("change", (_, time) => {
-				ActionExecutor.get(SetTime).execute(localPlayer, time);
+				SetTime.execute(localPlayer, time);
 			})
 			.appendTo(this);
 
@@ -220,6 +219,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 	}
 
 	@HookMethod
+	@Debounce(100)
 	public onGameTickEnd() {
 		if (this.timeRange) {
 			this.timeRange.refresh();
@@ -247,6 +247,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 	@OwnEventHandler(GeneralPanel, "switchTo")
 	protected onSwitchTo() {
 		this.timeRange.refresh();
+		this.dropdownLayer.refresh();
 
 		this.registerHookHost("DebugToolsDialog:GeneralPanel");
 
@@ -276,7 +277,9 @@ export default class GeneralPanel extends DebugToolsPanel {
 	}
 
 	@Bound private changeLayer(_: any, layer: WorldZ) {
-		ActionExecutor.get(ChangeLayer).execute(localPlayer, layer);
+		if (localPlayer.z !== layer) {
+			ChangeLayer.execute(localPlayer, layer);
+		}
 	}
 
 	@Bound private travel() {
@@ -296,7 +299,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 				.filter(id => id !== island.id)
 				.random()!;
 
-		game.travelToIslandId(islandId);
+		game.travelToIslandId(islandId, localPlayer);
 	}
 
 	private travelToNewIsland() {
@@ -313,7 +316,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 			const islandId = Island.positionToId(nextPosition);
 			if (!game.islands.has(islandId)) {
-				game.travelToIslandId(islandId, { newWorldBiomeTypeOverride: biome });
+				game.travelToIslandId(islandId, localPlayer, { newWorldBiomeTypeOverride: biome });
 				return;
 			}
 		}
@@ -321,11 +324,11 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 	private async sailToCivilization() {
 		if (multiplayer.isConnected() && !game.isChallenge) return;
-		ActionExecutor.get(ForceSailToCivilization).execute(localPlayer);
+		ForceSailToCivilization.execute(localPlayer);
 	}
 
 	@Bound private renameIsland(input: Input) {
-		ActionExecutor.get(RenameIsland).execute(localPlayer, input.text);
+		RenameIsland.execute(localPlayer, input.text);
 		this.dropdownTravel.refresh();
 	}
 }
@@ -342,7 +345,7 @@ class IslandDropdown<OTHER_OPTIONS extends string = never> extends GroupDropdown
 	@Override protected getTranslation(islandId: string) {
 		const island = game.islands.get(islandId);
 		return translation(DebugToolsTranslation.Island)
-			.addArgs(islandId, island?.name, new Translation(Dictionary.Biome, island?.biomeType ?? BiomeType.Random), island?.seeds.base);
+			.addArgs(islandId, island?.name, new Translation(Dictionary.Biome, island?.biomeType ?? BiomeType.Random), island?.seeds.base.toString());
 	}
 
 	@Override protected getGroupName(biome: BiomeType) {

@@ -1,6 +1,6 @@
-import { NPCType } from "entity/npc/INPCs";
 import { Events, IEventEmitter } from "event/EventEmitter";
-import Component from "newui/component/Component";
+import { NPCType } from "game/entity/npc/INPCs";
+import Component from "ui/component/Component";
 import { IPaintSection } from "../panel/PaintPanel";
 export default class NPCPaint extends Component implements IPaintSection {
     event: IEventEmitter<this, Events<IPaintSection>>;

@@ -1,5 +1,5 @@
-import Entity from "entity/Entity";
-import { Stat } from "entity/IStats";
+import Entity from "game/entity/Entity";
+import { Stat } from "game/entity/IStats";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 export default class HumanInformation extends InspectEntityInformationSubsection {
     private readonly addItemContainer;

@@ -1,16 +1,16 @@
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import Mod from "mod/Mod";
-import Button from "newui/component/Button";
-import { CheckButton } from "newui/component/CheckButton";
-import Divider from "newui/component/Divider";
-import { RangeRow } from "newui/component/RangeRow";
-import { Heading } from "newui/component/Text";
-import ImagePath from "newui/util/ImagePath";
 import { RenderLayerFlag } from "renderer/IWorldRenderer";
 import { compileShaders, loadShaders } from "renderer/Shaders";
 import WorldLayerRenderer from "renderer/WorldLayerRenderer";
 import WorldRenderer from "renderer/WorldRenderer";
+import Button from "ui/component/Button";
+import { CheckButton } from "ui/component/CheckButton";
+import Divider from "ui/component/Divider";
+import { RangeRow } from "ui/component/RangeRow";
+import { Heading } from "ui/component/Text";
+import ImagePath from "ui/util/ImagePath";
 import Enums from "utilities/enum/Enums";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, ISaveData, translation, ZOOM_LEVEL_MAX } from "../../IDebugTools";
@@ -65,6 +65,12 @@ export default class DisplayPanel extends DebugToolsPanel {
 			.classes.add("warning")
 			.setText(translation(DebugToolsTranslation.ButtonResetWebGL))
 			.event.subscribe("activate", this.resetWebGL)
+			.appendTo(this);
+
+		new Button()
+			.classes.add("warning")
+			.setText(translation(DebugToolsTranslation.ButtonRefreshTiles))
+			.event.subscribe("activate", this.refreshTiles)
 			.appendTo(this);
 
 		new Button()
@@ -124,6 +130,11 @@ export default class DisplayPanel extends DebugToolsPanel {
 	@Bound
 	private resetWebGL() {
 		game.resetWebGL();
+	}
+
+	@Bound
+	private refreshTiles() {
+		renderer?.updateAll();
 	}
 
 	@Bound

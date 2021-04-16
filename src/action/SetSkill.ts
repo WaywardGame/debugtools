@@ -1,7 +1,7 @@
-import { Action } from "entity/action/Action";
-import { ActionArgument } from "entity/action/IAction";
-import { EntityType } from "entity/IEntity";
-import { SkillType } from "entity/IHuman";
+import { Action } from "game/entity/action/Action";
+import { ActionArgument } from "game/entity/action/IAction";
+import { EntityType } from "game/entity/IEntity";
+import { SkillType } from "game/entity/IHuman";
 import { defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.Player, ActionArgument.Number, ActionArgument.Number)
@@ -10,5 +10,5 @@ export default new Action(ActionArgument.Player, ActionArgument.Number, ActionAr
 	.setHandler((action, player, skill: SkillType, value) => {
 		if (!player) return;
 
-		player.setSkillCore(skill, value);
+		player.skill.setCore(skill, value);
 	});

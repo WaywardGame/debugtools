@@ -1,14 +1,13 @@
-import Doodad from "doodad/Doodad";
-import { GrowingStage } from "doodad/IDoodad";
-import ActionExecutor from "entity/action/ActionExecutor";
 import { OwnEventHandler } from "event/EventManager";
+import Doodad from "game/doodad/Doodad";
+import { GrowingStage } from "game/doodad/IDoodad";
 import { Quality } from "game/IObject";
-import { IContainer, ItemType } from "item/IItem";
+import { IContainer, ItemType } from "game/item/IItem";
+import { ITile } from "game/tile/ITerrain";
 import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
-import Button from "newui/component/Button";
-import EnumContextMenu, { EnumSort } from "newui/component/EnumContextMenu";
-import { ITile } from "tile/ITerrain";
+import Button from "ui/component/Button";
+import EnumContextMenu, { EnumSort } from "ui/component/EnumContextMenu";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
@@ -84,13 +83,13 @@ export default class DoodadInformation extends InspectInformationSection {
 	}
 
 	@Bound
-	private addItem(_: any, type: ItemType, quality: Quality) {
-		ActionExecutor.get(AddItemToInventory).execute(localPlayer, this.doodad! as IContainer, type, quality);
+	private addItem(_: any, type: ItemType, quality: Quality, quantity: number) {
+		AddItemToInventory.execute(localPlayer, this.doodad! as IContainer, type, quality, quantity);
 	}
 
 	@Bound
 	private removeDoodad() {
-		ActionExecutor.get(Remove).execute(localPlayer, this.doodad!);
+		Remove.execute(localPlayer, this.doodad!);
 	}
 
 	@Bound
@@ -98,7 +97,7 @@ export default class DoodadInformation extends InspectInformationSection {
 		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
 		if (!teleportLocation) return;
 
-		ActionExecutor.get(Clone).execute(localPlayer, this.doodad!, new Vector3(teleportLocation, localPlayer.z));
+		Clone.execute(localPlayer, this.doodad!, new Vector3(teleportLocation, localPlayer.z));
 	}
 
 	@Bound
@@ -112,6 +111,6 @@ export default class DoodadInformation extends InspectInformationSection {
 			return;
 		}
 
-		ActionExecutor.get(SetGrowingStage).execute(localPlayer, this.doodad!, growthStage);
+		SetGrowingStage.execute(localPlayer, this.doodad!, growthStage);
 	}
 }

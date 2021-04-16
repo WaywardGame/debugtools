@@ -64,6 +64,7 @@ export enum DebugToolsTranslation {
 	ZoomLevel,
 	ButtonUnlockCamera,
 	ButtonResetWebGL,
+	ButtonRefreshTiles,
 	ButtonReloadShaders,
 	ButtonReloadUIImages,
 	HeadingLayers,
@@ -121,6 +122,7 @@ export enum DebugToolsTranslation {
 	LabelTemplate,
 	ButtonMirrorVertically,
 	ButtonMirrorHorizontally,
+	ButtonOverlap,
 	ButtonPlace,
 	LabelRotate,
 	RangeRotateDegrees,
@@ -143,6 +145,7 @@ export enum DebugToolsTranslation {
 	ButtonHealLocalPlayer,
 	ButtonTeleportLocalPlayer,
 	ButtonCloneEntity,
+	ButtonClearInventory,
 	KillEntityDeathMessage,
 	CorpseName,
 	ButtonResurrectCorpse,
@@ -161,6 +164,7 @@ export enum DebugToolsTranslation {
 	LabelSkill,
 	None,
 	LabelQuality,
+	LabelQuantity,
 	AddToInventory,
 	DoodadName,
 	TabItemStack,
@@ -173,11 +177,15 @@ export enum DebugToolsTranslation {
 	////////////////////////////////////
 	// Inspection
 	//
-	InspectionTemperatureCalculated,
-	InspectionTemperatureCalculatedHeat,
-	InspectionTemperatureCalculatedCold,
-	InspectionTemperatureProducedHeat,
-	InspectionTemperatureProducedCold,
+	InspectionTemperature,
+	InspectionTemperatureBiome,
+	InspectionTemperatureTimeModifier,
+	InspectionTemperatureLayerModifier,
+	InspectionTemperatureTileCalculated,
+	InspectionTemperatureTileCalculatedHeat,
+	InspectionTemperatureTileCalculatedCold,
+	InspectionTemperatureTileProducedHeat,
+	InspectionTemperatureTileProducedCold,
 	////////////////////////////////////
 	// Misc
 	//

@@ -1,4 +1,4 @@
-define(["require", "exports", "tile/Terrains", "utilities/TileHelpers", "game/IGame"], function (require, exports, Terrains_1, TileHelpers_1, IGame_1) {
+define(["require", "exports", "game/IGame", "game/tile/Terrains", "utilities/game/TileHelpers"], function (require, exports, IGame_1, Terrains_1, TileHelpers_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function default_1(x, y, z, tilled) {

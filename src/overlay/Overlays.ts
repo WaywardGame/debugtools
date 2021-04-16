@@ -1,8 +1,8 @@
+import { IOverlayInfo } from "game/tile/ITerrain";
 import Mod from "mod/Mod";
-import { IOverlayInfo } from "tile/ITerrain";
-
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID } from "../IDebugTools";
+
 
 export default class Overlays {
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)

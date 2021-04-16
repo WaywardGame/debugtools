@@ -1,4 +1,4 @@
-import { ITile } from "tile/ITerrain";
+import { ITile } from "game/tile/ITerrain";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import DebugTools from "../DebugTools";
 export default class SelectionOverlay {

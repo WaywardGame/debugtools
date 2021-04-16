@@ -1,16 +1,15 @@
-import ActionExecutor from "entity/action/ActionExecutor";
-import Creature from "entity/creature/Creature";
-import { SkillType } from "entity/IHuman";
-import NPC from "entity/npc/NPC";
-import Player from "entity/player/Player";
+import Creature from "game/entity/creature/Creature";
+import { SkillType } from "game/entity/IHuman";
+import NPC from "game/entity/npc/NPC";
+import Player from "game/entity/player/Player";
 import UiTranslation from "language/dictionary/UiTranslation";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
-import { BlockRow } from "newui/component/BlockRow";
-import { CheckButton } from "newui/component/CheckButton";
-import SkillDropdown from "newui/component/dropdown/SkillDropdown";
-import { LabelledRow } from "newui/component/LabelledRow";
-import { RangeRow } from "newui/component/RangeRow";
+import { BlockRow } from "ui/component/BlockRow";
+import { CheckButton } from "ui/component/CheckButton";
+import SkillDropdown from "ui/component/dropdown/SkillDropdown";
+import { LabelledRow } from "ui/component/LabelledRow";
+import { RangeRow } from "ui/component/RangeRow";
 import SetSkill from "../../action/SetSkill";
 import SetWeightBonus from "../../action/SetWeightBonus";
 import ToggleInvulnerable from "../../action/ToggleInvulnerable";
@@ -61,7 +60,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelWeightBonus)))
 			.editRange(range => range
 				.setMin(0)
-				.setMax(1000)
+				.setMax(10000)
 				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "weightBonus") : 0))
 			.setDisplayValue(true)
 			.event.subscribe("finish", this.setWeightBonus)
@@ -80,7 +79,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.editRange(range => range
 				.setMin(0)
 				.setMax(100)
-				.setRefreshMethod(() => this.skill !== undefined && this.player && this.skill in this.player.skills ? this.player.skills[this.skill]!.core : 0))
+				.setRefreshMethod(() => this.player?.skill.getCore(this.skill!) ?? 0))
 			.setDisplayValue(Translation.ui(UiTranslation.GameStatsPercentage).get)
 			.event.subscribe("finish", this.setSkill)
 			.appendTo(this);
@@ -124,35 +123,35 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 	@Bound
 	private setSkill(_: any, value: number) {
-		ActionExecutor.get(SetSkill).execute(localPlayer, this.player!, this.skill!, value);
+		SetSkill.execute(localPlayer, this.player!, this.skill!, value);
 	}
 
 	@Bound
 	private toggleInvulnerable(_: any, invulnerable: boolean) {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "invulnerable") === invulnerable) return;
 
-		ActionExecutor.get(ToggleInvulnerable).execute(localPlayer, this.player!, invulnerable);
+		ToggleInvulnerable.execute(localPlayer, this.player!, invulnerable);
 	}
 
 	@Bound
 	private toggleNoClip(_: any, noclip: boolean) {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "noclip") === noclip) return;
 
-		ActionExecutor.get(ToggleNoClip).execute(localPlayer, this.player!, noclip);
+		ToggleNoClip.execute(localPlayer, this.player!, noclip);
 	}
 
 	@Bound
 	private togglePermissions(_: any, permissions: boolean) {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "permissions") === permissions) return;
 
-		ActionExecutor.get(TogglePermissions).execute(localPlayer, this.player!, permissions);
+		TogglePermissions.execute(localPlayer, this.player!, permissions);
 	}
 
 	@Bound
 	private setWeightBonus(_: any, weightBonus: number) {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "weightBonus") === weightBonus) return;
 
-		ActionExecutor.get(SetWeightBonus).execute(localPlayer, this.player!, weightBonus);
+		SetWeightBonus.execute(localPlayer, this.player!, weightBonus);
 	}
 
 	@Bound

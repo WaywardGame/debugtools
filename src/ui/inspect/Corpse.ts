@@ -1,26 +1,25 @@
-import ActionExecutor from "entity/action/ActionExecutor";
-import { ICorpse } from "entity/creature/corpse/ICorpse";
+import Corpse from "game/entity/creature/corpse/Corpse";
+import { ITile } from "game/tile/ITerrain";
 import { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
-import Button from "newui/component/Button";
-import { ITile } from "tile/ITerrain";
-import { Tuple } from "utilities/Arrays";
+import Button from "ui/component/Button";
+import { Tuple } from "utilities/collection/Arrays";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
-
 import Heal from "../../action/Heal";
 import Remove from "../../action/Remove";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
+
 
 export default class CorpseInformation extends InspectInformationSection {
 
 	@Mod.log(DEBUG_TOOLS_ID)
 	public readonly LOG: Log;
 
-	private corpses: ICorpse[] = [];
-	private corpse: ICorpse | undefined;
+	private corpses: Corpse[] = [];
+	private corpse: Corpse | undefined;
 
 	public constructor() {
 		super();
@@ -67,13 +66,13 @@ export default class CorpseInformation extends InspectInformationSection {
 
 	@Bound
 	private resurrect() {
-		ActionExecutor.get(Heal).execute(localPlayer, this.corpse!);
+		Heal.execute(localPlayer, this.corpse!);
 		this.event.emit("update");
 	}
 
 	@Bound
 	private removeCorpse() {
-		ActionExecutor.get(Remove).execute(localPlayer, this.corpse!);
+		Remove.execute(localPlayer, this.corpse!);
 		this.event.emit("update");
 	}
 }

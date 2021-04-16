@@ -1,6 +1,6 @@
-import terrainDescriptions from "tile/Terrains";
-import TileHelpers from "utilities/TileHelpers";
 import { TileUpdateType } from "game/IGame";
+import terrainDescriptions from "game/tile/Terrains";
+import TileHelpers from "utilities/game/TileHelpers";
 
 export default function (x: number, y: number, z: number, tilled: boolean) {
 	const tile = game.getTile(x, y, z);

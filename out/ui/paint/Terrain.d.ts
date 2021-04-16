@@ -1,6 +1,6 @@
 import { Events, IEventEmitter } from "event/EventEmitter";
-import Component from "newui/component/Component";
-import { TerrainType } from "tile/ITerrain";
+import { TerrainType } from "game/tile/ITerrain";
+import Component from "ui/component/Component";
 import { IPaintSection } from "../panel/PaintPanel";
 export default class TerrainPaint extends Component implements IPaintSection {
     event: IEventEmitter<this, Events<IPaintSection>>;

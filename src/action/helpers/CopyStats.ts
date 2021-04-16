@@ -1,6 +1,6 @@
-import Entity from "entity/Entity";
-import { StatusEffectChangeReason } from "entity/IEntity";
-import { Stat } from "entity/IStats";
+import Entity from "game/entity/Entity";
+import { StatusEffectChangeReason } from "game/entity/IEntity";
+import { Stat } from "game/entity/IStats";
 
 /**
  * Copies stats and status effects from one entity to another.

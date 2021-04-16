@@ -1,17 +1,16 @@
-import ActionExecutor from "entity/action/ActionExecutor";
 import { Quality } from "game/IObject";
-import { ItemType } from "item/IItem";
-import Item from "item/Item";
+import { ItemType } from "game/item/IItem";
+import Item from "game/item/Item";
+import { ITile } from "game/tile/ITerrain";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
-import Button from "newui/component/Button";
-import Component from "newui/component/Component";
-import { Paragraph } from "newui/component/Text";
-import { ITile } from "tile/ITerrain";
+import Button from "ui/component/Button";
+import Component from "ui/component/Component";
+import { Paragraph } from "ui/component/Text";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
-import AddItemToInventory from "../../action/AddItemToInventory";
+import AddItemToInventory, { ADD_ITEM_ALL, ADD_ITEM_RANDOM } from "../../action/AddItemToInventory";
 import Remove from "../../action/Remove";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
@@ -81,14 +80,14 @@ export default class ItemInformation extends InspectInformationSection {
 	}
 
 	@Bound
-	private addItem(_: any, type: ItemType, quality: Quality) {
-		ActionExecutor.get(AddItemToInventory).execute(localPlayer, itemManager.getTileContainer(this.position.x, this.position.y, localPlayer.z), type, quality);
+	private addItem(_: any, type: ItemType | typeof ADD_ITEM_ALL | typeof ADD_ITEM_RANDOM, quality: Quality, quantity: number) {
+		AddItemToInventory.execute(localPlayer, itemManager.getTileContainer(this.position.x, this.position.y, localPlayer.z), type, quality, quantity);
 	}
 
 	@Bound
 	private removeItem(item: Item) {
 		return () => {
-			ActionExecutor.get(Remove).execute(localPlayer, item);
+			Remove.execute(localPlayer, item);
 		};
 	}
 }

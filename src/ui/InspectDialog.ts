@@ -1,26 +1,26 @@
-import Entity from "entity/Entity";
 import { EventBus } from "event/EventBuses";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
+import Entity from "game/entity/Entity";
 import { RenderSource, TileUpdateType } from "game/IGame";
+import { ITile, TerrainType } from "game/tile/ITerrain";
 import Translation from "language/Translation";
 import { HookMethod, IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import { Registry } from "mod/ModRegistry";
-import Button from "newui/component/Button";
-import Component from "newui/component/Component";
-import ContextMenu from "newui/component/ContextMenu";
-import Text from "newui/component/Text";
-import Bind, { IBindHandlerApi } from "newui/input/Bind";
-import Bindable from "newui/input/Bindable";
-import InputManager from "newui/input/InputManager";
-import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
-import { gameScreen } from "newui/screen/screens/GameScreen";
-import { ITile } from "tile/ITerrain";
-import { Tuple } from "utilities/Arrays";
+import Button from "ui/component/Button";
+import Component from "ui/component/Component";
+import ContextMenu from "ui/component/ContextMenu";
+import Text from "ui/component/Text";
+import Bind, { IBindHandlerApi } from "ui/input/Bind";
+import Bindable from "ui/input/Bindable";
+import InputManager from "ui/input/InputManager";
+import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
+import { gameScreen } from "ui/screen/screens/GameScreen";
+import { Tuple } from "utilities/collection/Arrays";
+import TileHelpers from "utilities/game/TileHelpers";
 import Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
-import TileHelpers from "utilities/TileHelpers";
 import DebugTools from "../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../IDebugTools";
 import Overlays from "../overlay/Overlays";
@@ -85,9 +85,6 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		super(id);
 
 		this.classes.add("debug-tools-inspect-dialog");
-
-		// we register this component as a "hook host" — this means that, like the `Mod` class, it can implement hook methods
-		this.registerHookHost("DebugToolsInspectDialog");
 
 		InspectDialog.INSTANCE = this;
 	}
@@ -218,6 +215,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	//
 
 	@HookMethod
+	@Debounce(100)
 	public onGameTickEnd() {
 		this.update();
 	}
@@ -317,7 +315,8 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	@Bound
 	private logUpdate() {
 		if (this.shouldLog) {
-			this.LOG.info("Tile:", this.tile, this.tilePosition !== undefined ? this.tilePosition.toString() : undefined);
+			const tileData = this.tilePosition ? game.getTileData(this.tilePosition.x, this.tilePosition.y, this.tilePosition.z) : undefined;
+			this.LOG.info("Tile:", this.tile, this.tilePosition?.toString(), tileData?.map(data => TerrainType[data.type]).join(", "), tileData,);
 			this.shouldLog = false;
 		}
 

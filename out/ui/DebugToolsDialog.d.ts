@@ -1,5 +1,5 @@
 import Translation from "language/Translation";
-import { DialogId, IDialogDescription } from "newui/screen/screens/game/Dialogs";
+import { DialogId, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import DebugTools from "../DebugTools";
 import DebugToolsPanel from "./component/DebugToolsPanel";
 import TabDialog, { SubpanelInformation } from "./TabDialog";

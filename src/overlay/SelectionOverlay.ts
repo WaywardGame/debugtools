@@ -1,11 +1,11 @@
+import { ITile } from "game/tile/ITerrain";
 import Mod from "mod/Mod";
-import { ITile } from "tile/ITerrain";
-import { Tuple } from "utilities/Arrays";
+import { Tuple } from "utilities/collection/Arrays";
 import Enums from "utilities/enum/Enums";
+import TileHelpers from "utilities/game/TileHelpers";
 import { IVector2, IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
-import TileHelpers from "utilities/TileHelpers";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID } from "../IDebugTools";
 import Overlays from "./Overlays";

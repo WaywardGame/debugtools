@@ -1,7 +1,7 @@
-import { Action } from "entity/action/Action";
-import { ActionArgument } from "entity/action/IAction";
-import { EntityType } from "entity/IEntity";
-import TileHelpers from "utilities/TileHelpers";
+import { Action } from "game/entity/action/Action";
+import { ActionArgument } from "game/entity/action/IAction";
+import { EntityType } from "game/entity/IEntity";
+import TileHelpers from "utilities/game/TileHelpers";
 import { defaultUsability } from "../Actions";
 import { IPaintData } from "../ui/panel/PaintPanel";
 import { getTilePosition } from "../util/TilePosition";

@@ -1,11 +1,11 @@
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
-import Component from "newui/component/Component";
-import { DialogId, Edge, IDialogDescription } from "newui/screen/screens/game/Dialogs";
-import { gameScreen } from "newui/screen/screens/GameScreen";
-import { Tuple } from "utilities/Arrays";
-import { sleep } from "utilities/Async";
+import Component from "ui/component/Component";
+import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
+import { gameScreen } from "ui/screen/screens/GameScreen";
+import { Tuple } from "utilities/collection/Arrays";
 import Vector2 from "utilities/math/Vector2";
+import { sleep } from "utilities/promise/Async";
 import DebugTools from "../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../IDebugTools";
 import DebugToolsPanel from "./component/DebugToolsPanel";
@@ -54,9 +54,6 @@ export default class DebugToolsDialog extends TabDialog {
 	public constructor(id: DialogId) {
 		super(id);
 		this.classes.add("debug-tools-dialog");
-
-		// we register this component as a "hook host" — this means that, like the `Mod` class, it can implement hook methods
-		this.registerHookHost("DebugToolsDialog");
 
 		// when the dialog is removed from the DOM, we force remove all of the panels (they're cached otherwise)
 		this.event.subscribe("willRemove", () => {

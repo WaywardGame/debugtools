@@ -1,7 +1,7 @@
-import Doodad from "doodad/Doodad";
-import { Action } from "entity/action/Action";
-import { ActionArgument, anyOf } from "entity/action/IAction";
-import { EntityType } from "entity/IEntity";
+import Doodad from "game/doodad/Doodad";
+import { Action } from "game/entity/action/Action";
+import { ActionArgument, anyOf } from "game/entity/action/IAction";
+import { EntityType } from "game/entity/IEntity";
 import { IVector3 } from "utilities/math/IVector";
 import { defaultUsability } from "../Actions";
 import { DebugToolsTranslation, translation } from "../IDebugTools";

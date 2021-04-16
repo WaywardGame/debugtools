@@ -7,6 +7,7 @@ export default class TemplatePanel extends DebugToolsPanel {
     private readonly dropdownTemplate;
     private readonly mirrorVertically;
     private readonly mirrorHorizontally;
+    private readonly overlap;
     private readonly rotate;
     private readonly degrade;
     private readonly place;

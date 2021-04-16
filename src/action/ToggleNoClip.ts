@@ -1,7 +1,7 @@
-import { Action } from "entity/action/Action";
-import { ActionArgument } from "entity/action/IAction";
-import { EntityType, MoveType } from "entity/IEntity";
-import { Delay } from "entity/IHuman";
+import { Action } from "game/entity/action/Action";
+import { ActionArgument } from "game/entity/action/IAction";
+import { EntityType, MoveType } from "game/entity/IEntity";
+import { Delay } from "game/entity/IHuman";
 import { RenderSource } from "game/IGame";
 import Actions, { defaultUsability } from "../Actions";
 

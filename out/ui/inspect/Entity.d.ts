@@ -1,5 +1,5 @@
-import Entity from "entity/Entity";
-import { ITile } from "tile/ITerrain";
+import Entity from "game/entity/Entity";
+import { ITile } from "game/tile/ITerrain";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import DebugTools from "../../DebugTools";

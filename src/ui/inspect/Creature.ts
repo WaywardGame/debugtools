@@ -1,8 +1,7 @@
-import ActionExecutor from "entity/action/ActionExecutor";
-import Creature from "entity/creature/Creature";
-import Entity from "entity/Entity";
-import Button from "newui/component/Button";
-import { CheckButton } from "newui/component/CheckButton";
+import Creature from "game/entity/creature/Creature";
+import Entity from "game/entity/Entity";
+import Button from "ui/component/Button";
+import { CheckButton } from "ui/component/CheckButton";
 import Remove from "../../action/Remove";
 import SetTamed from "../../action/SetTamed";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -35,11 +34,11 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 
 	@Bound
 	private setTamed(_: any, tamed: boolean) {
-		ActionExecutor.get(SetTamed).execute(localPlayer, this.creature!, tamed);
+		SetTamed.execute(localPlayer, this.creature!, tamed);
 	}
 
 	@Bound
 	private removeCreature() {
-		ActionExecutor.get(Remove).execute(localPlayer, this.creature!);
+		Remove.execute(localPlayer, this.creature!);
 	}
 }

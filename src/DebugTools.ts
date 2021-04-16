@@ -1,19 +1,19 @@
-import ActionExecutor from "entity/action/ActionExecutor";
-import { ActionType } from "entity/action/IAction";
-import Creature from "entity/creature/Creature";
-import { IDamageInfo } from "entity/creature/ICreature";
-import Human from "entity/Human";
-import { MoveType } from "entity/IEntity";
-import { Delay } from "entity/IHuman";
-import NPC from "entity/npc/NPC";
-import { Source } from "entity/player/IMessageManager";
-import Player from "entity/player/Player";
 import { EventBus } from "event/EventBuses";
 import { Events, IEventEmitter, Priority } from "event/EventEmitter";
 import EventManager, { EventHandler } from "event/EventManager";
+import { ActionType } from "game/entity/action/IAction";
+import Creature from "game/entity/creature/Creature";
+import { IDamageInfo } from "game/entity/creature/ICreature";
+import Human from "game/entity/Human";
+import { MoveType } from "game/entity/IEntity";
+import { Delay } from "game/entity/IHuman";
+import NPC from "game/entity/npc/NPC";
+import { Source } from "game/entity/player/IMessageManager";
+import Player from "game/entity/player/Player";
 import Game from "game/Game";
 import { RenderSource } from "game/IGame";
 import { InspectType } from "game/inspection/IInspection";
+import { ITile, OverlayType } from "game/tile/ITerrain";
 import { Dictionary } from "language/Dictionaries";
 import Interrupt from "language/dictionary/Interrupt";
 import Message from "language/dictionary/Message";
@@ -21,23 +21,25 @@ import { HookMethod } from "mod/IHookHost";
 import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
-import Bind, { IBindHandlerApi } from "newui/input/Bind";
-import Bindable from "newui/input/Bindable";
-import { IInput } from "newui/input/IInput";
-import InputManager from "newui/input/InputManager";
-import { DialogId } from "newui/screen/screens/game/Dialogs";
-import { MenuBarButtonGroup, MenuBarButtonType } from "newui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
-import { gameScreen } from "newui/screen/screens/GameScreen";
 import WorldRenderer from "renderer/WorldRenderer";
-import { ITile, OverlayType } from "tile/ITerrain";
-import { IInjectionApi, Inject, InjectionPosition } from "utilities/Inject";
+import Bind, { IBindHandlerApi } from "ui/input/Bind";
+import Bindable from "ui/input/Bindable";
+import { IInput } from "ui/input/IInput";
+import InputManager from "ui/input/InputManager";
+import { DialogId } from "ui/screen/screens/game/Dialogs";
+import { MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
+import { MenuBarButtonGroup } from "ui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
+import { gameScreen } from "ui/screen/screens/GameScreen";
+import { IInjectionApi, Inject, InjectionPosition } from "utilities/class/Inject";
 import Log from "utilities/Log";
 import { Direction } from "utilities/math/Direction";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import AddItemToInventory from "./action/AddItemToInventory";
+import ChangeLayer from "./action/ChangeLayer";
 import ChangeTerrain from "./action/ChangeTerrain";
+import ClearInventory from "./action/ClearInventory";
 import Clone from "./action/Clone";
 import ForceSailToCivilization from "./action/ForceSailToCivilization";
 import Heal from "./action/Heal";
@@ -228,6 +230,9 @@ export default class DebugTools extends Mod {
 	@Register.action("SetWeightBonus", SetWeightBonus)
 	public readonly actionSetWeightBonus: ActionType;
 
+	@Register.action("ChangeLayer", ChangeLayer)
+	public readonly actionChangeLayer: ActionType;
+
 	@Register.action("ChangeTerrain", ChangeTerrain)
 	public readonly actionChangeTerrain: ActionType;
 
@@ -239,6 +244,9 @@ export default class DebugTools extends Mod {
 
 	@Register.action("AddItemToInventory", AddItemToInventory)
 	public readonly actionAddItemToInventory: ActionType;
+
+	@Register.action("ClearInventory", ClearInventory)
+	public readonly actionClearInventory: ActionType;
 
 	@Register.action("Paint", Paint)
 	public readonly actionPaint: ActionType;
@@ -479,7 +487,7 @@ export default class DebugTools extends Mod {
 
 	public toggleLighting(lighting: boolean) {
 		this.setPlayerData(localPlayer, "lighting", lighting);
-		ActionExecutor.get(UpdateStatsAndAttributes).execute(localPlayer, localPlayer);
+		UpdateStatsAndAttributes.execute(localPlayer, localPlayer);
 		game.updateView(RenderSource.Mod, true);
 	}
 
@@ -496,7 +504,7 @@ export default class DebugTools extends Mod {
 		const targetPlayer = game.getPlayerByName(args);
 		if (targetPlayer !== undefined && !targetPlayer.isLocalPlayer()) {
 			const newPermissions = !this.getPlayerData(targetPlayer, "permissions");
-			ActionExecutor.get(TogglePermissions).execute(localPlayer, targetPlayer, newPermissions);
+			TogglePermissions.execute(localPlayer, targetPlayer, newPermissions);
 			DebugTools.LOG.info(`Updating permissions for ${targetPlayer.getName().toString()} to ${newPermissions}`);
 		}
 	}
@@ -726,7 +734,7 @@ export default class DebugTools extends Mod {
 		if (!this.hasPermission())
 			return false;
 
-		ActionExecutor.get(Heal).execute(localPlayer, localPlayer);
+		Heal.execute(localPlayer, localPlayer);
 		return true;
 	}
 
@@ -739,7 +747,7 @@ export default class DebugTools extends Mod {
 		if (!tile)
 			return false;
 
-		ActionExecutor.get(TeleportEntity).execute(localPlayer, localPlayer, { ...tile.raw(), z: localPlayer.z });
+		TeleportEntity.execute(localPlayer, localPlayer, { ...tile.raw(), z: localPlayer.z });
 		return true;
 	}
 
@@ -748,7 +756,7 @@ export default class DebugTools extends Mod {
 		if (!this.hasPermission())
 			return false;
 
-		ActionExecutor.get(ToggleNoClip).execute(localPlayer, localPlayer, !this.getPlayerData(localPlayer, "noclip"));
+		ToggleNoClip.execute(localPlayer, localPlayer, !this.getPlayerData(localPlayer, "noclip"));
 		return true;
 	}
 

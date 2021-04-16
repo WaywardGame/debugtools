@@ -1,8 +1,8 @@
-import { NPCType } from "entity/npc/INPCs";
 import { Events, IEventEmitter } from "event/EventEmitter";
-import Component from "newui/component/Component";
-import NPCDropdown from "newui/component/dropdown/NPCDropdown";
-import { LabelledRow } from "newui/component/LabelledRow";
+import { NPCType } from "game/entity/npc/INPCs";
+import Component from "ui/component/Component";
+import NPCDropdown from "ui/component/dropdown/NPCDropdown";
+import { LabelledRow } from "ui/component/LabelledRow";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 

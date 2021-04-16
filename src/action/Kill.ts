@@ -1,6 +1,6 @@
-import { Action } from "entity/action/Action";
-import { ActionArgument } from "entity/action/IAction";
-import { DamageType, EntityType } from "entity/IEntity";
+import { Action } from "game/entity/action/Action";
+import { ActionArgument } from "game/entity/action/IAction";
+import { DamageType, EntityType } from "game/entity/IEntity";
 import { defaultUsability } from "../Actions";
 import { DebugToolsTranslation, translation } from "../IDebugTools";
 

@@ -1,4 +1,4 @@
-import Human from "entity/Human";
+import Human from "game/entity/Human";
 
 /**
  * Clones the inventory from one human entity to another.
@@ -15,12 +15,14 @@ export default function (from: Human, to: Human) {
 	for (const item of from.inventory.containedItems) {
 		const clone = to.createItemInInventory(item.type, item.quality);
 		clone.ownerIdentifier = item.ownerIdentifier;
+		game.notifier?.suspend();
 		clone.minDur = item.minDur;
+		game.notifier?.resume();
 		clone.maxDur = item.maxDur;
 		clone.renamed = item.renamed;
 		clone.weight = item.weight;
 		clone.weightCapacity = item.weightCapacity;
-		clone.legendary = item.legendary && { ...item.legendary };
+		clone.magic.inherit(item.magic);
 		if (item.isEquipped()) to.equip(clone, item.getEquipSlot()!);
 	}
 }

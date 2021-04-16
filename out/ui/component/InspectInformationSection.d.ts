@@ -1,8 +1,7 @@
-import { Events } from "event/EventEmitter";
-import { IEventEmitter } from "event/EventEmitter";
-import Component from "newui/component/Component";
-import { TranslationGenerator } from "newui/component/IComponent";
-import { ITile } from "tile/ITerrain";
+import { Events, IEventEmitter } from "event/EventEmitter";
+import { ITile } from "game/tile/ITerrain";
+import Component from "ui/component/Component";
+import { TranslationGenerator } from "ui/component/IComponent";
 import { IVector2 } from "utilities/math/IVector";
 export declare type TabInformation = [number, TranslationGenerator];
 interface IInspectInformationSectionEvents extends Events<Component> {

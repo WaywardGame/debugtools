@@ -1,16 +1,16 @@
-import { Action } from "entity/action/Action";
-import { EntityType } from "entity/IEntity";
+import { Action } from "game/entity/action/Action";
+import Paddle from "game/entity/action/actions/Paddle";
+import SailToCivilization from "game/entity/action/actions/SailToCivilization";
+import { EntityType } from "game/entity/IEntity";
+import { ItemType } from "game/item/IItem";
+import { TerrainType } from "game/tile/ITerrain";
+import TileHelpers from "utilities/game/TileHelpers";
 import { defaultUsability } from "../Actions";
-import ActionExecutor from "entity/action/ActionExecutor";
-import { ActionType } from "entity/action/IAction";
-import { ItemType } from "item/IItem";
-import TileHelpers from "utilities/TileHelpers";
-import { TerrainType } from "tile/ITerrain";
 
 export default new Action()
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
-	.setHandler((action) => {
+	.setHandler(action => {
 		const position = TileHelpers.findMatchingTile(action.executor, (_, tile) => TileHelpers.getType(tile) === TerrainType.DeepSeawater);
 		if (!position) {
 			return;
@@ -33,7 +33,7 @@ export default new Action()
 		}
 
 		if (action.executor.isLocalPlayer()) {
-			ActionExecutor.get(ActionType.Paddle).execute(action.executor, sailboat);
-			ActionExecutor.get(ActionType.SailToCivilization).execute(action.executor, sailboat, true);
+			Paddle.execute(action.executor, sailboat);
+			SailToCivilization.execute(action, sailboat, true);
 		}
 	});

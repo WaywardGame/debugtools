@@ -1,7 +1,7 @@
-import { Action } from "entity/action/Action";
-import { ActionArgument } from "entity/action/IAction";
-import { EntityType } from "entity/IEntity";
-import { Stat } from "entity/IStats";
+import { Action } from "game/entity/action/Action";
+import { ActionArgument } from "game/entity/action/IAction";
+import { EntityType } from "game/entity/IEntity";
+import { Stat } from "game/entity/IStats";
 import { defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.Entity, ActionArgument.Number, ActionArgument.Number)

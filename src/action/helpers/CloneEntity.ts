@@ -1,8 +1,8 @@
-import Creature from "entity/creature/Creature";
-import Entity from "entity/Entity";
-import { AiType } from "entity/IEntity";
-import NPC from "entity/npc/NPC";
-import { NPCType } from "entity/npc/INPCs";
+import Creature from "game/entity/creature/Creature";
+import Entity from "game/entity/Entity";
+import { AiType } from "game/entity/IEntity";
+import { NPCType } from "game/entity/npc/INPCs";
+import NPC from "game/entity/npc/NPC";
 import { IVector3 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import CloneInventory from "./CloneInventory";

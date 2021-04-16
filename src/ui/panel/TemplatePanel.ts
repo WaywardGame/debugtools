@@ -1,25 +1,24 @@
-import ActionExecutor from "entity/action/ActionExecutor";
 import { Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
+import { ITemplateOptions, manipulateTemplates } from "game/mapgen/MapGenHelpers";
+import { TileTemplateType } from "game/tile/ITerrain";
+import templateDescriptions from "game/tile/TerrainTemplates";
 import Translation from "language/Translation";
-import { ITemplateOptions, manipulateTemplates } from "mapgen/MapGenHelpers";
 import Mod from "mod/Mod";
 import { Registry } from "mod/ModRegistry";
-import Button from "newui/component/Button";
-import { CheckButton } from "newui/component/CheckButton";
-import Dropdown from "newui/component/Dropdown";
-import { LabelledRow } from "newui/component/LabelledRow";
-import { RangeRow } from "newui/component/RangeRow";
-import Text from "newui/component/Text";
-import Bind from "newui/input/Bind";
-import InputManager from "newui/input/InputManager";
-import MovementHandler from "newui/screen/screens/game/util/movement/MovementHandler";
-import { gameScreen } from "newui/screen/screens/GameScreen";
-import Spacer from "newui/screen/screens/menu/component/Spacer";
-import { TileTemplateType } from "tile/ITerrain";
-import templateDescriptions from "tile/TerrainTemplates";
-import { Tuple } from "utilities/Arrays";
+import Button from "ui/component/Button";
+import { CheckButton } from "ui/component/CheckButton";
+import Dropdown from "ui/component/Dropdown";
+import { LabelledRow } from "ui/component/LabelledRow";
+import { RangeRow } from "ui/component/RangeRow";
+import Text from "ui/component/Text";
+import Bind from "ui/input/Bind";
+import InputManager from "ui/input/InputManager";
+import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
+import { gameScreen } from "ui/screen/screens/GameScreen";
+import Spacer from "ui/screen/screens/menu/component/Spacer";
+import { Tuple } from "utilities/collection/Arrays";
 import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
@@ -39,6 +38,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 	private readonly dropdownTemplate: Dropdown<string>;
 	private readonly mirrorVertically: CheckButton;
 	private readonly mirrorHorizontally: CheckButton;
+	private readonly overlap: CheckButton;
 	private readonly rotate: RangeRow;
 	private readonly degrade: RangeRow;
 	private readonly place: CheckButton;
@@ -73,7 +73,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 					defaultOption: Stream.keys<string>(templateDescriptions[this.dropdownType.selection]).first()!,
 					options: Stream.keys<string>(templateDescriptions[this.dropdownType.selection])
 						.map(name => Tuple(name, Translation.generator(name)))
-						.sorted(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				})))
 			.appendTo(this);
@@ -84,6 +84,10 @@ export default class TemplatePanel extends DebugToolsPanel {
 
 		this.mirrorHorizontally = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonMirrorHorizontally))
+			.appendTo(this);
+			
+		this.overlap = new CheckButton()
+			.setText(translation(DebugToolsTranslation.ButtonOverlap))
 			.appendTo(this);
 
 		this.rotate = new RangeRow()
@@ -219,6 +223,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 		return {
 			mirrorHorizontally: this.mirrorHorizontally.checked,
 			mirrorVertically: this.mirrorVertically.checked,
+			overlap: this.overlap.checked,
 			rotate: this.rotate.value as 0 | 90 | 180 | 270,
 			degrade: this.degrade.value / 100,
 			which: this.dropdownTemplate.selection,
@@ -230,6 +235,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 			|| this.templateOptions.which !== options.which
 			|| this.templateOptions.mirrorHorizontally !== options.mirrorHorizontally
 			|| this.templateOptions.mirrorHorizontally !== options.mirrorVertically
+			|| this.templateOptions.overlap !== options.overlap
 			|| this.templateOptions.rotate !== options.rotate;
 	}
 
@@ -252,7 +258,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 
 	private placeTemplate(topLeft: Vector2) {
 		this.place.setChecked(false);
-		ActionExecutor.get(PlaceTemplate).execute(localPlayer, this.dropdownType.selection, topLeft.raw(), this.getTemplateOptions());
+		PlaceTemplate.execute(localPlayer, this.dropdownType.selection, topLeft.raw(), this.getTemplateOptions());
 	}
 
 	private clearPreview() {

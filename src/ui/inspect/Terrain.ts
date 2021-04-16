@@ -1,22 +1,21 @@
-import ActionExecutor from "entity/action/ActionExecutor";
 import { RenderSource } from "game/IGame";
+import { ITile, TerrainType } from "game/tile/ITerrain";
+import terrainDescriptions from "game/tile/Terrains";
 import { Dictionary } from "language/Dictionaries";
 import Translation, { TextContext } from "language/Translation";
 import Mod from "mod/Mod";
-import { BlockRow } from "newui/component/BlockRow";
-import Button from "newui/component/Button";
-import { CheckButton } from "newui/component/CheckButton";
-import Dropdown from "newui/component/Dropdown";
-import { LabelledRow } from "newui/component/LabelledRow";
-import Text from "newui/component/Text";
-import { ITile, TerrainType } from "tile/ITerrain";
-import terrainDescriptions from "tile/Terrains";
-import { Tuple } from "utilities/Arrays";
+import { BlockRow } from "ui/component/BlockRow";
+import Button from "ui/component/Button";
+import { CheckButton } from "ui/component/CheckButton";
+import Dropdown from "ui/component/Dropdown";
+import { LabelledRow } from "ui/component/LabelledRow";
+import Text from "ui/component/Text";
+import { Tuple } from "utilities/collection/Arrays";
 import Enums from "utilities/enum/Enums";
+import TileHelpers from "utilities/game/TileHelpers";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
-import TileHelpers from "utilities/TileHelpers";
 import ChangeTerrain from "../../action/ChangeTerrain";
 import ToggleTilled from "../../action/ToggleTilled";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
@@ -110,7 +109,7 @@ export default class TerrainInformation extends InspectInformationSection {
 	@Bound
 	private toggleTilled(_: any, tilled: boolean) {
 		if (this.isTilled() !== tilled) {
-			ActionExecutor.get(ToggleTilled).execute(localPlayer, this.position, tilled);
+			ToggleTilled.execute(localPlayer, this.position, tilled);
 		}
 	}
 
@@ -129,13 +128,13 @@ export default class TerrainInformation extends InspectInformationSection {
 			return;
 		}
 
-		ActionExecutor.get(ChangeTerrain).execute(localPlayer, terrain, this.position);
+		ChangeTerrain.execute(localPlayer, terrain, this.position);
 		this.update(this.position, this.tile);
 	}
 
 	@Bound
 	public refreshTile() {
-		world.layers[this.position.z].updateTile(this.position.x, this.position.y, this.tile, true, this.checkButtonIncludeNeighbors.checked, true, true);
+		world.layers[this.position.z].updateTile(this.position.x, this.position.y, this.tile, true, this.checkButtonIncludeNeighbors.checked, true, undefined, true);
 		game.updateView(RenderSource.Mod, false);
 	}
 }

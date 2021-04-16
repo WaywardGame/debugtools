@@ -31,13 +31,13 @@
 		},
 		"modDebugToolsDebugTools": {
 			"optionsAutoOpen": "Open Dialog on Load",
-			
-			
+
+
 			"dialogTitleMain": "Debug Tools",
-			
-			
+
+
 			"panelGeneral": "General",
-			
+
 			"labelTime": "Time",
 			"buttonInspect": "Inspect {#--text-secondary:({Bindings:ModDebugToolsInspectTile})}",
 			"buttonInspectLocalPlayer": "Inspect Local Player {#--text-secondary:({Bindings:ModDebugToolsInspectLocalPlayer})}",
@@ -48,30 +48,31 @@
 			"labelLayer": "Layer",
 			"optionLayer": "The {1} {#--text-secondary:({2?{2}, }{0})}",
 			"headingIslandCurrent": "Island: {0}",
-			"island": "{1?{1}:{0?Island {0}}}{#--text-secondary: ({2}) ({3})}",
+			"island": "{1?{1}:{0?Island {0}}}{#--text-secondary: ({2}{3?, seed\\: {3}})}",
 			"labelTravel": "Travel to",
 			"optionTravelNewIsland": "New Island {#--text-secondary:({0})}",
 			"optionTravelCivilization": "Civilization",
 			"optionTravelRandomIsland": "Random Island",
 			"buttonTravel": "Travel!",
-				
-			
+
+
 			"panelDisplay": "Display",
-			
+
 			"buttonToggleFog": "Fog {#--text-secondary:({Bindings:ModDebugToolsToggleFullVisibility})}",
 			"buttonToggleLighting": "Lighting {#--text-secondary:({Bindings:ModDebugToolsToggleFullVisibility})}",
 			"labelZoomLevel": "Zoom Level",
 			"zoomLevel": "{0}x",
 			"buttonUnlockCamera": "Unlock Camera {#--text-secondary:({Bindings:ModDebugToolsToggleCameraLock})}",
 			"buttonResetWebGL": "Reset WebGL",
+			"buttonRefreshTiles": "Refresh Tiles",
 			"buttonReloadShaders": "Reload Shaders",
 			"buttonReloadUIImages": "Reload UI Images",
 			"headingLayers": "Layers",
 			"buttonToggleLayer": "{0}",
-			
-			
+
+
 			"panelPaint": "Tile Paint",
-			
+
 			"buttonPaint": "Paint",
 			"paintNoChange": "No Change",
 			"paintRemove": "Remove",
@@ -90,10 +91,10 @@
 			"labelTileEvent": "{#--text-secondary:Tile Event}",
 			"buttonReplaceExisting": "Replace Existing",
 			"resetPaintSection": "Reset Section",
-			
-			
+
+
 			"panelSelection": "Selection",
-			
+
 			"selectionMethod": "{#--text-secondary:Method}",
 			"selectionFilter": "{#--text-secondary:of type}",
 			"selectionAction": "{#--text-secondary:Action}",
@@ -117,23 +118,24 @@
 			"selectionCount": "{0} targets",
 			"selectionFilterNamed": "{#--text-secondary:named}",
 			"selectionFilterAll": "",
-			
-			
+
+
 			"panelTemplates": "Templates",
-			
+
 			"labelTemplateType": "{#--text-secondary:Type}",
 			"labelTemplate": "{#--text-secondary:Template}",
 			"buttonMirrorVertically": "Mirror Vertically",
 			"buttonMirrorHorizontally": "Mirror Horizontally",
+			"buttonOverlap": "Overlap Other Templates",
 			"buttonPlace": "Place",
 			"labelRotate": "Rotate",
 			"rangeRotateDegrees": "{0}°",
 			"labelDegrade": "Degradation",
 			"rangeDegradeAmount": "{0}%",
-			
-			
+
+
 			"dialogTitleInspect": "Inspect",
-			
+
 			"inspectTileTitle": "{#--text-secondary:x:} {0} {#--text-secondary:y:} {1} {#--text-secondary:z:} {2}",
 			"inspectTerrain": "{#--text-secondary:Terrain:} {0}",
 			"labelChangeTerrain": "Change",
@@ -144,6 +146,7 @@
 			"buttonHealLocalPlayer": "Heal {#--text-secondary:({Bindings:ModDebugToolsHealLocalPlayer})}",
 			"buttonTeleportLocalPlayer": "Teleport {#--text-secondary:({Bindings:ModDebugToolsTeleportLocalPlayer})}",
 			"buttonCloneEntity": "Clone",
+			"buttonClearInventory": "Clear Inventory",
 			"killEntityDeathMessage": "by l33t h4x0r",
 			"corpseName": "{#--text-secondary:Corpse:} {0}",
 			"buttonResurrectCorpse": "Resurrect",
@@ -155,6 +158,7 @@
 			"buttonRefreshTile": "Refresh Tile",
 			"labelItem": "{#--text-secondary:Item}",
 			"labelQuality": "Quality",
+			"labelQuantity": "Quantity",
 			"labelBenignity": "Benignity",
 			"labelMalignity": "Malignity",
 			"optionTeleportSelectLocation": "To Location",
@@ -174,18 +178,22 @@
 			"itemName": "{#--text-secondary:{0}}",
 			"buttonTogglePermissions": "Grant Debug Permissions",
 			"buttonSetGrowthStage": "Set Growth Stage",
-			
-			
+
+
 			"actionResurrect": "resurrect {0}",
 			"actionClone": "clone {0}",
 			"actionTeleport": "{0?teleport {0}:Teleport}",
-			
-			
-			"inspectionTemperatureCalculated": "Temp: {0}",
-			"inspectionTemperatureCalculatedHeat": "Calculated heat: {0}",
-			"inspectionTemperatureCalculatedCold": "Calculated cold: {0}",
-			"inspectionTemperatureProducedHeat": "Produced heat: {0}",
-			"inspectionTemperatureProducedCold": "Produced cold: {0}"
+
+
+			"inspectionTemperature": "Temp: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureBiome": "Biome temp: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureTimeModifier": "Time mod: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureLayerModifier": "Layer mod: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureTileCalculated": "Tile mod: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureTileCalculatedHeat": "Tile calc heat: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureTileCalculatedCold": "Tile calc cold: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureTileProducedHeat": "Tile produced heat: {#--TEXT-PRIMARY:{0}}",
+			"inspectionTemperatureTileProducedCold": "Tile produced cold: {#--TEXT-PRIMARY:{0}}"
 		},
 		"item": {
 			"none": "none"

@@ -1,13 +1,14 @@
-import ActionExecutor from "entity/action/ActionExecutor";
-import Entity from "entity/Entity";
-import Human, { REPUTATION_MAX } from "entity/Human";
-import { IStat, Stat } from "entity/IStats";
 import { OwnEventHandler } from "event/EventManager";
+import Entity from "game/entity/Entity";
+import Human, { REPUTATION_MAX } from "game/entity/Human";
+import { IStat, Stat } from "game/entity/IStats";
 import { Quality } from "game/IObject";
-import { ItemType } from "item/IItem";
-import Component from "newui/component/Component";
-import { RangeRow } from "newui/component/RangeRow";
+import { ItemType } from "game/item/IItem";
+import Button from "ui/component/Button";
+import Component from "ui/component/Component";
+import { RangeRow } from "ui/component/RangeRow";
 import AddItemToInventory from "../../action/AddItemToInventory";
+import ClearInventory from "../../action/ClearInventory";
 import SetStat from "../../action/SetStat";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import AddItemToInventoryComponent from "../component/AddItemToInventory";
@@ -23,6 +24,10 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 		super();
 
 		this.addItemContainer = new Component().appendTo(this);
+		new Button()
+			.setText(translation(DebugToolsTranslation.ButtonClearInventory))
+			.event.subscribe("activate", () => this.human && ClearInventory.execute(localPlayer, this.human))
+			.appendTo(this);
 
 		this.addReputationSlider(DebugToolsTranslation.LabelMalignity, Stat.Malignity);
 		this.addReputationSlider(DebugToolsTranslation.LabelBenignity, Stat.Benignity);
@@ -79,14 +84,14 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 	private setReputation(type: Stat.Malignity | Stat.Benignity) {
 		return (_: any, value: number) => {
 			if (this.human!.stat.getValue(type) === value) return;
-			ActionExecutor.get(SetStat).execute(localPlayer, this.human!, type, value);
+			SetStat.execute(localPlayer, this.human!, type, value);
 		};
 	}
 
 	@Bound
-	private addItem(_: any, type: ItemType, quality: Quality) {
+	private addItem(_: any, type: ItemType, quality: Quality, quantity: number) {
 		if (this.human)
-			ActionExecutor.get(AddItemToInventory).execute(localPlayer, this.human.asPlayer ?? this.human.inventory, type, quality);
+			AddItemToInventory.execute(localPlayer, this.human.asPlayer ?? this.human.inventory, type, quality, quantity);
 	}
 
 	@Bound

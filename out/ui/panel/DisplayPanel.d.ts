@@ -13,6 +13,7 @@ export default class DisplayPanel extends DebugToolsPanel {
     protected onSwitchTo(): void;
     protected onUpdateZoom(): void;
     private resetWebGL;
+    private refreshTiles;
     private reloadShaders;
     private updateRenderLayerFlag;
     protected getRenderFlags(): RenderLayerFlag;

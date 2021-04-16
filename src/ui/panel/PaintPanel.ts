@@ -1,32 +1,31 @@
-import { DoodadType } from "doodad/IDoodad";
-import ActionExecutor from "entity/action/ActionExecutor";
-import { CreatureType } from "entity/creature/ICreature";
-import { NPCType } from "entity/npc/INPCs";
 import { Events, IEventEmitter, Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
+import { DoodadType } from "game/doodad/IDoodad";
+import { CreatureType } from "game/entity/creature/ICreature";
+import { NPCType } from "game/entity/npc/INPCs";
 import { RenderSource } from "game/IGame";
+import { TerrainType } from "game/tile/ITerrain";
+import { TileEventType } from "game/tile/ITileEvent";
 import Mod from "mod/Mod";
 import { Registry } from "mod/ModRegistry";
-import { BlockRow } from "newui/component/BlockRow";
-import Button from "newui/component/Button";
-import { CheckButton } from "newui/component/CheckButton";
-import Component from "newui/component/Component";
-import ContextMenu from "newui/component/ContextMenu";
-import { RangeRow } from "newui/component/RangeRow";
-import Bind, { IBindHandlerApi } from "newui/input/Bind";
-import Bindable from "newui/input/Bindable";
-import InputManager from "newui/input/InputManager";
-import MovementHandler from "newui/screen/screens/game/util/movement/MovementHandler";
-import { gameScreen } from "newui/screen/screens/GameScreen";
-import Spacer from "newui/screen/screens/menu/component/Spacer";
 import { SpriteBatchLayer } from "renderer/IWorldRenderer";
 import WorldRenderer from "renderer/WorldRenderer";
-import { TerrainType } from "tile/ITerrain";
-import { TileEventType } from "tile/ITileEvent";
+import { BlockRow } from "ui/component/BlockRow";
+import Button from "ui/component/Button";
+import { CheckButton } from "ui/component/CheckButton";
+import Component from "ui/component/Component";
+import ContextMenu from "ui/component/ContextMenu";
+import { RangeRow } from "ui/component/RangeRow";
+import Bind, { IBindHandlerApi } from "ui/input/Bind";
+import Bindable from "ui/input/Bindable";
+import InputManager from "ui/input/InputManager";
+import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
+import { gameScreen } from "ui/screen/screens/GameScreen";
+import Spacer from "ui/screen/screens/menu/component/Spacer";
+import TileHelpers from "utilities/game/TileHelpers";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
-import TileHelpers from "utilities/TileHelpers";
 import Paint from "../../action/Paint";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
@@ -344,7 +343,7 @@ export default class PaintPanel extends DebugToolsPanel {
 			Object.assign(paintData, paintSection.getTilePaintData());
 		}
 
-		ActionExecutor.get(Paint).execute(localPlayer, [...this.paintTiles], paintData);
+		Paint.execute(localPlayer, [...this.paintTiles], paintData);
 
 		this.clearPaint();
 	}

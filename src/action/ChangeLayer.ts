@@ -1,6 +1,6 @@
-import { Action } from "entity/action/Action";
-import { ActionArgument } from "entity/action/IAction";
-import { EntityType } from "entity/IEntity";
+import { Action } from "game/entity/action/Action";
+import { ActionArgument } from "game/entity/action/IAction";
+import { EntityType } from "game/entity/IEntity";
 import { WorldZ } from "game/WorldZ";
 import Enums from "utilities/enum/Enums";
 import { defaultUsability } from "../Actions";

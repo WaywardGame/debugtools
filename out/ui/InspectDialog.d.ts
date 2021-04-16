@@ -1,10 +1,10 @@
-import Entity from "entity/Entity";
+import Entity from "game/entity/Entity";
 import { TileUpdateType } from "game/IGame";
+import { ITile } from "game/tile/ITerrain";
 import Translation from "language/Translation";
 import { IHookHost } from "mod/IHookHost";
-import { IBindHandlerApi } from "newui/input/Bind";
-import { DialogId, IDialogDescription } from "newui/screen/screens/game/Dialogs";
-import { ITile } from "tile/ITerrain";
+import { IBindHandlerApi } from "ui/input/Bind";
+import { DialogId, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
 import DebugTools from "../DebugTools";

@@ -1,11 +1,10 @@
 import { Events, IEventEmitter } from "event/EventEmitter";
 import { OwnEventHandler } from "event/EventManager";
-import Button from "newui/component/Button";
-import Component from "newui/component/Component";
-import { TranslationGenerator } from "newui/component/IComponent";
-import newui from "newui/NewUi";
-import Dialog from "newui/screen/screens/game/component/Dialog";
-import { DialogId, Edge } from "newui/screen/screens/game/Dialogs";
+import Button from "ui/component/Button";
+import Component from "ui/component/Component";
+import { TranslationGenerator } from "ui/component/IComponent";
+import Dialog from "ui/screen/screens/game/component/Dialog";
+import { DialogId, Edge } from "ui/screen/screens/game/Dialogs";
 
 export type SubpanelInformation = [string | number, TranslationGenerator, (component: Component) => any, ((button: Button) => any)?, Button?];
 
@@ -112,7 +111,7 @@ export default abstract class TabDialog extends Dialog {
 
 	@OwnEventHandler(TabDialog, "resize")
 	private onResize() {
-		const dialogWidth = newui.windowWidth * (this.edges[Edge.Right] - this.edges[Edge.Left]) / 100;
+		const dialogWidth = ui.windowWidth * (this.edges[Edge.Right] - this.edges[Edge.Left]) / 100;
 		this.classes.toggle(dialogWidth < 440, "tabs-drawer");
 	}
 }

@@ -1,22 +1,20 @@
-import ActionExecutor from "entity/action/ActionExecutor";
-import Entity from "entity/Entity";
-import { EntityType, IStatChangeInfo } from "entity/IEntity";
-import { IStat, Stat } from "entity/IStats";
+import Entity from "game/entity/Entity";
+import { EntityType, IStatChangeInfo } from "game/entity/IEntity";
+import { IStat, Stat } from "game/entity/IStats";
+import { ITile } from "game/tile/ITerrain";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
-import { BlockRow } from "newui/component/BlockRow";
-import Button from "newui/component/Button";
-import Component from "newui/component/Component";
-import ContextMenu from "newui/component/ContextMenu";
-import Input from "newui/component/Input";
-import { LabelledRow } from "newui/component/LabelledRow";
-import { RangeRow } from "newui/component/RangeRow";
-import { IRefreshable } from "newui/component/Refreshable";
-import Text from "newui/component/Text";
-import InputManager from "newui/input/InputManager";
-import newui from "newui/NewUi";
-import { ITile } from "tile/ITerrain";
-import { Tuple } from "utilities/Arrays";
+import { BlockRow } from "ui/component/BlockRow";
+import Button from "ui/component/Button";
+import Component from "ui/component/Component";
+import ContextMenu from "ui/component/ContextMenu";
+import Input from "ui/component/Input";
+import { LabelledRow } from "ui/component/LabelledRow";
+import { RangeRow } from "ui/component/RangeRow";
+import { IRefreshable } from "ui/component/Refreshable";
+import Text from "ui/component/Text";
+import InputManager from "ui/input/InputManager";
+import { Tuple } from "utilities/collection/Arrays";
 import Enums from "utilities/enum/Enums";
 import Log from "utilities/Log";
 import { IVector2, IVector3 } from "utilities/math/IVector";
@@ -209,7 +207,7 @@ export default class EntityInformation extends InspectInformationSection {
 
 	@Bound
 	private openTeleportMenu() {
-		const screen = newui.screens.getTop();
+		const screen = ui.screens.getTop();
 		if (!screen) {
 			return;
 		}
@@ -252,7 +250,7 @@ export default class EntityInformation extends InspectInformationSection {
 				translation: Translation.generator(player.name),
 				onActivate: () => this.teleport(player),
 			}))
-			.sorted(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))
+			.sort(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))
 			// create the context menu from them
 			.collect<ContextMenu>(options => new ContextMenu(...options))
 			.addAllDescribedOptions();
@@ -268,14 +266,14 @@ export default class EntityInformation extends InspectInformationSection {
 
 	@Bound
 	private teleport(location: IVector2 | IVector3) {
-		ActionExecutor.get(TeleportEntity).execute(localPlayer, this.entity!, new Vector3(location, "z" in location ? location.z : localPlayer.z));
+		TeleportEntity.execute(localPlayer, this.entity!, new Vector3(location, "z" in location ? location.z : localPlayer.z));
 
 		this.event.emit("update");
 	}
 
 	@Bound
 	private kill() {
-		ActionExecutor.get(Kill).execute(localPlayer, this.entity!);
+		Kill.execute(localPlayer, this.entity!);
 		this.event.emit("update");
 	}
 
@@ -284,12 +282,12 @@ export default class EntityInformation extends InspectInformationSection {
 		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
 		if (!teleportLocation) return;
 
-		ActionExecutor.get(Clone).execute(localPlayer, this.entity!, new Vector3(teleportLocation, localPlayer.z));
+		Clone.execute(localPlayer, this.entity!, new Vector3(teleportLocation, localPlayer.z));
 	}
 
 	@Bound
 	private heal() {
-		ActionExecutor.get(Heal).execute(localPlayer, this.entity!);
+		Heal.execute(localPlayer, this.entity!);
 		this.event.emit("update");
 	}
 
@@ -298,7 +296,7 @@ export default class EntityInformation extends InspectInformationSection {
 		return (_: any, value: number) => {
 			if (this.entity!.stat.getValue(stat) === value) return;
 
-			ActionExecutor.get(SetStat).execute(localPlayer, this.entity!, stat, value);
+			SetStat.execute(localPlayer, this.entity!, stat, value);
 		};
 	}
 }
