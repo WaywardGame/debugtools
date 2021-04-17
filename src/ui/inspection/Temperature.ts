@@ -101,6 +101,11 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 
 	@EventHandler(EventBus.Game, "tickEnd")
 	public onTickEnd() {
+		// todo: only refresh when changes occur?
+		if (localPlayer.isResting()) {
+			return;
+		}
+
 		this.refresh();
 	}
 
