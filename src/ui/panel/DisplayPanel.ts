@@ -2,7 +2,7 @@ import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { RenderSource } from "game/IGame";
 import Mod from "mod/Mod";
 import { RenderLayerFlag } from "renderer/IWorldRenderer";
-import { compileShaders, loadShaders } from "renderer/Shaders";
+import { Shaders } from "renderer/Shaders";
 import WorldLayerRenderer from "renderer/WorldLayerRenderer";
 import WorldRenderer from "renderer/WorldRenderer";
 import Button from "ui/component/Button";
@@ -139,9 +139,10 @@ export default class DisplayPanel extends DebugToolsPanel {
 
 	@Bound
 	private async reloadShaders() {
-		await loadShaders();
+		await Shaders.load();
 
-		compileShaders();
+		Shaders.recompile();
+
 		game.updateView(RenderSource.Mod, true);
 	}
 
