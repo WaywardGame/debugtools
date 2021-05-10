@@ -15,7 +15,6 @@ export default function (from: Partial<IContainer>, to: Partial<IContainer>) {
 		clone.maxDur = item.maxDur;
 		clone.renamed = item.renamed;
 		clone.weight = item.weight;
-		clone.weightCapacity = item.weightCapacity;
 		clone.magic.inherit(item.magic);
 	}
 }
