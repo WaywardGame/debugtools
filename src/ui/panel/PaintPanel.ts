@@ -21,7 +21,6 @@ import Bindable from "ui/input/Bindable";
 import InputManager from "ui/input/InputManager";
 import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
 import { gameScreen } from "ui/screen/screens/GameScreen";
-import Spacer from "ui/screen/screens/menu/component/Spacer";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
@@ -110,8 +109,6 @@ export default class PaintPanel extends DebugToolsPanel {
 			.map(cls => new cls()
 				.event.subscribe("change", this.onPaintSectionChange)
 				.appendTo(this)));
-
-		new Spacer().appendTo(this);
 
 		this.paintRow = new Component()
 			.classes.add("debug-tools-paint-row")
