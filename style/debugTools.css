@@ -62,12 +62,8 @@
 	display: none;
 }
 
-.debug-tools-paint-panel::after {
-	height: 50px;
-}
-
-.debug-tools-paint-panel .menu-separator {
-	height: calc(54px * var(--scale-floor));
+.debug-tools-paint-panel {
+	height: calc(100% - calc(20px * var(--scale)) + var(--negative-margin) * 2 - 54px) !important;
 }
 
 .debug-tools-tab-dialog-subpanel-link.inspection-lock {
