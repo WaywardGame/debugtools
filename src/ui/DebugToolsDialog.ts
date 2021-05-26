@@ -87,7 +87,8 @@ export default class DebugToolsDialog extends TabDialog {
 				.merge(this.DEBUG_TOOLS.modRegistryMainDialogPanels.getRegistrations()
 					.map(registration => registration.data(DebugToolsPanel)))
 				.map(cls => new cls()
-					.event.subscribe("willRemove", panel => {
+					.event.until(this, "close")
+					.subscribe("willRemove", panel => {
 						if (panel.isVisible()) {
 							panel.event.emit("switchAway");
 						}
