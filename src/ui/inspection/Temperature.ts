@@ -21,7 +21,7 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 	public static readonly DEBUG_TOOLS: DebugTools;
 
 	public static getFromTile(position: IVector3) {
-		return new TemperatureInspection(position);
+		return TemperatureInspection.DEBUG_TOOLS ? new TemperatureInspection(position) : [];
 	}
 
 	public constructor(tile: IVector3) {
