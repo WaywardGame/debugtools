@@ -49,11 +49,11 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 			InfoProvider.create()
 				.setDisplayLevel(InfoDisplayLevel.NonExtra)
 				.add(translation(DebugToolsTranslation.InspectionTemperature)
-					.addArgs(island.temperature.get(this.value.x, this.value.y, this.value.z, true))),
+					.addArgs(island.temperature.get(this.value.x, this.value.y, this.value.z, undefined))),
 			InfoProvider.title()
 				.setDisplayLevel(InfoDisplayLevel.Extra)
 				.add(translation(DebugToolsTranslation.InspectionTemperature)
-					.addArgs(island.temperature.get(this.value.x, this.value.y, this.value.z, true))),
+					.addArgs(island.temperature.get(this.value.x, this.value.y, this.value.z, undefined))),
 			InfoProvider.create()
 				.setDisplayLevel(InfoDisplayLevel.Extra)
 				.setComponent(Paragraph)
