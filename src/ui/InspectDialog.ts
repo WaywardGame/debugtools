@@ -14,6 +14,7 @@ import Text from "ui/component/Text";
 import Bind, { IBindHandlerApi } from "ui/input/Bind";
 import Bindable from "ui/input/Bindable";
 import InputManager from "ui/input/InputManager";
+import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import { gameScreen } from "ui/screen/screens/GameScreen";
 import { Tuple } from "utilities/collection/Arrays";
@@ -31,7 +32,6 @@ import EntityInformation from "./inspect/Entity";
 import ItemInformation from "./inspect/Item";
 import TerrainInformation from "./inspect/Terrain";
 import TileEventInformation from "./inspect/TileEvent";
-import TabDialog, { SubpanelInformation } from "./TabDialog";
 
 export type InspectDialogInformationSectionClass = new () => InspectInformationSection;
 
@@ -47,7 +47,7 @@ const informationSectionClasses: InspectDialogInformationSectionClass[] = [
 	ItemInformation,
 ];
 
-export default class InspectDialog extends TabDialog implements IHookHost {
+export default class InspectDialog extends TabDialog<InspectInformationSection> implements IHookHost {
 	/**
 	 * The positioning settings for the dialog.
 	 */
@@ -70,14 +70,12 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	public readonly LOG: Log;
 
 	private entityButtons: Button[];
-	private infoSections: InspectInformationSection[];
 	private entityInfoSection: EntityInformation;
 
 	private tilePosition?: Vector3;
 	private tile?: ITile;
 	private inspectionLock?: Entity;
 	private inspectingTile?: ITile;
-	private storePanels = true;
 	private shouldLog = false;
 	private willShowSubpanel = false;
 
@@ -90,35 +88,36 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	}
 
 	/**
+	 * Implements the abstract method in "TabDialog". Returns an array of subpanels.
+	 * This will only be called once
+	 */
+	@Override protected getSubpanels(): InspectInformationSection[] {
+		const subpanels = informationSectionClasses.stream()
+			.merge(this.DEBUG_TOOLS.modRegistryInspectDialogPanels.getRegistrations()
+				.map(registration => registration.data(InspectInformationSection)))
+			.map(cls => new cls()
+				.event.subscribe("update", this.update))
+			.toArray();
+
+		// we're going to need the entity information section for some other stuff
+		this.entityInfoSection = subpanels
+			.find<EntityInformation>((infoSection): infoSection is EntityInformation => infoSection instanceof EntityInformation)!;
+
+		return subpanels;
+	}
+
+	/**
 	 * Implements the abstract method in "TabDialog". Returns an array of tuples containing information used to set-up the
 	 * subpanels of this dialog.
+	 * 
+	 * If the subpanel classes haven't been instantiated yet, it first instantiates them by calling getSubpanels.
+	 * This includes binding a `WillRemove` event handler to the panel, which will `store` (cache) the panel instead of removing it,
+	 * and trigger a `SwitchAway` event on the panel when this occurs.
 	 */
-	@Override public getSubpanels(): SubpanelInformation[] {
-		if (!this.infoSections) {
-			this.infoSections = informationSectionClasses.stream()
-				.merge(this.DEBUG_TOOLS.modRegistryInspectDialogPanels.getRegistrations()
-					.map(registration => registration.data(InspectInformationSection)))
-				.map(cls => new cls()
-					.event.subscribe("update", this.update)
-					.event.subscribe("willRemove", infoSection => {
-						if (this.storePanels) {
-							infoSection.event.emit("switchAway");
-							infoSection.store();
-							return false;
-						}
-
-						return undefined;
-					}))
-				.toArray();
-
-			// we're going to need the entity information section for some other stuff
-			this.entityInfoSection = this.infoSections
-				.find<EntityInformation>((infoSection): infoSection is EntityInformation => infoSection instanceof EntityInformation)!;
-		}
-
+	@Override protected getSubpanelInformation(subpanels: InspectInformationSection[]): SubpanelInformation[] {
 		this.entityButtons = [];
 
-		return this.infoSections.stream()
+		return this.subpanels.stream()
 			// add the tabs of the section to the tuple
 			.map(section => Tuple(section, section.getTabs()))
 			// if there are no tabs from the section, remove it
@@ -175,7 +174,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 	public update() {
 		if (this.inspectionLock) this.setInspectionTile(this.inspectionLock);
 
-		for (const section of this.infoSections) {
+		for (const section of this.subpanels) {
 			section.resetWillLog();
 			section.update(this.tilePosition!, this.tile!);
 		}
@@ -242,15 +241,6 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 		}
 
 		game.updateView(RenderSource.Mod, false);
-
-		this.storePanels = false;
-		for (const infoSection of this.infoSections) {
-			if (infoSection.isVisible()) {
-				infoSection.event.emit("switchAway");
-			}
-
-			infoSection.remove();
-		}
 
 		delete InspectDialog.INSTANCE;
 	}
@@ -320,7 +310,7 @@ export default class InspectDialog extends TabDialog implements IHookHost {
 			this.shouldLog = false;
 		}
 
-		for (const infoSection of this.infoSections) {
+		for (const infoSection of this.subpanels) {
 			if (infoSection.willLog) {
 				infoSection.logUpdate();
 				infoSection.resetWillLog();

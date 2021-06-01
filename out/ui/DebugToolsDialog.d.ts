@@ -1,17 +1,14 @@
 import Translation from "language/Translation";
+import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import { DialogId, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import DebugTools from "../DebugTools";
 import DebugToolsPanel from "./component/DebugToolsPanel";
-import TabDialog, { SubpanelInformation } from "./TabDialog";
 export declare type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
-export default class DebugToolsDialog extends TabDialog {
+export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
     static description: IDialogDescription;
     readonly DEBUG_TOOLS: DebugTools;
-    private subpanels;
-    private activePanel;
-    private storePanels;
     constructor(id: DialogId);
     getName(): Translation;
-    getSubpanels(): SubpanelInformation[];
-    private onShowSubpanel;
+    protected getSubpanels(): DebugToolsPanel[];
+    protected getSubpanelInformation(subpanels: DebugToolsPanel[]): SubpanelInformation[];
 }

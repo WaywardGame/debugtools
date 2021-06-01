@@ -3,6 +3,7 @@ import { ITile } from "game/tile/ITerrain";
 import Component from "ui/component/Component";
 import { TranslationGenerator } from "ui/component/IComponent";
 import { IVector2 } from "utilities/math/IVector";
+import TabDialogPanel from "ui/screen/screens/game/component/TabDialogPanel";
 export declare type TabInformation = [number, TranslationGenerator];
 interface IInspectInformationSectionEvents extends Events<Component> {
     change(): any;
@@ -10,7 +11,7 @@ interface IInspectInformationSectionEvents extends Events<Component> {
     switchAway(): any;
     switchTo(): any;
 }
-export default abstract class InspectInformationSection extends Component {
+export default abstract class InspectInformationSection extends TabDialogPanel {
     event: IEventEmitter<this, IInspectInformationSectionEvents>;
     private shouldLog;
     get willLog(): boolean;

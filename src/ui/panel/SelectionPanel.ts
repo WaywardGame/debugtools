@@ -16,7 +16,7 @@ import Component from "ui/component/Component";
 import Dropdown, { IDropdownOption } from "ui/component/Dropdown";
 import CorpseDropdown from "ui/component/dropdown/CorpseDropdown";
 import CreatureDropdown from "ui/component/dropdown/CreatureDropdown";
-import { DoodadDropdown } from "ui/component/dropdown/DoodadDropdown";
+import DoodadDropdown from "ui/component/dropdown/DoodadDropdown";
 import NPCDropdown from "ui/component/dropdown/NPCDropdown";
 import TileEventDropdown from "ui/component/dropdown/TileEventDropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
