@@ -296,6 +296,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 	@OwnEventHandler(PaintPanel, "switchAway")
 	protected onSwitchAway() {
+		console.log("switch away");
 		Bind.deregisterHandlers(this);
 
 		this.paintButton.setChecked(false);
