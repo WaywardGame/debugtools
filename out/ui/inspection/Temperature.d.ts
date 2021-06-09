@@ -4,7 +4,7 @@ import { IVector3 } from "utilities/math/IVector";
 import DebugTools from "../../DebugTools";
 export default class TemperatureInspection extends Inspection<IVector3> {
     static readonly DEBUG_TOOLS: DebugTools;
-    static getFromTile(position: IVector3): TemperatureInspection;
+    static getFromTile(position: IVector3): never[] | TemperatureInspection;
     constructor(tile: IVector3);
     getId(): string;
     getPriority(): number;

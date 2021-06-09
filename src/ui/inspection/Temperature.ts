@@ -21,7 +21,7 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 	public static readonly DEBUG_TOOLS: DebugTools;
 
 	public static getFromTile(position: IVector3) {
-		return new TemperatureInspection(position);
+		return TemperatureInspection.DEBUG_TOOLS ? new TemperatureInspection(position) : [];
 	}
 
 	public constructor(tile: IVector3) {
@@ -49,11 +49,11 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 			InfoProvider.create()
 				.setDisplayLevel(InfoDisplayLevel.NonExtra)
 				.add(translation(DebugToolsTranslation.InspectionTemperature)
-					.addArgs(island.temperature.get(this.value.x, this.value.y, this.value.z, true))),
+					.addArgs(island.temperature.get(this.value.x, this.value.y, this.value.z, undefined))),
 			InfoProvider.title()
 				.setDisplayLevel(InfoDisplayLevel.Extra)
 				.add(translation(DebugToolsTranslation.InspectionTemperature)
-					.addArgs(island.temperature.get(this.value.x, this.value.y, this.value.z, true))),
+					.addArgs(island.temperature.get(this.value.x, this.value.y, this.value.z, undefined))),
 			InfoProvider.create()
 				.setDisplayLevel(InfoDisplayLevel.Extra)
 				.setComponent(Paragraph)

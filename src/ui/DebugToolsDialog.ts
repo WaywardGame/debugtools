@@ -1,6 +1,6 @@
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
-import Component from "ui/component/Component";
+import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import { gameScreen } from "ui/screen/screens/GameScreen";
 import { Tuple } from "utilities/collection/Arrays";
@@ -14,7 +14,6 @@ import GeneralPanel from "./panel/GeneralPanel";
 import PaintPanel from "./panel/PaintPanel";
 import SelectionPanel from "./panel/SelectionPanel";
 import TemplatePanel from "./panel/TemplatePanel";
-import TabDialog, { SubpanelInformation } from "./TabDialog";
 
 export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
 
@@ -29,7 +28,7 @@ const subpanelClasses: DebugToolsDialogPanelClass[] = [
 	TemplatePanel,
 ];
 
-export default class DebugToolsDialog extends TabDialog {
+export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 	/**
 	 * The positioning settings for the dialog.
 	 */
@@ -46,23 +45,9 @@ export default class DebugToolsDialog extends TabDialog {
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
 	public readonly DEBUG_TOOLS: DebugTools;
 
-	private subpanels: DebugToolsPanel[];
-	private activePanel: DebugToolsPanel;
-
-	private storePanels = true;
-
 	public constructor(id: DialogId) {
 		super(id);
 		this.classes.add("debug-tools-dialog");
-
-		// when the dialog is removed from the DOM, we force remove all of the panels (they're cached otherwise)
-		this.event.subscribe("willRemove", () => {
-			this.storePanels = false;
-			for (const subpanel of this.subpanels) {
-				subpanel.event.emit("switchAway");
-				subpanel.remove();
-			}
-		});
 
 		if (!this.DEBUG_TOOLS.hasPermission()) {
 			sleep(1).then(() => gameScreen!.closeDialog(id));
@@ -74,54 +59,32 @@ export default class DebugToolsDialog extends TabDialog {
 	}
 
 	/**
+	 * Implements the abstract method in "TabDialog". Returns an array of subpanels.
+	 * This will only be called once
+	 */
+	@Override protected getSubpanels(): DebugToolsPanel[] {
+		return subpanelClasses.stream()
+			.merge(this.DEBUG_TOOLS.modRegistryMainDialogPanels.getRegistrations()
+				.map(registration => registration.data(DebugToolsPanel)))
+			.map(cls => new cls())
+			.toArray();
+	}
+
+	/**
 	 * Implements the abstract method in "TabDialog". Returns an array of tuples containing information used to set-up the
 	 * subpanels of this dialog.
 	 * 
-	 * If the subpanel classes haven't been instantiated yet, it first instantiates them. This includes binding a `WillRemove` event
-	 * handler to the panel, which will `store` (cache) the panel instead of removing it, and trigger a `SwitchAway` event on the 
-	 * panel when this occurs.
+	 * If the subpanel classes haven't been instantiated yet, it first instantiates them by calling getSubpanels.
+	 * This includes binding a `WillRemove` event handler to the panel, which will `store` (cache) the panel instead of removing it,
+	 * and trigger a `SwitchAway` event on the panel when this occurs.
 	 */
-	@Override public getSubpanels(): SubpanelInformation[] {
-		if (!this.subpanels) {
-			this.subpanels = subpanelClasses.stream()
-				.merge(this.DEBUG_TOOLS.modRegistryMainDialogPanels.getRegistrations()
-					.map(registration => registration.data(DebugToolsPanel)))
-				.map(cls => new cls()
-					.event.until(this, "close")
-					.subscribe("willRemove", panel => {
-						if (panel.isVisible()) {
-							panel.event.emit("switchAway");
-						}
-
-						if (this.storePanels) {
-							panel.store();
-							return false;
-						}
-
-						return undefined;
-					}))
-				.toArray();
-		}
-
-		return this.subpanels
+	@Override protected getSubpanelInformation(subpanels: DebugToolsPanel[]): SubpanelInformation[] {
+		return subpanels
 			.map(subpanel => Tuple(
 				translation(subpanel.getTranslation()).getString(),
 				translation(subpanel.getTranslation()),
 				this.onShowSubpanel(subpanel),
 			));
-	}
-
-	/**
-	 * Returns a function that will be executed when the passed subpanel is shown.
-	 * 
-	 * When executed, the return function will append the panel to show to the passed component (which is the panel wrapper 
-	 * of the `TabDialog`), and trigger a `SwitchTo` event on the panel.
-	 */
-	private onShowSubpanel(showPanel: DebugToolsPanel) {
-		return (component: Component) => {
-			this.activePanel = showPanel.appendTo(component);
-			this.activePanel.event.emit("switchTo");
-		};
 	}
 
 }
