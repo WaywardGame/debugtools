@@ -2,8 +2,8 @@ import { Events, IEventEmitter } from "event/EventEmitter";
 import { ITile } from "game/tile/ITerrain";
 import Component from "ui/component/Component";
 import { TranslationGenerator } from "ui/component/IComponent";
-import { IVector2 } from "utilities/math/IVector";
 import TabDialogPanel from "ui/screen/screens/game/component/TabDialogPanel";
+import { IVector2 } from "utilities/math/IVector";
 export declare type TabInformation = [number, TranslationGenerator];
 interface IInspectInformationSectionEvents extends Events<Component> {
     change(): any;

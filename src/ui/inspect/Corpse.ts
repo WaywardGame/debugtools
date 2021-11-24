@@ -1,9 +1,10 @@
 import Corpse from "game/entity/creature/corpse/Corpse";
 import { ITile } from "game/tile/ITerrain";
-import { TextContext } from "language/Translation";
+import { TextContext } from "language/ITranslation";
 import Mod from "mod/Mod";
 import Button from "ui/component/Button";
 import { Tuple } from "utilities/collection/Arrays";
+import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Heal from "../../action/Heal";
@@ -35,19 +36,19 @@ export default class CorpseInformation extends InspectInformationSection {
 			.appendTo(this);
 	}
 
-	@Override public getTabs(): TabInformation[] {
+	public override getTabs(): TabInformation[] {
 		return this.corpses.entries().stream()
 			.map(([i, corpse]) => Tuple(i, () => translation(DebugToolsTranslation.CorpseName)
-				.get(corpseManager.getName(corpse, false).inContext(TextContext.Title))))
+				.get(localIsland.corpses.getName(corpse, false).inContext(TextContext.Title))))
 			.toArray();
 	}
 
-	@Override public setTab(corpse: number) {
+	public override setTab(corpse: number) {
 		this.corpse = this.corpses[corpse];
 		return this;
 	}
 
-	@Override public update(position: IVector2, tile: ITile) {
+	public override update(position: IVector2, tile: ITile) {
 		const corpses = [...tile.corpses || []];
 
 		if (areArraysIdentical(corpses, this.corpses)) return;
@@ -58,7 +59,7 @@ export default class CorpseInformation extends InspectInformationSection {
 		this.setShouldLog();
 	}
 
-	@Override public logUpdate() {
+	public override logUpdate() {
 		for (const corpse of this.corpses) {
 			this.LOG.info("Corpse:", corpse);
 		}

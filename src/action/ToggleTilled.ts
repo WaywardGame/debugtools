@@ -10,7 +10,7 @@ export default new Action(ActionArgument.Vector3, ActionArgument.Boolean)
 	.setHandler((action, position, tilled) => {
 		if (!position) return;
 
-		SetTilled(position.x, position.y, position.z, tilled);
+		SetTilled(action.executor.island, position.x, position.y, position.z, tilled);
 
 		renderer?.computeSpritesInViewport();
 		action.setUpdateRender();

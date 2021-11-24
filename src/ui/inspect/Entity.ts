@@ -2,6 +2,7 @@ import Entity from "game/entity/Entity";
 import { EntityType, IStatChangeInfo } from "game/entity/IEntity";
 import { IStat, Stat } from "game/entity/IStats";
 import { ITile } from "game/tile/ITerrain";
+import TranslationImpl from "language/impl/TranslationImpl";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { BlockRow } from "ui/component/BlockRow";
@@ -15,6 +16,7 @@ import { IRefreshable } from "ui/component/Refreshable";
 import Text from "ui/component/Text";
 import InputManager from "ui/input/InputManager";
 import { Tuple } from "utilities/collection/Arrays";
+import { Bound } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
 import Log from "utilities/Log";
 import { IVector2, IVector3 } from "utilities/math/IVector";
@@ -98,14 +100,14 @@ export default class EntityInformation extends InspectInformationSection {
 			.forEach(subsection => subsection.event.emit("switchAway")));
 	}
 
-	@Override public getTabs() {
+	public override getTabs() {
 		return this.entities.entries().stream()
 			.map(([i, entity]) => Tuple(i, () => translation(DebugToolsTranslation.EntityName)
 				.get(EntityType[entity.entityType], entity.getName()/*.inContext(TextContext.Title)*/)))
 			.toArray();
 	}
 
-	@Override public setTab(entity: number) {
+	public override setTab(entity: number) {
 		this.entity = this.entities[entity];
 
 		this.buttonHeal.refreshText();
@@ -120,8 +122,8 @@ export default class EntityInformation extends InspectInformationSection {
 		return this;
 	}
 
-	@Override public update(position: IVector2, tile: ITile) {
-		const entities: Entity[] = game.getPlayersAtTile(tile, true);
+	public override update(position: IVector2, tile: ITile) {
+		const entities: Entity[] = localIsland.getPlayersAtTile(tile, true);
 
 		if (tile.creature) entities.push(tile.creature);
 		if (tile.npc) entities.push(tile.npc);
@@ -149,7 +151,7 @@ export default class EntityInformation extends InspectInformationSection {
 		return this.entities[index];
 	}
 
-	@Override public logUpdate() {
+	public override logUpdate() {
 		for (const entity of this.entities) {
 			this.LOG.info("Entity:", entity);
 		}
@@ -167,7 +169,7 @@ export default class EntityInformation extends InspectInformationSection {
 		for (const stat of stats) {
 			if ("max" in stat && !stat.canExceedMax) {
 				this.statComponents.set(stat.type, new RangeRow()
-					.setLabel(label => label.setText(Translation.generator(Stat[stat.type])))
+					.setLabel(label => label.setText(Translation.stat(stat.type)))
 					.editRange(range => range
 						.noClampOnRefresh()
 						.setMin(0)
@@ -191,7 +193,7 @@ export default class EntityInformation extends InspectInformationSection {
 					.setDefault(() => this.entity ? `${this.entity.stat.getValue(stat.type)}` : "")
 					.clear()
 					.appendTo(new LabelledRow()
-						.setLabel(label => label.setText(Translation.generator(Stat[stat.type])))
+						.setLabel(label => label.setText(Translation.stat(stat.type)))
 						.appendTo(this.statWrapper)));
 			}
 		}
@@ -247,7 +249,7 @@ export default class EntityInformation extends InspectInformationSection {
 		return players.stream()
 			.filter(player => player !== this.entity)
 			.map(player => Tuple(player.name, {
-				translation: Translation.generator(player.name),
+				translation: TranslationImpl.generator(player.name),
 				onActivate: () => this.teleport(player),
 			}))
 			.sort(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))

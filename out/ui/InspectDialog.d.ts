@@ -2,7 +2,6 @@ import Entity from "game/entity/Entity";
 import { TileUpdateType } from "game/IGame";
 import { ITile } from "game/tile/ITerrain";
 import Translation from "language/Translation";
-import { IHookHost } from "mod/IHookHost";
 import { IBindHandlerApi } from "ui/input/Bind";
 import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import { DialogId, IDialogDescription } from "ui/screen/screens/game/Dialogs";
@@ -11,7 +10,7 @@ import Vector2 from "utilities/math/Vector2";
 import DebugTools from "../DebugTools";
 import InspectInformationSection from "./component/InspectInformationSection";
 export declare type InspectDialogInformationSectionClass = new () => InspectInformationSection;
-export default class InspectDialog extends TabDialog<InspectInformationSection> implements IHookHost {
+export default class InspectDialog extends TabDialog<InspectInformationSection> {
     static description: IDialogDescription;
     static INSTANCE: InspectDialog | undefined;
     readonly DEBUG_TOOLS: DebugTools;
@@ -35,7 +34,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
     onGameEnd(): void;
     onGameTickEnd(): void;
     onMoveComplete(): void;
-    onTileUpdate(game: any, tile: ITile, x: number, y: number, z: number, tileUpdateType: TileUpdateType): void;
+    onTileUpdate(island: any, tile: ITile, x: number, y: number, z: number, tileUpdateType: TileUpdateType): void;
     protected onClose(): void;
     private updateSubpanels;
     private setInspectionTile;

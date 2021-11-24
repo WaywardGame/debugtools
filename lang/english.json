@@ -7,6 +7,9 @@
 		"source": {
 			"modDebugToolsDebugTools": "Debug Tools"
 		},
+		"menuBarButton": {
+			"modDebugToolsDialog": "Debug Tools"
+		},
 		"bindable": {
 			"modDebugToolsToggleDialog": "Toggle Tools Dialog",
 			"modDebugToolsSelectLocation": "Select Location",
@@ -31,13 +34,8 @@
 		},
 		"modDebugToolsDebugTools": {
 			"optionsAutoOpen": "Open Dialog on Load",
-
-
 			"dialogTitleMain": "Debug Tools",
-
-
 			"panelGeneral": "General",
-
 			"labelTime": "Time",
 			"buttonInspect": "Inspect {#--text-secondary:({Bindings:ModDebugToolsInspectTile})}",
 			"buttonInspectLocalPlayer": "Inspect Local Player {#--text-secondary:({Bindings:ModDebugToolsInspectLocalPlayer})}",
@@ -48,16 +46,13 @@
 			"labelLayer": "Layer",
 			"optionLayer": "The {1} {#--text-secondary:({2?{2}, }{0})}",
 			"headingIslandCurrent": "Island: {0}",
-			"island": "{1?{1}:{0?Island {0}}}{#--text-secondary: ({2}{3?, seed\\: {3}})}",
+			"island": "{1}{#--text-secondary: ({2}, {0}{3?, seed\\: {3}})}",
 			"labelTravel": "Travel to",
 			"optionTravelNewIsland": "New Island {#--text-secondary:({0})}",
 			"optionTravelCivilization": "Civilization",
 			"optionTravelRandomIsland": "Random Island",
 			"buttonTravel": "Travel!",
-
-
 			"panelDisplay": "Display",
-
 			"buttonToggleFog": "Fog {#--text-secondary:({Bindings:ModDebugToolsToggleFullVisibility})}",
 			"buttonToggleLighting": "Lighting {#--text-secondary:({Bindings:ModDebugToolsToggleFullVisibility})}",
 			"labelZoomLevel": "Zoom Level",
@@ -69,10 +64,7 @@
 			"buttonReloadUIImages": "Reload UI Images",
 			"headingLayers": "Layers",
 			"buttonToggleLayer": "{0}",
-
-
 			"panelPaint": "Tile Paint",
-
 			"buttonPaint": "Paint",
 			"paintNoChange": "No Change",
 			"paintRemove": "Remove",
@@ -91,10 +83,7 @@
 			"labelTileEvent": "{#--text-secondary:Tile Event}",
 			"buttonReplaceExisting": "Replace Existing",
 			"resetPaintSection": "Reset Section",
-
-
 			"panelSelection": "Selection",
-
 			"selectionMethod": "{#--text-secondary:Method}",
 			"selectionFilter": "{#--text-secondary:of type}",
 			"selectionAction": "{#--text-secondary:Action}",
@@ -114,14 +103,11 @@
 			"actionSelect": "Select",
 			"to": "{#--text-secondary:to}",
 			"buttonExecute": "Execute",
-			"labelSelectionCount": "{#--text-secondary:Selection Size:}",
-			"selectionCount": "{0} targets",
+			"labelSelectionPreview": "{#--text-secondary:Preview:}",
+			"selectionPreview": "{0?{0} {#--text-secondary:of} {1} {#--text-secondary:target(s) —} {2}:No Selection}",
 			"selectionFilterNamed": "{#--text-secondary:named}",
 			"selectionFilterAll": "",
-
-
 			"panelTemplates": "Templates",
-
 			"labelTemplateType": "{#--text-secondary:Type}",
 			"labelTemplate": "{#--text-secondary:Template}",
 			"buttonMirrorVertically": "Mirror Vertically",
@@ -132,10 +118,7 @@
 			"rangeRotateDegrees": "{0}°",
 			"labelDegrade": "Degradation",
 			"rangeDegradeAmount": "{0}%",
-
-
 			"dialogTitleInspect": "Inspect",
-
 			"inspectTileTitle": "{#--text-secondary:x:} {0} {#--text-secondary:y:} {1} {#--text-secondary:z:} {2}",
 			"inspectTerrain": "{#--text-secondary:Terrain:} {0}",
 			"labelChangeTerrain": "Change",
@@ -178,13 +161,9 @@
 			"itemName": "{#--text-secondary:{0}}",
 			"buttonTogglePermissions": "Grant Debug Permissions",
 			"buttonSetGrowthStage": "Set Growth Stage",
-
-
 			"actionResurrect": "resurrect {0}",
 			"actionClone": "clone {0}",
 			"actionTeleport": "{0?teleport {0}:Teleport}",
-
-
 			"inspectionTemperature": "Temp: {#--TEXT-PRIMARY:{0}}",
 			"inspectionTemperatureBiome": "Biome temp: {#--TEXT-PRIMARY:{0}}",
 			"inspectionTemperatureTimeModifier": "Time mod: {#--TEXT-PRIMARY:{0}}",

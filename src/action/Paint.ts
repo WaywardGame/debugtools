@@ -20,45 +20,45 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 
 		for (const tileId of tiles) {
 			const [x, y, z] = getTilePosition(tileId);
-			const tile = game.getTile(x, y, z);
+			const tile = action.executor.island.getTile(x, y, z);
 			for (const k of Object.keys(data)) {
 				const paintType = k as keyof IPaintData;
 				switch (paintType) {
 					case "terrain": {
-						game.changeTile(data.terrain!.type, x, y, z, false);
+						action.executor.island.changeTile(data.terrain!.type, x, y, z, false);
 						if (data.terrain!.tilled !== undefined && data.terrain!.tilled !== TileHelpers.isTilled(tile))
-							SetTilled(x, y, z, data.terrain!.tilled);
+							SetTilled(action.executor.island, x, y, z, data.terrain!.tilled);
 						break;
 					}
 					case "creature": {
 						const creature = tile.creature;
-						if (creature) creatureManager.remove(creature);
+						if (creature) action.executor.island.creatures.remove(creature);
 
 						const type = data.creature!.type;
 						if (type !== "remove") {
-							creatureManager.spawn(type, x, y, z, true, data.creature!.aberrant, undefined, true);
+							action.executor.island.creatures.spawn(type, x, y, z, true, data.creature!.aberrant, undefined, true);
 						}
 
 						break;
 					}
 					case "npc": {
 						const npc = tile.npc;
-						if (npc) npcManager.remove(npc);
+						if (npc) action.executor.island.npcs.remove(npc);
 
 						const type = data.npc!.type;
 						if (type !== "remove") {
-							npcManager.spawn(type, x, y, z);
+							action.executor.island.npcs.spawn(type, x, y, z);
 						}
 
 						break;
 					}
 					case "doodad": {
 						const doodad = tile.doodad;
-						if (doodad) doodadManager.remove(doodad);
+						if (doodad) action.executor.island.doodads.remove(doodad);
 
 						const type = data.doodad!.type;
 						if (type !== "remove") {
-							doodadManager.create(type, x, y, z);
+							action.executor.island.doodads.create(type, x, y, z);
 						}
 
 						break;
@@ -68,14 +68,14 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 							const corpses = tile.corpses;
 							if (corpses) {
 								for (const corpse of corpses) {
-									corpseManager.remove(corpse);
+									action.executor.island.corpses.remove(corpse);
 								}
 							}
 						}
 
 						const type = data.corpse!.type;
 						if (type !== undefined && type !== "remove") {
-							corpseManager.create(type, x, y, z, undefined, data.corpse!.aberrant);
+							action.executor.island.corpses.create(type, x, y, z, undefined, data.corpse!.aberrant);
 						}
 
 						break;
@@ -85,14 +85,14 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 							const tileEvents = tile.events;
 							if (tileEvents) {
 								for (const event of tileEvents) {
-									tileEventManager.remove(event);
+									action.executor.island.tileEvents.remove(event);
 								}
 							}
 						}
 
 						const type = data.tileEvent!.type;
 						if (type !== undefined && type !== "remove") {
-							tileEventManager.create(type, x, y, z);
+							action.executor.island.tileEvents.create(type, x, y, z);
 						}
 
 						break;

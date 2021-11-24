@@ -1,20 +1,23 @@
 import { EventHandler, OwnEventHandler } from "event/EventManager";
-import { RenderSource } from "game/IGame";
 import Mod from "mod/Mod";
-import { RenderLayerFlag } from "renderer/IWorldRenderer";
+import { RenderSource } from "renderer/IRenderer";
 import { Shaders } from "renderer/Shaders";
-import WorldLayerRenderer from "renderer/WorldLayerRenderer";
-import WorldRenderer from "renderer/WorldRenderer";
+import { RenderLayerFlag } from "renderer/world/IWorldRenderer";
+import WorldLayerRenderer from "renderer/world/WorldLayerRenderer";
+import WorldRenderer from "renderer/world/WorldRenderer";
 import Button from "ui/component/Button";
 import { CheckButton } from "ui/component/CheckButton";
 import Divider from "ui/component/Divider";
 import { RangeRow } from "ui/component/RangeRow";
 import { Heading } from "ui/component/Text";
 import ImagePath from "ui/util/ImagePath";
+import { Bound } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, ISaveData, translation, ZOOM_LEVEL_MAX } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
+// import Component from "ui/component/Component";
+// import Renderer from "renderer/Renderer";
 
 export default class DisplayPanel extends DebugToolsPanel {
 	private readonly zoomRange: RangeRow;
@@ -51,7 +54,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 				.get(this.DEBUG_TOOLS.getZoomLevel() || saveDataGlobal.options.zoomLevel))
 			.event.subscribe("change", (_, value) => {
 				this.saveData.zoomLevel = value;
-				game.updateZoomLevel();
+				renderer?.updateZoomLevel();
 			})
 			.appendTo(this);
 
@@ -103,7 +106,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 			.splat(this.append);
 	}
 
-	@Override public getTranslation() {
+	public override getTranslation() {
 		return DebugToolsTranslation.PanelDisplay;
 	}
 
@@ -134,14 +137,14 @@ export default class DisplayPanel extends DebugToolsPanel {
 
 	@Bound
 	private refreshTiles() {
-		renderer?.updateAll();
+		renderer?.worldRenderer.updateAllTiles();
 	}
 
 	@Bound
 	private async reloadShaders() {
 		await Shaders.load();
 
-		Shaders.recompile();
+		await game.webGlContext?.recompilePrograms();
 
 		game.updateView(RenderSource.Mod, true);
 	}

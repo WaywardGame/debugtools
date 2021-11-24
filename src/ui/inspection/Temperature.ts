@@ -28,11 +28,11 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 		super(TemperatureInspection.DEBUG_TOOLS.inspectionTemperature, tile);
 	}
 
-	@Override public getId() {
+	public override getId() {
 		return this.createIdFromVector3(this.value);
 	}
 
-	@Override public getPriority() {
+	public override getPriority() {
 		return basicInspectionPriorities[InspectType.Tile] + 100;
 	}
 
@@ -40,33 +40,33 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 	// Content
 	//
 
-	@Override public hasContent() {
-		return this.getTileMod() !== "?";
+	public override hasContent() {
+		return game.playing && this.getTileMod() !== "?";
 	}
 
-	@Override public get(context: InfoProviderContext) {
+	public override get(context: InfoProviderContext) {
 		return [
 			InfoProvider.create()
 				.setDisplayLevel(InfoDisplayLevel.NonExtra)
 				.add(translation(DebugToolsTranslation.InspectionTemperature)
-					.addArgs(island.temperature.get(this.value.x, this.value.y, this.value.z, undefined))),
+					.addArgs(localIsland.temperature.get(this.value.x, this.value.y, this.value.z, undefined))),
 			InfoProvider.title()
 				.setDisplayLevel(InfoDisplayLevel.Extra)
 				.add(translation(DebugToolsTranslation.InspectionTemperature)
-					.addArgs(island.temperature.get(this.value.x, this.value.y, this.value.z, undefined))),
+					.addArgs(localIsland.temperature.get(this.value.x, this.value.y, this.value.z, undefined))),
 			InfoProvider.create()
 				.setDisplayLevel(InfoDisplayLevel.Extra)
 				.setComponent(Paragraph)
 				.setChildComponent(Paragraph)
 				.add(translation(DebugToolsTranslation.InspectionTemperatureBiome)
-					.addArgs(island.temperature.getBase()))
+					.addArgs(localIsland.temperature.getBase()))
 				// the following bit is only used for if biomes themselves have time modifiers,
 				// but so far we only use layer-specific time modifiers so it's not very useful hence hidden!
 				// .add(translation(DebugToolsTranslation.InspectionTemperatureTimeModifier)
 				// 	.addArgs(Translation.difference(island.temperature.getTime())))
 				.add(translation(DebugToolsTranslation.InspectionTemperatureLayerModifier)
 					.addArgs(Translation.misc(MiscTranslation.Difference)
-						.addArgs(island.temperature.getLayer(this.value.z)))),
+						.addArgs(localIsland.temperature.getLayer(this.value.z)))),
 			InfoProvider.create()
 				.setDisplayLevel(InfoDisplayLevel.Extra)
 				.setComponent(Paragraph)
@@ -114,7 +114,7 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 	//
 
 	private getTemperature(tempType: TempType, calcOrProduce: "calculated" | "produced") {
-		const temp = island.temperature?.[calcOrProduce === "calculated" ? "getCachedCalculated" : "getCachedProduced"]
+		const temp = localIsland.temperature?.[calcOrProduce === "calculated" ? "getCachedCalculated" : "getCachedProduced"]
 			(this.value.x, this.value.y, this.value.z, tempType);
 		return temp === TEMPERATURE_INVALID || temp === undefined ? "?" : temp;
 	}

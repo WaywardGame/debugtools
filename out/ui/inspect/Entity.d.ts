@@ -17,7 +17,7 @@ export default class EntityInformation extends InspectInformationSection {
     private entities;
     private entity?;
     constructor();
-    getTabs(): [number, () => import("../../../node_modules/@wayward/types/definitions/utilities/string/Interpolator").IStringSection[]][];
+    getTabs(): [number, () => import("@wayward/types/definitions/game/utilities/string/Interpolator").IStringSection[]][];
     setTab(entity: number): this;
     update(position: IVector2, tile: ITile): void;
     getEntityIndex(entity: Entity): number;

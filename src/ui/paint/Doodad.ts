@@ -3,11 +3,12 @@ import { DoodadType } from "game/doodad/IDoodad";
 import Component from "ui/component/Component";
 import DoodadDropdown from "ui/component/dropdown/DoodadDropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
+import { Bound } from "utilities/Decorators";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
 export default class DoodadPaint extends Component implements IPaintSection {
-	@Override public event: IEventEmitter<this, Events<IPaintSection>>;
+	public override event: IEventEmitter<this, Events<IPaintSection>>;
 
 	private readonly dropdown: DoodadDropdown<"nochange" | "remove">;
 

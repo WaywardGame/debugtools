@@ -2,6 +2,7 @@ import Creature from "game/entity/creature/Creature";
 import Entity from "game/entity/Entity";
 import Button from "ui/component/Button";
 import { CheckButton } from "ui/component/CheckButton";
+import { Bound } from "utilities/Decorators";
 import Remove from "../../action/Remove";
 import SetTamed from "../../action/SetTamed";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -26,7 +27,7 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 			.appendTo(this);
 	}
 
-	@Override public update(entity: Entity) {
+	public override update(entity: Entity) {
 		this.creature = entity.asCreature;
 		this.tamedButton.refresh();
 		this.toggle(!!this.creature);

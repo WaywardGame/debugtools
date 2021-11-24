@@ -12,7 +12,7 @@ export default new Action(anyOf(ActionArgument.Container, ActionArgument.Human))
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, target) => {
 		const inventory = "entityType" in target ? target.inventory : target;
-		itemManager.removeContainerItems(inventory, true);
+		action.executor.island.items.removeContainerItems(inventory, true);
 
 		if ("entityType" in target) {
 			target.asPlayer?.updateTablesAndWeight("M");

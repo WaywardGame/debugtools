@@ -11,7 +11,7 @@ export default new Action()
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
 	.setHandler(action => {
-		const position = TileHelpers.findMatchingTile(action.executor, (_, tile) => TileHelpers.getType(tile) === TerrainType.DeepSeawater);
+		const position = TileHelpers.findMatchingTile(action.executor.island, action.executor, (_1, _2, tile) => TileHelpers.getType(tile) === TerrainType.DeepSeawater);
 		if (!position) {
 			return;
 		}

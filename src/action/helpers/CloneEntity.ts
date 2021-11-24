@@ -4,7 +4,6 @@ import { AiType } from "game/entity/IEntity";
 import { NPCType } from "game/entity/npc/INPCs";
 import NPC from "game/entity/npc/NPC";
 import { IVector3 } from "utilities/math/IVector";
-import Vector2 from "utilities/math/Vector2";
 import CloneInventory from "./CloneInventory";
 import CopyStats from "./CopyStats";
 
@@ -16,7 +15,7 @@ export default function (entity: Entity, position: IVector3) {
 
 	const creature = entity.asCreature;
 	if (creature) {
-		clone = creatureManager.spawn(creature.type, position.x, position.y, position.z, true, creature.aberrant, undefined, true)!;
+		clone = entity.island.creatures.spawn(creature.type, position.x, position.y, position.z, true, creature.aberrant, undefined, true)!;
 
 		if (creature.isTamed()) clone.tame(creature.getOwner()!);
 		clone.renamed = entity.renamed;
@@ -27,13 +26,13 @@ export default function (entity: Entity, position: IVector3) {
 
 	} else {
 		const npc = entity.asNPC!;
-		clone = npcManager.spawn(NPCType.Merchant, position.x, position.y, position.z)!;
+		clone = entity.island.npcs.spawn(NPCType.Merchant, position.x, position.y, position.z)!;
 		clone.customization = { ...npc.customization };
 		clone.renamed = entity.getName().getString();
 		CloneInventory(npc, clone);
 	}
 
-	clone.direction = new Vector2(entity.direction).raw();
+	clone.direction = entity.direction.copy();
 	clone.facingDirection = entity.facingDirection;
 
 	CopyStats(entity, clone);

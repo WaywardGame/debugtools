@@ -10,10 +10,10 @@ import RemoveItem from "./RemoveItem";
 
 
 export default function (action: IActionApi<Player>, target: Creature | NPC | Doodad | Item | Corpse | TileEvent) {
-	if (target instanceof Creature) return creatureManager.remove(target);
-	if (target instanceof NPC) return npcManager.remove(target);
-	if (target instanceof Doodad) return doodadManager.remove(target, true);
+	if (target instanceof Creature) return action.executor.island.creatures.remove(target);
+	if (target instanceof NPC) return action.executor.island.npcs.remove(target);
+	if (target instanceof Doodad) return action.executor.island.doodads.remove(target, true);
 	if (target instanceof Item) return RemoveItem(action, target);
-	if (target instanceof TileEvent) return tileEventManager.remove(target);
-	if (target instanceof Corpse) return corpseManager.remove(target);
+	if (target instanceof TileEvent) return action.executor.island.tileEvents.remove(target);
+	if (target instanceof Corpse) return action.executor.island.corpses.remove(target);
 }

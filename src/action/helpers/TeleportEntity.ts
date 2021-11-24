@@ -1,7 +1,6 @@
 import { ActionApi } from "game/entity/action/IAction";
 import Entity from "game/entity/Entity";
 import Player from "game/entity/player/Player";
-import { gameScreen } from "ui/screen/screens/GameScreen";
 import { IVector3 } from "utilities/math/IVector";
 import GetPosition from "../../action/helpers/GetPosition";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -14,12 +13,12 @@ export function teleportEntity(action: ActionApi<any>, entity: Entity, position?
 	if (!entity || !position) return;
 
 	if (entity.asCreature) {
-		const tile = game.getTile(entity.x, entity.y, entity.z);
+		const tile = action.executor.island.getTile(entity.x, entity.y, entity.z);
 		delete tile.creature;
 	}
 
 	if (entity.asNPC) {
-		const tile = game.getTile(entity.x, entity.y, entity.z);
+		const tile = action.executor.island.getTile(entity.x, entity.y, entity.z);
 		delete tile.npc;
 	}
 
@@ -33,12 +32,12 @@ export function teleportEntity(action: ActionApi<any>, entity: Entity, position?
 	}
 
 	if (entity.asCreature) {
-		const tile = game.getTile(entity.x, entity.y, entity.z);
+		const tile = action.executor.island.getTile(entity.x, entity.y, entity.z);
 		tile.creature = entity.asCreature;
 	}
 
 	if (entity.asNPC) {
-		const tile = game.getTile(entity.x, entity.y, entity.z);
+		const tile = action.executor.island.getTile(entity.x, entity.y, entity.z);
 		tile.npc = entity.asNPC;
 	}
 

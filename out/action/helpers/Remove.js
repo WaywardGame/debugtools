@@ -3,18 +3,18 @@ define(["require", "exports", "game/doodad/Doodad", "game/entity/creature/corpse
     Object.defineProperty(exports, "__esModule", { value: true });
     function default_1(action, target) {
         if (target instanceof Creature_1.default)
-            return creatureManager.remove(target);
+            return action.executor.island.creatures.remove(target);
         if (target instanceof NPC_1.default)
-            return npcManager.remove(target);
+            return action.executor.island.npcs.remove(target);
         if (target instanceof Doodad_1.default)
-            return doodadManager.remove(target, true);
+            return action.executor.island.doodads.remove(target, true);
         if (target instanceof Item_1.default)
-            return RemoveItem_1.default(action, target);
+            return (0, RemoveItem_1.default)(action, target);
         if (target instanceof TileEvent_1.default)
-            return tileEventManager.remove(target);
+            return action.executor.island.tileEvents.remove(target);
         if (target instanceof Corpse_1.default)
-            return corpseManager.remove(target);
+            return action.executor.island.corpses.remove(target);
     }
     exports.default = default_1;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUmVtb3ZlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2FjdGlvbi9oZWxwZXJzL1JlbW92ZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFXQSxtQkFBeUIsTUFBMEIsRUFBRSxNQUEyRDtRQUMvRyxJQUFJLE1BQU0sWUFBWSxrQkFBUTtZQUFFLE9BQU8sZUFBZSxDQUFDLE1BQU0sQ0FBQyxNQUFNLENBQUMsQ0FBQztRQUN0RSxJQUFJLE1BQU0sWUFBWSxhQUFHO1lBQUUsT0FBTyxVQUFVLENBQUMsTUFBTSxDQUFDLE1BQU0sQ0FBQyxDQUFDO1FBQzVELElBQUksTUFBTSxZQUFZLGdCQUFNO1lBQUUsT0FBTyxhQUFhLENBQUMsTUFBTSxDQUFDLE1BQU0sRUFBRSxJQUFJLENBQUMsQ0FBQztRQUN4RSxJQUFJLE1BQU0sWUFBWSxjQUFJO1lBQUUsT0FBTyxvQkFBVSxDQUFDLE1BQU0sRUFBRSxNQUFNLENBQUMsQ0FBQztRQUM5RCxJQUFJLE1BQU0sWUFBWSxtQkFBUztZQUFFLE9BQU8sZ0JBQWdCLENBQUMsTUFBTSxDQUFDLE1BQU0sQ0FBQyxDQUFDO1FBQ3hFLElBQUksTUFBTSxZQUFZLGdCQUFNO1lBQUUsT0FBTyxhQUFhLENBQUMsTUFBTSxDQUFDLE1BQU0sQ0FBQyxDQUFDO0lBQ25FLENBQUM7SUFQRCw0QkFPQyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiUmVtb3ZlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2FjdGlvbi9oZWxwZXJzL1JlbW92ZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7SUFXQSxtQkFBeUIsTUFBMEIsRUFBRSxNQUEyRDtRQUMvRyxJQUFJLE1BQU0sWUFBWSxrQkFBUTtZQUFFLE9BQU8sTUFBTSxDQUFDLFFBQVEsQ0FBQyxNQUFNLENBQUMsU0FBUyxDQUFDLE1BQU0sQ0FBQyxNQUFNLENBQUMsQ0FBQztRQUN2RixJQUFJLE1BQU0sWUFBWSxhQUFHO1lBQUUsT0FBTyxNQUFNLENBQUMsUUFBUSxDQUFDLE1BQU0sQ0FBQyxJQUFJLENBQUMsTUFBTSxDQUFDLE1BQU0sQ0FBQyxDQUFDO1FBQzdFLElBQUksTUFBTSxZQUFZLGdCQUFNO1lBQUUsT0FBTyxNQUFNLENBQUMsUUFBUSxDQUFDLE1BQU0sQ0FBQyxPQUFPLENBQUMsTUFBTSxDQUFDLE1BQU0sRUFBRSxJQUFJLENBQUMsQ0FBQztRQUN6RixJQUFJLE1BQU0sWUFBWSxjQUFJO1lBQUUsT0FBTyxJQUFBLG9CQUFVLEVBQUMsTUFBTSxFQUFFLE1BQU0sQ0FBQyxDQUFDO1FBQzlELElBQUksTUFBTSxZQUFZLG1CQUFTO1lBQUUsT0FBTyxNQUFNLENBQUMsUUFBUSxDQUFDLE1BQU0sQ0FBQyxVQUFVLENBQUMsTUFBTSxDQUFDLE1BQU0sQ0FBQyxDQUFDO1FBQ3pGLElBQUksTUFBTSxZQUFZLGdCQUFNO1lBQUUsT0FBTyxNQUFNLENBQUMsUUFBUSxDQUFDLE1BQU0sQ0FBQyxPQUFPLENBQUMsTUFBTSxDQUFDLE1BQU0sQ0FBQyxDQUFDO0lBQ3BGLENBQUM7SUFQRCw0QkFPQyJ9

@@ -4,7 +4,7 @@ import { EntityType } from "game/entity/IEntity";
 import { Stat } from "game/entity/IStats";
 import { defaultUsability } from "../Actions";
 
-export default new Action(ActionArgument.Entity, ActionArgument.Number, ActionArgument.Number)
+export default new Action(ActionArgument.Entity, ActionArgument.Integer32, ActionArgument.Float64)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, entity, stat: Stat, value) => {

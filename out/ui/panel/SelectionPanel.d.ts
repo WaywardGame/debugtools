@@ -1,11 +1,15 @@
-import DebugTools from "src/DebugTools";
+import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 export default class SelectionPanel extends DebugToolsPanel {
     static DEBUG_TOOLS: DebugTools;
+    private disposed;
     private readonly targets;
     private readonly textPreposition;
     private readonly countRow;
+    private readonly buttonPreviewPrevious;
+    private readonly buttonPreviewNext;
+    private readonly canvas;
     private readonly buttonExecute;
     private readonly creatures;
     private readonly npcs;
@@ -15,12 +19,21 @@ export default class SelectionPanel extends DebugToolsPanel {
     private readonly players;
     private readonly rangeQuantity;
     private readonly dropdownMethod;
+    private readonly buttonReroll;
     private readonly dropdownAlternativeTarget;
     private readonly dropdownAction;
+    private webGlContext?;
+    private renderer?;
+    private previewCursor;
     constructor();
     getTranslation(): DebugToolsTranslation;
     execute(): void;
+    protected onAppend(): void;
+    protected onDispose(): void;
     private onActionChange;
     private onMethodChange;
     private updateTargets;
+    private resize;
+    private updatePreview;
+    private rerender;
 }

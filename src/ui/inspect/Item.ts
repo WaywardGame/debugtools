@@ -2,12 +2,14 @@ import { Quality } from "game/IObject";
 import { ItemType } from "game/item/IItem";
 import Item from "game/item/Item";
 import { ITile } from "game/tile/ITerrain";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { TextContext } from "language/Translation";
+import Dictionary from "language/Dictionary";
+import { TextContext } from "language/ITranslation";
+import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import Button from "ui/component/Button";
 import Component from "ui/component/Component";
 import { Paragraph } from "ui/component/Text";
+import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import AddItemToInventory, { ADD_ITEM_ALL, ADD_ITEM_RANDOM } from "../../action/AddItemToInventory";
@@ -36,13 +38,13 @@ export default class ItemInformation extends InspectInformationSection {
 		this.wrapperItems = new Component().appendTo(this);
 	}
 
-	@Override public getTabs(): TabInformation[] {
+	public override getTabs(): TabInformation[] {
 		return [
 			[0, translation(DebugToolsTranslation.TabItemStack)],
 		];
 	}
 
-	@Override public setTab() {
+	public override setTab() {
 		const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this.wrapperAddItem);
 		addItemToInventory.event.until(this, "remove", "switchAway")
 			.subscribe("execute", this.addItem);
@@ -50,7 +52,7 @@ export default class ItemInformation extends InspectInformationSection {
 		return this;
 	}
 
-	@Override public update(position: IVector2, tile: ITile) {
+	public override update(position: IVector2, tile: ITile) {
 		this.position = position;
 		const items = [...tile.containedItems || []];
 
@@ -75,13 +77,13 @@ export default class ItemInformation extends InspectInformationSection {
 		}
 	}
 
-	@Override public logUpdate() {
+	public override logUpdate() {
 		this.LOG.info("Items:", this.items);
 	}
 
 	@Bound
 	private addItem(_: any, type: ItemType | typeof ADD_ITEM_ALL | typeof ADD_ITEM_RANDOM, quality: Quality, quantity: number) {
-		AddItemToInventory.execute(localPlayer, itemManager.getTileContainer(this.position.x, this.position.y, localPlayer.z), type, quality, quantity);
+		AddItemToInventory.execute(localPlayer, localIsland.items.getTileContainer(this.position.x, this.position.y, localPlayer.z), type, quality, quantity);
 	}
 
 	@Bound
