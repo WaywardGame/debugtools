@@ -3,7 +3,7 @@ import { EventBus } from "event/EventBuses";
 import { Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { BiomeType } from "game/biome/IBiome";
-import { IslandId, IslandPosition } from "game/island/IIsland";
+import { DEFAULT_ISLAND_ID, IslandId, IslandPosition } from "game/island/IIsland";
 import { WorldZ } from "game/WorldZ";
 import Dictionary from "language/Dictionary";
 import TranslationImpl from "language/impl/TranslationImpl";
@@ -31,6 +31,7 @@ import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import ChangeLayer from "../../action/ChangeLayer";
 import ForceSailToCivilization from "../../action/ForceSailToCivilization";
+import MoveToIsland from "../../action/MoveToIsland";
 import RenameIsland from "../../action/RenameIsland";
 import SetTime from "../../action/SetTime";
 import DebugTools from "../../DebugTools";
@@ -293,38 +294,34 @@ export default class GeneralPanel extends DebugToolsPanel {
 			return;
 		}
 
+		let islandId: IslandId = DEFAULT_ISLAND_ID;
+		const biome = Enums.values(BiomeType)
+			.find(b => this.dropdownTravel.selection === getTravelDropdownNewIslandOptionId(b)) ?? BiomeType.Random;
+
 		if (this.dropdownTravel.selection.startsWith(TRAVEL_DROPDOWN_NEW_ISLAND_PREFIX)) {
-			this.travelToNewIsland();
-			return;
-		}
+			const currentIslandPosition = localIsland.position;
 
-		const islandId = this.dropdownTravel.selection !== "random"
-			? this.dropdownTravel.selection as IslandId
-			: game.islands.keys()
-				.filter(id => id !== localIsland.id)
-				.random()!;
+			for (let i = 1; i < Infinity; i++) {
+				const nextPosition = {
+					x: currentIslandPosition.x,
+					y: currentIslandPosition.y + i,
+				};
 
-		localPlayer.moveToIslandId(islandId);
-	}
-
-	private travelToNewIsland() {
-		const currentIslandPosition = localIsland.position;
-
-		for (let i = 1; i < Infinity; i++) {
-			const nextPosition = {
-				x: currentIslandPosition.x,
-				y: currentIslandPosition.y + i,
-			};
-
-			const biome = Enums.values(BiomeType)
-				.find(b => this.dropdownTravel.selection === getTravelDropdownNewIslandOptionId(b));
-
-			const islandId = IslandPosition.toId(nextPosition);
-			if (!game.islands.has(islandId)) {
-				localPlayer.moveToIslandId(islandId, { newWorldBiomeTypeOverride: biome });
-				return;
+				islandId = IslandPosition.toId(nextPosition);
+				if (!game.islands.has(islandId)) {
+					break;
+				}
 			}
+
+		} else {
+			islandId = this.dropdownTravel.selection !== "random"
+				? this.dropdownTravel.selection as IslandId
+				: game.islands.keys()
+					.filter(id => id !== localIsland.id)
+					.random()!;
 		}
+
+		MoveToIsland.execute(localPlayer, islandId, biome);
 	}
 
 	private async sailToCivilization() {

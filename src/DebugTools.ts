@@ -45,6 +45,7 @@ import Paint from "./action/Paint";
 import PlaceTemplate from "./action/PlaceTemplate";
 import Remove from "./action/Remove";
 import RenameIsland from "./action/RenameIsland";
+import MoveToIsland from "./action/MoveToIsland";
 import SelectionExecute from "./action/SelectionExecute";
 import SetGrowingStage from "./action/SetGrowingStage";
 import SetSkill from "./action/SetSkill";
@@ -263,6 +264,9 @@ export default class DebugTools extends Mod {
 
 	@Register.action("RenameIsland", RenameIsland)
 	public readonly actionRenameIsland: ActionType;
+
+	@Register.action("MoveToIsland", MoveToIsland)
+	public readonly actionMoveToIsland: ActionType;
 
 	@Register.action("ForceSailToCivilization", ForceSailToCivilization)
 	public readonly actionForceSailToCivilization: ActionType;

@@ -25,7 +25,6 @@ export default class GeneralPanel extends DebugToolsPanel {
     private inspectTile;
     private changeLayer;
     private travel;
-    private travelToNewIsland;
     private sailToCivilization;
     private renameIsland;
 }
