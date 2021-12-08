@@ -41,11 +41,11 @@ import Clone from "./action/Clone";
 import ForceSailToCivilization from "./action/ForceSailToCivilization";
 import Heal from "./action/Heal";
 import Kill from "./action/Kill";
+import MoveToIsland from "./action/MoveToIsland";
 import Paint from "./action/Paint";
 import PlaceTemplate from "./action/PlaceTemplate";
 import Remove from "./action/Remove";
 import RenameIsland from "./action/RenameIsland";
-import MoveToIsland from "./action/MoveToIsland";
 import SelectionExecute from "./action/SelectionExecute";
 import SetGrowingStage from "./action/SetGrowingStage";
 import SetSkill from "./action/SetSkill";
@@ -149,7 +149,7 @@ export default class DebugTools extends Mod {
 	@Register.bindable("CloseInspectDialog", IInput.key("KeyI", "Alt"))
 	public readonly bindableCloseInspectDialog: Bindable;
 
-	@Register.bindable("InspectTile", IInput.mouseButton(2, "Ctrl"))
+	@Register.bindable("InspectTile", IInput.mouseButton(2, "Alt"))
 	public readonly bindableInspectTile: Bindable;
 	@Register.bindable("InspectLocalPlayer", IInput.key("KeyP", "Alt"))
 	public readonly bindableInspectLocalPlayer: Bindable;
