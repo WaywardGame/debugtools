@@ -33,11 +33,11 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 	 */
 	public static description: IDialogDescription = {
 		minSize: new Vector2(20, 25),
-		size: new Vector2(25, 27),
+		size: new Vector2(29, 25),
 		maxSize: new Vector2(40, 70),
 		edges: [
-			[Edge.Left, 25],
-			[Edge.Bottom, 33],
+			[Edge.Right, 50],
+			[Edge.Bottom, 31],
 		],
 	};
 

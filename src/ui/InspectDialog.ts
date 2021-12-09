@@ -53,11 +53,11 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 */
 	public static description: IDialogDescription = {
 		minSize: new Vector2(20, 25),
-		size: new Vector2(25, 27),
+		size: new Vector2(29, 25),
 		maxSize: new Vector2(40, 70),
 		edges: [
 			[Edge.Left, 50],
-			[Edge.Bottom, 33],
+			[Edge.Bottom, 31],
 		],
 		saveOpen: false,
 	};

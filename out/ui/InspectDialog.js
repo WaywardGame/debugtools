@@ -171,11 +171,11 @@ define(["require", "exports", "event/EventBuses", "event/EventManager", "game/ti
     }
     InspectDialog.description = {
         minSize: new Vector2_1.default(20, 25),
-        size: new Vector2_1.default(25, 27),
+        size: new Vector2_1.default(29, 25),
         maxSize: new Vector2_1.default(40, 70),
         edges: [
             [Dialogs_1.Edge.Left, 50],
-            [Dialogs_1.Edge.Bottom, 33],
+            [Dialogs_1.Edge.Bottom, 31],
         ],
         saveOpen: false,
     };
