@@ -1,11 +1,12 @@
-import { RenderSource } from "game/IGame";
 import Mod from "mod/Mod";
 import Register from "mod/ModRegistry";
+import { RenderSource } from "renderer/IRenderer";
 import Bindable from "ui/input/Bindable";
 import { IInput } from "ui/input/IInput";
 import InputManager from "ui/input/InputManager";
-import { gameScreen } from "ui/screen/screens/GameScreen";
 import Vector2 from "utilities/math/Vector2";
+import { Bound } from "utilities/Decorators";
+
 import type DebugTools from "./DebugTools";
 import { DEBUG_TOOLS_ID } from "./IDebugTools";
 
@@ -63,22 +64,22 @@ export default class UnlockedCameraMovementHandler {
 
 		if (!this.transition) {
 			if (InputManager.input.isHolding(this.bindMoveCameraLeft)) {
-				this.velocity.x -= ACCELERATION / renderer.getTileScale();
+				this.velocity.x -= ACCELERATION / renderer.worldRenderer.getTileScale();
 				friction = MOVE_FRICTION;
 			}
 
 			if (InputManager.input.isHolding(this.bindMoveCameraRight)) {
-				this.velocity.x += ACCELERATION / renderer.getTileScale();
+				this.velocity.x += ACCELERATION / renderer.worldRenderer.getTileScale();
 				friction = MOVE_FRICTION;
 			}
 
 			if (InputManager.input.isHolding(this.bindMoveCameraUp)) {
-				this.velocity.y -= ACCELERATION / renderer.getTileScale();
+				this.velocity.y -= ACCELERATION / renderer.worldRenderer.getTileScale();
 				friction = MOVE_FRICTION;
 			}
 
 			if (InputManager.input.isHolding(this.bindMoveCameraDown)) {
-				this.velocity.y += ACCELERATION / renderer.getTileScale();
+				this.velocity.y += ACCELERATION / renderer.worldRenderer.getTileScale();
 				friction = MOVE_FRICTION;
 			}
 		}

@@ -3,11 +3,12 @@ import { NPCType } from "game/entity/npc/INPCs";
 import Component from "ui/component/Component";
 import NPCDropdown from "ui/component/dropdown/NPCDropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
+import { Bound } from "utilities/Decorators";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
 export default class NPCPaint extends Component implements IPaintSection {
-	@Override public event: IEventEmitter<this, Events<IPaintSection>>;
+	public override event: IEventEmitter<this, Events<IPaintSection>>;
 
 	private readonly dropdown: NPCDropdown<"nochange" | "remove">;
 

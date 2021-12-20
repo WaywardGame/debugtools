@@ -10,7 +10,7 @@ interface IInspectEntityInformationSubsectionEvents extends Events<Component> {
 }
 
 export default abstract class InspectEntityInformationSubsection extends Component {
-	@Override public event: IEventEmitter<this, IInspectEntityInformationSubsectionEvents>;
+	public override event: IEventEmitter<this, IInspectEntityInformationSubsectionEvents>;
 
 	public constructor() {
 		super();

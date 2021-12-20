@@ -1,15 +1,15 @@
 import { Priority } from "event/EventEmitter";
 import { EventHandler } from "event/EventManager";
-import { RenderSource } from "game/IGame";
 import { ITile } from "game/tile/ITerrain";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
+import { RenderSource } from "renderer/IRenderer";
 import Bind from "ui/input/Bind";
 import Bindable from "ui/input/Bindable";
 import { IInput } from "ui/input/IInput";
 import InputManager from "ui/input/InputManager";
 import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
-import { gameScreen } from "ui/screen/screens/GameScreen";
+import { Bound } from "utilities/Decorators";
 import TileHelpers from "utilities/game/TileHelpers";
 import Vector2 from "utilities/math/Vector2";
 import DebugTools from "./DebugTools";
@@ -101,10 +101,10 @@ export default class SelectLocation {
 		let updateRender = false;
 
 		if (this._selecting) {
-			const tilePosition = renderer?.screenToTile(...InputManager.mouse.position.xy);
+			const tilePosition = renderer?.worldRenderer.screenToTile(...InputManager.mouse.position.xy);
 			if (tilePosition) {
 				// add the target overlay to the tile currently being hovered
-				const tile = game.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
+				const tile = localIsland.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
 
 				if (tile !== this.hoverTile) {
 					updateRender = true;

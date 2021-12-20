@@ -15,12 +15,12 @@ import Actions from "../../Actions";
  * @param actionName The name of the action the player is attempting to execute. This is printed in the error message.
  */
 export default function (player: Player, position: IVector3, actionName: TranslationGenerator) {
-	if (TileHelpers.isOpenTile(position, game.getTile(position.x, position.y, position.z)) ||
+	if (TileHelpers.isOpenTile(player.island, position, player.island.getTile(position.x, position.y, position.z)) ||
 		player.getMoveType() === MoveType.Flying) {
 		return position;
 	}
 
-	const openTile = TileHelpers.findMatchingTile(position, TileHelpers.isOpenTile);
+	const openTile = TileHelpers.findMatchingTile(player.island, position, TileHelpers.isOpenTile);
 
 	if (!openTile) {
 		player.messages.source(Actions.DEBUG_TOOLS.source)

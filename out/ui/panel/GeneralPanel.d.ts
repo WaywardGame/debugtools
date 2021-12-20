@@ -18,13 +18,13 @@ export default class GeneralPanel extends DebugToolsPanel {
     canClientMove(): false | undefined;
     protected onChangeZ(_: any, z: number): void;
     onGameTickEnd(): void;
+    protected onLoadOnIsland(): void;
     onSelectLocation(api: IBindHandlerApi): boolean;
     protected onSwitchTo(): void;
     protected onSwitchAway(): void;
     private inspectTile;
     private changeLayer;
     private travel;
-    private travelToNewIsland;
     private sailToCivilization;
     private renameIsland;
 }

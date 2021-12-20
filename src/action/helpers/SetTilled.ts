@@ -1,16 +1,17 @@
 import { TileUpdateType } from "game/IGame";
+import Island from "game/island/Island";
 import terrainDescriptions from "game/tile/Terrains";
 import TileHelpers from "utilities/game/TileHelpers";
 
-export default function (x: number, y: number, z: number, tilled: boolean) {
-	const tile = game.getTile(x, y, z);
+export default function (island: Island, x: number, y: number, z: number, tilled: boolean) {
+	const tile = island.getTile(x, y, z);
 
 	const tileType = TileHelpers.getType(tile);
 	if (!terrainDescriptions[tileType]!.tillable) {
 		return;
 	}
 
-	const tileData = game.getOrCreateTileData(x, y, z);
+	const tileData = island.getOrCreateTileData(x, y, z);
 	if (tileData.length === 0) {
 		tileData.push({
 			type: tileType,
@@ -23,5 +24,5 @@ export default function (x: number, y: number, z: number, tilled: boolean) {
 
 	TileHelpers.setTilled(tile, tilled);
 
-	world.updateTile(x, y, z, tile, TileUpdateType.Tilled);
+	island.world.updateTile(x, y, z, tile, TileUpdateType.Tilled);
 }

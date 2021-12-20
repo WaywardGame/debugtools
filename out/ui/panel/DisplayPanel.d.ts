@@ -1,4 +1,4 @@
-import { RenderLayerFlag } from "renderer/IWorldRenderer";
+import { RenderLayerFlag } from "renderer/world/IWorldRenderer";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, ISaveData } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";

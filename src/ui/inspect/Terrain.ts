@@ -1,9 +1,10 @@
-import { RenderSource } from "game/IGame";
 import { ITile, TerrainType } from "game/tile/ITerrain";
 import terrainDescriptions from "game/tile/Terrains";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { TextContext } from "language/Translation";
+import Dictionary from "language/Dictionary";
+import { TextContext } from "language/ITranslation";
+import Translation from "language/Translation";
 import Mod from "mod/Mod";
+import { RenderSource } from "renderer/IRenderer";
 import { BlockRow } from "ui/component/BlockRow";
 import Button from "ui/component/Button";
 import { CheckButton } from "ui/component/CheckButton";
@@ -11,6 +12,7 @@ import Dropdown from "ui/component/Dropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
 import Text from "ui/component/Text";
 import { Tuple } from "utilities/collection/Arrays";
+import { Bound } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
 import TileHelpers from "utilities/game/TileHelpers";
 import Log from "utilities/Log";
@@ -45,7 +47,7 @@ export default class TerrainInformation extends InspectInformationSection {
 					defaultOption: this.tile ? TileHelpers.getType(this.tile) : TerrainType.Dirt,
 					options: Enums.values(TerrainType)
 						.filter(terrain => terrain)
-						.map(terrain => Tuple(terrain, new Translation(Dictionary.Terrain, terrain).inContext(TextContext.Title)))
+						.map(terrain => Tuple(terrain, Translation.get(Dictionary.Terrain, terrain).inContext(TextContext.Title)))
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				}))
@@ -68,8 +70,7 @@ export default class TerrainInformation extends InspectInformationSection {
 		;
 	}
 
-	@Override
-	public getTabs(): TabInformation[] {
+	public override getTabs(): TabInformation[] {
 		return [
 			[0, this.getTabTranslation],
 		];
@@ -78,11 +79,10 @@ export default class TerrainInformation extends InspectInformationSection {
 	@Bound
 	public getTabTranslation() {
 		return this.tile && translation(DebugToolsTranslation.InspectTerrain)
-			.get(new Translation(Dictionary.Terrain, TileHelpers.getType(this.tile)).inContext(TextContext.Title));
+			.get(Translation.get(Dictionary.Terrain, TileHelpers.getType(this.tile)).inContext(TextContext.Title));
 	}
 
-	@Override
-	public update(position: IVector2, tile: ITile) {
+	public override update(position: IVector2, tile: ITile) {
 		this.position = new Vector3(position.x, position.y, localPlayer.z);
 		this.tile = tile;
 
@@ -101,8 +101,7 @@ export default class TerrainInformation extends InspectInformationSection {
 		return this;
 	}
 
-	@Override
-	public logUpdate() {
+	public override logUpdate() {
 		this.LOG.info("Terrain:", this.terrainType, ...this.isTillable() ? ["Tilled:", this.isTilled()] : []);
 	}
 
@@ -134,7 +133,7 @@ export default class TerrainInformation extends InspectInformationSection {
 
 	@Bound
 	public refreshTile() {
-		world.layers[this.position.z].updateTile(this.position.x, this.position.y, this.tile, true, this.checkButtonIncludeNeighbors.checked, true, undefined, true);
+		localIsland.world.layers[this.position.z].updateTile(this.position.x, this.position.y, this.tile, true, this.checkButtonIncludeNeighbors.checked, true, undefined, true);
 		game.updateView(RenderSource.Mod, false);
 	}
 }

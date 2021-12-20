@@ -3,13 +3,13 @@ import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { DoodadType } from "game/doodad/IDoodad";
 import { CreatureType } from "game/entity/creature/ICreature";
 import { NPCType } from "game/entity/npc/INPCs";
-import { RenderSource } from "game/IGame";
 import { TerrainType } from "game/tile/ITerrain";
 import { TileEventType } from "game/tile/ITileEvent";
 import Mod from "mod/Mod";
 import { Registry } from "mod/ModRegistry";
-import { SpriteBatchLayer } from "renderer/IWorldRenderer";
-import WorldRenderer from "renderer/WorldRenderer";
+import { RenderSource } from "renderer/IRenderer";
+import { SpriteBatchLayer } from "renderer/world/IWorldRenderer";
+import WorldRenderer from "renderer/world/WorldRenderer";
 import { BlockRow } from "ui/component/BlockRow";
 import Button from "ui/component/Button";
 import { CheckButton } from "ui/component/CheckButton";
@@ -20,7 +20,7 @@ import Bind, { IBindHandlerApi } from "ui/input/Bind";
 import Bindable from "ui/input/Bindable";
 import InputManager from "ui/input/InputManager";
 import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
-import { gameScreen } from "ui/screen/screens/GameScreen";
+import { Bound } from "utilities/Decorators";
 import TileHelpers from "utilities/game/TileHelpers";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
@@ -140,7 +140,7 @@ export default class PaintPanel extends DebugToolsPanel {
 					.event.subscribe("activate", this.completePaint)));
 	}
 
-	@Override public getTranslation() {
+	public override getTranslation() {
 		return DebugToolsTranslation.PanelPaint;
 	}
 
@@ -183,7 +183,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		if (!this.painting || !gameScreen?.mouseStartWasWithin(api) || !renderer)
 			return false;
 
-		const tilePosition = renderer.screenToTile(...api.mouse.position.xy);
+		const tilePosition = renderer.worldRenderer.screenToTile(...api.mouse.position.xy);
 		if (!tilePosition)
 			return false;
 
@@ -195,7 +195,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 			const paintPosition = interpolatedPosition.floor(new Vector2());
 
-			for (const [paintTilePosition] of TileHelpers.tilesInRange(new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
+			for (const [paintTilePosition] of TileHelpers.tilesInRange(localIsland, new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
 				SelectionOverlay.add(paintTilePosition);
 
 				const tileId = getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z);
@@ -218,7 +218,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		if (!this.painting || !gameScreen?.mouseStartWasWithin(api) || !renderer)
 			return false;
 
-		const tilePosition = renderer.screenToTile(...api.mouse.position.xy);
+		const tilePosition = renderer.worldRenderer.screenToTile(...api.mouse.position.xy);
 		if (!tilePosition)
 			return false;
 
@@ -230,7 +230,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 			const paintPosition = interpolatedPosition.floor(new Vector2());
 
-			for (const [paintTilePosition] of TileHelpers.tilesInRange(new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
+			for (const [paintTilePosition] of TileHelpers.tilesInRange(localIsland, new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
 				SelectionOverlay.remove(paintTilePosition);
 
 				const tileId = getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z);
@@ -302,7 +302,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		this.painting = false;
 		this.paintButton.setChecked(false);
 
-		this.paintRow.store();
+		this.paintRow.store(this);
 
 		this.getParent()?.classes.remove("debug-tools-paint-panel");
 	}
@@ -313,7 +313,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 	private updateOverlayBatch() {
 		if (this.paintTiles.length * 4 - 512 < this.maxSprites || this.paintTiles.length * 4 + 512 > this.maxSprites) {
-			renderer!.initializeSpriteBatch(SpriteBatchLayer.Overlay, true);
+			renderer!.worldRenderer.initializeSpriteBatch(SpriteBatchLayer.Overlay);
 		}
 	}
 
@@ -351,7 +351,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	private clearPaint() {
 		for (const tileId of this.paintTiles) {
 			const position = getTilePosition(tileId);
-			const tile = game.getTile(...position);
+			const tile = localIsland.getTile(...position);
 			TileHelpers.Overlay.remove(tile, Overlays.isPaint);
 		}
 

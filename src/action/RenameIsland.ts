@@ -7,8 +7,8 @@ export default new Action(ActionArgument.String)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, name) => {
-		if (!name || island.name === name)
+		if (!name || action.executor.island.name === name)
 			return;
 
-		island.name = name === island.id ? undefined : name;
+		action.executor.island.name = name === action.executor.island.id ? undefined : name;
 	});

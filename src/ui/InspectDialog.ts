@@ -1,12 +1,12 @@
 import { EventBus } from "event/EventBuses";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import Entity from "game/entity/Entity";
-import { RenderSource, TileUpdateType } from "game/IGame";
+import { TileUpdateType } from "game/IGame";
 import { ITile, TerrainType } from "game/tile/ITerrain";
 import Translation from "language/Translation";
-import { HookMethod, IHookHost } from "mod/IHookHost";
 import Mod from "mod/Mod";
 import { Registry } from "mod/ModRegistry";
+import { RenderSource } from "renderer/IRenderer";
 import Button from "ui/component/Button";
 import Component from "ui/component/Component";
 import ContextMenu from "ui/component/ContextMenu";
@@ -16,8 +16,8 @@ import Bindable from "ui/input/Bindable";
 import InputManager from "ui/input/InputManager";
 import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
-import { gameScreen } from "ui/screen/screens/GameScreen";
 import { Tuple } from "utilities/collection/Arrays";
+import { Bound, Debounce } from "utilities/Decorators";
 import TileHelpers from "utilities/game/TileHelpers";
 import Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
@@ -47,17 +47,17 @@ const informationSectionClasses: InspectDialogInformationSectionClass[] = [
 	ItemInformation,
 ];
 
-export default class InspectDialog extends TabDialog<InspectInformationSection> implements IHookHost {
+export default class InspectDialog extends TabDialog<InspectInformationSection> {
 	/**
 	 * The positioning settings for the dialog.
 	 */
 	public static description: IDialogDescription = {
 		minSize: new Vector2(20, 25),
-		size: new Vector2(25, 27),
+		size: new Vector2(29, 25),
 		maxSize: new Vector2(40, 70),
 		edges: [
 			[Edge.Left, 50],
-			[Edge.Bottom, 33],
+			[Edge.Bottom, 31],
 		],
 		saveOpen: false,
 	};
@@ -91,7 +91,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * Implements the abstract method in "TabDialog". Returns an array of subpanels.
 	 * This will only be called once
 	 */
-	@Override protected getSubpanels(): InspectInformationSection[] {
+	protected override getSubpanels(): InspectInformationSection[] {
 		const subpanels = informationSectionClasses.stream()
 			.merge(this.DEBUG_TOOLS.modRegistryInspectDialogPanels.getRegistrations()
 				.map(registration => registration.data(InspectInformationSection)))
@@ -114,7 +114,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * This includes binding a `WillRemove` event handler to the panel, which will `store` (cache) the panel instead of removing it,
 	 * and trigger a `SwitchAway` event on the panel when this occurs.
 	 */
-	@Override protected getSubpanelInformation(subpanels: InspectInformationSection[]): SubpanelInformation[] {
+	protected override getSubpanelInformation(subpanels: InspectInformationSection[]): SubpanelInformation[] {
 		this.entityButtons = [];
 
 		return this.subpanels.stream()
@@ -141,7 +141,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 			.toArray();
 	}
 
-	@Override public getName(): Translation {
+	public override getName(): Translation {
 		return translation(DebugToolsTranslation.DialogTitleInspect);
 	}
 
@@ -183,6 +183,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 		this.schedule(300, 300, this.updateSubpanels);
 	}
 
+	@EventHandler(EventBus.LocalPlayer, "preMoveToIsland")
 	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableCloseInspectDialog"))
 	public onCloseBind() {
 		this.close();
@@ -204,7 +205,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 		return false;
 	}
 
-	@EventHandler(EventBus.Game, "end")
+	@EventHandler(EventBus.Game, "stoppingPlay")
 	public onGameEnd() {
 		this.close();
 	}
@@ -213,7 +214,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	// Hooks that trigger a dialog update
 	//
 
-	@HookMethod
+	@EventHandler(EventBus.Game, "tickEnd")
 	@Debounce(100)
 	public onGameTickEnd() {
 		this.update();
@@ -224,8 +225,8 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 		this.update();
 	}
 
-	@EventHandler(EventBus.Game, "tileUpdate")
-	public onTileUpdate(game: any, tile: ITile, x: number, y: number, z: number, tileUpdateType: TileUpdateType) {
+	@EventHandler(EventBus.Island, "tileUpdate")
+	public onTileUpdate(island: any, tile: ITile, x: number, y: number, z: number, tileUpdateType: TileUpdateType) {
 		this.update();
 	}
 
@@ -279,7 +280,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 		if (this.tilePosition && position.equals(this.tilePosition)) return;
 		this.tilePosition = position;
 
-		this.tile = game.getTile(...this.tilePosition.xyz);
+		this.tile = localIsland.getTile(...this.tilePosition.xyz);
 
 		this.shouldLog = true;
 		this.logUpdate();
@@ -305,7 +306,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	@Bound
 	private logUpdate() {
 		if (this.shouldLog) {
-			const tileData = this.tilePosition ? game.getTileData(this.tilePosition.x, this.tilePosition.y, this.tilePosition.z) : undefined;
+			const tileData = this.tilePosition ? localIsland.getTileData(this.tilePosition.x, this.tilePosition.y, this.tilePosition.z) : undefined;
 			this.LOG.info("Tile:", this.tile, this.tilePosition?.toString(), tileData?.map(data => TerrainType[data.type]).join(", "), tileData,);
 			this.shouldLog = false;
 		}

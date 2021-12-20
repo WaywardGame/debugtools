@@ -6,7 +6,7 @@ import InspectDialog from "../../ui/InspectDialog";
 
 export default function (action: IActionApi<Player>, item: Item) {
 	const container = item.containedWithin;
-	itemManager.remove(item);
+	action.executor.island.items.remove(item);
 
 	if (container) {
 		if ("data" in container) {

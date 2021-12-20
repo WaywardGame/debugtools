@@ -5,19 +5,19 @@ import Human from "game/entity/Human";
  */
 export default function (from: Human, to: Human) {
 	for (const item of to.inventory.containedItems) {
-		itemManager.remove(item);
+		from.island.items.remove(item);
 	}
 
 	for (const item of to.getEquippedItems()) {
-		itemManager.remove(item);
+		to.island.items.remove(item);
 	}
 
 	for (const item of from.inventory.containedItems) {
 		const clone = to.createItemInInventory(item.type, item.quality);
 		clone.ownerIdentifier = item.ownerIdentifier;
-		game.notifier?.suspend();
+		renderer?.notifier.suspend();
 		clone.minDur = item.minDur;
-		game.notifier?.resume();
+		renderer?.notifier.resume();
 		clone.maxDur = item.maxDur;
 		clone.renamed = item.renamed;
 		clone.weight = item.weight;

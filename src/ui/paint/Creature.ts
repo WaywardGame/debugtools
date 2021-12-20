@@ -4,12 +4,13 @@ import { CheckButton } from "ui/component/CheckButton";
 import Component from "ui/component/Component";
 import CreatureDropdown from "ui/component/dropdown/CreatureDropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
+import { Bound } from "utilities/Decorators";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
 
 export default class CreaturePaint extends Component implements IPaintSection {
-	@Override public event: IEventEmitter<this, Events<IPaintSection>>;
+	public override event: IEventEmitter<this, Events<IPaintSection>>;
 
 	private readonly dropdown: CreatureDropdown<"nochange" | "remove">;
 	private readonly aberrantCheckButton: CheckButton;

@@ -3,11 +3,12 @@ import { EventBus } from "event/EventBuses";
 import { Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { BiomeType } from "game/biome/IBiome";
-import Island from "game/Island";
+import { DEFAULT_ISLAND_ID, IslandId, IslandPosition } from "game/island/IIsland";
 import { WorldZ } from "game/WorldZ";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { TextContext } from "language/Translation";
-import { HookMethod } from "mod/IHookHost";
+import Dictionary from "language/Dictionary";
+import TranslationImpl from "language/impl/TranslationImpl";
+import { TextContext } from "language/ITranslation";
+import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { Registry } from "mod/ModRegistry";
 import { ParticleType } from "renderer/particle/IParticle";
@@ -25,16 +26,19 @@ import Text, { Heading } from "ui/component/Text";
 import Bind, { IBindHandlerApi } from "ui/input/Bind";
 import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
 import { Tuple } from "utilities/collection/Arrays";
+import { Bound, Debounce } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import ChangeLayer from "../../action/ChangeLayer";
 import ForceSailToCivilization from "../../action/ForceSailToCivilization";
+import MoveToIsland from "../../action/MoveToIsland";
 import RenameIsland from "../../action/RenameIsland";
 import SetTime from "../../action/SetTime";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import CancelablePromise from "../../util/CancelablePromise";
 import DebugToolsPanel from "../component/DebugToolsPanel";
+
 
 const TRAVEL_DROPDOWN_NEW_ISLAND_PREFIX = "new_island_";
 
@@ -101,14 +105,14 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.append(new Text()
 				.setText(translation(DebugToolsTranslation.HeadingIslandCurrent)))
 			.append(new Input()
-				.setDefault(() => island.id)
-				.setClearTo(() => island.name || island.id)
+				.setDefault(() => localIsland.id)
+				.setClearTo(() => localIsland.name || localIsland.id)
 				.setClearToDefaultWhenEmpty()
 				.clear()
 				.event.subscribe("done", this.renameIsland))
 			.append(new Text()
 				.setText(translation(DebugToolsTranslation.Island)
-					.addArgs("", "", new Translation(Dictionary.Biome, island.biomeType))))
+					.addArgs("", "", Translation.get(Dictionary.Biome, localIsland.biomeType))))
 			.appendTo(this);
 
 		////////////////////////////////////
@@ -122,8 +126,8 @@ export default class GeneralPanel extends DebugToolsPanel {
 				.setStep(0.001)
 				.setMin(0)
 				.setMax(1)
-				.setRefreshMethod(() => island.time.getTime()))
-			.setDisplayValue(time => island.time.getTranslation(time))
+				.setRefreshMethod(() => localIsland.time.getTime()))
+			.setDisplayValue(time => localIsland.time.getTranslation(time))
 			.event.subscribe("change", (_, time) => {
 				SetTime.execute(localPlayer, time);
 			})
@@ -138,9 +142,9 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelLayer)))
 			.append(this.dropdownLayer = new Dropdown<number>()
 				.setRefreshMethod(() => ({
-					options: Object.values(world.layers)
+					options: Object.values(localIsland.world.layers)
 						.map(layer => [layer.level, option => option.setText(translation(DebugToolsTranslation.OptionLayer)
-							.addArgs(layer.level, new Translation(Dictionary.WorldLayer, layer.level).inContext(TextContext.Title), Enums.getMod(WorldZ, layer.level)?.config.name))] as IDropdownOption<number>),
+							.addArgs(layer.level, Translation.get(Dictionary.WorldLayer, layer.level).inContext(TextContext.Title), Enums.getMod(WorldZ, layer.level)?.config.name))] as IDropdownOption<number>),
 					defaultOption: localPlayer.z,
 				}))
 				.event.subscribe("selection", this.changeLayer))
@@ -149,10 +153,10 @@ export default class GeneralPanel extends DebugToolsPanel {
 		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTravel)))
-			.append(this.dropdownTravel = new IslandDropdown<string>(getTravelDropdownNewIslandOptionId(BiomeType.Random), [
+			.append(this.dropdownTravel = new IslandDropdown<string>(getTravelDropdownNewIslandOptionId(BiomeType.Random), () => [
 				...Enums.values(BiomeType)
 					.map(biome => [getTravelDropdownNewIslandOptionId(biome), option => option.setText(translation(DebugToolsTranslation.OptionTravelNewIsland)
-						.addArgs(new Translation(Dictionary.Biome, biome).inContext(TextContext.Title)))] as IDropdownOption<string>),
+						.addArgs(Translation.get(Dictionary.Biome, biome).inContext(TextContext.Title)))] as IDropdownOption<string>),
 				["random", option => option.setText(translation(DebugToolsTranslation.OptionTravelRandomIsland))],
 				["civilization", option => option.setText(translation(DebugToolsTranslation.OptionTravelCivilization))],
 			]))
@@ -178,7 +182,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 				.setRefreshMethod(() => ({
 					defaultOption: SfxType.Click,
 					options: Enums.values(SfxType)
-						.map(sfx => Tuple(sfx, Translation.generator(SfxType[sfx])))
+						.map(sfx => Tuple(sfx, TranslationImpl.generator(SfxType[sfx])))
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				})))
@@ -192,14 +196,14 @@ export default class GeneralPanel extends DebugToolsPanel {
 				.setRefreshMethod(() => ({
 					defaultOption: ParticleType.Blood,
 					options: Enums.values(ParticleType)
-						.map(particle => Tuple(particle, Translation.generator(ParticleType[particle])))
+						.map(particle => Tuple(particle, TranslationImpl.generator(ParticleType[particle])))
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				})))
 			.appendTo(this);
 	}
 
-	@Override public getTranslation() {
+	public override getTranslation() {
 		return DebugToolsTranslation.PanelGeneral;
 	}
 
@@ -218,7 +222,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 		this.dropdownLayer.refresh();
 	}
 
-	@HookMethod
+	@EventHandler(EventBus.Game, "tickEnd")
 	@Debounce(100)
 	public onGameTickEnd() {
 		if (this.timeRange) {
@@ -226,20 +230,25 @@ export default class GeneralPanel extends DebugToolsPanel {
 		}
 	}
 
+	@EventHandler(EventBus.LocalPlayer, "loadedOnIsland")
+	protected onLoadOnIsland() {
+		this.dropdownTravel.refresh();
+	}
+
 	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).registry("selector").get("bindableSelectLocation"), Priority.High)
 	public onSelectLocation(api: IBindHandlerApi) {
 		if (!this.checkButtonAudio.checked && !this.checkButtonParticle.checked)
 			return false;
 
-		const position = renderer?.screenToTile(...api.mouse.position.xy);
+		const position = renderer?.worldRenderer.screenToTile(...api.mouse.position.xy);
 		if (!position)
 			return false;
 
 		if (this.checkButtonAudio.checked)
-			audio.queueEffect(this.dropdownAudio.selection, position.x, position.y, localPlayer.z);
+			audio?.queueEffect(this.dropdownAudio.selection, localIsland, position.x, position.y, localPlayer.z);
 
 		else
-			game.particle.create(position.x, position.y, localPlayer.z, particles[this.dropdownParticle.selection]);
+			renderer?.particle.create(localIsland, position.x, position.y, localPlayer.z, particles[this.dropdownParticle.selection]);
 
 		return true;
 	}
@@ -249,8 +258,6 @@ export default class GeneralPanel extends DebugToolsPanel {
 		this.timeRange.refresh();
 		this.dropdownLayer.refresh();
 
-		this.registerHookHost("DebugToolsDialog:GeneralPanel");
-
 		this.DEBUG_TOOLS.event.until(this, "switchAway")
 			.subscribe("inspect", () => {
 				if (this.selectionPromise) this.selectionPromise.cancel();
@@ -259,7 +266,6 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 	@OwnEventHandler(GeneralPanel, "switchAway")
 	protected onSwitchAway() {
-		hookManager.deregister(this);
 		if (this.selectionPromise) {
 			this.selectionPromise.cancel();
 			delete this.selectionPromise;
@@ -288,38 +294,34 @@ export default class GeneralPanel extends DebugToolsPanel {
 			return;
 		}
 
+		let islandId: IslandId = DEFAULT_ISLAND_ID;
+		const biome = Enums.values(BiomeType)
+			.find(b => this.dropdownTravel.selection === getTravelDropdownNewIslandOptionId(b)) ?? BiomeType.Random;
+
 		if (this.dropdownTravel.selection.startsWith(TRAVEL_DROPDOWN_NEW_ISLAND_PREFIX)) {
-			this.travelToNewIsland();
-			return;
-		}
+			const currentIslandPosition = localIsland.position;
 
-		const islandId = this.dropdownTravel.selection !== "random"
-			? this.dropdownTravel.selection
-			: game.islands.keys()
-				.filter(id => id !== island.id)
-				.random()!;
+			for (let i = 1; i < Infinity; i++) {
+				const nextPosition = {
+					x: currentIslandPosition.x,
+					y: currentIslandPosition.y + i,
+				};
 
-		game.travelToIslandId(islandId, localPlayer);
-	}
-
-	private travelToNewIsland() {
-		const currentIslandPosition = island.position;
-
-		for (let i = 1; i < Infinity; i++) {
-			const nextPosition = {
-				x: currentIslandPosition.x,
-				y: currentIslandPosition.y + i,
-			};
-
-			const biome = Enums.values(BiomeType)
-				.find(b => this.dropdownTravel.selection === getTravelDropdownNewIslandOptionId(b));
-
-			const islandId = Island.positionToId(nextPosition);
-			if (!game.islands.has(islandId)) {
-				game.travelToIslandId(islandId, localPlayer, { newWorldBiomeTypeOverride: biome });
-				return;
+				islandId = IslandPosition.toId(nextPosition);
+				if (!game.islands.has(islandId)) {
+					break;
+				}
 			}
+
+		} else {
+			islandId = this.dropdownTravel.selection !== "random"
+				? this.dropdownTravel.selection as IslandId
+				: game.islands.keys()
+					.filter(id => id !== localIsland.id)
+					.random()!;
 		}
+
+		MoveToIsland.execute(localPlayer, islandId, biome);
 	}
 
 	private async sailToCivilization() {
@@ -333,37 +335,41 @@ export default class GeneralPanel extends DebugToolsPanel {
 	}
 }
 
-class IslandDropdown<OTHER_OPTIONS extends string = never> extends GroupDropdown<Record<string, string>, OTHER_OPTIONS, BiomeType> {
+class IslandDropdown<OTHER_OPTIONS extends string = never> extends GroupDropdown<Record<IslandId, string>, OTHER_OPTIONS, BiomeType> {
 
-	public constructor(defaultOption: string | OTHER_OPTIONS, options: Iterable<IDropdownOption<OTHER_OPTIONS>>) {
+	public constructor(defaultOption: IslandId | OTHER_OPTIONS, options: SupplierOr<Iterable<IDropdownOption<OTHER_OPTIONS>>>) {
 		super(game.islands.keyStream().toObject(key => [key, key]), -1, defaultOption, options);
-		this.options.get(island.id)?.setDisabled(true);
-		this.options.get("random")?.setDisabled(game.islands.size <= 1);
 		this.setPrefix("biome");
 	}
 
-	@Override protected getTranslation(islandId: string) {
+	protected override getTranslation(islandId: IslandId) {
 		const island = game.islands.get(islandId);
 		return translation(DebugToolsTranslation.Island)
-			.addArgs(islandId, island?.name, new Translation(Dictionary.Biome, island?.biomeType ?? BiomeType.Random), island?.seeds.base.toString());
+			.addArgs(islandId, island?.getName(), Translation.get(Dictionary.Biome, island?.biomeType ?? BiomeType.Random), island?.seeds.base.toString());
 	}
 
-	@Override protected getGroupName(biome: BiomeType) {
-		return new Translation(Dictionary.Biome, biome).getString();
+	protected override getGroupName(biome: BiomeType) {
+		return Translation.get(Dictionary.Biome, biome).getString();
 	}
 
-	@Override protected shouldIncludeOtherOptionsInGroupFilter() {
+	protected override shouldIncludeOtherOptionsInGroupFilter() {
 		return true;
 	}
 
-	@Override protected isInGroup(islandId: string, biome: BiomeType) {
+	protected override isInGroup(islandId: IslandId, biome: BiomeType) {
 		if (islandId.startsWith(TRAVEL_DROPDOWN_NEW_ISLAND_PREFIX))
 			return islandId === getTravelDropdownNewIslandOptionId(biome);
 
 		return game.islands.get(islandId)?.biomeType === biome;
 	}
 
-	@Override protected getGroups() {
+	protected override getGroups() {
 		return Enums.values(BiomeType).slice(1);
+	}
+
+	@OwnEventHandler(IslandDropdown, "refresh")
+	protected onRefresh() {
+		this.options.get(localIsland.id)?.setDisabled(true);
+		this.options.get("random")?.setDisabled(game.islands.size <= 1);
 	}
 }

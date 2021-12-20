@@ -1,3 +1,4 @@
+import Stream from "@wayward/goodstream/Stream";
 import { OwnEventHandler } from "event/EventManager";
 import Entity from "game/entity/Entity";
 import Human, { REPUTATION_MAX } from "game/entity/Human";
@@ -7,6 +8,7 @@ import { ItemType } from "game/item/IItem";
 import Button from "ui/component/Button";
 import Component from "ui/component/Component";
 import { RangeRow } from "ui/component/RangeRow";
+import { Bound } from "utilities/Decorators";
 import AddItemToInventory from "../../action/AddItemToInventory";
 import ClearInventory from "../../action/ClearInventory";
 import SetStat from "../../action/SetStat";
@@ -40,7 +42,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 			.subscribe("execute", this.addItem);
 	}
 
-	@Override public getImmutableStats() {
+	public override getImmutableStats() {
 		return this.human ? [
 			Stat.Benignity,
 			Stat.Malignity,
@@ -51,7 +53,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 		] : [];
 	}
 
-	@Override public update(entity: Entity) {
+	public override update(entity: Entity) {
 		if (this.human === entity) return;
 
 		this.human = entity.asHuman;

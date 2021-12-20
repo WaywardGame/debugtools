@@ -5,7 +5,7 @@ import { WorldZ } from "game/WorldZ";
 import Enums from "utilities/enum/Enums";
 import { defaultUsability } from "../Actions";
 
-export default new Action(ActionArgument.Number)
+export default new Action(ActionArgument.Integer32)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, z) => {

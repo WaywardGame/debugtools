@@ -4,10 +4,10 @@ import { EntityType } from "game/entity/IEntity";
 import { defaultUsability } from "../Actions";
 
 
-export default new Action(ActionArgument.Number)
+export default new Action(ActionArgument.Float64)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, time) => {
-		island.time.setTime(time);
+		action.executor.island.time.setTime(time);
 		action.setUpdateView(true);
 	});

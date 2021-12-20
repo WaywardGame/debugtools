@@ -3,7 +3,7 @@ import { ActionArgument } from "game/entity/action/IAction";
 import { EntityType } from "game/entity/IEntity";
 import Actions, { defaultUsability } from "../Actions";
 
-export default new Action(ActionArgument.Player, ActionArgument.Number)
+export default new Action(ActionArgument.Player, ActionArgument.Float64)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, player, weightBonus) => {

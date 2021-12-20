@@ -1,6 +1,7 @@
 import { Events, IEventEmitter } from "event/EventEmitter";
 import { Quality } from "game/IObject";
 import { ItemType } from "game/item/IItem";
+import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import Button from "ui/component/Button";
 import Component from "ui/component/Component";
@@ -9,6 +10,7 @@ import ItemDropdown from "ui/component/dropdown/ItemDropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
 import { RangeRow } from "ui/component/RangeRow";
 import { Tuple } from "utilities/collection/Arrays";
+import { Bound } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
 import { ADD_ITEM_ALL, ADD_ITEM_RANDOM } from "../../action/AddItemToInventory";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -22,7 +24,7 @@ interface IAddItemToInventoryEvents extends Events<Component> {
 }
 
 export default class AddItemToInventory extends Component {
-	@Override public event: IEventEmitter<this, IAddItemToInventoryEvents>;
+	public override event: IEventEmitter<this, IAddItemToInventoryEvents>;
 
 	private static INSTANCE: AddItemToInventory | undefined;
 
@@ -59,7 +61,7 @@ export default class AddItemToInventory extends Component {
 					.setRefreshMethod(() => ({
 						defaultOption: Quality.Random,
 						options: Enums.values(Quality)
-							.map(quality => Tuple(quality, Translation.generator(Quality[quality])))
+							.map(quality => Tuple(quality, Translation.get(Dictionary.Quality, quality)))
 							.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 					}))))
 			.append(this.rangeItemQuantity = new RangeRow()
@@ -85,7 +87,7 @@ export default class AddItemToInventory extends Component {
 
 	@Bound
 	private willRemove() {
-		this.store();
+		this.store(this.getScreen()!);
 		return false;
 	}
 

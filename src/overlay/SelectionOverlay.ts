@@ -1,3 +1,4 @@
+import Stream from "@wayward/goodstream/Stream";
 import { ITile } from "game/tile/ITerrain";
 import Mod from "mod/Mod";
 import { Tuple } from "utilities/collection/Arrays";
@@ -29,7 +30,7 @@ export default class SelectionOverlay {
 }
 
 function getTile(tilePosition: IVector2 | IVector3) {
-	return game.getTile(tilePosition.x, tilePosition.y, "z" in tilePosition ? tilePosition.z : localPlayer.z);
+	return localIsland.getTile(tilePosition.x, tilePosition.y, "z" in tilePosition ? tilePosition.z : localPlayer.z);
 }
 
 /**
@@ -99,7 +100,7 @@ function updateSelectionOverlay(tile: ITile, tilePosition: IVector2, updateNeigh
 function getNeighborTiles(tilePosition: IVector2): INeighborTiles {
 	const vectors = getNeighborVectors(tilePosition);
 	return Enums.values(NeighborPosition)
-		.map(pos => Tuple(pos, Tuple(vectors[pos], game.getTile(...vectors[pos].xyz))))
+		.map(pos => Tuple(pos, Tuple(vectors[pos], localIsland.getTile(...vectors[pos].xyz))))
 		.toObject();
 }
 

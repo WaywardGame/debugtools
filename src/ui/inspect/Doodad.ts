@@ -4,10 +4,11 @@ import { GrowingStage } from "game/doodad/IDoodad";
 import { Quality } from "game/IObject";
 import { IContainer, ItemType } from "game/item/IItem";
 import { ITile } from "game/tile/ITerrain";
-import { TextContext } from "language/Translation";
+import { TextContext } from "language/ITranslation";
 import Mod from "mod/Mod";
 import Button from "ui/component/Button";
 import EnumContextMenu, { EnumSort } from "ui/component/EnumContextMenu";
+import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
@@ -60,14 +61,14 @@ export default class DoodadInformation extends InspectInformationSection {
 			.subscribe("execute", this.addItem);
 	}
 
-	@Override public getTabs(): TabInformation[] {
+	public override getTabs(): TabInformation[] {
 		return this.doodad ? [
 			[0, () => translation(DebugToolsTranslation.DoodadName)
 				.get(this.doodad!.getName(false).inContext(TextContext.Title))],
 		] : [];
 	}
 
-	@Override public update(position: IVector2, tile: ITile) {
+	public override update(position: IVector2, tile: ITile) {
 		if (tile.doodad === this.doodad) return;
 		this.doodad = tile.doodad;
 
@@ -78,7 +79,7 @@ export default class DoodadInformation extends InspectInformationSection {
 		this.setShouldLog();
 	}
 
-	@Override public logUpdate() {
+	public override logUpdate() {
 		this.LOG.info("Doodad:", this.doodad);
 	}
 

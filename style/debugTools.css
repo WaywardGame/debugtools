@@ -95,3 +95,31 @@
     display: grid;
     grid-template-columns: auto 1fr auto;
 }
+
+.debug-tools-selection-preview-wrapper {
+    margin: calc(10px * var(--scale-floor)) 0;
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	gap: calc(10px * var(--scale-floor));
+}
+
+.debug-tools-selection-preview {
+    width: 100%;
+	height: calc(200px * var(--scale-floor));
+    position: relative;	
+	grid-column: 2;
+	grid-row: 1;
+}
+
+.debug-tools-selection-preview:not(.has-targets) {
+	filter: grayscale() brightness(0.2);
+}
+
+.debug-tools-selection-preview-wrapper .button-icon {
+	height: calc(44px * var(--scale-floor));
+	align-self: center;
+}
+
+.debug-tools-selection-method {
+	grid-template-columns: minmax(auto, calc(150px * var(--scale-floor))) 1fr auto;
+}

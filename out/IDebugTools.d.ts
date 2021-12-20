@@ -1,5 +1,5 @@
 import Translation from "language/Translation";
-import { RenderLayerFlag } from "renderer/IWorldRenderer";
+import { RenderLayerFlag } from "renderer/world/IWorldRenderer";
 import type DebugTools from "./DebugTools";
 import type DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import type InspectEntityInformationSubsection from "./ui/component/InspectEntityInformationSubsection";
@@ -9,7 +9,7 @@ import type { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect
 import type { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
 export declare const DEBUG_TOOLS_ID = "Debug Tools";
 export declare const ZOOM_LEVEL_MAX: number;
-export declare function translation(debugToolsTranslation: DebugToolsTranslation | Translation): Translation;
+export declare function translation(debugToolsTranslation: DebugToolsTranslation | Translation): import("@wayward/types/definitions/game/language/impl/TranslationImpl").default;
 export declare module translation {
     function setDebugToolsInstance(instance: DebugTools): void;
 }
@@ -82,8 +82,8 @@ export declare enum DebugToolsTranslation {
     ActionRemove = 65,
     ActionSelect = 66,
     ButtonExecute = 67,
-    SelectionCount = 68,
-    LabelSelectionCount = 69,
+    SelectionPreview = 68,
+    LabelSelectionPreview = 69,
     SelectionFilterNamed = 70,
     SelectionFilterAll = 71,
     SelectionAllPlayers = 72,

@@ -3,7 +3,6 @@ import { ActionArgument, anyOf } from "game/entity/action/IAction";
 import { EntityType, MoveType, StatusEffectChangeReason, StatusType } from "game/entity/IEntity";
 import { IStatMax, Stat } from "game/entity/IStats";
 import { PlayerState } from "game/entity/player/IPlayer";
-import { gameScreen } from "ui/screen/screens/GameScreen";
 import Actions, { defaultUsability } from "../Actions";
 import ResurrectCorpse from "./helpers/ResurrectCorpse";
 
@@ -44,7 +43,7 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
 			entity.asPlayer.setMoveType(moveType);
 		}
 
+		action.setPassTurn();
 		action.setUpdateRender();
 		Actions.DEBUG_TOOLS.updateFog();
-		gameScreen!.onGameTickEnd();
 	});

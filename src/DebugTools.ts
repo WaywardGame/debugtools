@@ -10,29 +10,26 @@ import { Delay } from "game/entity/IHuman";
 import NPC from "game/entity/npc/NPC";
 import { Source } from "game/entity/player/IMessageManager";
 import Player from "game/entity/player/Player";
-import Game from "game/Game";
-import { RenderSource } from "game/IGame";
 import { InspectType } from "game/inspection/IInspection";
+import Island from "game/island/Island";
 import { ITile, OverlayType } from "game/tile/ITerrain";
-import { Dictionary } from "language/Dictionaries";
-import Interrupt from "language/dictionary/Interrupt";
+import Dictionary from "language/Dictionary";
 import Message from "language/dictionary/Message";
-import { HookMethod } from "mod/IHookHost";
 import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
-import WorldRenderer from "renderer/WorldRenderer";
+import { RenderSource } from "renderer/IRenderer";
+import WorldRenderer from "renderer/world/WorldRenderer";
 import Bind, { IBindHandlerApi } from "ui/input/Bind";
 import Bindable from "ui/input/Bindable";
 import { IInput } from "ui/input/IInput";
 import InputManager from "ui/input/InputManager";
 import { DialogId } from "ui/screen/screens/game/Dialogs";
-import { MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
-import { MenuBarButtonGroup } from "ui/screen/screens/game/static/menubar/MenuBarButtonDescriptions";
-import { gameScreen } from "ui/screen/screens/GameScreen";
+import { MenuBarButtonGroup, MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
+import GameScreen from "ui/screen/screens/GameScreen";
 import { IInjectionApi, Inject, InjectionPosition } from "utilities/class/Inject";
+import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
-import { Direction } from "utilities/math/Direction";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
@@ -44,6 +41,7 @@ import Clone from "./action/Clone";
 import ForceSailToCivilization from "./action/ForceSailToCivilization";
 import Heal from "./action/Heal";
 import Kill from "./action/Kill";
+import MoveToIsland from "./action/MoveToIsland";
 import Paint from "./action/Paint";
 import PlaceTemplate from "./action/PlaceTemplate";
 import Remove from "./action/Remove";
@@ -65,7 +63,8 @@ import Actions from "./Actions";
 import { DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation, ZOOM_LEVEL_MAX } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import AddItemToInventoryComponent from "./ui/component/AddItemToInventory";
-import MainDialog from "./ui/DebugToolsDialog";
+import DebugToolsPanel from "./ui/component/DebugToolsPanel";
+import MainDialog, { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import InspectDialog from "./ui/InspectDialog";
 import TemperatureInspection from "./ui/inspection/Temperature";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
@@ -108,7 +107,7 @@ interface IDebugToolsEvents extends Events<Mod> {
 }
 
 export default class DebugTools extends Mod {
-	@Override public event: IEventEmitter<this, IDebugToolsEvents>;
+	public override event: IEventEmitter<this, IDebugToolsEvents>;
 
 	////////////////////////////////////
 	// Static
@@ -190,9 +189,6 @@ export default class DebugTools extends Mod {
 	@Register.messageSource("DebugTools")
 	public readonly source: Source;
 
-	@Register.interrupt("ConfirmUnlockRecipes")
-	public readonly interruptUnlockRecipes: Interrupt;
-
 	////////////////////////////////////
 	// Actions
 	//
@@ -269,6 +265,9 @@ export default class DebugTools extends Mod {
 	@Register.action("RenameIsland", RenameIsland)
 	public readonly actionRenameIsland: ActionType;
 
+	@Register.action("MoveToIsland", MoveToIsland)
+	public readonly actionMoveToIsland: ActionType;
+
 	@Register.action("ForceSailToCivilization", ForceSailToCivilization)
 	public readonly actionForceSailToCivilization: ActionType;
 
@@ -288,10 +287,11 @@ export default class DebugTools extends Mod {
 		onActivate: () => DebugTools.INSTANCE.toggleDialog(),
 		group: MenuBarButtonGroup.Meta,
 		bindable: Registry<DebugTools>().get("bindableToggleDialog"),
-		tooltip: tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.DialogTitleMain))),
+		tooltip: tooltip => tooltip.dump().addText(text => text.setText(translation(DebugToolsTranslation.DialogTitleMain))),
 		onCreate: button => {
 			button.toggle(DebugTools.INSTANCE.hasPermission());
-			DebugTools.INSTANCE.event.subscribe("playerDataChange", () => button.toggle(DebugTools.INSTANCE.hasPermission()));
+			DebugTools.INSTANCE.event.until(DebugTools.INSTANCE, "unload")
+				.subscribe("playerDataChange", () => button.toggle(DebugTools.INSTANCE.hasPermission()));
 		},
 	})
 	public readonly menuBarButton: MenuBarButtonType;
@@ -338,7 +338,7 @@ export default class DebugTools extends Mod {
 			invulnerable: false,
 			noclip: false,
 			permissions: players[player.id].isServer(),
-			fog: true,
+			fog: undefined,
 			lighting: true,
 		})[key];
 	}
@@ -359,8 +359,8 @@ export default class DebugTools extends Mod {
 		this.event.emit("playerDataChange", player.id, key, value);
 
 		if (!this.hasPermission() && gameScreen) {
-			gameScreen.closeDialog(this.dialogMain);
-			gameScreen.closeDialog(this.dialogInspect);
+			gameScreen.dialogs.close(this.dialogMain);
+			gameScreen.dialogs.close(this.dialogInspect);
 		}
 	}
 
@@ -371,7 +371,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
 	 */
-	@Override public initializeGlobalData(data?: IGlobalData) {
+	public override initializeGlobalData(data?: IGlobalData) {
 		return !this.needsUpgrade(data) ? data : {
 			lastVersion: modManager.getVersion(this.getIndex()),
 		};
@@ -380,14 +380,14 @@ export default class DebugTools extends Mod {
 	/**
 	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
 	 */
-	@Override public initializeSaveData(data?: ISaveData) {
+	public override initializeSaveData(data?: ISaveData) {
 		return !this.needsUpgrade(data) ? data : {
 			playerData: {},
 			lastVersion: modManager.getVersion(this.getIndex()),
 		};
 	}
 
-	@Override public onInitialize() {
+	public override onInitialize() {
 		translation.setDebugToolsInstance(this);
 	}
 
@@ -395,10 +395,9 @@ export default class DebugTools extends Mod {
 	 * Called when Debug Tools is loaded (in a save)
 	 * - Registers the `LocationSelector` stored in `this.selector` as a hook host.
 	 */
-	@Override public onLoad() {
+	public override onLoad() {
 		EventManager.registerEventBusSubscriber(this.selector);
 		Bind.registerHandlers(this.selector);
-		this.unlockedCameraMovementHandler.begin();
 	}
 
 	/**
@@ -406,7 +405,7 @@ export default class DebugTools extends Mod {
 	 * - Deregisters `this.selector` as a hook host.
 	 * - Removes the `AddItemToInventory` UI Component.
 	 */
-	@Override public onUnload() {
+	public override onUnload() {
 		AddItemToInventoryComponent.init().releaseAndRemove();
 		EventManager.deregisterEventBusSubscriber(this.selector);
 		Bind.deregisterHandlers(this.selector);
@@ -428,8 +427,13 @@ export default class DebugTools extends Mod {
 	 * Updates the field of view based on whether it's disabled in the mod.
 	 */
 	public updateFog() {
-		fieldOfView.disabled = (localPlayer.isGhost() && !game.getGameOptions().respawn) ? true : this.getPlayerData(localPlayer, "fog") === false;
-		game.updateView(RenderSource.Mod, true);
+		if (renderer) {
+			const fogForceEnabled = this.getPlayerData(localPlayer, "fog");
+			if (fogForceEnabled !== undefined && renderer.fieldOfView.disabled !== !fogForceEnabled) {
+				renderer.fieldOfView.disabled = !fogForceEnabled;
+				game.updateView(RenderSource.Mod, true);
+			}
+		}
 	}
 
 	/**
@@ -461,7 +465,7 @@ export default class DebugTools extends Mod {
 			return;
 		}
 
-		gameScreen.openDialog<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
+		gameScreen.dialogs.open<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
 			.setInspection(what);
 
 		this.event.emit("inspect");
@@ -473,7 +477,7 @@ export default class DebugTools extends Mod {
 	public toggleDialog() {
 		if (!this.hasPermission() || !gameScreen) return;
 
-		gameScreen.toggleDialog(this.dialogMain);
+		gameScreen.dialogs.toggle(this.dialogMain);
 	}
 
 	public hasPermission() {
@@ -496,12 +500,12 @@ export default class DebugTools extends Mod {
 	//
 
 	@Register.command("DebugToolsPermission")
-	public debugToolsAccessCommand(player: Player, args: string) {
+	public debugToolsAccessCommand(_: any, player: Player, args: string) {
 		if (!this.hasPermission()) {
 			return;
 		}
 
-		const targetPlayer = game.getPlayerByName(args);
+		const targetPlayer = playerManager.getByName(args);
 		if (targetPlayer !== undefined && !targetPlayer.isLocalPlayer()) {
 			const newPermissions = !this.getPlayerData(targetPlayer, "permissions");
 			TogglePermissions.execute(localPlayer, targetPlayer, newPermissions);
@@ -516,7 +520,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * When the field of view has initialized, we update the fog (enables/disables it based on the mod save data)
 	 */
-	@Override @HookMethod
+	@EventHandler(EventBus.Game, "postFieldOfView")
 	public postFieldOfView() {
 		this.updateFog();
 	}
@@ -526,9 +530,17 @@ export default class DebugTools extends Mod {
 	 * - Initializes the `AddItemToInventory` UI Component (it takes a second or two to be created, and there are multiple places in
 	 * the UI that use it. We initialize it only once so the slow initialization only happens once.)
 	 */
-	@Override @HookMethod
+	@EventHandler(GameScreen, "show")
 	public onGameScreenVisible() {
 		AddItemToInventoryComponent.init();
+	}
+
+	@EventHandler(EventBus.Game, "play")
+	protected onGamePlay() {
+		const rendererEventsUntilUnload = renderer?.event.until(this, "unload");
+		rendererEventsUntilUnload?.subscribe("getZoomLevel", this.getZoomLevel);
+		rendererEventsUntilUnload?.subscribe("getCameraPosition", this.getCameraPosition);
+		this.unlockedCameraMovementHandler.begin();
 	}
 
 	/**
@@ -540,8 +552,7 @@ export default class DebugTools extends Mod {
 	 * - If our internal zoom level is `1`: `0.125`
 	 * - If our internal zoom level is `0`: `0.0625`
 	 */
-	@EventHandler(EventBus.Game, "getZoomLevel")
-	public getZoomLevel() {
+	@Bound public getZoomLevel() {
 		if (this.data.zoomLevel === undefined || !this.hasPermission()) {
 			return undefined;
 		}
@@ -561,8 +572,7 @@ export default class DebugTools extends Mod {
 	 * 		- If it is, we lock the camera again and return `undefined`.
 	 * 		- Otherwise, we return the transition camera position.
 	 */
-	@EventHandler(EventBus.Game, "getCameraPosition")
-	protected getCameraPosition(_: any, position: IVector2): IVector2 | undefined {
+	@Bound protected getCameraPosition(_: any, position: IVector2): IVector2 | undefined {
 		if (this.cameraState === CameraState.Locked) {
 			return undefined;
 		}
@@ -608,8 +618,8 @@ export default class DebugTools extends Mod {
 	 * - Moves the player to the next tile instantly, then adds the calculated delay.
 	 * - Cancels the default movement by returning `false`.
 	 */
-	@Override @HookMethod
-	public onMove(player: Player, nextX: number, nextY: number, tile: ITile, direction: Direction): boolean | undefined {
+	@EventHandler(EventBus.Players, "preMove")
+	public onMove(player: Player, fromX: number, fromY: number, fromZ: number, fromTile: ITile, nextX: number, nextY: number, nextZ: number, tile: ITile): boolean | void | undefined {
 		const noclip = this.getPlayerData(player, "noclip");
 		if (!noclip) return undefined;
 
@@ -683,7 +693,7 @@ export default class DebugTools extends Mod {
 
 		this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;
 		this.data.zoomLevel = api.bindable === Bindable.GameZoomIn ? Math.min(ZOOM_LEVEL_MAX + 3, ++this.data.zoomLevel) : Math.max(0, --this.data.zoomLevel);
-		game.updateZoomLevel();
+		renderer?.updateZoomLevel();
 		return true;
 	}
 
@@ -712,7 +722,7 @@ export default class DebugTools extends Mod {
 		if (!this.hasPermission() || !gameScreen?.isMouseWithin() || !renderer)
 			return false;
 
-		const tile = renderer.screenToTile(...InputManager.mouse.position.xy);
+		const tile = renderer.worldRenderer.screenToTile(...InputManager.mouse.position.xy);
 		if (!tile)
 			return false;
 
@@ -743,7 +753,7 @@ export default class DebugTools extends Mod {
 		if (!this.hasPermission() || !renderer)
 			return false;
 
-		const tile = renderer.screenToTile(...api.mouse.position.xy);
+		const tile = renderer.worldRenderer.screenToTile(...api.mouse.position.xy);
 		if (!tile)
 			return false;
 
@@ -774,19 +784,19 @@ export default class DebugTools extends Mod {
 	/**
 	 * If lighting is disabled, we return the maximum light level.
 	 */
-	@Inject(Game, "calculateAmbientLightLevel", InjectionPosition.Pre)
-	public getAmbientLightLevel(api: IInjectionApi<Game, "calculateAmbientLightLevel">, player: Player | undefined, z: number) {
-		if (player === localPlayer && this.getPlayerData(localPlayer, "lighting") === false) {
-			api.returnValue = 1;
-			api.cancelled = true;
-		}
-	}
+	// @Inject(Renderer, "calculateAmbientLightLevel", InjectionPosition.Pre)
+	// public getAmbientLightLevel(api: IInjectionApi<Renderer, "calculateAmbientLightLevel">, entity: Entity, z: number) {
+	// 	if (entity === localPlayer && this.getPlayerData(localPlayer, "lighting") === false) {
+	// 		api.returnValue = 1;
+	// 		api.cancelled = true;
+	// 	}
+	// }
 
 	/**
 	 * If lighting is disabled, we return the minimum light level.
 	 */
-	@Inject(Game, "calculateTileLightLevel", InjectionPosition.Pre)
-	public getTileLightLevel(api: IInjectionApi<Game, "calculateTileLightLevel">, tile: ITile, x: number, y: number, z: number) {
+	@Inject(Island, "calculateTileLightLevel", InjectionPosition.Pre)
+	public getTileLightLevel(api: IInjectionApi<Island, "calculateTileLightLevel">, tile: ITile, x: number, y: number, z: number) {
 		if (this.getPlayerData(localPlayer, "lighting") === false) {
 			api.returnValue = 0;
 			api.cancelled = true;
@@ -811,3 +821,7 @@ export default class DebugTools extends Mod {
 		return lastLoadVersion.isOlderThan(version);
 	}
 }
+
+export { ModRegistrationMainDialogPanel };
+export { DebugToolsPanel, DebugToolsDialogPanelClass };
+

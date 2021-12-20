@@ -2,7 +2,6 @@ import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
-import { gameScreen } from "ui/screen/screens/GameScreen";
 import { Tuple } from "utilities/collection/Arrays";
 import Vector2 from "utilities/math/Vector2";
 import { sleep } from "utilities/promise/Async";
@@ -34,11 +33,11 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 	 */
 	public static description: IDialogDescription = {
 		minSize: new Vector2(20, 25),
-		size: new Vector2(25, 27),
+		size: new Vector2(29, 25),
 		maxSize: new Vector2(40, 70),
 		edges: [
-			[Edge.Left, 25],
-			[Edge.Bottom, 33],
+			[Edge.Right, 50],
+			[Edge.Bottom, 31],
 		],
 	};
 
@@ -50,11 +49,11 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 		this.classes.add("debug-tools-dialog");
 
 		if (!this.DEBUG_TOOLS.hasPermission()) {
-			sleep(1).then(() => gameScreen!.closeDialog(id));
+			sleep(1).then(() => gameScreen?.dialogs.close(id));
 		}
 	}
 
-	@Override public getName(): Translation {
+	public override getName(): Translation {
 		return translation(DebugToolsTranslation.DialogTitleMain);
 	}
 
@@ -62,7 +61,7 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 	 * Implements the abstract method in "TabDialog". Returns an array of subpanels.
 	 * This will only be called once
 	 */
-	@Override protected getSubpanels(): DebugToolsPanel[] {
+	protected override getSubpanels(): DebugToolsPanel[] {
 		return subpanelClasses.stream()
 			.merge(this.DEBUG_TOOLS.modRegistryMainDialogPanels.getRegistrations()
 				.map(registration => registration.data(DebugToolsPanel)))
@@ -78,7 +77,7 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 	 * This includes binding a `WillRemove` event handler to the panel, which will `store` (cache) the panel instead of removing it,
 	 * and trigger a `SwitchAway` event on the panel when this occurs.
 	 */
-	@Override protected getSubpanelInformation(subpanels: DebugToolsPanel[]): SubpanelInformation[] {
+	protected override getSubpanelInformation(subpanels: DebugToolsPanel[]): SubpanelInformation[] {
 		return subpanels
 			.map(subpanel => Tuple(
 				translation(subpanel.getTranslation()).getString(),

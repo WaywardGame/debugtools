@@ -2,7 +2,7 @@ import { Action } from "game/entity/action/Action";
 import { ActionArgument } from "game/entity/action/IAction";
 import { EntityType, MoveType } from "game/entity/IEntity";
 import { Delay } from "game/entity/IHuman";
-import { RenderSource } from "game/IGame";
+import { RenderSource } from "renderer/IRenderer";
 import Actions, { defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.Player, ActionArgument.Boolean)

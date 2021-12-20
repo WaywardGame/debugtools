@@ -1,6 +1,6 @@
 import * as Consts from "game/IGame";
 import Translation from "language/Translation";
-import { RenderLayerFlag } from "renderer/IWorldRenderer";
+import { RenderLayerFlag } from "renderer/world/IWorldRenderer";
 import type DebugTools from "./DebugTools";
 import type DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import type InspectEntityInformationSubsection from "./ui/component/InspectEntityInformationSubsection";
@@ -20,7 +20,7 @@ let debugTools: DebugTools | undefined;
  */
 export function translation(debugToolsTranslation: DebugToolsTranslation | Translation) {
 	return !debugTools ? Translation.empty()
-		: typeof debugToolsTranslation !== "number" ? debugToolsTranslation : new Translation(debugTools.dictionary, debugToolsTranslation);
+		: typeof debugToolsTranslation !== "number" ? debugToolsTranslation : Translation.get(debugTools.dictionary, debugToolsTranslation);
 }
 
 export module translation {
@@ -110,8 +110,8 @@ export enum DebugToolsTranslation {
 	ActionSelect,
 	// ActionCount,
 	ButtonExecute,
-	SelectionCount,
-	LabelSelectionCount,
+	SelectionPreview,
+	LabelSelectionPreview,
 	SelectionFilterNamed,
 	SelectionFilterAll,
 	SelectionAllPlayers,

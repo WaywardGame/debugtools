@@ -3,6 +3,7 @@ import { SkillType } from "game/entity/IHuman";
 import NPC from "game/entity/npc/NPC";
 import Player from "game/entity/player/Player";
 import UiTranslation from "language/dictionary/UiTranslation";
+import TranslationImpl from "language/impl/TranslationImpl";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { BlockRow } from "ui/component/BlockRow";
@@ -10,6 +11,7 @@ import { CheckButton } from "ui/component/CheckButton";
 import SkillDropdown from "ui/component/dropdown/SkillDropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
 import { RangeRow } from "ui/component/RangeRow";
+import { Bound } from "utilities/Decorators";
 import SetSkill from "../../action/SetSkill";
 import SetWeightBonus from "../../action/SetWeightBonus";
 import ToggleInvulnerable from "../../action/ToggleInvulnerable";
@@ -75,7 +77,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 		this.skillRangeRow = new RangeRow()
 			.hide()
-			.setLabel(label => label.setText(Translation.generator(() => this.skill === undefined ? "" : SkillType[this.skill])))
+			.setLabel(label => label.setText(TranslationImpl.generator(() => this.skill === undefined ? "" : SkillType[this.skill])))
 			.editRange(range => range
 				.setMin(0)
 				.setMax(100)
@@ -85,7 +87,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.appendTo(this);
 	}
 
-	@Override public update(entity: Creature | NPC | Player) {
+	public override update(entity: Creature | NPC | Player) {
 		if (this.player === entity) return;
 
 		this.player = entity.asPlayer;

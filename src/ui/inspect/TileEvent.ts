@@ -1,10 +1,12 @@
 import { ITile } from "game/tile/ITerrain";
 import TileEvent from "game/tile/TileEvent";
-import { Dictionary } from "language/Dictionaries";
-import Translation, { TextContext } from "language/Translation";
+import Dictionary from "language/Dictionary";
+import { TextContext } from "language/ITranslation";
+import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import Button from "ui/component/Button";
 import { Tuple } from "utilities/collection/Arrays";
+import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Remove from "../../action/Remove";
@@ -31,19 +33,19 @@ export default class TileEventInformation extends InspectInformationSection {
 			.appendTo(this);
 	}
 
-	@Override public getTabs(): TabInformation[] {
+	public override getTabs(): TabInformation[] {
 		return this.tileEvents.entries().stream()
 			.map(([i, tileEvent]) => Tuple(i, () => translation(DebugToolsTranslation.TileEventName)
 				.get(Translation.nameOf(Dictionary.TileEvent, tileEvent, false).inContext(TextContext.Title))))
 			.toArray();
 	}
 
-	@Override public setTab(tileEvent: number) {
+	public override setTab(tileEvent: number) {
 		this.tileEvent = this.tileEvents[tileEvent];
 		return this;
 	}
 
-	@Override public update(position: IVector2, tile: ITile) {
+	public override update(position: IVector2, tile: ITile) {
 		const tileEvents = [...tile.events || []];
 
 		if (areArraysIdentical(tileEvents, this.tileEvents)) return;
@@ -52,7 +54,7 @@ export default class TileEventInformation extends InspectInformationSection {
 		this.setShouldLog();
 	}
 
-	@Override public logUpdate() {
+	public override logUpdate() {
 		for (const tileEvent of this.tileEvents) {
 			this.LOG.info("Tile Event:", tileEvent);
 		}

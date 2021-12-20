@@ -1,12 +1,12 @@
 import { Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
-import { RenderSource } from "game/IGame";
 import { ITemplateOptions, manipulateTemplates } from "game/mapgen/MapGenHelpers";
 import { TileTemplateType } from "game/tile/ITerrain";
 import templateDescriptions from "game/tile/TerrainTemplates";
-import Translation from "language/Translation";
+import TranslationImpl from "language/impl/TranslationImpl";
 import Mod from "mod/Mod";
 import { Registry } from "mod/ModRegistry";
+import { RenderSource } from "renderer/IRenderer";
 import Button from "ui/component/Button";
 import { CheckButton } from "ui/component/CheckButton";
 import Dropdown from "ui/component/Dropdown";
@@ -16,18 +16,20 @@ import Text from "ui/component/Text";
 import Bind from "ui/input/Bind";
 import InputManager from "ui/input/InputManager";
 import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
-import { gameScreen } from "ui/screen/screens/GameScreen";
 import Spacer from "ui/screen/screens/menu/component/Spacer";
 import { Tuple } from "utilities/collection/Arrays";
 import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
+import { Bound } from "utilities/Decorators";
+
 import PlaceTemplate from "../../action/PlaceTemplate";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
 import { getTileId, getTilePosition } from "../../util/TilePosition";
 import DebugToolsPanel from "../component/DebugToolsPanel";
+import Stream from "@wayward/goodstream/Stream";
 
 export default class TemplatePanel extends DebugToolsPanel {
 
@@ -58,7 +60,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 				.setRefreshMethod(() => ({
 					defaultOption: TileTemplateType.House,
 					options: Enums.values(TileTemplateType)
-						.map(type => Tuple(type, Translation.generator(TileTemplateType[type])))
+						.map(type => Tuple(type, TranslationImpl.generator(TileTemplateType[type])))
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				}))
@@ -72,7 +74,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 				.setRefreshMethod(() => ({
 					defaultOption: Stream.keys<string>(templateDescriptions[this.dropdownType.selection]).first()!,
 					options: Stream.keys<string>(templateDescriptions[this.dropdownType.selection])
-						.map(name => Tuple(name, Translation.generator(name)))
+						.map(name => Tuple(name, TranslationImpl.generator(name)))
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				})))
@@ -85,7 +87,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 		this.mirrorHorizontally = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonMirrorHorizontally))
 			.appendTo(this);
-			
+
 		this.overlap = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonOverlap))
 			.appendTo(this);
@@ -115,7 +117,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 			.appendTo(this);
 	}
 
-	@Override public getTranslation() {
+	public override getTranslation() {
 		return DebugToolsTranslation.PanelTemplates;
 	}
 
@@ -164,7 +166,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 	}
 
 	private updateTemplate([terrain, doodads]: [string[], string[]?], options: ITemplateOptions) {
-		const center = renderer!.screenToVector(...InputManager.mouse.position.xy);
+		const center = renderer!.worldRenderer.screenToVector(...InputManager.mouse.position.xy);
 
 		const width = terrain[0].length;
 		const height = terrain.length;
@@ -212,7 +214,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 		if (!template)
 			return undefined;
 
-		return manipulateTemplates(options, [...template.terrain], template.doodad && [...template.doodad]);
+		return manipulateTemplates(localIsland, options, [...template.terrain], template.doodad && [...template.doodad]);
 	}
 
 	private templateHasTile(templates: [string[], string[]?], x: number, y: number) {
