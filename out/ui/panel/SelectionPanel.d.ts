@@ -9,7 +9,7 @@ export default class SelectionPanel extends DebugToolsPanel {
     private readonly countRow;
     private readonly buttonPreviewPrevious;
     private readonly buttonPreviewNext;
-    private readonly canvas;
+    private canvas;
     private readonly buttonExecute;
     private readonly creatures;
     private readonly npcs;
@@ -30,6 +30,7 @@ export default class SelectionPanel extends DebugToolsPanel {
     execute(): void;
     protected onAppend(): void;
     protected onDispose(): void;
+    private disposeCanvas;
     private onActionChange;
     private onMethodChange;
     private updateTargets;
