@@ -514,7 +514,7 @@ export default class DebugTools extends Mod {
 	}
 
 	////////////////////////////////////
-	// Hooks
+	// Event Handlers
 	//
 
 	/**

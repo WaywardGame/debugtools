@@ -211,7 +211,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	}
 
 	////////////////////////////////////
-	// Hooks that trigger a dialog update
+	// Event Handlers that trigger a dialog update
 	//
 
 	@EventHandler(EventBus.Game, "tickEnd")
