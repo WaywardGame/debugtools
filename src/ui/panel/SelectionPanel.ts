@@ -74,13 +74,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 		.classes.add("button-icon", "has-icon-before", "icon-center", "icon-right")
 		.event.subscribe("activate", () => { this.previewCursor++; this.updatePreview() });
 
-	private readonly canvas = new Component<HTMLCanvasElement>("canvas")
-		.attributes.set("width", "300")
-		.attributes.set("height", "200")
-		.classes.add("debug-tools-selection-preview")
-		.appendTo(new Component()
-			.classes.add("debug-tools-selection-preview-wrapper")
-			.append(this.buttonPreviewPrevious, this.buttonPreviewNext));
+	private canvas: Component<HTMLCanvasElement> | undefined;
 
 	private readonly buttonExecute = new Button()
 		.classes.add("has-icon-before", "icon-arrow-right", "icon-no-scale")
@@ -182,9 +176,41 @@ export default class SelectionPanel extends DebugToolsPanel {
 			.map(selectionSource => (selectionSource as SelectionSource<any, any>).event.subscribe("change", this.updateTargets))
 			.collect(this.append);
 
-		this.append(new Spacer(), this.countRow, this.canvas.getParent()!, this.buttonExecute);
+		this.append(new Spacer(), this.countRow, this.buttonExecute);
 
 		this.updateTargets();
+	}
+
+	public override getTranslation() {
+		return DebugToolsTranslation.PanelSelection;
+	}
+
+	@Bound
+	public execute() {
+		if (!this.targets.length)
+			return;
+
+		SelectionExecute.execute(localPlayer, this.dropdownAction.selection, this.targets
+			.map(target => Tuple(getSelectionType(target), target instanceof Player ? target.identifier : target.id)), this.dropdownAlternativeTarget.selection);
+
+		this.updateTargets();
+	}
+
+	@OwnEventHandler(SelectionPanel, "append")
+	protected onAppend() {
+		this.getDialog()?.event.until(this, "remove").subscribe("resize", this.resize);
+
+		this.disposeCanvas();
+
+		this.canvas = new Component<HTMLCanvasElement>("canvas")
+			.attributes.set("width", "300")
+			.attributes.set("height", "200")
+			.classes.add("debug-tools-selection-preview")
+			.appendTo(new Component()
+				.classes.add("debug-tools-selection-preview-wrapper")
+				.append(this.buttonPreviewPrevious, this.buttonPreviewNext))
+
+		this.append(this.canvas.getParent()!);
 
 		Renderer.createWebGlContext(this.canvas.element).then(async (context) => {
 			if (this.disposed) {
@@ -211,35 +237,22 @@ export default class SelectionPanel extends DebugToolsPanel {
 		});
 	}
 
-	public override getTranslation() {
-		return DebugToolsTranslation.PanelSelection;
-	}
-
-	@Bound
-	public execute() {
-		if (!this.targets.length)
-			return;
-
-		SelectionExecute.execute(localPlayer, this.dropdownAction.selection, this.targets
-			.map(target => Tuple(getSelectionType(target), target instanceof Player ? target.identifier : target.id)), this.dropdownAlternativeTarget.selection);
-
-		this.updateTargets();
-	}
-
-	@OwnEventHandler(SelectionPanel, "append")
-	protected onAppend() {
-		this.getDialog()?.event.until(this, "remove").subscribe("resize", this.resize);
-	}
-
 	@OwnEventHandler(SelectionPanel, "remove")
 	protected onDispose() {
 		this.disposed = true;
 
+		this.disposeCanvas();
+	}
+
+	private disposeCanvas() {
 		this.renderer?.delete();
 		this.renderer = undefined;
 
 		this.webGlContext?.delete();
 		this.webGlContext = undefined;
+
+		this.canvas?.remove();
+		this.canvas = undefined;
 	}
 
 	@Bound
@@ -313,7 +326,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 		SelectionPanel.DEBUG_TOOLS.getLog().info("Targets:", this.targets);
 
-		this.canvas.classes.toggle(!!this.targets.length, "has-targets");
+		this.canvas?.classes.toggle(!!this.targets.length, "has-targets");
 		this.buttonPreviewPrevious.toggle(this.targets.length > 1);
 		this.buttonPreviewNext.toggle(this.targets.length > 1);
 		this.previewCursor = 0;
@@ -323,6 +336,10 @@ export default class SelectionPanel extends DebugToolsPanel {
 	@OwnEventHandler(SelectionPanel, "switchTo")
 	@Bound
 	private resize() {
+		if (!this.canvas) {
+			return;
+		}
+
 		const box = this.canvas.getBox(true, true);
 		const width = this.canvas.element.width = box.width || 300;
 		const height = this.canvas.element.height = box.height || 200;
