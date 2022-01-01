@@ -12,7 +12,7 @@ export default class TerrainInformation extends InspectInformationSection {
     private readonly checkButtonIncludeNeighbors;
     constructor();
     getTabs(): TabInformation[];
-    getTabTranslation(): import("@wayward/types/definitions/game/utilities/string/Interpolator").IStringSection[];
+    getTabTranslation(): import("../../../node_modules/@wayward/types/definitions/game/utilities/string/Interpolator").IStringSection[];
     update(position: IVector2, tile: ITile): this | undefined;
     logUpdate(): void;
     private toggleTilled;

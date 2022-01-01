@@ -9,7 +9,7 @@ import type { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect
 import type { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
 export declare const DEBUG_TOOLS_ID = "Debug Tools";
 export declare const ZOOM_LEVEL_MAX: number;
-export declare function translation(debugToolsTranslation: DebugToolsTranslation | Translation): import("@wayward/types/definitions/game/language/impl/TranslationImpl").default;
+export declare function translation(debugToolsTranslation: DebugToolsTranslation | Translation): import("../node_modules/@wayward/types/definitions/game/language/impl/TranslationImpl").default;
 export declare module translation {
     function setDebugToolsInstance(instance: DebugTools): void;
 }
