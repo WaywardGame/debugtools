@@ -1,7 +1,7 @@
 import Stream from "@wayward/goodstream/Stream";
 import WebGlContext from "renderer/WebGlContext";
 import { Events, IEventEmitter } from "event/EventEmitter";
-import { OwnEventHandler } from "event/EventManager";
+import { EventHandler, OwnEventHandler } from "event/EventManager";
 import Doodad from "game/doodad/Doodad";
 import Corpse from "game/entity/creature/corpse/Corpse";
 import Creature from "game/entity/creature/Creature";
@@ -37,6 +37,8 @@ import SelectionExecute, { SelectionType } from "../../action/SelectionExecute";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
+import Entity from "game/entity/Entity";
+import { EventBus } from "event/EventBuses";
 
 const entityTypeToSelectionTypeMap = {
 	[EntityType.Creature]: SelectionType.Creature,
@@ -363,14 +365,23 @@ export default class SelectionPanel extends DebugToolsPanel {
 				.setText(translation(DebugToolsTranslation.SelectionPreview)
 					.addArgs(which + 1, this.targets.length, target.getName().inContext(TextContext.Title))));
 
-		// todo: use RendererOrigin.fromEntity when appropriate for more accuracy
-		this.renderer?.setOrigin(RendererOrigin.fromVector(target.island, target));
+		if (target instanceof Entity) {
+			this.renderer?.setOrigin(RendererOrigin.fromEntity(target));
+
+		} else {
+			this.renderer?.setOrigin(RendererOrigin.fromVector(target.island, target));
+		}
 
 		this.rerender();
 	}
 
 	private rerender(reason = RenderSource.Mod) {
 		this.renderer?.updateView(reason, true, true);
+	}
+
+	@EventHandler(EventBus.Game, "tickEnd")
+	public onTickEnd() {
+		this.rerender();
 	}
 }
 
