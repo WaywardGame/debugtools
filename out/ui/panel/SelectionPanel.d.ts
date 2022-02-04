@@ -37,4 +37,5 @@ export default class SelectionPanel extends DebugToolsPanel {
     private resize;
     private updatePreview;
     private rerender;
+    onTickEnd(): void;
 }
