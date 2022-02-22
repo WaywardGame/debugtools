@@ -30,6 +30,7 @@ export default class SelectionPanel extends DebugToolsPanel {
     execute(): void;
     protected onAppend(): void;
     protected onDispose(): void;
+    private disposeGl;
     private disposeCanvas;
     private onActionChange;
     private onMethodChange;

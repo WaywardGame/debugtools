@@ -227,6 +227,9 @@ export default class SelectionPanel extends DebugToolsPanel {
 				return;
 			}
 
+			// ensure any existing gl resources are deleted
+			this.disposeGl();
+
 			this.webGlContext = context;
 
 			const entity = localPlayer;
@@ -246,12 +249,16 @@ export default class SelectionPanel extends DebugToolsPanel {
 		this.disposeCanvas();
 	}
 
-	private disposeCanvas() {
+	private disposeGl() {
 		this.renderer?.delete();
 		this.renderer = undefined;
 
 		this.webGlContext?.delete();
 		this.webGlContext = undefined;
+	}
+
+	private disposeCanvas() {
+		this.disposeGl();
 
 		this.canvas?.remove();
 		this.canvas = undefined;
