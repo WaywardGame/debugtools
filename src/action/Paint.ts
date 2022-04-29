@@ -47,7 +47,7 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 
 						const type = data.npc!.type;
 						if (type !== "remove") {
-							action.executor.island.npcs.spawn(type, x, y, z);
+							action.executor.island.npcs.spawn(type, x, y, z, { allowEdgeSpawning: true, allowOverDooadsAndTileEvents: true, allowOnFire: true, allowOnBlockedTiles: true });
 						}
 
 						break;

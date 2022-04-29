@@ -9,6 +9,6 @@ export default new Action(ActionArgument.Doodad, ActionArgument.Integer32)
 	.setHandler((action, doodad, growingStage) => {
 		if (!doodad) return;
 
-		doodad.setGrowingStage(growingStage, true);
+		doodad.setGrowingStage(growingStage);
 		action.setUpdateView();
 	});
