@@ -9,6 +9,7 @@ export default class SelectionPanel extends DebugToolsPanel {
     private readonly countRow;
     private readonly buttonPreviewPrevious;
     private readonly buttonPreviewNext;
+    private readonly previewWrapper;
     private canvas;
     private readonly buttonExecute;
     private readonly creatures;

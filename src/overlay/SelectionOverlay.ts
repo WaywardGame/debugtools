@@ -19,13 +19,19 @@ export default class SelectionOverlay {
 	public static add(tilePosition: IVector2 | IVector3, tile = getTile(tilePosition)) {
 		if (TileHelpers.Overlay.add(tile, { type: this.debugTools.overlayPaint }, Overlays.isPaint)) {
 			updateSelectionOverlay(tile, tilePosition);
+			return true;
 		}
+
+		return false;
 	}
 
 	public static remove(tilePosition: IVector2 | IVector3, tile = getTile(tilePosition)) {
 		if (TileHelpers.Overlay.remove(tile, Overlays.isPaint)) {
 			updateSelectionOverlay(tile, tilePosition);
+			return true;
 		}
+
+		return false;
 	}
 }
 

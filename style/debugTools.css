@@ -3,35 +3,27 @@
 }
 
 [data-dialog-id="ModDebugTools_Inspect"] .paragraph {
-	padding-bottom: calc(5px * var(--scale-floor)) !important;
+	padding-bottom: calc(5px * max(1, var(--scale))) !important;
 }
 
 .debug-tools-inspect-dialog-inspect-section {
-	margin-top: calc(20px * var(--scale-floor));
+	margin-top: calc(20px * max(1, var(--scale)));
 }
 
 .debug-tools-inspect-entity-sub-section {
-	margin-top: calc(10px * var(--scale-floor));
-}
-
-.dropdown-label > .label {
-    margin-top: calc(4px * var(--scale-floor));
+	margin-top: calc(10px * max(1, var(--scale)));
 }
 
 .debug-tools-inspect-human-wrapper-add-item {
-	margin-left: calc(20px * var(--scale-floor));
-	margin-bottom: calc(10px * var(--scale-floor));
+	margin-left: calc(20px * max(1, var(--scale)));
+	margin-bottom: calc(10px * max(1, var(--scale)));
 }
 
 .debug-tools-paint-row {
 	position: absolute;
-	bottom: -10px;
-	width: calc(100% - 10px * var(--scale-floor));
+	bottom: 10px;
+	width: calc(100% - 10px * max(1, var(--scale)));
 	background: var(--background-dialog);
-}
-
-.debug-tools-paint-row > * {
-	gap: calc(4px * var(--scale-floor));
 }
 
 .debug-tools-paint-row:not(.painting) > .real-paint-row {
@@ -46,15 +38,15 @@
 	height: calc(100% - calc(20px * var(--scale)) + var(--negative-margin) * 2 - 54px) !important;
 }
 
-.tab-dialog-subpanel-link.inspection-lock {
-	--border-width: 1px;
-	border: var(--border-width) solid grey !important;
+.debug-tools-inspect-dialog .tab-dialog-subpanel-link-wrapper > .game-dialog-scrollable-wrapper {
+	padding-left: 1px;
 }
 
-.tab-dialog-subpanel-link.inspection-lock::after {
-	border: var(--border-width) solid grey;
-	margin-top: calc(var(--border-width) * -1);
-	border-left: none;
+.tab-dialog-subpanel-link.inspection-lock {
+	--border-width: 1px;
+	box-shadow: var(--box-shadow-button-slide),
+		0 0 0 var(--border-width) grey,
+		var(--button-slide-width-2, var(--button-slide-width, var(--gap))) 0 0 var(--border-width) grey;
 }
 
 .debug-tools-dialog-selection-quantity {
@@ -62,7 +54,7 @@
 }
 
 .debug-tools-dialog-selection-source {
-	grid-template-columns: min(50%, calc(150px * var(--scale-floor))) 1fr;
+	grid-template-columns: min(50%, calc(150px * max(1, var(--scale)))) 1fr;
 	gap: 2px;
 }
 
@@ -71,24 +63,28 @@
 }
 
 .debug-tools-dialog-checkbutton-dropdown-row {
+	display: grid;
 	grid-template-columns: auto 1fr;
 }
 
 .debug-tools-selection-action {
+	display: grid;
 	grid-template-columns: auto auto auto;
 }
 
 .debug-tools-selection-action > .text {
-	margin-top: calc(10px * var(--scale-floor));
+	min-height: fit-content;
+	align-self: center;
+	margin-top: calc(-2px * max(1, var(--scale)));
 }
 
 .debug-tools-island-heading .input > input {
     width: 100%;
     border: none;
     height: 100%;
-    padding: calc(2px * var(--scale-floor)) calc(5px * var(--scale-floor));
-    margin-top: calc(-2px * var(--scale-floor));
-    margin-bottom: calc(-1px * var(--scale-floor));
+    padding: calc(2px * max(1, var(--scale))) calc(5px * max(1, var(--scale)));
+    margin-top: calc(-2px * max(1, var(--scale)));
+    margin-bottom: calc(-1px * max(1, var(--scale)));
 }
 
 .debug-tools-island-heading {
@@ -96,16 +92,22 @@
     grid-template-columns: auto 1fr auto;
 }
 
+.debug-tools-island-heading > .text {
+    height: fit-content;
+    display: inline-block;
+    align-self: center;
+}
+
 .debug-tools-selection-preview-wrapper {
-    margin: calc(10px * var(--scale-floor)) 0;
+    margin: calc(10px * max(1, var(--scale))) 0;
 	display: grid;
 	grid-template-columns: auto 1fr auto;
-	gap: calc(10px * var(--scale-floor));
+	gap: calc(10px * max(1, var(--scale)));
 }
 
 .debug-tools-selection-preview {
     width: 100%;
-	height: calc(200px * var(--scale-floor));
+	height: calc(200px * max(1, var(--scale)));
     position: relative;	
 	grid-column: 2;
 	grid-row: 1;
@@ -116,10 +118,11 @@
 }
 
 .debug-tools-selection-preview-wrapper .button-icon {
-	height: calc(44px * var(--scale-floor));
+	height: calc(44px * max(1, var(--scale)));
 	align-self: center;
 }
 
 .debug-tools-selection-method {
-	grid-template-columns: minmax(auto, calc(150px * var(--scale-floor))) 1fr auto;
+	display: grid;
+	grid-template-columns: minmax(auto, calc(150px * max(1, var(--scale)))) 1fr auto;
 }

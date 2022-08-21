@@ -38,5 +38,5 @@ export default new Action(anyOf(ActionArgument.Container, ActionArgument.Player)
 			action.setUpdateView();
 		}
 
-		if (InspectDialog.INSTANCE) InspectDialog.INSTANCE.update();
+		InspectDialog.INSTANCE?.update();
 	});

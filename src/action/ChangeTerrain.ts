@@ -14,6 +14,6 @@ export default new Action(ActionArgument.Integer32, ActionArgument.Vector3)
 		action.executor.island.changeTile(terrain, position.x, position.y, position.z, false);
 		SetTilled(action.executor.island, position.x, position.y, position.z, false);
 
-		renderer?.computeSpritesInViewport();
+		renderers.computeSpritesInViewport();
 		action.setUpdateRender();
 	});

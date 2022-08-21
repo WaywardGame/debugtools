@@ -21,8 +21,6 @@ export default function (entity: Entity, position: IVector3) {
 		clone.renamed = entity.renamed;
 		clone.ai = creature.ai;
 		clone.enemy = creature.enemy;
-		clone.enemyAttempts = creature.enemyAttempts;
-		clone.enemyIsPlayer = creature.enemyIsPlayer;
 
 	} else {
 		const npc = entity.asNPC!;

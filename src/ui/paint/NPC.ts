@@ -1,7 +1,7 @@
 import { Events, IEventEmitter } from "event/EventEmitter";
 import { NPCType } from "game/entity/npc/INPCs";
 import Component from "ui/component/Component";
-import NPCDropdown from "ui/component/dropdown/NPCDropdown";
+import NPCTypeDropdown from "ui/component/dropdown/NPCTypeDropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
 import { Bound } from "utilities/Decorators";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -10,7 +10,7 @@ import { IPaintSection } from "../panel/PaintPanel";
 export default class NPCPaint extends Component implements IPaintSection {
 	public override event: IEventEmitter<this, Events<IPaintSection>>;
 
-	private readonly dropdown: NPCDropdown<"nochange" | "remove">;
+	private readonly dropdown: NPCTypeDropdown<"nochange" | "remove">;
 
 	private npc: NPCType | "remove" | undefined;
 
@@ -20,7 +20,7 @@ export default class NPCPaint extends Component implements IPaintSection {
 		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelNPC)))
-			.append(this.dropdown = new NPCDropdown("nochange", [
+			.append(this.dropdown = new NPCTypeDropdown("nochange", [
 				["nochange", option => option.setText(translation(DebugToolsTranslation.PaintNoChange))],
 				["remove", option => option.setText(translation(DebugToolsTranslation.PaintRemove))],
 			])

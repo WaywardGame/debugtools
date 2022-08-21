@@ -18,6 +18,6 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Doodad, Ac
 
 		Remove(action, toRemove as any);
 
-		renderer?.computeSpritesInViewport();
+		renderers.computeSpritesInViewport();
 		action.setUpdateRender();
 	});

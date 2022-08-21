@@ -8,7 +8,7 @@ interface IAddItemToInventoryEvents extends Events<Component> {
 }
 export default class AddItemToInventory extends Component {
     event: IEventEmitter<this, IAddItemToInventoryEvents>;
-    private static INSTANCE;
+    static INSTANCE: AddItemToInventory | undefined;
     static init(): AddItemToInventory;
     private readonly dropdownItemType;
     private readonly dropdownItemQuality;

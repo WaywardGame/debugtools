@@ -337,7 +337,7 @@ export default class DebugTools extends Mod {
 			weightBonus: 0,
 			invulnerable: false,
 			noclip: false,
-			permissions: players[player.id].isServer(),
+			permissions: player.isServer(),
 			fog: undefined,
 			lighting: true,
 		})[key];
@@ -406,7 +406,7 @@ export default class DebugTools extends Mod {
 	 * - Removes the `AddItemToInventory` UI Component.
 	 */
 	public override onUnload() {
-		AddItemToInventoryComponent.init().releaseAndRemove();
+		AddItemToInventoryComponent.INSTANCE?.releaseAndRemove();
 		EventManager.deregisterEventBusSubscriber(this.selector);
 		Bind.deregisterHandlers(this.selector);
 		this.unlockedCameraMovementHandler.end();
@@ -601,7 +601,7 @@ export default class DebugTools extends Mod {
 	 * We prevent creatures attacking the enemy if the enemy is a player who is set as "invulnerable" or "noclipping"
 	 */
 	@EventHandler(Creature, "canAttack")
-	protected canCreatureAttack(creature: Creature, enemy: Player | Creature): boolean | undefined {
+	protected canCreatureAttack(creature: Creature, enemy: Human | Creature): boolean | undefined {
 		if (enemy.asPlayer) {
 			if (this.getPlayerData(enemy.asPlayer, "invulnerable")) return false;
 			if (this.getPlayerData(enemy.asPlayer, "noclip")) return false;
@@ -636,8 +636,9 @@ export default class DebugTools extends Mod {
 
 		player.isMoving = true;
 		player.isMovingClientside = true;
-		player.nextX = nextX;
-		player.nextY = nextY;
+
+		player.moveTo(nextX, nextY, player.z, false);
+
 		player.nextMoveTime = game.absoluteTime + (noclip.delay * game.interval);
 
 		noclip.moving = true;

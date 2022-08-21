@@ -29,6 +29,6 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Doodad), A
 			CloneEntity(toClone, position);
 		}
 
-		renderer?.computeSpritesInViewport();
+		renderers.computeSpritesInViewport();
 		action.setUpdateRender();
 	});

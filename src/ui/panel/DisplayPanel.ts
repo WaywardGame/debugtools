@@ -66,7 +66,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 
 		new Button()
 			.classes.add("warning")
-			.setText(translation(DebugToolsTranslation.ButtonResetWebGL))
+			.setText(translation(DebugToolsTranslation.ButtonResetRenderer))
 			.event.subscribe("activate", this.resetWebGL)
 			.appendTo(this);
 

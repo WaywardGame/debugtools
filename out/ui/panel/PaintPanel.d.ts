@@ -67,6 +67,7 @@ export default class PaintPanel extends DebugToolsPanel {
     protected onCompletePaint(): boolean;
     protected onSwitchTo(): void;
     protected onSwitchAway(): void;
+    protected onWillRemove(): void;
     private updateOverlayBatch;
     private onPaintSectionChange;
     private showPaintSectionResetMenu;

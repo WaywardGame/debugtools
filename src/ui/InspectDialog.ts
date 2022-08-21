@@ -180,7 +180,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 		}
 
 		this.logUpdate();
-		this.schedule(300, 300, this.updateSubpanels);
+		this.schedule(20, 50, this.updateSubpanels);
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "preMoveToIsland")
@@ -215,7 +215,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	//
 
 	@EventHandler(EventBus.Game, "tickEnd")
-	@Debounce(100)
+	@Debounce(10)
 	public onGameTickEnd() {
 		this.update();
 	}
@@ -226,6 +226,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	}
 
 	@EventHandler(EventBus.Island, "tileUpdate")
+	@Debounce(10)
 	public onTileUpdate(island: any, tile: ITile, x: number, y: number, z: number, tileUpdateType: TileUpdateType) {
 		this.update();
 	}

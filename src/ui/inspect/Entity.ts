@@ -3,6 +3,7 @@ import { EntityType, IStatChangeInfo } from "game/entity/IEntity";
 import { IStat, Stat } from "game/entity/IStats";
 import { ITile } from "game/tile/ITerrain";
 import TranslationImpl from "language/impl/TranslationImpl";
+import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { BlockRow } from "ui/component/BlockRow";
@@ -169,7 +170,7 @@ export default class EntityInformation extends InspectInformationSection {
 		for (const stat of stats) {
 			if ("max" in stat && !stat.canExceedMax) {
 				this.statComponents.set(stat.type, new RangeRow()
-					.setLabel(label => label.setText(Translation.stat(stat.type)))
+					.setLabel(label => label.setText(Translation.stat(stat.type).inContext(TextContext.Title)))
 					.editRange(range => range
 						.noClampOnRefresh()
 						.setMin(0)
@@ -193,7 +194,7 @@ export default class EntityInformation extends InspectInformationSection {
 					.setDefault(() => this.entity ? `${this.entity.stat.getValue(stat.type)}` : "")
 					.clear()
 					.appendTo(new LabelledRow()
-						.setLabel(label => label.setText(Translation.stat(stat.type)))
+						.setLabel(label => label.setText(Translation.stat(stat.type).inContext(TextContext.Title)))
 						.appendTo(this.statWrapper)));
 			}
 		}
@@ -232,7 +233,7 @@ export default class EntityInformation extends InspectInformationSection {
 			}],
 			!multiplayer.isConnected() || this.entity === players[0] ? undefined : ["to host", {
 				translation: translation(DebugToolsTranslation.OptionTeleportToHost),
-				onActivate: () => this.teleport(players[0]),
+				onActivate: () => this.teleport(players[0]!),
 			}],
 			!multiplayer.isConnected() ? undefined : ["to player", {
 				translation: translation(DebugToolsTranslation.OptionTeleportToPlayer),
@@ -246,7 +247,7 @@ export default class EntityInformation extends InspectInformationSection {
 
 	@Bound
 	private createTeleportToPlayerMenu() {
-		return players.stream()
+		return playerManager.getAll(true, true).stream()
 			.filter(player => player !== this.entity)
 			.map(player => Tuple(player.name, {
 				translation: TranslationImpl.generator(player.name),

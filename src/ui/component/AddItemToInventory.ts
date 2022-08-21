@@ -26,7 +26,7 @@ interface IAddItemToInventoryEvents extends Events<Component> {
 export default class AddItemToInventory extends Component {
 	public override event: IEventEmitter<this, IAddItemToInventoryEvents>;
 
-	private static INSTANCE: AddItemToInventory | undefined;
+	public static INSTANCE: AddItemToInventory | undefined;
 
 	public static init() {
 		return AddItemToInventory.INSTANCE = AddItemToInventory.INSTANCE || new AddItemToInventory();

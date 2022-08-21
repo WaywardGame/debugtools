@@ -16,7 +16,8 @@ export default function (doodad: Doodad, position: IVector3) {
 		weight: doodad.weight,
 		disassembly: !doodad.disassembly ? undefined : doodad.disassembly
 			.map(item => doodad.island.items.createFake(item.type, item.quality)),
-		ownerIdentifier: doodad.ownerIdentifier,
+		builderIdentifier: doodad.builderIdentifier,
+		crafterIdentifier: doodad.crafterIdentifier,
 		step: doodad.step,
 	});
 

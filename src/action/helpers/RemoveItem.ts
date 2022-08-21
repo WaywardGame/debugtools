@@ -18,5 +18,5 @@ export default function (action: IActionApi<Player>, item: Item) {
 		}
 	}
 
-	if (InspectDialog.INSTANCE) InspectDialog.INSTANCE.update();
+	InspectDialog.INSTANCE?.update();
 }

@@ -21,5 +21,5 @@ export default new Action(anyOf(ActionArgument.Container, ActionArgument.Human))
 			action.setUpdateView();
 		}
 
-		if (InspectDialog.INSTANCE) InspectDialog.INSTANCE.update();
+		InspectDialog.INSTANCE?.update();
 	});
