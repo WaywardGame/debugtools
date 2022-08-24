@@ -21,7 +21,7 @@
 
 .debug-tools-paint-row {
 	position: absolute;
-	bottom: 10px;
+	bottom: calc(-10px * max(1, var(--scale)));
 	width: calc(100% - 10px * max(1, var(--scale)));
 	background: var(--background-dialog);
 }
