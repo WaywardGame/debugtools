@@ -32,9 +32,8 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 	 * The positioning settings for the dialog.
 	 */
 	public static description: IDialogDescription = {
-		minSize: new Vector2(20, 25),
+		minResolution: new Vector2(300, 200),
 		size: new Vector2(29, 25),
-		maxSize: new Vector2(40, 70),
 		edges: [
 			[Edge.Right, 50],
 			[Edge.Bottom, 31],

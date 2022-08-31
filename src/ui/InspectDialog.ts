@@ -52,9 +52,8 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * The positioning settings for the dialog.
 	 */
 	public static description: IDialogDescription = {
-		minSize: new Vector2(20, 25),
+		minResolution: new Vector2(300, 200),
 		size: new Vector2(29, 25),
-		maxSize: new Vector2(40, 70),
 		edges: [
 			[Edge.Left, 50],
 			[Edge.Bottom, 31],
