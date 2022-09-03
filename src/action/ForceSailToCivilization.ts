@@ -1,5 +1,5 @@
 import { Action } from "game/entity/action/Action";
-import Paddle from "game/entity/action/actions/Paddle";
+import Ride from "game/entity/action/actions/Ride";
 import SailToCivilization from "game/entity/action/actions/SailToCivilization";
 import { EntityType } from "game/entity/IEntity";
 import { ItemType } from "game/item/IItem";
@@ -33,7 +33,7 @@ export default new Action()
 		}
 
 		if (action.executor.isLocalPlayer()) {
-			Paddle.execute(action.executor, sailboat);
+			Ride.execute(action.executor, sailboat);
 			SailToCivilization.execute(action, sailboat, true);
 		}
 	});
