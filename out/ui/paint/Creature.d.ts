@@ -10,7 +10,7 @@ export default class CreaturePaint extends Component implements IPaintSection {
     constructor();
     getTilePaintData(): {
         creature: {
-            type: "remove" | CreatureType;
+            type: CreatureType | "remove";
             aberrant: boolean;
         };
     } | undefined;
