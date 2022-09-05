@@ -176,7 +176,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		return this.painting && !!gameScreen?.mouseStartWasWithin(api);
 	}
 
-	@Bind.onHolding(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindablePaint"))
+	@Bind.onHolding(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindablePaint"), Priority.High)
 	protected onPaint(api: IBindHandlerApi) {
 		if (!this.painting || !gameScreen?.mouseStartWasWithin(api) || !renderer) {
 			return false;

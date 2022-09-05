@@ -6,7 +6,7 @@ import Creature from "game/entity/creature/Creature";
 import { IDamageInfo } from "game/entity/creature/ICreature";
 import Human from "game/entity/Human";
 import { MoveType } from "game/entity/IEntity";
-import { Delay } from "game/entity/IHuman";
+import { Delay, MovingClientSide } from "game/entity/IHuman";
 import NPC from "game/entity/npc/NPC";
 import { Source } from "game/entity/player/IMessageManager";
 import Player from "game/entity/player/Player";
@@ -635,7 +635,7 @@ export default class DebugTools extends Mod {
 		player.addDelay(noclip.delay, true);
 
 		player.isMoving = true;
-		player.isMovingClientside = true;
+		player.movingClientside = MovingClientSide.Moving;
 
 		player.moveTo(nextX, nextY, player.z, false);
 
