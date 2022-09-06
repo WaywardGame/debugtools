@@ -190,7 +190,6 @@ export default class EntityInformation extends InspectInformationSection {
 							this.setStat(stat.type)(input, +value);
 						}
 					})
-					.classes.add("no-filtering-highlight")
 					.setClearToDefaultWhenEmpty()
 					.setDefault(() => this.entity ? `${this.entity.stat.getValue(stat.type)}` : "")
 					.clear()

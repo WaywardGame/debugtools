@@ -105,7 +105,6 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.append(new Text()
 				.setText(translation(DebugToolsTranslation.HeadingIslandCurrent)))
 			.append(new Input()
-				.classes.add("no-filtering-highlight")
 				.setDefault(() => localIsland.id)
 				.setClearTo(() => localIsland.name || localIsland.id)
 				.setClearToDefaultWhenEmpty()
