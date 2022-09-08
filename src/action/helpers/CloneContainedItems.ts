@@ -11,9 +11,9 @@ export default function (island: Island, from: Partial<IContainer>, to: Partial<
 		const clone = island.items.create(item.type, to as IContainer, item.quality);
 		clone.crafterIdentifier = item.crafterIdentifier;
 		renderers.notifier.suspend();
-		clone.minDur = item.minDur;
+		clone.durability = item.durability;
 		renderers.notifier.resume();
-		clone.maxDur = item.maxDur;
+		clone.durabilityMax = item.durabilityMax;
 		clone.renamed = item.renamed;
 		clone.weight = item.weight;
 		clone.magic.inherit(item.magic);

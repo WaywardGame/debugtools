@@ -16,9 +16,9 @@ export default function (from: Human, to: Human) {
 		const clone = to.createItemInInventory(item.type, item.quality);
 		clone.crafterIdentifier = item.crafterIdentifier;
 		renderers.notifier.suspend();
-		clone.minDur = item.minDur;
+		clone.durability = item.durability;
 		renderers.notifier.resume();
-		clone.maxDur = item.maxDur;
+		clone.durabilityMax = item.durabilityMax;
 		clone.renamed = item.renamed;
 		clone.weight = item.weight;
 		clone.magic.inherit(item.magic);
