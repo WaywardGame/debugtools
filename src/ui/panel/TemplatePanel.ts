@@ -162,7 +162,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 		}
 
 		if (updateRender)
-			game.updateView(RenderSource.Mod, false);
+			renderers.updateView(RenderSource.Mod, false);
 	}
 
 	private updateTemplate([terrain, doodads]: [string[], string[]?], options: MapGenHelpers.ITemplateOptions) {
@@ -275,7 +275,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 		this.previewTiles.splice(0, Infinity);
 
 		if (!this.place.checked)
-			game.updateView(RenderSource.Mod, false);
+			renderers.updateView(RenderSource.Mod, false);
 
 		return true;
 	}

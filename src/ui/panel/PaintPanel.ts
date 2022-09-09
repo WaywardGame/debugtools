@@ -213,7 +213,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 		if (shouldUpdateView) {
 			this.updateOverlayBatch();
-			game.updateView(RenderSource.Mod, false);
+			renderers.updateView(RenderSource.Mod, false);
 		}
 
 		return true;
@@ -256,7 +256,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 		if (shouldUpdateView) {
 			this.updateOverlayBatch();
-			game.updateView(RenderSource.Mod, false);
+			renderers.updateView(RenderSource.Mod, false);
 		}
 
 		return true;
@@ -377,6 +377,6 @@ export default class PaintPanel extends DebugToolsPanel {
 		this.paintTiles.clear();
 
 		this.updateOverlayBatch();
-		game.updateView(RenderSource.Mod, false);
+		renderers.updateView(RenderSource.Mod, false);
 	}
 }

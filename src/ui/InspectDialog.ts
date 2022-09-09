@@ -241,7 +241,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 			delete this.inspectingTile;
 		}
 
-		game.updateView(RenderSource.Mod, false);
+		renderers.updateView(RenderSource.Mod, false);
 
 		delete InspectDialog.INSTANCE;
 	}
@@ -297,7 +297,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 			red: 0,
 			blue: 0,
 		}, Overlays.isSelectedTarget);
-		game.updateView(RenderSource.Mod, false);
+		renderers.updateView(RenderSource.Mod, false);
 	}
 
 	/**

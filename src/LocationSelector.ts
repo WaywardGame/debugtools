@@ -141,7 +141,7 @@ export default class SelectLocation {
 		}
 
 		if (updateRender)
-			game.updateView(RenderSource.Mod, false);
+			renderers.updateView(RenderSource.Mod, false);
 	}
 
 	/**

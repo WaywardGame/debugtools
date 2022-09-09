@@ -19,5 +19,5 @@ export default new Action(ActionArgument.Player, ActionArgument.Boolean)
 
 		player.setMoveType(noclip ? MoveType.Flying : MoveType.Land);
 
-		game.updateView(RenderSource.Mod, true);
+		renderers.updateView(RenderSource.Mod, true);
 	});

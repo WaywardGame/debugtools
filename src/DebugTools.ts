@@ -431,7 +431,7 @@ export default class DebugTools extends Mod {
 			const fogForceEnabled = this.getPlayerData(localPlayer, "fog");
 			if (fogForceEnabled !== undefined && renderer.fieldOfView.disabled !== !fogForceEnabled) {
 				renderer.fieldOfView.disabled = !fogForceEnabled;
-				game.updateView(RenderSource.Mod, true);
+				renderers.updateView(RenderSource.Mod, true);
 			}
 		}
 	}
@@ -492,7 +492,7 @@ export default class DebugTools extends Mod {
 	public toggleLighting(lighting: boolean) {
 		this.setPlayerData(localPlayer, "lighting", lighting);
 		UpdateStatsAndAttributes.execute(localPlayer, localPlayer);
-		game.updateView(RenderSource.Mod, true);
+		renderers.updateView(RenderSource.Mod, true);
 	}
 
 	////////////////////////////////////
