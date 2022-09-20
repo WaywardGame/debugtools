@@ -387,7 +387,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 	}
 
 	private rerender(reason = RenderSource.Mod) {
-		this.renderer?.updateView(reason, true, true);
+		this.renderer?.updateView(reason, true);
 	}
 
 	@EventHandler(EventBus.Game, "tickEnd")
