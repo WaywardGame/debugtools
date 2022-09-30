@@ -67,7 +67,7 @@ export default class ItemInformation extends InspectInformationSection {
 		for (const item of this.items) {
 			new Paragraph()
 				.setText(() => translation(DebugToolsTranslation.ItemName)
-					.get(Translation.nameOf(Dictionary.Item, item, true).inContext(TextContext.Title)))
+					.get(Translation.nameOf(Dictionary.Item, item).inContext(TextContext.Title)))
 				.appendTo(this.wrapperItems);
 
 			new Button()

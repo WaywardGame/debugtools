@@ -14,11 +14,11 @@ export default function (from: Human, to: Human) {
 
 	for (const item of from.inventory.containedItems) {
 		const clone = to.createItemInInventory(item.type, item.quality);
-		clone.ownerIdentifier = item.ownerIdentifier;
-		renderer?.notifier.suspend();
-		clone.minDur = item.minDur;
-		renderer?.notifier.resume();
-		clone.maxDur = item.maxDur;
+		clone.crafterIdentifier = item.crafterIdentifier;
+		renderers.notifier.suspend();
+		clone.durability = item.durability;
+		renderers.notifier.resume();
+		clone.durabilityMax = item.durabilityMax;
 		clone.renamed = item.renamed;
 		clone.weight = item.weight;
 		clone.magic.inherit(item.magic);

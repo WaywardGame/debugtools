@@ -9,11 +9,11 @@ export default function (island: Island, from: Partial<IContainer>, to: Partial<
 
 	for (const item of from.containedItems || []) {
 		const clone = island.items.create(item.type, to as IContainer, item.quality);
-		clone.ownerIdentifier = item.ownerIdentifier;
-		renderer?.notifier.suspend();
-		clone.minDur = item.minDur;
-		renderer?.notifier.resume();
-		clone.maxDur = item.maxDur;
+		clone.crafterIdentifier = item.crafterIdentifier;
+		renderers.notifier.suspend();
+		clone.durability = item.durability;
+		renderers.notifier.resume();
+		clone.durabilityMax = item.durabilityMax;
 		clone.renamed = item.renamed;
 		clone.weight = item.weight;
 		clone.magic.inherit(item.magic);

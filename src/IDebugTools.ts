@@ -63,7 +63,7 @@ export enum DebugToolsTranslation {
 	LabelZoomLevel,
 	ZoomLevel,
 	ButtonUnlockCamera,
-	ButtonResetWebGL,
+	ButtonResetRenderer,
 	ButtonRefreshTiles,
 	ButtonReloadShaders,
 	ButtonReloadUIImages,

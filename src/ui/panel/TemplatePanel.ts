@@ -1,6 +1,6 @@
 import { Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
-import { ITemplateOptions, manipulateTemplates } from "game/mapgen/MapGenHelpers";
+import MapGenHelpers from "game/mapgen/MapGenHelpers";
 import { TileTemplateType } from "game/tile/ITerrain";
 import templateDescriptions from "game/tile/TerrainTemplates";
 import TranslationImpl from "language/impl/TranslationImpl";
@@ -48,7 +48,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 	private readonly previewTiles: number[] = [];
 	private selectHeld = false;
 	private center?: Vector2;
-	private templateOptions?: ITemplateOptions;
+	private templateOptions?: MapGenHelpers.ITemplateOptions;
 
 	public constructor() {
 		super();
@@ -58,7 +58,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTemplateType)))
 			.append(this.dropdownType = new Dropdown<TileTemplateType>()
 				.setRefreshMethod(() => ({
-					defaultOption: TileTemplateType.House,
+					defaultOption: TileTemplateType.WoodenHouses,
 					options: Enums.values(TileTemplateType)
 						.map(type => Tuple(type, TranslationImpl.generator(TileTemplateType[type])))
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
@@ -162,10 +162,10 @@ export default class TemplatePanel extends DebugToolsPanel {
 		}
 
 		if (updateRender)
-			game.updateView(RenderSource.Mod, false);
+			renderers.updateView(RenderSource.Mod, false);
 	}
 
-	private updateTemplate([terrain, doodads]: [string[], string[]?], options: ITemplateOptions) {
+	private updateTemplate([terrain, doodads]: [string[], string[]?], options: MapGenHelpers.ITemplateOptions) {
 		const center = renderer!.worldRenderer.screenToVector(...InputManager.mouse.position.xy);
 
 		const width = terrain[0].length;
@@ -209,19 +209,19 @@ export default class TemplatePanel extends DebugToolsPanel {
 		return true;
 	}
 
-	private getTemplate(options: ITemplateOptions) {
+	private getTemplate(options: MapGenHelpers.ITemplateOptions) {
 		const template = templateDescriptions[this.dropdownType.selection][this.dropdownTemplate.selection];
 		if (!template)
 			return undefined;
 
-		return manipulateTemplates(localIsland, options, [...template.terrain], template.doodad && [...template.doodad]);
+		return MapGenHelpers.manipulateTemplates(localIsland, options, [...template.terrain], template.doodad && [...template.doodad]);
 	}
 
 	private templateHasTile(templates: [string[], string[]?], x: number, y: number) {
 		return templates[0][y][x] !== " " || (templates[1] && templates[1][y][x] !== " ");
 	}
 
-	private getTemplateOptions(): ITemplateOptions {
+	private getTemplateOptions(): MapGenHelpers.ITemplateOptions {
 		return {
 			mirrorHorizontally: this.mirrorHorizontally.checked,
 			mirrorVertically: this.mirrorVertically.checked,
@@ -232,7 +232,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 		};
 	}
 
-	private templateOptionsChanged(options: ITemplateOptions) {
+	private templateOptionsChanged(options: MapGenHelpers.ITemplateOptions) {
 		return !this.templateOptions
 			|| this.templateOptions.which !== options.which
 			|| this.templateOptions.mirrorHorizontally !== options.mirrorHorizontally
@@ -275,7 +275,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 		this.previewTiles.splice(0, Infinity);
 
 		if (!this.place.checked)
-			game.updateView(RenderSource.Mod, false);
+			renderers.updateView(RenderSource.Mod, false);
 
 		return true;
 	}

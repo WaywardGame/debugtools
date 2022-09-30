@@ -39,7 +39,7 @@ export declare enum DebugToolsTranslation {
     LabelZoomLevel = 22,
     ZoomLevel = 23,
     ButtonUnlockCamera = 24,
-    ButtonResetWebGL = 25,
+    ButtonResetRenderer = 25,
     ButtonRefreshTiles = 26,
     ButtonReloadShaders = 27,
     ButtonReloadUIImages = 28,

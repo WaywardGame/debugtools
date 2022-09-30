@@ -1,10 +1,11 @@
 import Stream from "@wayward/goodstream/Stream";
-import WebGlContext from "renderer/WebGlContext";
+import { EventBus } from "event/EventBuses";
 import { Events, IEventEmitter } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import Doodad from "game/doodad/Doodad";
 import Corpse from "game/entity/creature/corpse/Corpse";
 import Creature from "game/entity/creature/Creature";
+import Entity from "game/entity/Entity";
 import { EntityType } from "game/entity/IEntity";
 import NPC from "game/entity/npc/NPC";
 import Player from "game/entity/player/Player";
@@ -14,15 +15,16 @@ import Mod from "mod/Mod";
 import { RendererOrigin } from "renderer/context/RendererOrigin";
 import { RenderSource } from "renderer/IRenderer";
 import Renderer from "renderer/Renderer";
+import WebGlContext from "renderer/WebGlContext";
 import { BlockRow } from "ui/component/BlockRow";
-import Button from "ui/component/Button";
+import Button, { ButtonClasses } from "ui/component/Button";
 import { CheckButton } from "ui/component/CheckButton";
 import Component from "ui/component/Component";
 import Dropdown, { IDropdownOption } from "ui/component/Dropdown";
 import CorpseDropdown from "ui/component/dropdown/CorpseDropdown";
 import CreatureDropdown from "ui/component/dropdown/CreatureDropdown";
 import DoodadDropdown from "ui/component/dropdown/DoodadDropdown";
-import NPCDropdown from "ui/component/dropdown/NPCDropdown";
+import NPCTypeDropdown from "ui/component/dropdown/NPCTypeDropdown";
 import TileEventDropdown from "ui/component/dropdown/TileEventDropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
 import { RangeRow } from "ui/component/RangeRow";
@@ -37,8 +39,6 @@ import SelectionExecute, { SelectionType } from "../../action/SelectionExecute";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
-import Entity from "game/entity/Entity";
-import { EventBus } from "event/EventBuses";
 
 const entityTypeToSelectionTypeMap = {
 	[EntityType.Creature]: SelectionType.Creature,
@@ -69,17 +69,24 @@ export default class SelectionPanel extends DebugToolsPanel {
 		.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelSelectionPreview)));
 
 	private readonly buttonPreviewPrevious = new Button()
-		.classes.add("button-icon", "has-icon-before", "icon-center", "icon-left")
+		.setDisplayMode(ButtonClasses.DisplayModeIcon)
+		.classes.add("has-icon-before", "icon-center", "icon-left")
 		.event.subscribe("activate", () => { this.previewCursor--; this.updatePreview() });
 
 	private readonly buttonPreviewNext = new Button()
-		.classes.add("button-icon", "has-icon-before", "icon-center", "icon-right")
+		.setDisplayMode(ButtonClasses.DisplayModeIcon)
+		.classes.add("has-icon-before", "icon-center", "icon-right")
 		.event.subscribe("activate", () => { this.previewCursor++; this.updatePreview() });
+
+	private readonly previewWrapper = new Component()
+		.classes.add("debug-tools-selection-preview-wrapper")
+		.append(this.buttonPreviewPrevious, this.buttonPreviewNext);
 
 	private canvas: Component<HTMLCanvasElement> | undefined;
 
 	private readonly buttonExecute = new Button()
 		.classes.add("has-icon-before", "icon-arrow-right", "icon-no-scale")
+		.style.set("--icon-zoom", 2)
 		.setText(translation(DebugToolsTranslation.ButtonExecute))
 		.event.subscribe("activate", this.execute)
 		.hide();
@@ -89,7 +96,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 		(creature, filter) => filter === "all" || (creature && creature.type === filter));
 
 	private readonly npcs = new SelectionSource(localIsland.npcs.getObjects(), DebugToolsTranslation.FilterNPCs,
-		new NPCDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
+		new NPCTypeDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
 		(npc, filter) => filter === "all" || (npc && npc.type === filter));
 
 	private readonly tileEvents = new SelectionSource(localIsland.tileEvents.getObjects(), DebugToolsTranslation.FilterTileEvents,
@@ -104,12 +111,12 @@ export default class SelectionPanel extends DebugToolsPanel {
 		new CorpseDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
 		(corpse, filter) => filter === "all" || (corpse && corpse.type === filter));
 
-	private readonly players = new SelectionSource(players, DebugToolsTranslation.FilterPlayers,
+	private readonly players = new SelectionSource(playerManager.getAll(true, true), DebugToolsTranslation.FilterPlayers,
 		new Dropdown()
 			.setRefreshMethod(() => ({
 				defaultOption: "all",
 				options: Stream.of<IDropdownOption<string>[]>(["all", option => option.setText(translation(DebugToolsTranslation.SelectionAllPlayers))])
-					.merge(players.map(player => Tuple(player.identifier, option => option.setText(player.getName())))),
+					.merge(playerManager.getAll(true, true).map(player => Tuple(player.identifier, option => option.setText(player.getName())))),
 			})),
 		(player, filter) => (this.dropdownAlternativeTarget.classes.has("hidden") || player.identifier !== this.dropdownAlternativeTarget.selection)
 			&& (filter === "all" || (player && player.identifier === filter)),
@@ -178,7 +185,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 			.map(selectionSource => (selectionSource as SelectionSource<any, any>).event.subscribe("change", this.updateTargets))
 			.collect(this.append);
 
-		this.append(new Spacer(), this.countRow, this.buttonExecute);
+		this.append(new Spacer(), this.countRow, this.buttonExecute, this.previewWrapper);
 
 		this.updateTargets();
 	}
@@ -208,11 +215,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 			.attributes.set("width", "300")
 			.attributes.set("height", "200")
 			.classes.add("debug-tools-selection-preview")
-			.appendTo(new Component()
-				.classes.add("debug-tools-selection-preview-wrapper")
-				.append(this.buttonPreviewPrevious, this.buttonPreviewNext))
-
-		this.append(this.canvas.getParent()!);
+			.appendTo(this.previewWrapper);
 
 		Renderer.createWebGlContext(this.canvas.element).then(async (context) => {
 			if (this.disposed) {
@@ -233,10 +236,11 @@ export default class SelectionPanel extends DebugToolsPanel {
 			this.webGlContext = context;
 
 			const entity = localPlayer;
+
 			this.renderer = new Renderer(context, entity);
-			this.renderer.setViewport(new Vector2(300, 200));
 			this.renderer.fieldOfView.disabled = true;
 			this.renderer.event.subscribe("getZoomLevel", () => 2);
+			this.renderer.setViewport(new Vector2(300, 200));
 
 			this.resize();
 		});
@@ -272,7 +276,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 				this.dropdownAlternativeTarget
 					.setRefreshMethod(() => ({
 						defaultOption: localPlayer.identifier,
-						options: players.map(player => Tuple(player.identifier, option => option.setText(player.getName()))),
+						options: playerManager.getAll(true, true).map(player => Tuple(player.identifier, option => option.setText(player.getName()))),
 					}))
 					.selectDefault();
 				break;
@@ -383,7 +387,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 	}
 
 	private rerender(reason = RenderSource.Mod) {
-		this.renderer?.updateView(reason, true, true);
+		this.renderer?.updateView(reason, true);
 	}
 
 	@EventHandler(EventBus.Game, "tickEnd")

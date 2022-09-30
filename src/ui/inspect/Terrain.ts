@@ -134,6 +134,6 @@ export default class TerrainInformation extends InspectInformationSection {
 	@Bound
 	public refreshTile() {
 		localIsland.world.layers[this.position.z].updateTile(this.position.x, this.position.y, this.tile, true, this.checkButtonIncludeNeighbors.checked, true, undefined, true);
-		game.updateView(RenderSource.Mod, false);
+		renderers.updateView(RenderSource.Mod, false);
 	}
 }

@@ -6,7 +6,7 @@ import Creature from "game/entity/creature/Creature";
 import { IDamageInfo } from "game/entity/creature/ICreature";
 import Human from "game/entity/Human";
 import { MoveType } from "game/entity/IEntity";
-import { Delay } from "game/entity/IHuman";
+import { Delay, MovingClientSide } from "game/entity/IHuman";
 import NPC from "game/entity/npc/NPC";
 import { Source } from "game/entity/player/IMessageManager";
 import Player from "game/entity/player/Player";
@@ -337,7 +337,7 @@ export default class DebugTools extends Mod {
 			weightBonus: 0,
 			invulnerable: false,
 			noclip: false,
-			permissions: players[player.id].isServer(),
+			permissions: player.isServer(),
 			fog: undefined,
 			lighting: true,
 		})[key];
@@ -406,7 +406,7 @@ export default class DebugTools extends Mod {
 	 * - Removes the `AddItemToInventory` UI Component.
 	 */
 	public override onUnload() {
-		AddItemToInventoryComponent.init().releaseAndRemove();
+		AddItemToInventoryComponent.INSTANCE?.releaseAndRemove();
 		EventManager.deregisterEventBusSubscriber(this.selector);
 		Bind.deregisterHandlers(this.selector);
 		this.unlockedCameraMovementHandler.end();
@@ -431,7 +431,7 @@ export default class DebugTools extends Mod {
 			const fogForceEnabled = this.getPlayerData(localPlayer, "fog");
 			if (fogForceEnabled !== undefined && renderer.fieldOfView.disabled !== !fogForceEnabled) {
 				renderer.fieldOfView.disabled = !fogForceEnabled;
-				game.updateView(RenderSource.Mod, true);
+				renderers.updateView(RenderSource.Mod, true);
 			}
 		}
 	}
@@ -492,7 +492,7 @@ export default class DebugTools extends Mod {
 	public toggleLighting(lighting: boolean) {
 		this.setPlayerData(localPlayer, "lighting", lighting);
 		UpdateStatsAndAttributes.execute(localPlayer, localPlayer);
-		game.updateView(RenderSource.Mod, true);
+		renderers.updateView(RenderSource.Mod, true);
 	}
 
 	////////////////////////////////////
@@ -601,7 +601,7 @@ export default class DebugTools extends Mod {
 	 * We prevent creatures attacking the enemy if the enemy is a player who is set as "invulnerable" or "noclipping"
 	 */
 	@EventHandler(Creature, "canAttack")
-	protected canCreatureAttack(creature: Creature, enemy: Player | Creature): boolean | undefined {
+	protected canCreatureAttack(creature: Creature, enemy: Human | Creature): boolean | undefined {
 		if (enemy.asPlayer) {
 			if (this.getPlayerData(enemy.asPlayer, "invulnerable")) return false;
 			if (this.getPlayerData(enemy.asPlayer, "noclip")) return false;
@@ -635,9 +635,10 @@ export default class DebugTools extends Mod {
 		player.addDelay(noclip.delay, true);
 
 		player.isMoving = true;
-		player.isMovingClientside = true;
-		player.nextX = nextX;
-		player.nextY = nextY;
+		player.movingClientside = MovingClientSide.Moving;
+
+		player.moveTo(nextX, nextY, player.z, false);
+
 		player.nextMoveTime = game.absoluteTime + (noclip.delay * game.interval);
 
 		noclip.moving = true;

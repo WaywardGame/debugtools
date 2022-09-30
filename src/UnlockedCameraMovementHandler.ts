@@ -98,7 +98,7 @@ export default class UnlockedCameraMovementHandler {
 
 		if (!this.position.equals(beforePosition)) {
 			gameScreen?.worldTooltipHandler?.["updatePosition"]();
-			game.updateView(RenderSource.Mod, false);
+			renderers.updateView(RenderSource.Mod, false);
 		}
 	}
 }

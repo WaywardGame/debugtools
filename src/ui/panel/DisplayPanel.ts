@@ -66,7 +66,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 
 		new Button()
 			.classes.add("warning")
-			.setText(translation(DebugToolsTranslation.ButtonResetWebGL))
+			.setText(translation(DebugToolsTranslation.ButtonResetRenderer))
 			.event.subscribe("activate", this.resetWebGL)
 			.appendTo(this);
 
@@ -146,7 +146,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 
 		await game.webGlContext?.recompilePrograms();
 
-		game.updateView(RenderSource.Mod, true);
+		renderers.updateView(RenderSource.Mod, true);
 	}
 
 	@Bound
@@ -162,7 +162,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 			this.saveData.renderLayerFlags &= ~flag;
 		}
 
-		game.updateView(RenderSource.Mod);
+		renderers.updateView(RenderSource.Mod);
 	}
 
 	@EventHandler(WorldLayerRenderer, "getRenderFlags")

@@ -52,9 +52,8 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * The positioning settings for the dialog.
 	 */
 	public static description: IDialogDescription = {
-		minSize: new Vector2(20, 25),
+		minResolution: new Vector2(300, 200),
 		size: new Vector2(29, 25),
-		maxSize: new Vector2(40, 70),
 		edges: [
 			[Edge.Left, 50],
 			[Edge.Bottom, 31],
@@ -180,7 +179,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 		}
 
 		this.logUpdate();
-		this.schedule(300, 300, this.updateSubpanels);
+		this.schedule(20, 50, this.updateSubpanels);
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "preMoveToIsland")
@@ -215,7 +214,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	//
 
 	@EventHandler(EventBus.Game, "tickEnd")
-	@Debounce(100)
+	@Debounce(10)
 	public onGameTickEnd() {
 		this.update();
 	}
@@ -226,6 +225,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	}
 
 	@EventHandler(EventBus.Island, "tileUpdate")
+	@Debounce(10)
 	public onTileUpdate(island: any, tile: ITile, x: number, y: number, z: number, tileUpdateType: TileUpdateType) {
 		this.update();
 	}
@@ -241,7 +241,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 			delete this.inspectingTile;
 		}
 
-		game.updateView(RenderSource.Mod, false);
+		renderers.updateView(RenderSource.Mod, false);
 
 		delete InspectDialog.INSTANCE;
 	}
@@ -297,7 +297,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 			red: 0,
 			blue: 0,
 		}, Overlays.isSelectedTarget);
-		game.updateView(RenderSource.Mod, false);
+		renderers.updateView(RenderSource.Mod, false);
 	}
 
 	/**

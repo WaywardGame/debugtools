@@ -96,14 +96,12 @@ export default class PaintPanel extends DebugToolsPanel {
 	private readonly paintRadius: RangeRow;
 
 	private painting = false;
-	private readonly paintTiles: number[] = [];
+	private readonly paintTiles = new Set<number>();
 	private lastPaintPosition?: IVector2;
 	private maxSprites = 1024;
 
 	public constructor() {
 		super();
-
-		this.paintSections.splice(0, Infinity);
 
 		this.paintSections.push(...paintSections
 			.map(cls => new cls()
@@ -157,7 +155,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 	@EventHandler(WorldRenderer, "getMaxSpritesForLayer")
 	protected getMaxSpritesForLayer(_: any, maxSprites: number) {
-		return this.maxSprites = maxSprites + (this.painting ? this.paintTiles.length * 4 : 0);
+		return this.maxSprites = maxSprites + (this.painting ? this.paintTiles.size * 4 : 0);
 	}
 
 	@Bind.onDown(Bindable.MenuContextMenu, Priority.High)
@@ -178,14 +176,20 @@ export default class PaintPanel extends DebugToolsPanel {
 		return this.painting && !!gameScreen?.mouseStartWasWithin(api);
 	}
 
-	@Bind.onHolding(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindablePaint"))
+	@Bind.onHolding(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindablePaint"), Priority.High)
 	protected onPaint(api: IBindHandlerApi) {
-		if (!this.painting || !gameScreen?.mouseStartWasWithin(api) || !renderer)
+		if (!this.painting || !gameScreen?.mouseStartWasWithin(api) || !renderer) {
 			return false;
+		}
 
 		const tilePosition = renderer.worldRenderer.screenToTile(...api.mouse.position.xy);
-		if (!tilePosition)
+		if (!tilePosition || this.lastPaintPosition === tilePosition) {
 			return false;
+		}
+
+		this.lastPaintPosition = tilePosition;
+
+		let shouldUpdateView = false;
 
 		const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
 
@@ -196,31 +200,39 @@ export default class PaintPanel extends DebugToolsPanel {
 			const paintPosition = interpolatedPosition.floor(new Vector2());
 
 			for (const [paintTilePosition] of TileHelpers.tilesInRange(localIsland, new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
-				SelectionOverlay.add(paintTilePosition);
-
-				const tileId = getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z);
-
-				if (!this.paintTiles.includes(tileId)) this.paintTiles.push(tileId);
+				if (SelectionOverlay.add(paintTilePosition)) {
+					shouldUpdateView = true;
+					this.paintTiles.add(getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z));
+				}
 			}
 
-			if (paintPosition.equals(tilePosition)) break;
+			if (paintPosition.equals(tilePosition)) {
+				break;
+			}
 		}
 
-		this.lastPaintPosition = tilePosition;
+		if (shouldUpdateView) {
+			this.updateOverlayBatch();
+			renderers.updateView(RenderSource.Mod, false);
+		}
 
-		this.updateOverlayBatch();
-		game.updateView(RenderSource.Mod, false);
 		return true;
 	}
 
 	@Bind.onHolding(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableErasePaint"))
 	protected onErasePaint(api: IBindHandlerApi) {
-		if (!this.painting || !gameScreen?.mouseStartWasWithin(api) || !renderer)
+		if (!this.painting || !gameScreen?.mouseStartWasWithin(api) || !renderer) {
 			return false;
+		}
 
 		const tilePosition = renderer.worldRenderer.screenToTile(...api.mouse.position.xy);
-		if (!tilePosition)
+		if (!tilePosition || this.lastPaintPosition === tilePosition) {
 			return false;
+		}
+
+		this.lastPaintPosition = tilePosition;
+
+		let shouldUpdateView = false;
 
 		const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
 
@@ -231,21 +243,22 @@ export default class PaintPanel extends DebugToolsPanel {
 			const paintPosition = interpolatedPosition.floor(new Vector2());
 
 			for (const [paintTilePosition] of TileHelpers.tilesInRange(localIsland, new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
-				SelectionOverlay.remove(paintTilePosition);
-
-				const tileId = getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z);
-
-				const index = this.paintTiles.indexOf(tileId);
-				if (index > -1) this.paintTiles.splice(index, 1);
+				if (SelectionOverlay.remove(paintTilePosition)) {
+					shouldUpdateView = true;
+					this.paintTiles.delete(getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z));
+				}
 			}
 
-			if (paintPosition.equals(tilePosition)) break;
+			if (paintPosition.equals(tilePosition)) {
+				break;
+			}
 		}
 
-		this.lastPaintPosition = tilePosition;
+		if (shouldUpdateView) {
+			this.updateOverlayBatch();
+			renderers.updateView(RenderSource.Mod, false);
+		}
 
-		this.updateOverlayBatch();
-		game.updateView(RenderSource.Mod, false);
 		return true;
 	}
 
@@ -262,7 +275,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	protected onCancelPaint() {
 		if (!this.painting)
 			return false;
-
+		this.painting = false;
 		this.paintButton.setChecked(false);
 		return true;
 	}
@@ -288,7 +301,6 @@ export default class PaintPanel extends DebugToolsPanel {
 	@OwnEventHandler(PaintPanel, "switchTo")
 	protected onSwitchTo() {
 		this.getParent()!.classes.add("debug-tools-paint-panel");
-
 		this.paintRow.appendTo(this.getParent()!.getParent()!);
 
 		Bind.registerHandlers(this);
@@ -302,9 +314,16 @@ export default class PaintPanel extends DebugToolsPanel {
 		this.painting = false;
 		this.paintButton.setChecked(false);
 
-		this.paintRow.store(this);
-
+		// store in the dialog body, which won't be removed when switching panels
+		this.paintRow.store(this.getParent()!.getParent()!.getParent()!.getParent()!);
 		this.getParent()?.classes.remove("debug-tools-paint-panel");
+
+		this.paintSections.length = 0;
+	}
+
+	@OwnEventHandler(PaintPanel, "willRemove")
+	protected onWillRemove() {
+		this.paintSections.length = 0;
 	}
 
 	////////////////////////////////////
@@ -312,7 +331,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	//
 
 	private updateOverlayBatch() {
-		if (this.paintTiles.length * 4 - 512 < this.maxSprites || this.paintTiles.length * 4 + 512 > this.maxSprites) {
+		if (this.paintTiles.size * 4 - 512 < this.maxSprites || this.paintTiles.size * 4 + 512 > this.maxSprites) {
 			renderer!.worldRenderer.initializeSpriteBatch(SpriteBatchLayer.Overlay);
 		}
 	}
@@ -342,7 +361,7 @@ export default class PaintPanel extends DebugToolsPanel {
 			Object.assign(paintData, paintSection.getTilePaintData());
 		}
 
-		Paint.execute(localPlayer, [...this.paintTiles], paintData);
+		Paint.execute(localPlayer, Array.from(this.paintTiles), paintData);
 
 		this.clearPaint();
 	}
@@ -355,9 +374,9 @@ export default class PaintPanel extends DebugToolsPanel {
 			TileHelpers.Overlay.remove(tile, Overlays.isPaint);
 		}
 
-		this.paintTiles.splice(0, Infinity);
+		this.paintTiles.clear();
 
 		this.updateOverlayBatch();
-		game.updateView(RenderSource.Mod, false);
+		renderers.updateView(RenderSource.Mod, false);
 	}
 }

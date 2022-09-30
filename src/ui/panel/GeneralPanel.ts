@@ -164,6 +164,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 		new Button()
 			.classes.add("has-icon-before", "icon-arrow-right", "icon-no-scale")
+			.style.set("--icon-zoom", 2)
 			.setText(translation(DebugToolsTranslation.ButtonTravel))
 			.event.subscribe("activate", this.travel)
 			.appendTo(this);
@@ -248,7 +249,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 			audio?.queueEffect(this.dropdownAudio.selection, localIsland, position.x, position.y, localPlayer.z);
 
 		else
-			renderer?.particle.create(localIsland, position.x, position.y, localPlayer.z, particles[this.dropdownParticle.selection]);
+			renderers.particle.create(localIsland, position.x, position.y, localPlayer.z, particles[this.dropdownParticle.selection]);
 
 		return true;
 	}

@@ -5,6 +5,7 @@ import { Quality } from "game/IObject";
 import { IContainer, ItemType } from "game/item/IItem";
 import { ITile } from "game/tile/ITerrain";
 import { TextContext } from "language/ITranslation";
+import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import Button from "ui/component/Button";
 import EnumContextMenu, { EnumSort } from "ui/component/EnumContextMenu";
@@ -104,7 +105,7 @@ export default class DoodadInformation extends InspectInformationSection {
 	@Bound
 	private async setGrowthStage() {
 		const growthStage = await new EnumContextMenu(GrowingStage)
-			.setTranslator(stage => Doodad.getGrowingStageTranslation(stage, this.doodad!.description())!.inContext(TextContext.Title))
+			.setTranslator(stage => Translation.growthStage(stage, this.doodad!.description()?.usesSpores)!.inContext(TextContext.Title))
 			.setSort(EnumSort.Id)
 			.waitForChoice();
 
