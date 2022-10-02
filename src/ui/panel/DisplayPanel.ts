@@ -5,7 +5,7 @@ import { Shaders } from "renderer/Shaders";
 import { RenderLayerFlag } from "renderer/world/IWorldRenderer";
 import WorldLayerRenderer from "renderer/world/WorldLayerRenderer";
 import WorldRenderer from "renderer/world/WorldRenderer";
-import Button from "ui/component/Button";
+import Button, { ButtonType } from "ui/component/Button";
 import { CheckButton } from "ui/component/CheckButton";
 import Divider from "ui/component/Divider";
 import { RangeRow } from "ui/component/RangeRow";
@@ -65,19 +65,19 @@ export default class DisplayPanel extends DebugToolsPanel {
 			.appendTo(this);
 
 		new Button()
-			.classes.add("warning")
+			.setType(ButtonType.Warning)
 			.setText(translation(DebugToolsTranslation.ButtonResetRenderer))
 			.event.subscribe("activate", this.resetWebGL)
 			.appendTo(this);
 
 		new Button()
-			.classes.add("warning")
+			.setType(ButtonType.Warning)
 			.setText(translation(DebugToolsTranslation.ButtonRefreshTiles))
 			.event.subscribe("activate", this.refreshTiles)
 			.appendTo(this);
 
 		new Button()
-			.classes.add("warning")
+			.setType(ButtonType.Warning)
 			.setText(translation(DebugToolsTranslation.ButtonReloadShaders))
 			.event.subscribe("activate", this.reloadShaders)
 			.appendTo(this);
