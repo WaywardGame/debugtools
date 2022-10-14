@@ -19,6 +19,7 @@ import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
 import { RenderSource } from "renderer/IRenderer";
+import Renderer from "renderer/Renderer";
 import WorldRenderer from "renderer/world/WorldRenderer";
 import Bind, { IBindHandlerApi } from "ui/input/Bind";
 import Bindable from "ui/input/Bindable";
@@ -537,10 +538,14 @@ export default class DebugTools extends Mod {
 
 	@EventHandler(EventBus.Game, "play")
 	protected onGamePlay() {
-		const rendererEventsUntilUnload = renderer?.event.until(this, "unload");
-		rendererEventsUntilUnload?.subscribe("getZoomLevel", this.getZoomLevel);
-		rendererEventsUntilUnload?.subscribe("getCameraPosition", this.getCameraPosition);
 		this.unlockedCameraMovementHandler.begin();
+	}
+
+	@EventHandler(EventBus.Game, "rendererCreated")
+	protected onRendererCreated(_: any, renderer: Renderer) {
+		const rendererEventsUntilDeleted = renderer.event.until(renderer, "deleted");
+		rendererEventsUntilDeleted?.subscribe("getZoomLevel", this.getZoomLevel);
+		rendererEventsUntilDeleted?.subscribe("getCameraPosition", this.getCameraPosition);
 	}
 
 	/**
