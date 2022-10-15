@@ -4,6 +4,7 @@ import { Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { BiomeType } from "game/biome/IBiome";
 import { DEFAULT_ISLAND_ID, IslandId, IslandPosition } from "game/island/IIsland";
+import { ReferenceType } from "game/reference/IReferenceManager";
 import { WorldZ } from "game/WorldZ";
 import Dictionary from "language/Dictionary";
 import TranslationImpl from "language/impl/TranslationImpl";
@@ -25,6 +26,7 @@ import { RangeRow } from "ui/component/RangeRow";
 import Text, { Heading } from "ui/component/Text";
 import Bind, { IBindHandlerApi } from "ui/input/Bind";
 import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
+import Tooltip from "ui/tooltip/Tooltip";
 import { Tuple } from "utilities/collection/Arrays";
 import { Bound, Debounce } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
@@ -105,14 +107,14 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.append(new Text()
 				.setText(translation(DebugToolsTranslation.HeadingIslandCurrent)))
 			.append(new Input()
-				.setDefault(() => localIsland.id)
-				.setClearTo(() => localIsland.name || localIsland.id)
+				.setDefault(() => localIsland.getName())
+				.setClearTo(() => localIsland.getName())
 				.setClearToDefaultWhenEmpty()
 				.clear()
 				.event.subscribe("done", this.renameIsland))
 			.append(new Text()
 				.setText(translation(DebugToolsTranslation.Island)
-					.addArgs("", "", Translation.get(Dictionary.Biome, localIsland.biomeType))))
+					.addArgs(localIsland.id, "", Translation.get(Dictionary.Biome, localIsland.biomeType))))
 			.appendTo(this);
 
 		////////////////////////////////////
@@ -155,10 +157,11 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTravel)))
 			.append(this.dropdownTravel = new IslandDropdown<string>(getTravelDropdownNewIslandOptionId(BiomeType.Random), () => [
 				...Enums.values(BiomeType)
-					.map(biome => [getTravelDropdownNewIslandOptionId(biome), option => option.setText(translation(DebugToolsTranslation.OptionTravelNewIsland)
-						.addArgs(Translation.get(Dictionary.Biome, biome).inContext(TextContext.Title)))] as IDropdownOption<string>),
-				["random", option => option.setText(translation(DebugToolsTranslation.OptionTravelRandomIsland))],
+					.map(biome => [getTravelDropdownNewIslandOptionId(biome), option => option
+						.setText(translation(DebugToolsTranslation.OptionTravelNewIsland)
+							.addArgs(Translation.get(Dictionary.Biome, biome).inContext(TextContext.Title)))] as IDropdownOption<string>),
 				["civilization", option => option.setText(translation(DebugToolsTranslation.OptionTravelCivilization))],
+				["random", option => option.setText(translation(DebugToolsTranslation.OptionTravelRandomIsland))],
 			]))
 			.appendTo(this);
 
@@ -346,11 +349,20 @@ class IslandDropdown<OTHER_OPTIONS extends string = never> extends GroupDropdown
 	protected override getTranslation(islandId: IslandId) {
 		const island = game.islands.get(islandId);
 		return translation(DebugToolsTranslation.Island)
-			.addArgs(islandId, island?.getName(), Translation.get(Dictionary.Biome, island?.biomeType ?? BiomeType.Random), island?.seeds.base.toString());
+			.addArgs(islandId, island?.getName(), Translation.get(Dictionary.Biome, island?.biomeType ?? BiomeType.Random));
 	}
 
 	protected override getGroupName(biome: BiomeType) {
 		return Translation.get(Dictionary.Biome, biome).getString();
+	}
+
+	protected override optionTooltipInitializer(tooltip: Tooltip, islandId: IslandId) {
+		const island = game.islands.getIfExists(islandId);
+		if (island?.referenceId === undefined) {
+			return undefined;
+		}
+
+		return game.references.tooltip([island.referenceId, ReferenceType.Island])(tooltip);
 	}
 
 	protected override shouldIncludeOtherOptionsInGroupFilter() {
