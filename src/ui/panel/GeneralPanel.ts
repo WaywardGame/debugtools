@@ -373,7 +373,7 @@ class IslandDropdown<OTHER_OPTIONS extends string = never> extends GroupDropdown
 		if (islandId.startsWith(TRAVEL_DROPDOWN_NEW_ISLAND_PREFIX))
 			return islandId === getTravelDropdownNewIslandOptionId(biome);
 
-		return game.islands.get(islandId)?.biomeType === biome;
+		return game.islands.getIfExists(islandId)?.biomeType === biome;
 	}
 
 	protected override getGroups() {
