@@ -1,5 +1,5 @@
 import { Quality } from "game/IObject";
-import { ItemType } from "game/item/IItem";
+import { IContainer, ItemType } from "game/item/IItem";
 import Item from "game/item/Item";
 import { ITile } from "game/tile/ITerrain";
 import Dictionary from "language/Dictionary";
@@ -83,7 +83,7 @@ export default class ItemInformation extends InspectInformationSection {
 
 	@Bound
 	private addItem(_: any, type: ItemType | typeof ADD_ITEM_ALL | typeof ADD_ITEM_RANDOM, quality: Quality, quantity: number) {
-		AddItemToInventory.execute(localPlayer, localIsland.items.getTileContainer(this.position.x, this.position.y, localPlayer.z), type, quality, quantity);
+		AddItemToInventory.execute(localPlayer, localIsland.items.getTileContainer(this.position.x, this.position.y, localPlayer.z) as IContainer, type, quality, quantity);
 	}
 
 	@Bound

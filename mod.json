@@ -1,7 +1,7 @@
 {
 	"name": "Debug Tools",
 	"description": "Adds a special debug tools menu into the game.",
-	"version": "2.1",
+	"version": "2.1.1",
 	"author": "Chiri Vulpes",
 	"github": "https://github.com/WaywardGame/debugtools",
 	"waywardVersion": "2.12.0-beta",
