@@ -46,7 +46,7 @@
 			"labelLayer": "Layer",
 			"optionLayer": "The {1} {#--text-secondary:({2?{2}, }{0})}",
 			"headingIslandCurrent": "Island: {0}",
-			"island": "{1}{#--text-secondary: ({2}, {0}{3?, seed\\: {3}})}",
+			"island": "{1}{#--text-secondary: ({2} @ {0})}",
 			"labelTravel": "Travel to",
 			"optionTravelNewIsland": "New Island {#--text-secondary:({0})}",
 			"optionTravelCivilization": "Civilization",

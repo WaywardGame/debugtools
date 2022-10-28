@@ -129,8 +129,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 					getTabTranslation,
 					// to show the panel, we append the section to the passed component & call a couple methods on the panel
 					(component: Component) => section.setTab(index)
-						.appendTo(component)
-						.event.emit("switchTo"),
+						.schedule(section => this.onShowSubpanel(section)(component)),
 					// we cache all of the entity buttons
 					(button: Button) => !(section instanceof EntityInformation) ? undefined : this.entityButtons[index] = button,
 				)))

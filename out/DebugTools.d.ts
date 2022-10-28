@@ -13,6 +13,7 @@ import Dictionary from "language/Dictionary";
 import Message from "language/dictionary/Message";
 import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
+import Renderer from "renderer/Renderer";
 import WorldRenderer from "renderer/world/WorldRenderer";
 import { IBindHandlerApi } from "ui/input/Bind";
 import Bindable from "ui/input/Bindable";
@@ -115,6 +116,7 @@ export default class DebugTools extends Mod {
     postFieldOfView(): void;
     onGameScreenVisible(): void;
     protected onGamePlay(): void;
+    protected onRendererCreated(_: any, renderer: Renderer): void;
     getZoomLevel(): number | undefined;
     protected getCameraPosition(_: any, position: IVector2): IVector2 | undefined;
     onPlayerDamage(player: Player, info: IDamageInfo): number | void;
