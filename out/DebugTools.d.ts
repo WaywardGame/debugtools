@@ -1,7 +1,6 @@
 import { Events, IEventEmitter } from "event/EventEmitter";
 import { ActionType } from "game/entity/action/IAction";
 import Creature from "game/entity/creature/Creature";
-import { IDamageInfo } from "game/entity/creature/ICreature";
 import Human from "game/entity/Human";
 import NPC from "game/entity/npc/NPC";
 import { Source } from "game/entity/player/IMessageManager";
@@ -119,7 +118,7 @@ export default class DebugTools extends Mod {
     protected onRendererCreated(_: any, renderer: Renderer): void;
     getZoomLevel(): number | undefined;
     protected getCameraPosition(_: any, position: IVector2): IVector2 | undefined;
-    onPlayerDamage(player: Player, info: IDamageInfo): number | void;
+    onPlayerDie(player: Player): false | void;
     protected canCreatureAttack(creature: Creature, enemy: Human | Creature): boolean | undefined;
     onMove(player: Player, fromX: number, fromY: number, fromZ: number, fromTile: ITile, nextX: number, nextY: number, nextZ: number, tile: ITile): boolean | void | undefined;
     onNoInputReceived(player: Player): void;

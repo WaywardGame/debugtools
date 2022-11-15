@@ -3,7 +3,6 @@ import { Events, IEventEmitter, Priority } from "event/EventEmitter";
 import EventManager, { EventHandler } from "event/EventManager";
 import { ActionType } from "game/entity/action/IAction";
 import Creature from "game/entity/creature/Creature";
-import { IDamageInfo } from "game/entity/creature/ICreature";
 import Human from "game/entity/Human";
 import { MoveType } from "game/entity/IEntity";
 import { Delay, MovingClientSide } from "game/entity/IHuman";
@@ -593,22 +592,18 @@ export default class DebugTools extends Mod {
 		return this.unlockedCameraMovementHandler.position;
 	}
 
-	/**
-	 * We cancel damage to the player if they're set as "invulnerable"
-	 */
-	@EventHandler(EventBus.Players, "damage")
-	public onPlayerDamage(player: Player, info: IDamageInfo): number | void {
+	@EventHandler(EventBus.Players, "shouldDie")
+	public onPlayerDie(player: Player): false | void {
 		if (this.getPlayerData(player, "invulnerable"))
-			return 0;
+			return false;
 	}
 
 	/**
-	 * We prevent creatures attacking the enemy if the enemy is a player who is set as "invulnerable" or "noclipping"
+	 * We prevent creatures attacking the enemy if the enemy is a player who is set as "noclipping"
 	 */
 	@EventHandler(Creature, "canAttack")
 	protected canCreatureAttack(creature: Creature, enemy: Human | Creature): boolean | undefined {
 		if (enemy.asPlayer) {
-			if (this.getPlayerData(enemy.asPlayer, "invulnerable")) return false;
 			if (this.getPlayerData(enemy.asPlayer, "noclip")) return false;
 		}
 
