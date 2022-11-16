@@ -1,22 +1,10 @@
-import { Quality } from "game/IObject";
-import { IContainer, ItemType } from "game/item/IItem";
-import Item from "game/item/Item";
 import { ITile } from "game/tile/ITerrain";
-import Dictionary from "language/Dictionary";
-import { TextContext } from "language/ITranslation";
-import Translation from "language/Translation";
 import Mod from "mod/Mod";
-import Button from "ui/component/Button";
-import Component from "ui/component/Component";
-import { Paragraph } from "ui/component/Text";
 import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
-import AddItemToInventory, { ADD_ITEM_ALL, ADD_ITEM_RANDOM } from "../../action/AddItemToInventory";
-import Remove from "../../action/Remove";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
-import { areArraysIdentical } from "../../util/Array";
-import AddItemToInventoryComponent from "../component/AddItemToInventory";
+import Container from "../component/Container";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
 
@@ -25,18 +13,7 @@ export default class ItemInformation extends InspectInformationSection {
 	@Mod.log(DEBUG_TOOLS_ID)
 	public readonly LOG: Log;
 
-	private readonly wrapperAddItem: Component;
-	private readonly wrapperItems: Component;
-
-	private items: Item[] = [];
 	private position: IVector2;
-
-	public constructor() {
-		super();
-
-		this.wrapperAddItem = new Component().appendTo(this);
-		this.wrapperItems = new Component().appendTo(this);
-	}
 
 	public override getTabs(): TabInformation[] {
 		return [
@@ -45,51 +22,22 @@ export default class ItemInformation extends InspectInformationSection {
 	}
 
 	public override setTab() {
-		const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this.wrapperAddItem);
-		addItemToInventory.event.until(this, "remove", "switchAway")
-			.subscribe("execute", this.addItem);
-
+		Container.appendTo(this, this, this.getTile);
 		return this;
 	}
 
 	public override update(position: IVector2, tile: ITile) {
 		this.position = position;
-		const items = [...tile.containedItems || []];
-
-		if (areArraysIdentical(items, this.items)) return;
-		this.items = items;
-		this.wrapperItems.dump();
-
-		if (!this.items.length) return;
-
-		this.setShouldLog();
-
-		for (const item of this.items) {
-			new Paragraph()
-				.setText(() => translation(DebugToolsTranslation.ItemName)
-					.get(Translation.nameOf(Dictionary.Item, item).inContext(TextContext.Title)))
-				.appendTo(this.wrapperItems);
-
-			new Button()
-				.setText(translation(DebugToolsTranslation.ActionRemove))
-				.event.subscribe("activate", this.removeItem(item))
-				.appendTo(this.wrapperItems);
-		}
+		Container.INSTANCE?.refreshItems();
+		if (tile.containedItems?.length)
+			this.setShouldLog();
 	}
 
 	public override logUpdate() {
-		this.LOG.info("Items:", this.items);
+		this.LOG.info("Items:", this.getTile()?.containedItems);
 	}
 
-	@Bound
-	private addItem(_: any, type: ItemType | typeof ADD_ITEM_ALL | typeof ADD_ITEM_RANDOM, quality: Quality, quantity: number) {
-		AddItemToInventory.execute(localPlayer, localIsland.items.getTileContainer(this.position.x, this.position.y, localPlayer.z) as IContainer, type, quality, quantity);
-	}
-
-	@Bound
-	private removeItem(item: Item) {
-		return () => {
-			Remove.execute(localPlayer, item);
-		};
+	@Bound private getTile() {
+		return localIsland.items.getTileContainer(this.position.x, this.position.y, localPlayer.z);
 	}
 }

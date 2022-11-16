@@ -47,6 +47,7 @@ import PlaceTemplate from "./action/PlaceTemplate";
 import Remove from "./action/Remove";
 import RenameIsland from "./action/RenameIsland";
 import SelectionExecute from "./action/SelectionExecute";
+import SetDurabilityBulk from "./action/SetDurabilityBulk";
 import SetGrowingStage from "./action/SetGrowingStage";
 import SetSkill from "./action/SetSkill";
 import SetStat from "./action/SetStat";
@@ -62,7 +63,7 @@ import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
 import Actions from "./Actions";
 import { DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation, ZOOM_LEVEL_MAX } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
-import AddItemToInventoryComponent from "./ui/component/AddItemToInventory";
+import Container from "./ui/component/Container";
 import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import MainDialog, { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import InspectDialog from "./ui/InspectDialog";
@@ -241,6 +242,9 @@ export default class DebugTools extends Mod {
 	@Register.action("AddItemToInventory", AddItemToInventory)
 	public readonly actionAddItemToInventory: ActionType;
 
+	@Register.action("SetDurabilityBulk", SetDurabilityBulk)
+	public readonly actionSetDurabilityBulk: ActionType;
+
 	@Register.action("ClearInventory", ClearInventory)
 	public readonly actionClearInventory: ActionType;
 
@@ -406,7 +410,7 @@ export default class DebugTools extends Mod {
 	 * - Removes the `AddItemToInventory` UI Component.
 	 */
 	public override onUnload() {
-		AddItemToInventoryComponent.INSTANCE?.releaseAndRemove();
+		Container.INSTANCE?.releaseAndRemove();
 		EventManager.deregisterEventBusSubscriber(this.selector);
 		Bind.deregisterHandlers(this.selector);
 		this.unlockedCameraMovementHandler.end();
@@ -532,7 +536,7 @@ export default class DebugTools extends Mod {
 	 */
 	@EventHandler(GameScreen, "show")
 	public onGameScreenVisible() {
-		AddItemToInventoryComponent.init();
+		Container.init();
 	}
 
 	@EventHandler(EventBus.Game, "play")

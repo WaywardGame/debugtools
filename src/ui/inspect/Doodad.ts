@@ -1,8 +1,6 @@
 import { OwnEventHandler } from "event/EventManager";
 import Doodad from "game/doodad/Doodad";
 import { GrowingStage } from "game/doodad/IDoodad";
-import { Quality } from "game/IObject";
-import { IContainer, ItemType } from "game/item/IItem";
 import { ITile } from "game/tile/ITerrain";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
@@ -13,13 +11,12 @@ import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
 import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
-import AddItemToInventory from "../../action/AddItemToInventory";
 import Clone from "../../action/Clone";
 import Remove from "../../action/Remove";
 import SetGrowingStage from "../../action/SetGrowingStage";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
-import AddItemToInventoryComponent from "../component/AddItemToInventory";
+import Container from "../component/Container";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
 
@@ -57,9 +54,7 @@ export default class DoodadInformation extends InspectInformationSection {
 		if (!this.doodad!.containedItems)
 			return;
 
-		const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this);
-		addItemToInventory.event.until(this, "switchAway", "remove")
-			.subscribe("execute", this.addItem);
+		Container.appendTo(this, this, () => this.doodad);
 	}
 
 	public override getTabs(): TabInformation[] {
@@ -82,11 +77,6 @@ export default class DoodadInformation extends InspectInformationSection {
 
 	public override logUpdate() {
 		this.LOG.info("Doodad:", this.doodad);
-	}
-
-	@Bound
-	private addItem(_: any, type: ItemType, quality: Quality, quantity: number) {
-		AddItemToInventory.execute(localPlayer, this.doodad! as IContainer, type, quality, quantity);
 	}
 
 	@Bound
