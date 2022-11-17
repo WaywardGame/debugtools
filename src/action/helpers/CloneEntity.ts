@@ -11,9 +11,10 @@ import CopyStats from "./CopyStats";
  * Clones an entity to another position. Given a player, clones a matching NPC.
  */
 export default function (entity: Entity, position: IVector3) {
-	let clone: Creature | NPC;
+	let clone: Creature | NPC | undefined;
 
 	const creature = entity.asCreature;
+	const human = entity.asHuman;
 	if (creature) {
 		clone = entity.island.creatures.spawn(creature.type, position.x, position.y, position.z, true, creature.aberrant, undefined, true)!;
 
@@ -22,13 +23,15 @@ export default function (entity: Entity, position: IVector3) {
 		clone.ai = creature.ai;
 		clone.enemy = creature.enemy;
 
-	} else {
-		const npc = entity.asNPC!;
+	} else if (human) {
 		clone = entity.island.npcs.spawn(NPCType.Merchant, position.x, position.y, position.z)!;
-		clone.customization = { ...npc.customization };
+		clone.customization = { ...human.customization };
 		clone.renamed = entity.getName().getString();
-		CloneInventory(npc, clone);
+		CloneInventory(human, clone);
 	}
+
+	if (!clone)
+		return;
 
 	clone.direction = entity.direction.copy();
 	clone.facingDirection = entity.facingDirection;

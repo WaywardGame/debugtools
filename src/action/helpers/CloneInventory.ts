@@ -4,11 +4,11 @@ import Human from "game/entity/Human";
  * Clones the inventory from one human entity to another.
  */
 export default function (from: Human, to: Human) {
-	for (const item of to.inventory.containedItems) {
+	for (const item of [...to.inventory.containedItems]) {
 		from.island.items.remove(item);
 	}
 
-	for (const item of to.getEquippedItems()) {
+	for (const item of [...to.getEquippedItems()]) {
 		to.island.items.remove(item);
 	}
 
