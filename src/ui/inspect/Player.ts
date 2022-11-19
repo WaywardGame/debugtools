@@ -3,7 +3,7 @@ import { SkillType } from "game/entity/IHuman";
 import NPC from "game/entity/npc/NPC";
 import Player from "game/entity/player/Player";
 import UiTranslation from "language/dictionary/UiTranslation";
-import TranslationImpl from "language/impl/TranslationImpl";
+import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { BlockRow } from "ui/component/BlockRow";
@@ -32,7 +32,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	private readonly skillRangeRow: RangeRow;
 	private readonly checkButtonPermissions?: CheckButton;
 
-	private skill?: SkillType;
+	private skill?: SkillType | -1;
 	private player?: Player;
 
 	public constructor() {
@@ -71,13 +71,19 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelSkill)))
-			.append(new SkillDropdown("none", [["none", option => option.setText(translation(DebugToolsTranslation.None))]])
+			.append(new SkillDropdown("none", [
+				["none", option => option.setText(translation(DebugToolsTranslation.None))],
+				["all", option => option.setText(translation(DebugToolsTranslation.MethodAll))],
+			])
 				.event.subscribe("selection", this.changeSkill))
 			.appendTo(this);
 
 		this.skillRangeRow = new RangeRow()
 			.hide()
-			.setLabel(label => label.setText(TranslationImpl.generator(() => this.skill === undefined ? "" : SkillType[this.skill])))
+			.setLabel(label => label.setText(() => this.skill === undefined ? undefined
+				: this.skill === -1 ? translation(DebugToolsTranslation.MethodAll)
+					: Translation.skill(this.skill).inContext(TextContext.Title)))
+			.setInheritTextTooltip()
 			.editRange(range => range
 				.setMin(0)
 				.setMax(100)
@@ -116,8 +122,8 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	}
 
 	@Bound
-	private changeSkill(_: any, skill: SkillType | "none") {
-		this.skill = skill === "none" ? undefined : skill;
+	private changeSkill(_: any, skill: SkillType | "none" | "all") {
+		this.skill = skill === "none" ? undefined : skill === "all" ? -1 : skill;
 		this.skillRangeRow.refresh();
 
 		this.skillRangeRow.toggle(skill !== "none");

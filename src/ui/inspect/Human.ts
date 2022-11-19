@@ -3,17 +3,12 @@ import { OwnEventHandler } from "event/EventManager";
 import Entity from "game/entity/Entity";
 import Human, { REPUTATION_MAX } from "game/entity/Human";
 import { IStat, Stat } from "game/entity/IStats";
-import { Quality } from "game/IObject";
-import { ItemType } from "game/item/IItem";
-import Button from "ui/component/Button";
 import Component from "ui/component/Component";
 import { RangeRow } from "ui/component/RangeRow";
 import { Bound } from "utilities/Decorators";
-import AddItemToInventory from "../../action/AddItemToInventory";
-import ClearInventory from "../../action/ClearInventory";
 import SetStat from "../../action/SetStat";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
-import AddItemToInventoryComponent from "../component/AddItemToInventory";
+import Container from "../component/Container";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
 export default class HumanInformation extends InspectEntityInformationSubsection {
@@ -26,10 +21,6 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 		super();
 
 		this.addItemContainer = new Component().appendTo(this);
-		new Button()
-			.setText(translation(DebugToolsTranslation.ButtonClearInventory))
-			.event.subscribe("activate", () => this.human && ClearInventory.execute(localPlayer, this.human))
-			.appendTo(this);
 
 		this.addReputationSlider(DebugToolsTranslation.LabelMalignity, Stat.Malignity);
 		this.addReputationSlider(DebugToolsTranslation.LabelBenignity, Stat.Benignity);
@@ -37,9 +28,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 	@OwnEventHandler(HumanInformation, "switchTo")
 	protected onSwitchTo() {
-		const addItemToInventory = AddItemToInventoryComponent.init().appendTo(this.addItemContainer);
-		addItemToInventory.event.until(this, "switchAway", "remove")
-			.subscribe("execute", this.addItem);
+		Container.appendTo(this.addItemContainer, this, () => this.human?.inventory);
 	}
 
 	public override getImmutableStats() {
@@ -88,12 +77,6 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 			if (this.human!.stat.getValue(type) === value) return;
 			SetStat.execute(localPlayer, this.human!, type, value);
 		};
-	}
-
-	@Bound
-	private addItem(_: any, type: ItemType, quality: Quality, quantity: number) {
-		if (this.human)
-			AddItemToInventory.execute(localPlayer, this.human.asPlayer ?? this.human.inventory, type, quality, quantity);
 	}
 
 	@Bound

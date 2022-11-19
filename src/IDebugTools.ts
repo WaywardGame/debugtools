@@ -165,15 +165,18 @@ export enum DebugToolsTranslation {
 	None,
 	LabelQuality,
 	LabelQuantity,
+	LabelDurability,
+	ButtonApply,
 	AddToInventory,
 	DoodadName,
 	TabItemStack,
 	UnlockInspection,
 	LockInspection,
 	TileEventName,
-	ItemName,
 	ButtonTogglePermissions,
 	ButtonSetGrowthStage,
+	LabelItemDetails,
+	LabelBulkItemOperations,
 	////////////////////////////////////
 	// Inspection
 	//

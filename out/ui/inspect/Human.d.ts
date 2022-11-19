@@ -11,6 +11,5 @@ export default class HumanInformation extends InspectEntityInformationSubsection
     update(entity: Entity): void;
     private addReputationSlider;
     private setReputation;
-    private addItem;
     private onStatChange;
 }

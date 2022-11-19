@@ -1,6 +1,5 @@
-import { Events, IEventEmitter } from "event/EventEmitter";
 import { Quality } from "game/IObject";
-import { ItemType } from "game/item/IItem";
+import { IContainer, ItemType } from "game/item/IItem";
 import Dictionary from "language/Dictionary";
 import Translation from "language/Translation";
 import Button from "ui/component/Button";
@@ -12,32 +11,17 @@ import { RangeRow } from "ui/component/RangeRow";
 import { Tuple } from "utilities/collection/Arrays";
 import { Bound } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
-import { ADD_ITEM_ALL, ADD_ITEM_RANDOM } from "../../action/AddItemToInventory";
+import AddItemToInventoryAction, { ADD_ITEM_ALL, ADD_ITEM_RANDOM } from "../../action/AddItemToInventory";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 
-interface IAddItemToInventoryEvents extends Events<Component> {
-	/**
-	 * @param type The `ItemType` of the item to add
-	 * @param quality The `ItemQuality` of the item to add
-	 */
-	execute(type: ItemType | typeof ADD_ITEM_RANDOM | typeof ADD_ITEM_ALL, quality: Quality, quantity: number): any;
-}
-
 export default class AddItemToInventory extends Component {
-	public override event: IEventEmitter<this, IAddItemToInventoryEvents>;
-
-	public static INSTANCE: AddItemToInventory | undefined;
-
-	public static init() {
-		return AddItemToInventory.INSTANCE = AddItemToInventory.INSTANCE || new AddItemToInventory();
-	}
 
 	private readonly dropdownItemType: ItemDropdown<"None" | "Random" | "All">;
 	private readonly dropdownItemQuality: Dropdown<Quality>;
 	private readonly rangeItemQuantity: RangeRow;
 	private readonly wrapperAddItem: Component;
 
-	private constructor() {
+	public constructor(private readonly containerSupplier: () => IContainer | undefined) {
 		super();
 
 		new LabelledRow()
@@ -75,20 +59,6 @@ export default class AddItemToInventory extends Component {
 				.setText(translation(DebugToolsTranslation.AddToInventory))
 				.event.subscribe("activate", this.addItem))
 			.appendTo(this);
-
-		this.event.subscribe("willRemove", this.willRemove);
-	}
-
-	public releaseAndRemove() {
-		this.event.unsubscribe("willRemove", this.willRemove);
-		this.remove();
-		delete AddItemToInventory.INSTANCE;
-	}
-
-	@Bound
-	private willRemove() {
-		this.store(this.getScreen()!);
-		return false;
 	}
 
 	@Bound
@@ -100,7 +70,11 @@ export default class AddItemToInventory extends Component {
 	@Bound
 	private addItem() {
 		const selection = this.dropdownItemType.selection;
-		this.event.emit("execute",
+		const container = this.containerSupplier();
+		if (!container)
+			return;
+
+		AddItemToInventoryAction.execute(localPlayer, container,
 			selection === "Random" ? ADD_ITEM_RANDOM : selection === "All" ? ADD_ITEM_ALL : selection as ItemType,
 			this.dropdownItemQuality.selection,
 			Math.floor(1.2 ** this.rangeItemQuantity.value));

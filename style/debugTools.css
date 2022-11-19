@@ -126,3 +126,7 @@
 	display: grid;
 	grid-template-columns: minmax(auto, calc(150px * max(1, var(--scale)))) 1fr auto;
 }
+
+.debug-tools-inspect-human-wrapper-set-durability-bulk {
+	grid-template-columns: auto 1fr auto !important;
+}

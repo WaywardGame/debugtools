@@ -7,7 +7,7 @@ import { IVector2 } from "utilities/math/IVector";
 
 export type TabInformation = [number, TranslationGenerator];
 
-interface IInspectInformationSectionEvents extends Events<Component> {
+export interface IInspectInformationSectionEvents extends Events<Component> {
 	change(): any;
 	update(): any;
 	switchAway(): any;

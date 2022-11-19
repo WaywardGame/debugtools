@@ -5,7 +5,7 @@ import { TranslationGenerator } from "ui/component/IComponent";
 import TabDialogPanel from "ui/screen/screens/game/component/TabDialogPanel";
 import { IVector2 } from "utilities/math/IVector";
 export declare type TabInformation = [number, TranslationGenerator];
-interface IInspectInformationSectionEvents extends Events<Component> {
+export interface IInspectInformationSectionEvents extends Events<Component> {
     change(): any;
     update(): any;
     switchAway(): any;
@@ -22,4 +22,3 @@ export default abstract class InspectInformationSection extends TabDialogPanel {
     abstract update(position: IVector2, tile: ITile): void;
     abstract logUpdate(): void;
 }
-export {};

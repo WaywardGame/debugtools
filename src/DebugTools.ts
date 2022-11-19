@@ -3,7 +3,6 @@ import { Events, IEventEmitter, Priority } from "event/EventEmitter";
 import EventManager, { EventHandler } from "event/EventManager";
 import { ActionType } from "game/entity/action/IAction";
 import Creature from "game/entity/creature/Creature";
-import { IDamageInfo } from "game/entity/creature/ICreature";
 import Human from "game/entity/Human";
 import { MoveType } from "game/entity/IEntity";
 import { Delay, MovingClientSide } from "game/entity/IHuman";
@@ -48,6 +47,7 @@ import PlaceTemplate from "./action/PlaceTemplate";
 import Remove from "./action/Remove";
 import RenameIsland from "./action/RenameIsland";
 import SelectionExecute from "./action/SelectionExecute";
+import SetDurabilityBulk from "./action/SetDurabilityBulk";
 import SetGrowingStage from "./action/SetGrowingStage";
 import SetSkill from "./action/SetSkill";
 import SetStat from "./action/SetStat";
@@ -63,7 +63,7 @@ import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
 import Actions from "./Actions";
 import { DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation, ZOOM_LEVEL_MAX } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
-import AddItemToInventoryComponent from "./ui/component/AddItemToInventory";
+import Container from "./ui/component/Container";
 import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import MainDialog, { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import InspectDialog from "./ui/InspectDialog";
@@ -242,6 +242,9 @@ export default class DebugTools extends Mod {
 	@Register.action("AddItemToInventory", AddItemToInventory)
 	public readonly actionAddItemToInventory: ActionType;
 
+	@Register.action("SetDurabilityBulk", SetDurabilityBulk)
+	public readonly actionSetDurabilityBulk: ActionType;
+
 	@Register.action("ClearInventory", ClearInventory)
 	public readonly actionClearInventory: ActionType;
 
@@ -407,7 +410,7 @@ export default class DebugTools extends Mod {
 	 * - Removes the `AddItemToInventory` UI Component.
 	 */
 	public override onUnload() {
-		AddItemToInventoryComponent.INSTANCE?.releaseAndRemove();
+		Container.INSTANCE?.releaseAndRemove();
 		EventManager.deregisterEventBusSubscriber(this.selector);
 		Bind.deregisterHandlers(this.selector);
 		this.unlockedCameraMovementHandler.end();
@@ -533,7 +536,7 @@ export default class DebugTools extends Mod {
 	 */
 	@EventHandler(GameScreen, "show")
 	public onGameScreenVisible() {
-		AddItemToInventoryComponent.init();
+		Container.init();
 	}
 
 	@EventHandler(EventBus.Game, "play")
@@ -593,22 +596,18 @@ export default class DebugTools extends Mod {
 		return this.unlockedCameraMovementHandler.position;
 	}
 
-	/**
-	 * We cancel damage to the player if they're set as "invulnerable"
-	 */
-	@EventHandler(EventBus.Players, "damage")
-	public onPlayerDamage(player: Player, info: IDamageInfo): number | void {
+	@EventHandler(EventBus.Players, "shouldDie")
+	public onPlayerDie(player: Player): false | void {
 		if (this.getPlayerData(player, "invulnerable"))
-			return 0;
+			return false;
 	}
 
 	/**
-	 * We prevent creatures attacking the enemy if the enemy is a player who is set as "invulnerable" or "noclipping"
+	 * We prevent creatures attacking the enemy if the enemy is a player who is set as "noclipping"
 	 */
 	@EventHandler(Creature, "canAttack")
 	protected canCreatureAttack(creature: Creature, enemy: Human | Creature): boolean | undefined {
 		if (enemy.asPlayer) {
-			if (this.getPlayerData(enemy.asPlayer, "invulnerable")) return false;
 			if (this.getPlayerData(enemy.asPlayer, "noclip")) return false;
 		}
 
