@@ -9,7 +9,7 @@ import Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
 import DebugTools from "../DebugTools";
 import InspectInformationSection from "./component/InspectInformationSection";
-export declare type InspectDialogInformationSectionClass = new () => InspectInformationSection;
+export type InspectDialogInformationSectionClass = new () => InspectInformationSection;
 export default class InspectDialog extends TabDialog<InspectInformationSection> {
     static description: IDialogDescription;
     static INSTANCE: InspectDialog | undefined;
