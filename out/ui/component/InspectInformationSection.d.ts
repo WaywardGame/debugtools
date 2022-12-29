@@ -4,7 +4,7 @@ import Component from "ui/component/Component";
 import { TranslationGenerator } from "ui/component/IComponent";
 import TabDialogPanel from "ui/screen/screens/game/component/TabDialogPanel";
 import { IVector2 } from "utilities/math/IVector";
-export declare type TabInformation = [number, TranslationGenerator];
+export type TabInformation = [number, TranslationGenerator];
 export interface IInspectInformationSectionEvents extends Events<Component> {
     change(): any;
     update(): any;

@@ -3,6 +3,7 @@ import { ActionArgument } from "game/entity/action/IAction";
 import Human from "game/entity/Human";
 import { EntityType } from "game/entity/IEntity";
 import { ItemType } from "game/item/IItem";
+import Item from "game/item/Item";
 import Enums from "utilities/enum/Enums";
 import { defaultUsability } from "../Actions";
 import InspectDialog from "../ui/InspectDialog";
@@ -23,18 +24,26 @@ export default new Action(ActionArgument.Container, ActionArgument.Integer32, Ac
 		}
 
 		const containerObject = action.executor.island.items.resolveContainer(target);
+		const createdItems: Item[] = [];
 		for (let i = 0; i < quantity; i++) {
 			const addItem = item === ADD_ITEM_ALL ? i + 1 : item === ADD_ITEM_RANDOM ? action.executor.island.seededRandom.int(total) + 1 : item;
-			if (containerObject instanceof Human)
-				containerObject.createItemInInventory(addItem, quality);
-			else
+			if (containerObject instanceof Human) {
+				const createdItem = containerObject.createItemInInventory(addItem, quality, false, true);
+				createdItems.push(createdItem);
+			} else {
 				action.executor.island.items.create(addItem, target, quality);
+			}
 		}
 
-		if (containerObject instanceof Human)
+		if (containerObject instanceof Human) {
+			if (createdItems.length > 0) {
+				oldui.afterAddingMultipleItemsToContainer(action.executor.inventory, createdItems);
+			}
+
 			containerObject.updateTablesAndWeight("M");
-		else
+		} else {
 			action.setUpdateView();
+		}
 
 		InspectDialog.INSTANCE?.update();
 	});

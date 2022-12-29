@@ -3,7 +3,7 @@ import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component
 import { DialogId, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import DebugTools from "../DebugTools";
 import DebugToolsPanel from "./component/DebugToolsPanel";
-export declare type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
+export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
 export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
     static description: IDialogDescription;
     readonly DEBUG_TOOLS: DebugTools;

@@ -5,7 +5,7 @@ import { IVector2 } from "utilities/math/IVector";
 import DebugTools from "../../DebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 import InspectInformationSection from "../component/InspectInformationSection";
-export declare type InspectDialogEntityInformationSubsectionClass = new () => InspectEntityInformationSubsection;
+export type InspectDialogEntityInformationSubsectionClass = new () => InspectEntityInformationSubsection;
 export default class EntityInformation extends InspectInformationSection {
     readonly DEBUG_TOOLS: DebugTools;
     readonly LOG: Log;

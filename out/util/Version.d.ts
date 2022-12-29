@@ -1,4 +1,4 @@
-declare type VersionMappable = string | Version | [number, number, number?];
+type VersionMappable = string | Version | [number, number, number?];
 export default class Version {
     private readonly version;
     get major(): number;

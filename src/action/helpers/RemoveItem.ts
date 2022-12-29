@@ -13,7 +13,7 @@ export default function (action: IActionApi<Player>, item: Item) {
 			action.setUpdateView(); // we removed the item from a tile
 
 		} else if ("entityType" in container) {
-			const entity = container as Entity;
+			const entity = container as any as Entity;
 			entity.asPlayer?.updateTablesAndWeight("M");
 		}
 	}
