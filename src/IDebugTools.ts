@@ -166,6 +166,7 @@ export enum DebugToolsTranslation {
 	LabelQuality,
 	LabelQuantity,
 	LabelDurability,
+	LabelDecay,
 	ButtonApply,
 	AddToInventory,
 	DoodadName,
@@ -231,19 +232,6 @@ export interface IPlayerData {
 	 * Whether the fog/field of view/fog of war is enabled
 	 */
 	fog?: boolean;
-	/**
-	 * False if the player is not "noclipping", an object otherwise.
-	 */
-	noclip: false | {
-		/**
-		 * Whether the player is currently moving
-		 */
-		moving: boolean;
-		/**
-		 * The current delay between movements.
-		 */
-		delay: number;
-	};
 	/**
 	 * Whether the player can use Debug Tools.
 	 */

@@ -5,15 +5,13 @@ import { TerrainType } from "game/tile/ITerrain";
 import { defaultUsability } from "../Actions";
 import SetTilled from "./helpers/SetTilled";
 
-export default new Action(ActionArgument.Integer32, ActionArgument.Vector3)
+export default new Action(ActionArgument.Integer32, ActionArgument.Tile)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
-	.setHandler((action, terrain: TerrainType, position) => {
-		if (!position) return;
+	.setHandler((action, terrain: TerrainType, tile) => {
+		tile.changeTile(terrain, false);
+		SetTilled(action.executor.island, tile, false);
 
-		action.executor.island.changeTile(terrain, position.x, position.y, position.z, false);
-		SetTilled(action.executor.island, position.x, position.y, position.z, false);
-
-		renderers.computeSpritesInViewport();
+		renderers.computeSpritesInViewport(tile);
 		action.setUpdateRender();
 	});

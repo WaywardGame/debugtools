@@ -22,13 +22,18 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Doodad), A
 
 		if (!position) return;
 
-		if (toClone instanceof Doodad) {
-			CloneDoodad(toClone, position);
-
-		} else {
-			CloneEntity(toClone, position);
+		const tile = action.executor.island.getTileFromPoint(position);
+		if (!tile) {
+			return;
 		}
 
-		renderers.computeSpritesInViewport();
+		if (toClone instanceof Doodad) {
+			CloneDoodad(toClone, tile);
+
+		} else {
+			CloneEntity(toClone, tile);
+		}
+
+		renderers.computeSpritesInViewport(tile);
 		action.setUpdateRender();
 	});

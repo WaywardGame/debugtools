@@ -1,23 +1,16 @@
 import { Action } from "game/entity/action/Action";
 import { ActionArgument } from "game/entity/action/IAction";
 import { EntityType, MoveType } from "game/entity/IEntity";
-import { Delay } from "game/entity/IHuman";
 import { RenderSource } from "renderer/IRenderer";
-import Actions, { defaultUsability } from "../Actions";
+import { defaultUsability } from "../Actions";
 
-export default new Action(ActionArgument.Player, ActionArgument.Boolean)
+export default new Action(ActionArgument.Player)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
-	.setHandler((action, player, noclip) => {
-
+	.setHandler((action, player) => {
 		if (!player) return;
 
-		Actions.DEBUG_TOOLS.setPlayerData(player, "noclip", noclip ? {
-			moving: false,
-			delay: Delay.Movement,
-		} : false);
+		player.setMoveType(player.isFlying ? MoveType.Land : MoveType.Flying);
 
-		player.setMoveType(noclip ? MoveType.Flying : MoveType.Land);
-
-		renderers.updateView(RenderSource.Mod, true);
+		player.updateView(RenderSource.Mod, true);
 	});

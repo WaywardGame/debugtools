@@ -3,36 +3,38 @@ import { Events, IEventEmitter, Priority } from "event/EventEmitter";
 import EventManager, { EventHandler } from "event/EventManager";
 import { ActionType } from "game/entity/action/IAction";
 import Creature from "game/entity/creature/Creature";
-import Human from "game/entity/Human";
-import { MoveType } from "game/entity/IEntity";
-import { Delay, MovingClientSide } from "game/entity/IHuman";
 import NPC from "game/entity/npc/NPC";
 import { Source } from "game/entity/player/IMessageManager";
 import Player from "game/entity/player/Player";
 import { InspectType } from "game/inspection/IInspection";
 import Island from "game/island/Island";
-import { ITile, OverlayType } from "game/tile/ITerrain";
+import { OverlayType } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import Dictionary from "language/Dictionary";
 import Message from "language/dictionary/Message";
 import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
-import { RenderSource } from "renderer/IRenderer";
+import { RenderSource, UpdateRenderFlag } from "renderer/IRenderer";
 import Renderer from "renderer/Renderer";
 import WorldRenderer from "renderer/world/WorldRenderer";
 import Bind, { IBindHandlerApi } from "ui/input/Bind";
 import Bindable from "ui/input/Bindable";
 import { IInput } from "ui/input/IInput";
 import InputManager from "ui/input/InputManager";
+import GameScreen from "ui/screen/screens/GameScreen";
 import { DialogId } from "ui/screen/screens/game/Dialogs";
 import { MenuBarButtonGroup, MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
-import GameScreen from "ui/screen/screens/GameScreen";
-import { IInjectionApi, Inject, InjectionPosition } from "utilities/class/Inject";
 import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
+import { IInjectionApi, Inject, InjectionPosition } from "utilities/class/Inject";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
+import Actions from "./Actions";
+import { DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, ZOOM_LEVEL_MAX, translation } from "./IDebugTools";
+import LocationSelector from "./LocationSelector";
+import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
 import AddItemToInventory from "./action/AddItemToInventory";
 import ChangeLayer from "./action/ChangeLayer";
 import ChangeTerrain from "./action/ChangeTerrain";
@@ -47,6 +49,7 @@ import PlaceTemplate from "./action/PlaceTemplate";
 import Remove from "./action/Remove";
 import RenameIsland from "./action/RenameIsland";
 import SelectionExecute from "./action/SelectionExecute";
+import SetDecayBulk from "./action/SetDecayBulk";
 import SetDurabilityBulk from "./action/SetDurabilityBulk";
 import SetGrowingStage from "./action/SetGrowingStage";
 import SetSkill from "./action/SetSkill";
@@ -60,15 +63,11 @@ import ToggleNoClip from "./action/ToggleNoClip";
 import TogglePermissions from "./action/TogglePermissions";
 import ToggleTilled from "./action/ToggleTilled";
 import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
-import Actions from "./Actions";
-import { DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation, ZOOM_LEVEL_MAX } from "./IDebugTools";
-import LocationSelector from "./LocationSelector";
-import Container from "./ui/component/Container";
-import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import MainDialog, { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import InspectDialog from "./ui/InspectDialog";
+import Container from "./ui/component/Container";
+import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import TemperatureInspection from "./ui/inspection/Temperature";
-import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
 import Version from "./util/Version";
 
 /**
@@ -245,6 +244,9 @@ export default class DebugTools extends Mod {
 	@Register.action("SetDurabilityBulk", SetDurabilityBulk)
 	public readonly actionSetDurabilityBulk: ActionType;
 
+	@Register.action("SetDecayBulk", SetDecayBulk)
+	public readonly actionSetDecayBulk: ActionType;
+
 	@Register.action("ClearInventory", ClearInventory)
 	public readonly actionClearInventory: ActionType;
 
@@ -291,7 +293,8 @@ export default class DebugTools extends Mod {
 		onActivate: () => DebugTools.INSTANCE.toggleDialog(),
 		group: MenuBarButtonGroup.Meta,
 		bindable: Registry<DebugTools>().get("bindableToggleDialog"),
-		tooltip: tooltip => tooltip.dump().addText(text => text.setText(translation(DebugToolsTranslation.DialogTitleMain))),
+		tooltip: tooltip => tooltip.schedule(tooltip => tooltip.getLastBlock().dump())
+			.setText(translation(DebugToolsTranslation.DialogTitleMain)),
 		onCreate: button => {
 			button.toggle(DebugTools.INSTANCE.hasPermission());
 			DebugTools.INSTANCE.event.until(DebugTools.INSTANCE, "unload")
@@ -340,7 +343,6 @@ export default class DebugTools extends Mod {
 		return (playerData[player.identifier] = {
 			weightBonus: 0,
 			invulnerable: false,
-			noclip: false,
 			permissions: player.isServer(),
 			fog: undefined,
 			lighting: true,
@@ -377,7 +379,7 @@ export default class DebugTools extends Mod {
 	 */
 	public override initializeGlobalData(data?: IGlobalData) {
 		return !this.needsUpgrade(data) ? data : {
-			lastVersion: modManager.getVersion(this.getIndex()),
+			lastVersion: game.modManager.getVersion(this.getIndex()),
 		};
 	}
 
@@ -387,7 +389,7 @@ export default class DebugTools extends Mod {
 	public override initializeSaveData(data?: ISaveData) {
 		return !this.needsUpgrade(data) ? data : {
 			playerData: {},
-			lastVersion: modManager.getVersion(this.getIndex()),
+			lastVersion: game.modManager.getVersion(this.getIndex()),
 		};
 	}
 
@@ -435,7 +437,7 @@ export default class DebugTools extends Mod {
 			const fogForceEnabled = this.getPlayerData(localPlayer, "fog");
 			if (fogForceEnabled !== undefined && renderer.fieldOfView.disabled !== !fogForceEnabled) {
 				renderer.fieldOfView.disabled = !fogForceEnabled;
-				renderers.updateView(RenderSource.Mod, true);
+				localPlayer.updateView(RenderSource.Mod, UpdateRenderFlag.FieldOfView | UpdateRenderFlag.FieldOfViewSkipTransition);
 			}
 		}
 	}
@@ -464,7 +466,7 @@ export default class DebugTools extends Mod {
 	 * - Opens the `InspectDialog`.
 	 * - Emits `DebugToolsEvent.Inspect`
 	 */
-	public inspect(what: Vector2 | Creature | Player | NPC) {
+	public inspect(what: Tile | Creature | Player | NPC) {
 		if (!gameScreen) {
 			return;
 		}
@@ -496,7 +498,7 @@ export default class DebugTools extends Mod {
 	public toggleLighting(lighting: boolean) {
 		this.setPlayerData(localPlayer, "lighting", lighting);
 		UpdateStatsAndAttributes.execute(localPlayer, localPlayer);
-		renderers.updateView(RenderSource.Mod, true);
+		localPlayer.updateView(RenderSource.Mod, true);
 	}
 
 	////////////////////////////////////
@@ -509,7 +511,7 @@ export default class DebugTools extends Mod {
 			return;
 		}
 
-		const targetPlayer = playerManager.getByName(args);
+		const targetPlayer = game.playerManager.getByName(args);
 		if (targetPlayer !== undefined && !targetPlayer.isLocalPlayer()) {
 			const newPermissions = !this.getPlayerData(targetPlayer, "permissions");
 			TogglePermissions.execute(localPlayer, targetPlayer, newPermissions);
@@ -603,86 +605,6 @@ export default class DebugTools extends Mod {
 	}
 
 	/**
-	 * We prevent creatures attacking the enemy if the enemy is a player who is set as "noclipping"
-	 */
-	@EventHandler(Creature, "canAttack")
-	protected canCreatureAttack(creature: Creature, enemy: Human | Creature): boolean | undefined {
-		if (enemy.asPlayer) {
-			if (this.getPlayerData(enemy.asPlayer, "noclip")) return false;
-		}
-
-		return undefined;
-	}
-
-	/**
-	 * If the player isn't "noclipping", returns `undefined`.
-	 * 
-	 * Otherwise: 
-	 * - The delay before the next movement is calculated based on the last movement (it goes faster the further you go, with a cap)
-	 * - Moves the player to the next tile instantly, then adds the calculated delay.
-	 * - Cancels the default movement by returning `false`.
-	 */
-	@EventHandler(EventBus.Players, "preMove")
-	public onMove(player: Player, fromX: number, fromY: number, fromZ: number, fromTile: ITile, nextX: number, nextY: number, nextZ: number, tile: ITile): boolean | void | undefined {
-		const noclip = this.getPlayerData(player, "noclip");
-		if (!noclip) return undefined;
-
-		player.setMoveType(MoveType.Flying);
-
-		if (noclip.moving) {
-			noclip.delay = Math.max(noclip.delay - 1, 1);
-
-		} else {
-			noclip.delay = Delay.Movement;
-		}
-
-		player.addDelay(noclip.delay, true);
-
-		player.isMoving = true;
-		player.movingClientside = MovingClientSide.Moving;
-
-		player.moveTo(nextX, nextY, player.z, false);
-
-		player.nextMoveTime = game.absoluteTime + (noclip.delay * game.interval);
-
-		noclip.moving = true;
-
-		game.passTurn(player);
-
-		return false;
-	}
-
-	/**
-	 * Used to reset noclip movement speed.
-	 */
-	@EventHandler(EventBus.Players, "noInput")
-	public onNoInputReceived(player: Player): void {
-		const noclip = this.getPlayerData(player, "noclip");
-		if (!noclip) return;
-
-		noclip.moving = false;
-	}
-
-	/**
-	 * Used to prevent the weight/stamina movement penalty while noclipping.
-	 */
-	@EventHandler(EventBus.Players, "getWeightOrStaminaMovementPenalty")
-	protected getPlayerWeightOrStaminaMovementPenalty(player: Player): number | undefined {
-		return this.getPlayerData(player, "noclip") ? 0 : undefined;
-	}
-
-	/**
-	 * If the player is "noclipping", we return `false` (not swimming). 
-	 * Otherwise we return `undefined` and let the game or other mods handle it. 
-	 */
-	@EventHandler(Human, "isSwimming")
-	protected isHumanSwimming(human: Human, isSwimming: boolean): boolean | undefined {
-		if (human.asNPC) return undefined;
-
-		return this.getPlayerData(human as Player, "noclip") ? false : undefined;
-	}
-
-	/**
 	 * We add the weight bonus from the player's save data to the existing strength.
 	 */
 	@EventHandler(EventBus.Players, "getMaxWeight")
@@ -762,7 +684,7 @@ export default class DebugTools extends Mod {
 		if (!tile)
 			return false;
 
-		TeleportEntity.execute(localPlayer, localPlayer, { ...tile.raw(), z: localPlayer.z });
+		TeleportEntity.execute(localPlayer, localPlayer, tile.point);
 		return true;
 	}
 
@@ -771,7 +693,7 @@ export default class DebugTools extends Mod {
 		if (!this.hasPermission())
 			return false;
 
-		ToggleNoClip.execute(localPlayer, localPlayer, !this.getPlayerData(localPlayer, "noclip"));
+		ToggleNoClip.execute(localPlayer, localPlayer);
 		return true;
 	}
 
@@ -801,7 +723,7 @@ export default class DebugTools extends Mod {
 	 * If lighting is disabled, we return the minimum light level.
 	 */
 	@Inject(Island, "calculateTileLightLevel", InjectionPosition.Pre)
-	public getTileLightLevel(api: IInjectionApi<Island, "calculateTileLightLevel">, tile: ITile, x: number, y: number, z: number) {
+	public getTileLightLevel(api: IInjectionApi<Island, "calculateTileLightLevel">, tile: Tile) {
 		if (this.getPlayerData(localPlayer, "lighting") === false) {
 			api.returnValue = 0;
 			api.cancelled = true;
@@ -813,7 +735,7 @@ export default class DebugTools extends Mod {
 			return true;
 		}
 
-		const versionString = modManager.getVersion(this.getIndex());
+		const versionString = game.modManager.getVersion(this.getIndex());
 		const lastLoadVersionString = (data && data.lastVersion) || "0.0.0";
 
 		if (versionString === lastLoadVersionString) {

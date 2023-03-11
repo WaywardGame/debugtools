@@ -1,17 +1,17 @@
 import Doodad from "game/doodad/Doodad";
-import { IVector3 } from "utilities/math/IVector";
+import MagicalPropertyManager from "game/magic/MagicalPropertyManager";
+import Tile from "game/tile/Tile";
 import CloneContainedItems from "./CloneContainedItems";
-
 
 /**
  * Clones a doodad to another position.
  */
-export default function (doodad: Doodad, position: IVector3) {
-	const clone = doodad.island.doodads.create(doodad.type, position.x, position.y, position.z, {
+export default function (doodad: Doodad, tile: Tile) {
+	const clone = doodad.island.doodads.create(doodad.type, tile, {
 		quality: doodad.quality,
 		stillContainer: doodad.stillContainer,
 		gatherReady: doodad.gatherReady,
-		gfx: doodad.gfx,
+		growth: doodad.growth,
 		spread: doodad.spread,
 		weight: doodad.weight,
 		disassembly: !doodad.disassembly ? undefined : doodad.disassembly
@@ -23,7 +23,7 @@ export default function (doodad: Doodad, position: IVector3) {
 
 	if (!clone) return;
 
-	clone.magic.inherit(doodad.magic);
+	MagicalPropertyManager.inherit(doodad, clone);
 
 	if (doodad.containedItems) {
 		CloneContainedItems(doodad.island, doodad, clone);

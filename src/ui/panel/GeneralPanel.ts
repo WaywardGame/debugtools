@@ -5,6 +5,7 @@ import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { BiomeType } from "game/biome/IBiome";
 import { DEFAULT_ISLAND_ID, IslandId, IslandPosition } from "game/island/IIsland";
 import { ReferenceType } from "game/reference/IReferenceManager";
+import Tile from "game/tile/Tile";
 import { WorldZ } from "game/WorldZ";
 import Dictionary from "language/Dictionary";
 import TranslationImpl from "language/impl/TranslationImpl";
@@ -30,7 +31,6 @@ import Tooltip from "ui/tooltip/Tooltip";
 import { Tuple } from "utilities/collection/Arrays";
 import { Bound, Debounce } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
-import Vector2 from "utilities/math/Vector2";
 import ChangeLayer from "../../action/ChangeLayer";
 import ForceSailToCivilization from "../../action/ForceSailToCivilization";
 import MoveToIsland from "../../action/MoveToIsland";
@@ -62,7 +62,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 	private readonly dropdownTravel: IslandDropdown<string>;
 	private readonly checkButtonParticle: CheckButton;
 
-	private selectionPromise: CancelablePromise<Vector2> | undefined;
+	private selectionPromise: CancelablePromise<Tile> | undefined;
 
 	public constructor() {
 		super();
@@ -145,8 +145,8 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.append(this.dropdownLayer = new Dropdown<number>()
 				.setRefreshMethod(() => ({
 					options: Object.values(localIsland.world.layers)
-						.map(layer => [layer.level, option => option.setText(translation(DebugToolsTranslation.OptionLayer)
-							.addArgs(layer.level, Translation.get(Dictionary.WorldLayer, layer.level).inContext(TextContext.Title), Enums.getMod(WorldZ, layer.level)?.config.name))] as IDropdownOption<number>),
+						.map(layer => [layer.z, option => option.setText(translation(DebugToolsTranslation.OptionLayer)
+							.addArgs(layer.z, Translation.get(Dictionary.WorldLayer, layer.z).inContext(TextContext.Title), Enums.getMod(WorldZ, layer.z)?.config.name))] as IDropdownOption<number>),
 					defaultOption: localPlayer.z,
 				}))
 				.event.subscribe("selection", this.changeLayer))
@@ -248,11 +248,13 @@ export default class GeneralPanel extends DebugToolsPanel {
 		if (!position)
 			return false;
 
-		if (this.checkButtonAudio.checked)
-			audio?.queueEffect(this.dropdownAudio.selection, localIsland, position.x, position.y, localPlayer.z);
+		const tile = localIsland.getTile(position.x, position.y, localPlayer.z);
 
-		else
-			renderers.particle.create(localIsland, position.x, position.y, localPlayer.z, particles[this.dropdownParticle.selection]);
+		if (this.checkButtonAudio.checked) {
+			audio?.queueEffect(this.dropdownAudio.selection, localIsland, position.x, position.y, localPlayer.z);
+		} else {
+			tile.createParticles(particles[this.dropdownParticle.selection]);
+		}
 
 		return true;
 	}
@@ -277,7 +279,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 	}
 
 	@Bound
-	private inspectTile(tilePosition?: Vector2) {
+	private inspectTile(tilePosition?: Tile) {
 		delete this.selectionPromise;
 		this.inspectButton.refresh();
 
@@ -342,7 +344,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 class IslandDropdown<OTHER_OPTIONS extends string = never> extends GroupDropdown<Record<IslandId, string>, OTHER_OPTIONS, BiomeType> {
 
 	public constructor(defaultOption: IslandId | OTHER_OPTIONS, options: SupplierOr<Iterable<IDropdownOption<OTHER_OPTIONS>>>) {
-		super(game.islands.keyStream().toObject(key => [key, key]), -1, defaultOption, options);
+		super(game.islands.keyStream().toObject(key => [key, key]), undefined, defaultOption, options);
 		this.setPrefix("biome");
 	}
 

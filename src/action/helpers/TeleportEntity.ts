@@ -6,11 +6,10 @@ import GetPosition from "../../action/helpers/GetPosition";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 
 export function teleportEntity(action: ActionApi<any>, entity: Entity, position?: IVector3) {
-
-	position = GetPosition(action.executor as Player, position!, () => translation(DebugToolsTranslation.ActionTeleport)
+	const targetTile = GetPosition(action.executor as Player, position!, () => translation(DebugToolsTranslation.ActionTeleport)
 		.get(entity.getName()));
 
-	if (!entity || !position) return;
+	if (!entity || !targetTile) return;
 
 	if (entity.asCreature) {
 		const tile = action.executor.island.getTile(entity.x, entity.y, entity.z);
@@ -23,12 +22,18 @@ export function teleportEntity(action: ActionApi<any>, entity: Entity, position?
 	}
 
 	if (entity.asPlayer) {
-		entity.asPlayer.setPosition(position);
+		entity.asPlayer.setPosition(targetTile);
 
 	} else {
-		entity.x = entity.fromX = position.x;
-		entity.y = entity.fromY = position.y;
-		entity.z = position.z;
+		entity.x = targetTile.x;
+		entity.y = targetTile.y;
+		entity.z = targetTile.z;
+
+		const entityMovable = entity.asEntityMovable;
+		if (entityMovable) {
+			entityMovable.fromX = entity.x;
+			entityMovable.fromY = entity.y;
+		}
 	}
 
 	if (entity.asCreature) {

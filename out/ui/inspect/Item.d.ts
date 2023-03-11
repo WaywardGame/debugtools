@@ -1,13 +1,12 @@
-import { ITile } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import Log from "utilities/Log";
-import { IVector2 } from "utilities/math/IVector";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 export default class ItemInformation extends InspectInformationSection {
     readonly LOG: Log;
-    private position;
+    private tile;
     getTabs(): TabInformation[];
     setTab(): this;
-    update(position: IVector2, tile: ITile): void;
+    update(tile: Tile): void;
     logUpdate(): void;
     private getTile;
 }

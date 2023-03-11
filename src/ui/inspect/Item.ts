@@ -1,8 +1,7 @@
-import { ITile } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import Mod from "mod/Mod";
 import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
-import { IVector2 } from "utilities/math/IVector";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import Container from "../component/Container";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
@@ -13,7 +12,7 @@ export default class ItemInformation extends InspectInformationSection {
 	@Mod.log(DEBUG_TOOLS_ID)
 	public readonly LOG: Log;
 
-	private position: IVector2;
+	private tile: Tile;
 
 	public override getTabs(): TabInformation[] {
 		return [
@@ -26,18 +25,20 @@ export default class ItemInformation extends InspectInformationSection {
 		return this;
 	}
 
-	public override update(position: IVector2, tile: ITile) {
-		this.position = position;
+	public override update(tile: Tile) {
+		this.tile = tile;
 		Container.INSTANCE?.refreshItems();
-		if (tile.containedItems?.length)
+		if (tile.containedItems?.length) {
 			this.setShouldLog();
+		}
 	}
 
 	public override logUpdate() {
-		this.LOG.info("Items:", this.getTile()?.containedItems);
+		this.LOG.info("Items:", this.tile?.containedItems);
 	}
 
 	@Bound private getTile() {
-		return localIsland.items.getTileContainer(this.position.x, this.position.y, localPlayer.z);
+		// todo: this might desync because it's creating a tile container?
+		return this.tile.tileContainer;
 	}
 }

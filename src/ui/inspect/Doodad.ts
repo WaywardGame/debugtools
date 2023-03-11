@@ -1,7 +1,8 @@
 import { OwnEventHandler } from "event/EventManager";
 import Doodad from "game/doodad/Doodad";
 import { GrowingStage } from "game/doodad/IDoodad";
-import { ITile } from "game/tile/ITerrain";
+import { IContainer } from "game/item/IItem";
+import Tile from "game/tile/Tile";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
@@ -9,7 +10,6 @@ import Button from "ui/component/Button";
 import EnumContextMenu, { EnumSort } from "ui/component/EnumContextMenu";
 import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
-import { IVector2 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import Clone from "../../action/Clone";
 import Remove from "../../action/Remove";
@@ -18,7 +18,6 @@ import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import Container from "../component/Container";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
-
 
 export default class DoodadInformation extends InspectInformationSection {
 
@@ -54,7 +53,7 @@ export default class DoodadInformation extends InspectInformationSection {
 		if (!this.doodad!.containedItems)
 			return;
 
-		Container.appendTo(this, this, () => this.doodad);
+		Container.appendTo(this, this, () => this.doodad as IContainer);
 	}
 
 	public override getTabs(): TabInformation[] {
@@ -64,13 +63,13 @@ export default class DoodadInformation extends InspectInformationSection {
 		] : [];
 	}
 
-	public override update(position: IVector2, tile: ITile) {
+	public override update(tile: Tile) {
 		if (tile.doodad === this.doodad) return;
 		this.doodad = tile.doodad;
 
 		if (!this.doodad) return;
 
-		this.buttonGrowthStage.toggle(this.doodad.getGrowingStage() !== undefined);
+		this.buttonGrowthStage.toggle(this.doodad.growth !== undefined);
 
 		this.setShouldLog();
 	}

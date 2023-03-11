@@ -2,7 +2,8 @@ import { EventBus } from "event/EventBuses";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import Entity from "game/entity/Entity";
 import { TileUpdateType } from "game/IGame";
-import { ITile, TerrainType } from "game/tile/ITerrain";
+import { TerrainType } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { Registry } from "mod/ModRegistry";
@@ -18,10 +19,8 @@ import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import { Tuple } from "utilities/collection/Arrays";
 import { Bound, Debounce } from "utilities/Decorators";
-import TileHelpers from "utilities/game/TileHelpers";
 import Log from "utilities/Log";
 import Vector2 from "utilities/math/Vector2";
-import Vector3 from "utilities/math/Vector3";
 import DebugTools from "../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../IDebugTools";
 import Overlays from "../overlay/Overlays";
@@ -71,10 +70,9 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	private entityButtons: Button[];
 	private entityInfoSection: EntityInformation;
 
-	private tilePosition?: Vector3;
-	private tile?: ITile;
+	private tile?: Tile;
 	private inspectionLock?: Entity;
-	private inspectingTile?: ITile;
+	private inspectingTile?: Tile;
 	private shouldLog = false;
 	private willShowSubpanel = false;
 
@@ -150,7 +148,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * - Updates the dialog. (`update`)
 	 * - If the inspection is locked to an entity, it makes a note of needing to show the entity's subpanel (`willShowSubpanel`).
 	 */
-	public setInspection(what: Vector2 | Entity) {
+	public setInspection(what: Tile | Entity) {
 		this.setInspectionTile(what);
 
 		this.inspectionLock = "entityType" in what ? what : undefined;
@@ -174,7 +172,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 
 		for (const section of this.subpanels) {
 			section.resetWillLog();
-			section.update(this.tilePosition!, this.tile!);
+			section.update(this.tile!);
 		}
 
 		this.logUpdate();
@@ -225,7 +223,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 
 	@EventHandler(EventBus.Island, "tileUpdate")
 	@Debounce(10)
-	public onTileUpdate(island: any, tile: ITile, x: number, y: number, z: number, tileUpdateType: TileUpdateType) {
+	public onTileUpdate(island: any, tile: Tile, tileUpdateType: TileUpdateType) {
 		this.update();
 	}
 
@@ -236,11 +234,11 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	@OwnEventHandler(InspectDialog, "close")
 	protected onClose() {
 		if (this.inspectingTile) {
-			TileHelpers.Overlay.remove(this.inspectingTile, Overlays.isSelectedTarget);
+			this.inspectingTile.removeOverlay(Overlays.isSelectedTarget);
 			delete this.inspectingTile;
 		}
 
-		renderers.updateView(RenderSource.Mod, false);
+		localPlayer.updateView(RenderSource.Mod, false);
 
 		delete InspectDialog.INSTANCE;
 	}
@@ -273,30 +271,34 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * - If there was an existing inspection overlay, removes it.
 	 * - Adds a new inspection overlay to the currently inspecting tile.
 	 */
-	private setInspectionTile(what: Vector2 | Entity) {
-		const position = new Vector3(what.x, what.y, "z" in what ? what.z : localPlayer.z);
+	private setInspectionTile(what: Tile | Entity) {
+		const tile = what instanceof Tile ? what : what.tile;;
+		if (!tile) {
+			return;
+		}
 
-		if (this.tilePosition && position.equals(this.tilePosition)) return;
-		this.tilePosition = position;
+		if (this.tile && this.tile === tile) {
+			return;
+		}
 
-		this.tile = localIsland.getTile(...this.tilePosition.xyz);
+		this.tile = tile;
 
 		this.shouldLog = true;
 		this.logUpdate();
 
 		// remove old inspection overlay
 		if (this.inspectingTile && this.inspectingTile !== this.tile) {
-			TileHelpers.Overlay.remove(this.inspectingTile, Overlays.isSelectedTarget);
+			this.inspectingTile.removeOverlay(Overlays.isSelectedTarget);
 		}
 
 		// set new inspection overlay
 		this.inspectingTile = this.tile;
-		TileHelpers.Overlay.add(this.tile, {
+		this.tile.addOverlay({
 			type: this.DEBUG_TOOLS.overlayTarget,
 			red: 0,
 			blue: 0,
 		}, Overlays.isSelectedTarget);
-		renderers.updateView(RenderSource.Mod, false);
+		localPlayer.updateView(RenderSource.Mod, false);
 	}
 
 	/**
@@ -305,8 +307,8 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	@Bound
 	private logUpdate() {
 		if (this.shouldLog) {
-			const tileData = this.tilePosition ? localIsland.getTileData(this.tilePosition.x, this.tilePosition.y, this.tilePosition.z) : undefined;
-			this.LOG.info("Tile:", this.tile, this.tilePosition?.toString(), tileData?.map(data => TerrainType[data.type]).join(", "), tileData,);
+			const tileData = this.tile ? this.tile.getTileData() : undefined;
+			this.LOG.info("Tile:", this.tile, this.tile?.toString(), tileData?.map(data => TerrainType[data.type]).join(", "), tileData,);
 			this.shouldLog = false;
 		}
 

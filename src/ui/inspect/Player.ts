@@ -32,7 +32,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	private readonly skillRangeRow: RangeRow;
 	private readonly checkButtonPermissions?: CheckButton;
 
-	private skill?: SkillType | -1;
+	private skill: SkillType | "all" | "none" = "none";
 	private player?: Player;
 
 	public constructor() {
@@ -50,7 +50,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 		new BlockRow()
 			.append(this.checkButtonNoClip = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonToggleNoClip))
-				.setRefreshMethod(() => this.player ? !!this.DEBUG_TOOLS.getPlayerData(this.player, "noclip") : false)
+				.setRefreshMethod(() => this.player?.isFlying ?? false)
 				.event.subscribe("toggle", this.toggleNoClip))
 			.append(this.checkButtonInvulnerable = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonToggleInvulnerable))
@@ -81,13 +81,13 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 		this.skillRangeRow = new RangeRow()
 			.hide()
 			.setLabel(label => label.setText(() => this.skill === undefined ? undefined
-				: this.skill === -1 ? translation(DebugToolsTranslation.MethodAll)
+				: this.skill === "all" ? translation(DebugToolsTranslation.MethodAll)
 					: Translation.skill(this.skill).inContext(TextContext.Title)))
 			.setInheritTextTooltip()
 			.editRange(range => range
 				.setMin(0)
 				.setMax(100)
-				.setRefreshMethod(() => this.player?.skill.getCore(this.skill!) ?? 0))
+				.setRefreshMethod(() => typeof (this.skill) === "number" ? (this.player?.skill.getCore(this.skill) ?? 0) : 0))
 			.setDisplayValue(Translation.ui(UiTranslation.GameStatsPercentage).get)
 			.event.subscribe("finish", this.setSkill)
 			.appendTo(this);
@@ -123,7 +123,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 	@Bound
 	private changeSkill(_: any, skill: SkillType | "none" | "all") {
-		this.skill = skill === "none" ? undefined : skill === "all" ? -1 : skill;
+		this.skill = skill;
 		this.skillRangeRow.refresh();
 
 		this.skillRangeRow.toggle(skill !== "none");
@@ -131,7 +131,9 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 	@Bound
 	private setSkill(_: any, value: number) {
-		SetSkill.execute(localPlayer, this.player!, this.skill!, value);
+		if (typeof (this.skill) === "number") {
+			SetSkill.execute(localPlayer, this.player!, this.skill, value);
+		}
 	}
 
 	@Bound
@@ -143,9 +145,9 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 	@Bound
 	private toggleNoClip(_: any, noclip: boolean) {
-		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "noclip") === noclip) return;
+		if (this.player?.isFlying === noclip) return;
 
-		ToggleNoClip.execute(localPlayer, this.player!, noclip);
+		ToggleNoClip.execute(localPlayer, this.player!);
 	}
 
 	@Bound
@@ -175,9 +177,6 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				break;
 			case "permissions":
 				if (this.checkButtonPermissions) this.checkButtonPermissions.refresh();
-				break;
-			case "noclip":
-				this.checkButtonNoClip.refresh();
 				break;
 		}
 	}

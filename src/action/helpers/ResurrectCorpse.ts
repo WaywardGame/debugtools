@@ -12,10 +12,10 @@ export default function (human: Human, corpse: Corpse) {
 
 	if (!location) return false;
 
-	const creature = human.island.creatures.spawn(corpse.type, corpse.x, corpse.y, corpse.z, true, corpse.aberrant, undefined, true);
+	const creature = human.island.creatures.spawn(corpse.type, corpse.tile, true, corpse.aberrant, undefined, true);
 	creature!.renamed = corpse.renamed;
 	human.island.corpses.remove(corpse);
 
-	renderers.computeSpritesInViewport();
+	renderers.computeSpritesInViewport(corpse);
 	return true;
 }

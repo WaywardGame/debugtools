@@ -2,6 +2,7 @@ import EventEmitter from "event/EventEmitter";
 import { IContainer } from "game/item/IItem";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
+import SetDecayBulk from "../../action/SetDecayBulk";
 import Button, { ButtonType } from "ui/component/Button";
 import Component from "ui/component/Component";
 import Details from "ui/component/Details";
@@ -35,6 +36,7 @@ export default class Container extends Component {
 
 	private readonly wrapperContainedItems: Details;
 	private readonly rangeBulkDurability: RangeRow;
+	private readonly rangeBulkDecay: RangeRow;
 	private containerSupplier?: () => IContainer | undefined;
 	private items: number[] = [];
 
@@ -58,6 +60,16 @@ export default class Container extends Component {
 				.append(new Button()
 					.setText(translation(DebugToolsTranslation.ButtonApply))
 					.event.subscribe("activate", this.applyBulkDurability)))
+			.append(this.rangeBulkDecay = new RangeRow()
+				.classes.add("debug-tools-inspect-human-wrapper-set-decay-bulk")
+				.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDecay)))
+				.editRange(range => range
+					.setMax(60)
+					.setStep(0.01))
+				.setDisplayValue(value => [{ content: `${Math.floor(1.2 ** value) - 1}` }])
+				.append(new Button()
+					.setText(translation(DebugToolsTranslation.ButtonApply))
+					.event.subscribe("activate", this.applyBulkDecay)))
 			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonClearInventory))
 				.setType(ButtonType.Warning)
@@ -116,5 +128,10 @@ export default class Container extends Component {
 	@Bound private applyBulkDurability() {
 		const container = this.getContainer();
 		if (container) SetDurabilityBulk.execute(localPlayer, container, Math.floor(1.2 ** this.rangeBulkDurability.rangeInput.value) - 1);
+	}
+
+	@Bound private applyBulkDecay() {
+		const container = this.getContainer();
+		if (container) SetDecayBulk.execute(localPlayer, container, Math.floor(1.2 ** this.rangeBulkDecay.rangeInput.value) - 1);
 	}
 }

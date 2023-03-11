@@ -4,14 +4,14 @@ import { EntityType } from "game/entity/IEntity";
 import { defaultUsability } from "../Actions";
 import SetTilled from "./helpers/SetTilled";
 
-export default new Action(ActionArgument.Vector3, ActionArgument.Boolean)
+export default new Action(ActionArgument.Tile, ActionArgument.Boolean)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
-	.setHandler((action, position, tilled) => {
-		if (!position) return;
+	.setHandler((action, tile, tilled) => {
+		if (!tile) return;
 
-		SetTilled(action.executor.island, position.x, position.y, position.z, tilled);
+		SetTilled(action.executor.island, tile, tilled);
 
-		renderers.computeSpritesInViewport();
+		renderers.computeSpritesInViewport(tile);
 		action.setUpdateRender();
 	});

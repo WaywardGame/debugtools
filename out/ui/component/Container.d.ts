@@ -6,6 +6,7 @@ export default class Container extends Component {
     static appendTo(component: Component, host: Component, containerSupplier: () => IContainer | undefined): Promise<void>;
     private readonly wrapperContainedItems;
     private readonly rangeBulkDurability;
+    private readonly rangeBulkDecay;
     private containerSupplier?;
     private items;
     constructor();
@@ -15,4 +16,5 @@ export default class Container extends Component {
     private getContainer;
     private clear;
     private applyBulkDurability;
+    private applyBulkDecay;
 }

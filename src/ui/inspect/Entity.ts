@@ -1,7 +1,8 @@
 import Entity from "game/entity/Entity";
+import EntityWithStats from "game/entity/EntityWithStats";
 import { EntityType, IStatChangeInfo } from "game/entity/IEntity";
 import { IStat, Stat } from "game/entity/IStats";
-import { ITile } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import TranslationImpl from "language/impl/TranslationImpl";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
@@ -20,7 +21,7 @@ import { Tuple } from "utilities/collection/Arrays";
 import { Bound } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
 import Log from "utilities/Log";
-import { IVector2, IVector3 } from "utilities/math/IVector";
+import { IVector3 } from "utilities/math/IVector";
 import Vector3 from "utilities/math/Vector3";
 import Clone from "../../action/Clone";
 import Heal from "../../action/Heal";
@@ -123,8 +124,8 @@ export default class EntityInformation extends InspectInformationSection {
 		return this;
 	}
 
-	public override update(position: IVector2, tile: ITile) {
-		const entities: Entity[] = localIsland.getPlayersAtTile(tile, true);
+	public override update(tile: Tile) {
+		const entities: Entity[] = tile.getPlayersOnTile(true);
 
 		if (tile.creature) entities.push(tile.creature);
 		if (tile.npc) entities.push(tile.npc);
@@ -139,8 +140,10 @@ export default class EntityInformation extends InspectInformationSection {
 		this.setShouldLog();
 
 		for (const entity of this.entities) {
-			entity.event.until(this, "remove", "change")
-				.subscribe("statChanged", this.onStatChange);
+			if (entity instanceof EntityWithStats) {
+				entity.event.until(this, "remove", "change")
+					.subscribe("statChanged", this.onStatChange);
+			}
 		}
 	}
 
@@ -162,9 +165,14 @@ export default class EntityInformation extends InspectInformationSection {
 		this.statWrapper.dump();
 		this.statComponents.clear();
 
+
+		if (!(this.entity instanceof EntityWithStats)) {
+			return;
+		}
+
 		const stats = Enums.values(Stat)
-			.filter(stat => this.entity?.stat.has(stat) && (!this.subsections.some(subsection => subsection.getImmutableStats().includes(stat))))
-			.map(stat => this.entity?.stat.get<IStat>(stat))
+			.filter(stat => this.entity?.asEntityWithStats?.stat.has(stat) && (!this.subsections.some(subsection => subsection.getImmutableStats().includes(stat))))
+			.map(stat => this.entity?.asEntityWithStats?.stat.get<IStat>(stat))
 			.filterNullish();
 
 		for (const stat of stats) {
@@ -175,7 +183,7 @@ export default class EntityInformation extends InspectInformationSection {
 						.noClampOnRefresh()
 						.setMin(0)
 						.setMax(stat.max!)
-						.setRefreshMethod(() => this.entity ? this.entity.stat.getValue(stat.type)! : 0))
+						.setRefreshMethod(() => this.entity ? this.entity.asEntityWithStats?.stat.getValue(stat.type)! : 0))
 					.event.subscribe("finish", this.setStat(stat.type))
 					.setDisplayValue(true)
 					.appendTo(this.statWrapper));
@@ -191,7 +199,7 @@ export default class EntityInformation extends InspectInformationSection {
 						}
 					})
 					.setClearToDefaultWhenEmpty()
-					.setDefault(() => this.entity ? `${this.entity.stat.getValue(stat.type)}` : "")
+					.setDefault(() => this.entity?.asEntityWithStats?.stat.getValue(stat.type)?.toString() ?? "")
 					.clear()
 					.appendTo(new LabelledRow()
 						.setLabel(label => label.setText(Translation.stat(stat.type).inContext(TextContext.Title)))
@@ -231,9 +239,9 @@ export default class EntityInformation extends InspectInformationSection {
 				translation: translation(DebugToolsTranslation.OptionTeleportToLocalPlayer),
 				onActivate: () => this.teleport(localPlayer),
 			}],
-			!multiplayer.isConnected() || this.entity === players[0] ? undefined : ["to host", {
+			!multiplayer.isConnected() || this.entity?.asLocalPlayer ? undefined : ["to host", {
 				translation: translation(DebugToolsTranslation.OptionTeleportToHost),
-				onActivate: () => this.teleport(players[0]!),
+				onActivate: () => this.teleport(game.playerManager.players[0]!),
 			}],
 			!multiplayer.isConnected() ? undefined : ["to player", {
 				translation: translation(DebugToolsTranslation.OptionTeleportToPlayer),
@@ -247,7 +255,7 @@ export default class EntityInformation extends InspectInformationSection {
 
 	@Bound
 	private createTeleportToPlayerMenu() {
-		return playerManager.getAll(true, true).stream()
+		return game.playerManager.getAll(true, true).stream()
 			.filter(player => player !== this.entity)
 			.map(player => Tuple(player.name, {
 				translation: TranslationImpl.generator(player.name),
@@ -268,7 +276,7 @@ export default class EntityInformation extends InspectInformationSection {
 	}
 
 	@Bound
-	private teleport(location: IVector2 | IVector3) {
+	private teleport(location: Tile | IVector3) {
 		TeleportEntity.execute(localPlayer, this.entity!, new Vector3(location, "z" in location ? location.z : localPlayer.z));
 
 		this.event.emit("update");
@@ -297,7 +305,7 @@ export default class EntityInformation extends InspectInformationSection {
 	@Bound
 	private setStat(stat: Stat) {
 		return (_: any, value: number) => {
-			if (this.entity!.stat.getValue(stat) === value) return;
+			if (this.entity?.asEntityWithStats?.stat.getValue(stat) === value) return;
 
 			SetStat.execute(localPlayer, this.entity!, stat, value);
 		};

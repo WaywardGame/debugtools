@@ -1,4 +1,5 @@
 import Human from "game/entity/Human";
+import MagicalPropertyManager from "game/magic/MagicalPropertyManager";
 
 /**
  * Clones the inventory from one human entity to another.
@@ -21,7 +22,7 @@ export default function (from: Human, to: Human) {
 		clone.durabilityMax = item.durabilityMax;
 		clone.renamed = item.renamed;
 		clone.weight = item.weight;
-		clone.magic.inherit(item.magic);
+		MagicalPropertyManager.inherit(item, clone);
 		if (item.isEquipped()) to.equip(clone, item.getEquipSlot()!);
 	}
 }

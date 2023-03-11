@@ -1,4 +1,4 @@
-import { ITile } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import TileEvent from "game/tile/TileEvent";
 import Dictionary from "language/Dictionary";
 import { TextContext } from "language/ITranslation";
@@ -8,7 +8,6 @@ import Button from "ui/component/Button";
 import { Tuple } from "utilities/collection/Arrays";
 import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
-import { IVector2 } from "utilities/math/IVector";
 import Remove from "../../action/Remove";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
@@ -45,7 +44,7 @@ export default class TileEventInformation extends InspectInformationSection {
 		return this;
 	}
 
-	public override update(position: IVector2, tile: ITile) {
+	public override update(tile: Tile) {
 		const tileEvents = [...tile.events || []];
 
 		if (areArraysIdentical(tileEvents, this.tileEvents)) return;

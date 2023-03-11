@@ -11,13 +11,13 @@ export default new Action(ActionArgument.Entity)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, entity) => {
-		entity.damage({
+		(entity?.asHuman ?? entity?.asCreature)?.damage({
 			type: DamageType.True,
 			amount: Infinity,
 			damageMessage: translation(DebugToolsTranslation.KillEntityDeathMessage),
 		});
 
-		renderers.computeSpritesInViewport();
+		renderers.computeSpritesInViewport(entity);
 		action.setUpdateRender();
 
 		if (!multiplayer.isConnected() && entity.asPlayer?.isLocalPlayer()) {

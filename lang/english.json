@@ -144,6 +144,7 @@
 			"labelQuality": "Quality",
 			"labelQuantity": "Quantity",
 			"labelDurability": "Durability",
+			"labelDecay": "Decay",
 			"buttonApply": "Apply",
 			"labelBenignity": "Benignity",
 			"labelMalignity": "Malignity",

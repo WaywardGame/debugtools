@@ -1,8 +1,7 @@
-import { ITile } from "game/tile/ITerrain";
-import { IVector2, IVector3 } from "utilities/math/IVector";
+import Tile from "game/tile/Tile";
 import DebugTools from "../DebugTools";
 export default class SelectionOverlay {
     static readonly debugTools: DebugTools;
-    static add(tilePosition: IVector2 | IVector3, tile?: ITile): boolean;
-    static remove(tilePosition: IVector2 | IVector3, tile?: ITile): boolean;
+    static add(tile: Tile): boolean;
+    static remove(tile: Tile): boolean;
 }

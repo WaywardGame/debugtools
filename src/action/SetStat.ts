@@ -9,7 +9,7 @@ export default new Action(ActionArgument.Entity, ActionArgument.Integer32, Actio
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, entity, stat: Stat, value) => {
-		entity.stat.set(stat, value);
+		entity?.asEntityWithStats?.stat.set(stat, value);
 		if (entity.asLocalPlayer && stat === Stat.Health) {
 			ui.screens.get(ScreenId.Game)?.["refreshHealthBasedEffects"]();
 		}

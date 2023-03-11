@@ -1,13 +1,13 @@
 import { Events, IEventEmitter } from "event/EventEmitter";
 import { ActionType } from "game/entity/action/IAction";
 import Creature from "game/entity/creature/Creature";
-import Human from "game/entity/Human";
 import NPC from "game/entity/npc/NPC";
 import { Source } from "game/entity/player/IMessageManager";
 import Player from "game/entity/player/Player";
 import { InspectType } from "game/inspection/IInspection";
 import Island from "game/island/Island";
-import { ITile, OverlayType } from "game/tile/ITerrain";
+import { OverlayType } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import Dictionary from "language/Dictionary";
 import Message from "language/dictionary/Message";
 import InterModRegistry from "mod/InterModRegistry";
@@ -18,16 +18,15 @@ import { IBindHandlerApi } from "ui/input/Bind";
 import Bindable from "ui/input/Bindable";
 import { DialogId } from "ui/screen/screens/game/Dialogs";
 import { MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
-import { IInjectionApi } from "utilities/class/Inject";
 import Log from "utilities/Log";
+import { IInjectionApi } from "utilities/class/Inject";
 import { IVector2 } from "utilities/math/IVector";
-import Vector2 from "utilities/math/Vector2";
 import Actions from "./Actions";
 import { IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
-import DebugToolsPanel from "./ui/component/DebugToolsPanel";
-import { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
+import { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
+import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 interface IDebugToolsEvents extends Events<Mod> {
     playerDataChange<K extends keyof IPlayerData>(playerId: number, property: K, newValue: IPlayerData[K]): any;
     inspect(): any;
@@ -77,6 +76,7 @@ export default class DebugTools extends Mod {
     readonly actionUpdateStatsAndAttributes: ActionType;
     readonly actionAddItemToInventory: ActionType;
     readonly actionSetDurabilityBulk: ActionType;
+    readonly actionSetDecayBulk: ActionType;
     readonly actionClearInventory: ActionType;
     readonly actionPaint: ActionType;
     readonly actionToggleInvulnerable: ActionType;
@@ -107,7 +107,7 @@ export default class DebugTools extends Mod {
     onSave(): any;
     updateFog(): void;
     setCameraUnlocked(unlocked: boolean): void;
-    inspect(what: Vector2 | Creature | Player | NPC): void;
+    inspect(what: Tile | Creature | Player | NPC): void;
     toggleDialog(): void;
     hasPermission(): boolean | undefined;
     toggleFog(fog: boolean): void;
@@ -120,11 +120,6 @@ export default class DebugTools extends Mod {
     getZoomLevel(): number | undefined;
     protected getCameraPosition(_: any, position: IVector2): IVector2 | undefined;
     onPlayerDie(player: Player): false | void;
-    protected canCreatureAttack(creature: Creature, enemy: Human | Creature): boolean | undefined;
-    onMove(player: Player, fromX: number, fromY: number, fromZ: number, fromTile: ITile, nextX: number, nextY: number, nextZ: number, tile: ITile): boolean | void | undefined;
-    onNoInputReceived(player: Player): void;
-    protected getPlayerWeightOrStaminaMovementPenalty(player: Player): number | undefined;
-    protected isHumanSwimming(human: Human, isSwimming: boolean): boolean | undefined;
     protected getPlayerMaxWeight(player: Player, weight: number): number;
     onZoomIn(api: IBindHandlerApi): boolean;
     onToggleCameraLock(): boolean;
@@ -135,7 +130,7 @@ export default class DebugTools extends Mod {
     onTeleportLocalPlayer(api: IBindHandlerApi): boolean;
     onToggleNoClipOnLocalPlayer(): boolean;
     getAmbientColor(api: IInjectionApi<WorldRenderer, "calculateAmbientColor">): void;
-    getTileLightLevel(api: IInjectionApi<Island, "calculateTileLightLevel">, tile: ITile, x: number, y: number, z: number): void;
+    getTileLightLevel(api: IInjectionApi<Island, "calculateTileLightLevel">, tile: Tile): void;
     private needsUpgrade;
 }
 export { ModRegistrationMainDialogPanel };

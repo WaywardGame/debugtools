@@ -133,30 +133,31 @@ export declare enum DebugToolsTranslation {
     LabelQuality = 116,
     LabelQuantity = 117,
     LabelDurability = 118,
-    ButtonApply = 119,
-    AddToInventory = 120,
-    DoodadName = 121,
-    TabItemStack = 122,
-    UnlockInspection = 123,
-    LockInspection = 124,
-    TileEventName = 125,
-    ButtonTogglePermissions = 126,
-    ButtonSetGrowthStage = 127,
-    LabelItemDetails = 128,
-    LabelBulkItemOperations = 129,
-    InspectionTemperature = 130,
-    InspectionTemperatureBiome = 131,
-    InspectionTemperatureTimeModifier = 132,
-    InspectionTemperatureLayerModifier = 133,
-    InspectionTemperatureTileCalculated = 134,
-    InspectionTemperatureTileCalculatedHeat = 135,
-    InspectionTemperatureTileCalculatedCold = 136,
-    InspectionTemperatureTileProducedHeat = 137,
-    InspectionTemperatureTileProducedCold = 138,
-    ActionResurrect = 139,
-    ActionClone = 140,
-    ActionTeleport = 141,
-    To = 142
+    LabelDecay = 119,
+    ButtonApply = 120,
+    AddToInventory = 121,
+    DoodadName = 122,
+    TabItemStack = 123,
+    UnlockInspection = 124,
+    LockInspection = 125,
+    TileEventName = 126,
+    ButtonTogglePermissions = 127,
+    ButtonSetGrowthStage = 128,
+    LabelItemDetails = 129,
+    LabelBulkItemOperations = 130,
+    InspectionTemperature = 131,
+    InspectionTemperatureBiome = 132,
+    InspectionTemperatureTimeModifier = 133,
+    InspectionTemperatureLayerModifier = 134,
+    InspectionTemperatureTileCalculated = 135,
+    InspectionTemperatureTileCalculatedHeat = 136,
+    InspectionTemperatureTileCalculatedCold = 137,
+    InspectionTemperatureTileProducedHeat = 138,
+    InspectionTemperatureTileProducedCold = 139,
+    ActionResurrect = 140,
+    ActionClone = 141,
+    ActionTeleport = 142,
+    To = 143
 }
 export interface ISaveData {
     lastVersion: string;
@@ -171,10 +172,6 @@ export interface IPlayerData {
     invulnerable?: boolean;
     lighting?: boolean;
     fog?: boolean;
-    noclip: false | {
-        moving: boolean;
-        delay: number;
-    };
     permissions?: boolean;
 }
 export interface IGlobalData {

@@ -146,7 +146,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 
 		await game.webGlContext?.recompilePrograms();
 
-		renderers.updateView(RenderSource.Mod, true);
+		localPlayer.updateView(RenderSource.Mod, true);
 	}
 
 	@Bound
@@ -162,7 +162,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 			this.saveData.renderLayerFlags &= ~flag;
 		}
 
-		renderers.updateView(RenderSource.Mod);
+		localPlayer.updateView(RenderSource.Mod);
 	}
 
 	@EventHandler(WorldLayerRenderer, "getRenderFlags")

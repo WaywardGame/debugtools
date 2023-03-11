@@ -7,6 +7,6 @@ export default new Action(ActionArgument.Creature, ActionArgument.Boolean)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, creature, tamed) => {
-		if (tamed) creature!.tame(action.executor);
+		if (tamed) creature!.tame(action.executor, Number.MAX_SAFE_INTEGER);
 		else creature!.release();
 	});

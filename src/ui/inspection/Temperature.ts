@@ -45,15 +45,16 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 	}
 
 	public override get(context: InfoProviderContext) {
+		const tempValue = localIsland.temperature.get(localIsland.getTileFromPoint(this.value), undefined);
 		return [
 			InfoProvider.create()
 				.setDisplayLevel(InfoDisplayLevel.NonExtra)
 				.add(translation(DebugToolsTranslation.InspectionTemperature)
-					.addArgs(localIsland.temperature.get(this.value.x, this.value.y, this.value.z, undefined))),
+					.addArgs(tempValue)),
 			InfoProvider.title()
 				.setDisplayLevel(InfoDisplayLevel.Extra)
 				.add(translation(DebugToolsTranslation.InspectionTemperature)
-					.addArgs(localIsland.temperature.get(this.value.x, this.value.y, this.value.z, undefined))),
+					.addArgs(tempValue)),
 			InfoProvider.create()
 				.setDisplayLevel(InfoDisplayLevel.Extra)
 				.setComponent(Paragraph)
@@ -114,8 +115,7 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 	//
 
 	private getTemperature(tempType: TempType, calcOrProduce: "calculated" | "produced") {
-		const temp = localIsland.temperature?.[calcOrProduce === "calculated" ? "getCachedCalculated" : "getCachedProduced"]
-			(this.value.x, this.value.y, this.value.z, tempType);
+		const temp = localIsland.temperature?.[calcOrProduce === "calculated" ? "getCachedCalculated" : "getCachedProduced"](this.value, tempType);
 		return temp === TEMPERATURE_INVALID || temp === undefined ? "?" : temp;
 	}
 

@@ -1,6 +1,6 @@
 import { Priority } from "event/EventEmitter";
 import { EventHandler } from "event/EventManager";
-import { ITile } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
 import { RenderSource } from "renderer/IRenderer";
@@ -10,8 +10,6 @@ import { IInput } from "ui/input/IInput";
 import InputManager from "ui/input/InputManager";
 import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
 import { Bound } from "utilities/Decorators";
-import TileHelpers from "utilities/game/TileHelpers";
-import Vector2 from "utilities/math/Vector2";
 import DebugTools from "./DebugTools";
 import { DEBUG_TOOLS_ID } from "./IDebugTools";
 import Overlays from "./overlay/Overlays";
@@ -37,9 +35,9 @@ export default class SelectLocation {
 
 	private _selecting = false;
 	public get selecting() { return this._selecting; }
-	private hoverTile?: ITile;
+	private hoverTile?: Tile;
 	private selectTileHeld = false;
-	private selectionPromise: CancelablePromise<Vector2> | undefined;
+	private selectionPromise: CancelablePromise<Tile> | undefined;
 
 	////////////////////////////////////
 	// Public API
@@ -52,7 +50,7 @@ export default class SelectLocation {
 	public select() {
 		this._selecting = true;
 		this.selectionTick();
-		return this.selectionPromise = new CancelablePromise<Vector2>()
+		return this.selectionPromise = new CancelablePromise<Tile>()
 			.onCancel(this.cancel);
 	}
 
@@ -88,7 +86,6 @@ export default class SelectLocation {
 	// Helpers
 	//
 
-	// tslint:disable-next-line cyclomatic-complexity
 	@Bound private selectionTick() {
 		if (!this._selecting)
 			return;
@@ -101,20 +98,17 @@ export default class SelectLocation {
 		let updateRender = false;
 
 		if (this._selecting) {
-			const tilePosition = renderer?.worldRenderer.screenToTile(...InputManager.mouse.position.xy);
-			if (tilePosition) {
-				// add the target overlay to the tile currently being hovered
-				const tile = localIsland.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
-
+			const tile = renderer?.worldRenderer.screenToTile(...InputManager.mouse.position.xy);
+			if (tile) {
 				if (tile !== this.hoverTile) {
 					updateRender = true;
 
 					if (this.hoverTile) {
-						TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
+						this.hoverTile.removeOverlay(Overlays.isHoverTarget);
 					}
 
 					this.hoverTile = tile;
-					TileHelpers.Overlay.add(tile, { type: this.DEBUG_TOOLS.overlayTarget }, Overlays.isHoverTarget);
+					tile.addOverlay({ type: this.DEBUG_TOOLS.overlayTarget }, Overlays.isHoverTarget);
 				}
 
 				if (cancelSelectTilePressed) {
@@ -126,7 +120,7 @@ export default class SelectLocation {
 				} else if (selectTilePressed) {
 					updateRender = true;
 
-					this.selectTile(tilePosition);
+					this.selectTile(tile);
 
 					this.selectTileHeld = true;
 				}
@@ -134,14 +128,15 @@ export default class SelectLocation {
 
 		} else if (this.hoverTile) {
 			// if we previously had the target overlay on a tile, remove it
-			TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
+			this.hoverTile.removeOverlay(Overlays.isHoverTarget);
 			delete this.hoverTile;
 
 			updateRender = true;
 		}
 
-		if (updateRender)
-			renderers.updateView(RenderSource.Mod, false);
+		if (updateRender) {
+			localPlayer.updateView(RenderSource.Mod, false);
+		}
 	}
 
 	/**
@@ -151,7 +146,7 @@ export default class SelectLocation {
 	private cancel() {
 		this._selecting = false;
 		if (this.hoverTile) {
-			TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
+			this.hoverTile.removeOverlay(Overlays.isHoverTarget);
 			delete this.hoverTile;
 		}
 	}
@@ -159,14 +154,14 @@ export default class SelectLocation {
 	/**
 	 * Removes the hover overlay, then resolves the selection promise with the selected position.
 	 */
-	private selectTile(tilePosition: Vector2) {
+	private selectTile(tile: Tile) {
 		if (this.hoverTile) {
-			TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
+			this.hoverTile.removeOverlay(Overlays.isHoverTarget);
 			delete this.hoverTile;
 		}
 
 		this._selecting = false;
-		this.selectionPromise!.resolve(tilePosition);
+		this.selectionPromise!.resolve(tile);
 		delete this.selectionPromise;
 	}
 

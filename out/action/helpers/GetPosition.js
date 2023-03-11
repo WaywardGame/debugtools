@@ -1,12 +1,12 @@
-define(["require", "exports", "game/entity/IEntity", "game/entity/player/IMessageManager", "ui/component/Text", "utilities/game/TileHelpers", "../../Actions"], function (require, exports, IEntity_1, IMessageManager_1, Text_1, TileHelpers_1, Actions_1) {
+define(["require", "exports", "game/entity/IEntity", "game/entity/player/IMessageManager", "ui/component/Text", "../../Actions"], function (require, exports, IEntity_1, IMessageManager_1, Text_1, Actions_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     function default_1(human, position, actionName) {
-        if (TileHelpers_1.default.isOpenTile(human.island, position, human.island.getTile(position.x, position.y, position.z)) ||
-            human.getMoveType() === IEntity_1.MoveType.Flying) {
-            return position;
+        const tile = human.island.getTileSafe(position.x, position.y, position.z);
+        if (tile && (tile.isOpenTile || human.getMoveType() === IEntity_1.MoveType.Flying)) {
+            return tile;
         }
-        const openTile = TileHelpers_1.default.findMatchingTile(human.island, position, TileHelpers_1.default.isOpenTile);
+        const openTile = tile?.findMatchingTile((tile) => !tile.isTileBlocked);
         if (!openTile) {
             human.messages.source(Actions_1.default.DEBUG_TOOLS.source)
                 .type(IMessageManager_1.MessageType.Bad)
@@ -16,4 +16,4 @@ define(["require", "exports", "game/entity/IEntity", "game/entity/player/IMessag
     }
     exports.default = default_1;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiR2V0UG9zaXRpb24uanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvYWN0aW9uL2hlbHBlcnMvR2V0UG9zaXRpb24udHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0lBZUEsbUJBQXlCLEtBQVksRUFBRSxRQUFrQixFQUFFLFVBQWdDO1FBQzFGLElBQUkscUJBQVcsQ0FBQyxVQUFVLENBQUMsS0FBSyxDQUFDLE1BQU0sRUFBRSxRQUFRLEVBQUUsS0FBSyxDQUFDLE1BQU0sQ0FBQyxPQUFPLENBQUMsUUFBUSxDQUFDLENBQUMsRUFBRSxRQUFRLENBQUMsQ0FBQyxFQUFFLFFBQVEsQ0FBQyxDQUFDLENBQUMsQ0FBQztZQUMzRyxLQUFLLENBQUMsV0FBVyxFQUFFLEtBQUssa0JBQVEsQ0FBQyxNQUFNLEVBQUU7WUFDekMsT0FBTyxRQUFRLENBQUM7U0FDaEI7UUFFRCxNQUFNLFFBQVEsR0FBRyxxQkFBVyxDQUFDLGdCQUFnQixDQUFDLEtBQUssQ0FBQyxNQUFNLEVBQUUsUUFBUSxFQUFFLHFCQUFXLENBQUMsVUFBVSxDQUFDLENBQUM7UUFFOUYsSUFBSSxDQUFDLFFBQVEsRUFBRTtZQUNkLEtBQUssQ0FBQyxRQUFRLENBQUMsTUFBTSxDQUFDLGlCQUFPLENBQUMsV0FBVyxDQUFDLE1BQU0sQ0FBQztpQkFDL0MsSUFBSSxDQUFDLDZCQUFXLENBQUMsR0FBRyxDQUFDO2lCQUNyQixJQUFJLENBQUMsaUJBQU8sQ0FBQyxXQUFXLENBQUMseUJBQXlCLEVBQUUsY0FBSSxDQUFDLE9BQU8sQ0FBQyxVQUFVLENBQUMsQ0FBQyxDQUFDO1NBQ2hGO1FBRUQsT0FBTyxRQUFRLENBQUM7SUFDakIsQ0FBQztJQWZELDRCQWVDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiR2V0UG9zaXRpb24uanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvYWN0aW9uL2hlbHBlcnMvR2V0UG9zaXRpb24udHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0lBZUEsbUJBQXlCLEtBQVksRUFBRSxRQUFrQixFQUFFLFVBQWdDO1FBQzFGLE1BQU0sSUFBSSxHQUFHLEtBQUssQ0FBQyxNQUFNLENBQUMsV0FBVyxDQUFDLFFBQVEsQ0FBQyxDQUFDLEVBQUUsUUFBUSxDQUFDLENBQUMsRUFBRSxRQUFRLENBQUMsQ0FBQyxDQUFDLENBQUM7UUFDMUUsSUFBSSxJQUFJLElBQUksQ0FBQyxJQUFJLENBQUMsVUFBVSxJQUFJLEtBQUssQ0FBQyxXQUFXLEVBQUUsS0FBSyxrQkFBUSxDQUFDLE1BQU0sQ0FBQyxFQUFFO1lBQ3pFLE9BQU8sSUFBSSxDQUFDO1NBQ1o7UUFFRCxNQUFNLFFBQVEsR0FBRyxJQUFJLEVBQUUsZ0JBQWdCLENBQUMsQ0FBQyxJQUFJLEVBQUUsRUFBRSxDQUFDLENBQUMsSUFBSSxDQUFDLGFBQWEsQ0FBQyxDQUFDO1FBQ3ZFLElBQUksQ0FBQyxRQUFRLEVBQUU7WUFDZCxLQUFLLENBQUMsUUFBUSxDQUFDLE1BQU0sQ0FBQyxpQkFBTyxDQUFDLFdBQVcsQ0FBQyxNQUFNLENBQUM7aUJBQy9DLElBQUksQ0FBQyw2QkFBVyxDQUFDLEdBQUcsQ0FBQztpQkFDckIsSUFBSSxDQUFDLGlCQUFPLENBQUMsV0FBVyxDQUFDLHlCQUF5QixFQUFFLGNBQUksQ0FBQyxPQUFPLENBQUMsVUFBVSxDQUFDLENBQUMsQ0FBQztTQUNoRjtRQUVELE9BQU8sUUFBUSxDQUFDO0lBQ2pCLENBQUM7SUFkRCw0QkFjQyJ9

@@ -1,33 +1,30 @@
 import { Action } from "game/entity/action/Action";
 import { ActionArgument } from "game/entity/action/IAction";
 import { EntityType } from "game/entity/IEntity";
-import TileHelpers from "utilities/game/TileHelpers";
+import Tile from "game/tile/Tile";
 import { defaultUsability } from "../Actions";
 import { IPaintData } from "../ui/panel/PaintPanel";
-import { getTilePosition } from "../util/TilePosition";
 import SetTilled from "./helpers/SetTilled";
+import { RenderSource } from "renderer/IRenderer";
 
 /**
  * Places terrain, creatures, NPCs, doodads, corpses, and/or tile events on the given tiles.
- * @param tiles An array of tile IDs
+ * @param tiles An array of tiles
  * @param data The data to paint (terrain, creature, npc, etc)
  */
-// tslint:disable cyclomatic-complexity
-export default new Action(ActionArgument.Array, ActionArgument.Object)
+export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
-	.setHandler((action, tiles: number[], data: IPaintData) => {
-
-		for (const tileId of tiles) {
-			const [x, y, z] = getTilePosition(tileId);
-			const tile = action.executor.island.getTile(x, y, z);
+	.setHandler((action, tiles: Tile[], data: IPaintData) => {
+		for (const tile of tiles) {
 			for (const k of Object.keys(data)) {
 				const paintType = k as keyof IPaintData;
 				switch (paintType) {
 					case "terrain": {
-						action.executor.island.changeTile(data.terrain!.type, x, y, z, false);
-						if (data.terrain!.tilled !== undefined && data.terrain!.tilled !== TileHelpers.isTilled(tile))
-							SetTilled(action.executor.island, x, y, z, data.terrain!.tilled);
+						tile.changeTile(data.terrain!.type, false);
+						if (data.terrain!.tilled !== undefined && data.terrain!.tilled !== tile.isTilled) {
+							SetTilled(action.executor.island, tile, data.terrain!.tilled);
+						}
 						break;
 					}
 					case "creature": {
@@ -36,7 +33,7 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 
 						const type = data.creature!.type;
 						if (type !== "remove") {
-							action.executor.island.creatures.spawn(type, x, y, z, true, data.creature!.aberrant, undefined, true);
+							action.executor.island.creatures.spawn(type, tile, true, data.creature!.aberrant, undefined, true);
 						}
 
 						break;
@@ -47,7 +44,7 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 
 						const type = data.npc!.type;
 						if (type !== "remove") {
-							action.executor.island.npcs.spawn(type, x, y, z, { allowEdgeSpawning: true, allowOverDooadsAndTileEvents: true, allowOnFire: true, allowOnBlockedTiles: true });
+							action.executor.island.npcs.spawn(type, tile, { allowEdgeSpawning: true, allowOverDooadsAndTileEvents: true, allowOnFire: true, allowOnBlockedTiles: true });
 						}
 
 						break;
@@ -58,7 +55,7 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 
 						const type = data.doodad!.type;
 						if (type !== "remove") {
-							action.executor.island.doodads.create(type, x, y, z);
+							action.executor.island.doodads.create(type, tile);
 						}
 
 						break;
@@ -75,7 +72,7 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 
 						const type = data.corpse!.type;
 						if (type !== undefined && type !== "remove") {
-							action.executor.island.corpses.create(type, x, y, z, undefined, data.corpse!.aberrant);
+							action.executor.island.corpses.create(type, tile, undefined, data.corpse!.aberrant);
 						}
 
 						break;
@@ -92,7 +89,7 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 
 						const type = data.tileEvent!.type;
 						if (type !== undefined && type !== "remove") {
-							action.executor.island.tileEvents.create(type, x, y, z);
+							action.executor.island.tileEvents.create(type, tile);
 						}
 
 						break;
@@ -100,4 +97,6 @@ export default new Action(ActionArgument.Array, ActionArgument.Object)
 				}
 			}
 		}
+
+		renderers.updateView(undefined, RenderSource.Mod, true);
 	});

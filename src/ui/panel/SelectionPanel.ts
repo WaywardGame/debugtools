@@ -5,7 +5,6 @@ import { EventHandler, OwnEventHandler } from "event/EventManager";
 import Doodad from "game/doodad/Doodad";
 import Corpse from "game/entity/creature/corpse/Corpse";
 import Creature from "game/entity/creature/Creature";
-import Entity from "game/entity/Entity";
 import { EntityType } from "game/entity/IEntity";
 import NPC from "game/entity/npc/NPC";
 import Player from "game/entity/player/Player";
@@ -15,7 +14,6 @@ import Mod from "mod/Mod";
 import { RendererOrigin } from "renderer/context/RendererOrigin";
 import { RenderSource } from "renderer/IRenderer";
 import Renderer from "renderer/Renderer";
-import WebGlContext from "renderer/WebGlContext";
 import { BlockRow } from "ui/component/BlockRow";
 import Button, { ButtonClasses } from "ui/component/Button";
 import { CheckButton } from "ui/component/CheckButton";
@@ -34,24 +32,26 @@ import Arrays, { Tuple } from "utilities/collection/Arrays";
 import { Bound } from "utilities/Decorators";
 import Math2 from "utilities/math/Math2";
 import Vector2 from "utilities/math/Vector2";
-import { generalRandom } from "utilities/random/Random";
+import { generalRandom } from "utilities/random/RandomUtilities";
 import SelectionExecute, { SelectionType } from "../../action/SelectionExecute";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
+import { IslandId } from "game/island/IIsland";
 
 const entityTypeToSelectionTypeMap = {
+	[EntityType.Corpse]: SelectionType.Corpse,
 	[EntityType.Creature]: SelectionType.Creature,
+	[EntityType.Doodad]: SelectionType.Doodad,
 	[EntityType.NPC]: SelectionType.NPC,
 	[EntityType.Player]: SelectionType.Player,
+	[EntityType.TileEvent]: SelectionType.TileEvent,
 };
 
 type Target = Creature | NPC | TileEvent | Doodad | Corpse | Player;
 
 function getSelectionType(target: Target) {
-	return "entityType" in target ? entityTypeToSelectionTypeMap[target.entityType]
-		: target instanceof Doodad ? SelectionType.Doodad
-			: SelectionType.TileEvent;
+	return "entityType" in target ? entityTypeToSelectionTypeMap[target.entityType] : undefined;
 }
 
 export default class SelectionPanel extends DebugToolsPanel {
@@ -59,9 +59,9 @@ export default class SelectionPanel extends DebugToolsPanel {
 	@Mod.instance(DEBUG_TOOLS_ID)
 	public static DEBUG_TOOLS: DebugTools;
 
-	private disposed = false;
-
 	private readonly targets: Target[] = [];
+
+	private readonly selectionContainer = new Component();
 
 	private readonly textPreposition = new Text().setText(translation(DebugToolsTranslation.To)).hide();
 
@@ -90,37 +90,6 @@ export default class SelectionPanel extends DebugToolsPanel {
 		.setText(translation(DebugToolsTranslation.ButtonExecute))
 		.event.subscribe("activate", this.execute)
 		.hide();
-
-	private readonly creatures = new SelectionSource(localIsland.creatures.getObjects(), DebugToolsTranslation.FilterCreatures,
-		new CreatureDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
-		(creature, filter) => filter === "all" || (creature && creature.type === filter));
-
-	private readonly npcs = new SelectionSource(localIsland.npcs.getObjects(), DebugToolsTranslation.FilterNPCs,
-		new NPCTypeDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
-		(npc, filter) => filter === "all" || (npc && npc.type === filter));
-
-	private readonly tileEvents = new SelectionSource(localIsland.tileEvents.getObjects(), DebugToolsTranslation.FilterTileEvents,
-		new TileEventDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
-		(tileEvent, filter) => filter === "all" || (tileEvent && tileEvent.type === filter));
-
-	private readonly doodads = new SelectionSource(localIsland.doodads.getObjects(), DebugToolsTranslation.FilterDoodads,
-		new DoodadDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
-		(doodad, filter) => filter === "all" || (doodad && doodad.type === filter));
-
-	private readonly corpses = new SelectionSource(localIsland.corpses.getObjects(), DebugToolsTranslation.FilterCorpses,
-		new CorpseDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
-		(corpse, filter) => filter === "all" || (corpse && corpse.type === filter));
-
-	private readonly players = new SelectionSource(playerManager.getAll(true, true), DebugToolsTranslation.FilterPlayers,
-		new Dropdown()
-			.setRefreshMethod(() => ({
-				defaultOption: "all",
-				options: Stream.of<IDropdownOption<string>[]>(["all", option => option.setText(translation(DebugToolsTranslation.SelectionAllPlayers))])
-					.merge(playerManager.getAll(true, true).map(player => Tuple(player.identifier, option => option.setText(player.getName())))),
-			})),
-		(player, filter) => (this.dropdownAlternativeTarget.classes.has("hidden") || player.identifier !== this.dropdownAlternativeTarget.selection)
-			&& (filter === "all" || (player && player.identifier === filter)),
-		DebugToolsTranslation.SelectionFilterNamed);
 
 	private readonly rangeQuantity = new RangeRow()
 		.classes.add("debug-tools-dialog-selection-quantity")
@@ -161,7 +130,15 @@ export default class SelectionPanel extends DebugToolsPanel {
 			],
 		}));
 
-	private webGlContext?: WebGlContext;
+	private targetIslandId: IslandId | undefined;
+
+	private creatures?: SelectionSource<any, any>;
+	private npcs?: SelectionSource<any, any>;
+	private tileEvents?: SelectionSource<any, any>;
+	private doodads?: SelectionSource<any, any>;
+	private corpses?: SelectionSource<any, any>;
+	private players?: SelectionSource<any, any>;
+
 	private renderer?: Renderer;
 	private previewCursor = 0;
 
@@ -181,9 +158,8 @@ export default class SelectionPanel extends DebugToolsPanel {
 			.append(this.dropdownMethod, this.rangeQuantity, this.buttonReroll)
 			.appendTo(this);
 
-		[this.creatures, this.npcs, this.tileEvents, this.doodads, this.corpses, this.players]
-			.map(selectionSource => (selectionSource as SelectionSource<any, any>).event.subscribe("change", this.updateTargets))
-			.collect(this.append);
+		this.selectionContainer
+			.appendTo(this);
 
 		this.append(new Spacer(), this.countRow, this.buttonExecute, this.previewWrapper);
 
@@ -192,6 +168,45 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 	public override getTranslation() {
 		return DebugToolsTranslation.PanelSelection;
+	}
+
+	private setupSelectionSources() {
+		[this.creatures, this.npcs, this.tileEvents, this.doodads, this.corpses, this.players].forEach(a => a?.remove());
+
+		this.creatures = new SelectionSource(localIsland.creatures.getObjects(), DebugToolsTranslation.FilterCreatures,
+			new CreatureDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
+			(creature, filter) => filter === "all" || (creature && creature.type === filter));
+
+		this.npcs = new SelectionSource(localIsland.npcs.getObjects(), DebugToolsTranslation.FilterNPCs,
+			new NPCTypeDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
+			(npc, filter) => filter === "all" || (npc && npc.type === filter));
+
+		this.tileEvents = new SelectionSource(localIsland.tileEvents.getObjects(), DebugToolsTranslation.FilterTileEvents,
+			new TileEventDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
+			(tileEvent, filter) => filter === "all" || (tileEvent && tileEvent.type === filter));
+
+		this.doodads = new SelectionSource(localIsland.doodads.getObjects(), DebugToolsTranslation.FilterDoodads,
+			new DoodadDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
+			(doodad, filter) => filter === "all" || (doodad && doodad.type === filter));
+
+		this.corpses = new SelectionSource(localIsland.corpses.getObjects(), DebugToolsTranslation.FilterCorpses,
+			new CorpseDropdown("all", [["all", option => option.setText(translation(DebugToolsTranslation.SelectionAll))]]),
+			(corpse, filter) => filter === "all" || (corpse && corpse.type === filter));
+
+		this.players = new SelectionSource(game.playerManager.getAll(true, true), DebugToolsTranslation.FilterPlayers,
+			new Dropdown()
+				.setRefreshMethod(() => ({
+					defaultOption: "all",
+					options: Stream.of<IDropdownOption<string>[]>(["all", option => option.setText(translation(DebugToolsTranslation.SelectionAllPlayers))])
+						.merge(game.playerManager.getAll(true, true).map(player => Tuple(player.identifier, option => option.setText(player.getName())))),
+				})),
+			(player, filter) => (this.dropdownAlternativeTarget.classes.has("hidden") || player.identifier !== this.dropdownAlternativeTarget.selection)
+				&& (filter === "all" || (player && player.identifier === filter)),
+			DebugToolsTranslation.SelectionFilterNamed);
+
+		[this.creatures, this.npcs, this.tileEvents, this.doodads, this.corpses, this.players]
+			.map(selectionSource => (selectionSource as SelectionSource<any, any>).event.subscribe("change", this.updateTargets))
+			.collect(this.selectionContainer.append);
 	}
 
 	@Bound
@@ -209,7 +224,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 	protected onAppend() {
 		this.getDialog()?.event.until(this, "remove").subscribe("resize", this.resize);
 
-		this.disposeCanvas();
+		this.disposeRendererAndCanvas();
 
 		this.canvas = new Component<HTMLCanvasElement>("canvas")
 			.attributes.set("width", "300")
@@ -217,52 +232,26 @@ export default class SelectionPanel extends DebugToolsPanel {
 			.classes.add("debug-tools-selection-preview")
 			.appendTo(this.previewWrapper);
 
-		Renderer.createWebGlContext(this.canvas.element).then(async (context) => {
-			if (this.disposed) {
-				context.delete();
-				return;
-			}
+		this.renderer = new Renderer(this.canvas.element);
+		this.renderer.fieldOfView.disabled = true;
+		this.renderer.event.subscribe("getZoomLevel", () => 2);
+		this.renderer.setOrigin(localPlayer);
 
-			await context.load(true);
-
-			if (this.disposed) {
-				context.delete();
-				return;
-			}
-
-			// ensure any existing gl resources are deleted
-			this.disposeGl();
-
-			this.webGlContext = context;
-
-			const entity = localPlayer;
-
-			this.renderer = new Renderer(context, entity);
-			this.renderer.fieldOfView.disabled = true;
-			this.renderer.event.subscribe("getZoomLevel", () => 2);
-			this.renderer.setViewport(new Vector2(300, 200));
-
-			this.resize();
-		});
+		this.resize();
 	}
 
 	@OwnEventHandler(SelectionPanel, "remove")
 	protected onDispose() {
-		this.disposed = true;
-
-		this.disposeCanvas();
+		this.disposeRendererAndCanvas();
 	}
 
-	private disposeGl() {
+	private disposeRenderer() {
 		this.renderer?.delete();
 		this.renderer = undefined;
-
-		this.webGlContext?.delete();
-		this.webGlContext = undefined;
 	}
 
-	private disposeCanvas() {
-		this.disposeGl();
+	private disposeRendererAndCanvas() {
+		this.disposeRenderer();
 
 		this.canvas?.remove();
 		this.canvas = undefined;
@@ -276,17 +265,17 @@ export default class SelectionPanel extends DebugToolsPanel {
 				this.dropdownAlternativeTarget
 					.setRefreshMethod(() => ({
 						defaultOption: localPlayer.identifier,
-						options: playerManager.getAll(true, true).map(player => Tuple(player.identifier, option => option.setText(player.getName()))),
+						options: game.playerManager.getAll(true, true).map(player => Tuple(player.identifier, option => option.setText(player.getName()))),
 					}))
 					.selectDefault();
 				break;
 
 			case DebugToolsTranslation.ActionRemove:
-				this.players.checkButton.setChecked(false);
+				this.players?.checkButton.setChecked(false);
 				break;
 		}
 
-		this.players.checkButton.setDisabled(action === DebugToolsTranslation.ActionRemove);
+		this.players?.checkButton.setDisabled(action === DebugToolsTranslation.ActionRemove);
 		this.dropdownMethod.options.get(DebugToolsTranslation.MethodAll)!.setDisabled(action === DebugToolsTranslation.ActionTeleport);
 		this.rangeQuantity.setDisabled(action === DebugToolsTranslation.ActionTeleport);
 		this.dropdownAlternativeTarget.toggle(action === DebugToolsTranslation.ActionTeleport);
@@ -303,16 +292,22 @@ export default class SelectionPanel extends DebugToolsPanel {
 		this.updateTargets();
 	}
 
-	@OwnEventHandler(DebugToolsPanel, "switchTo")
+	@OwnEventHandler(SelectionPanel, "switchTo")
+	@EventHandler(EventBus.LocalPlayer, "loadedOnIsland")
 	@Bound
 	private updateTargets() {
+		if (this.targetIslandId !== localPlayer.islandId) {
+			this.targetIslandId = localPlayer.islandId;
+			this.setupSelectionSources();
+		}
+
 		const targets = Stream.of<(Target | undefined)[][]>(
-			this.creatures.getTargetable(),
-			this.npcs.getTargetable(),
-			this.tileEvents.getTargetable(),
-			this.doodads.getTargetable(),
-			this.corpses.getTargetable(),
-			this.players.getTargetable(),
+			this.creatures?.getTargetable() ?? [],
+			this.npcs?.getTargetable() ?? [],
+			this.tileEvents?.getTargetable() ?? [],
+			this.doodads?.getTargetable() ?? [],
+			this.corpses?.getTargetable() ?? [],
+			this.players?.getTargetable() ?? [],
 		)
 			.flatMap(value => Arrays.arrayOr(value))
 			.filter<undefined>(entity => !!entity)
@@ -349,14 +344,20 @@ export default class SelectionPanel extends DebugToolsPanel {
 	@OwnEventHandler(SelectionPanel, "switchTo")
 	@Bound
 	private resize() {
-		if (!this.canvas) {
+		if (!this.canvas || !this.renderer) {
 			return;
 		}
 
 		const box = this.canvas.getBox(true, true);
-		const width = this.canvas.element.width = box.width || 300;
-		const height = this.canvas.element.height = box.height || 200;
-		this.renderer?.setViewport(new Vector2(width, height));
+		if (box.width === 0 && box.height === 0) {
+			return;
+		}
+
+		this.canvas.element.width = box.width;
+		this.canvas.element.height = box.height;
+
+		this.renderer.setViewportSize(this.canvas.element.width, this.canvas.element.height);
+
 		this.rerender(RenderSource.Resize);
 	}
 
@@ -376,12 +377,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 				.setText(translation(DebugToolsTranslation.SelectionPreview)
 					.addArgs(which + 1, this.targets.length, target.getName().inContext(TextContext.Title))));
 
-		if (target instanceof Entity) {
-			this.renderer?.setOrigin(RendererOrigin.fromEntity(target));
-
-		} else {
-			this.renderer?.setOrigin(RendererOrigin.fromVector(target.island, target));
-		}
+		this.renderer?.setOrigin(RendererOrigin.fromEntity(target));
 
 		this.rerender();
 	}

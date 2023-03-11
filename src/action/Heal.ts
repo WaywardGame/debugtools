@@ -1,5 +1,6 @@
 import { Action } from "game/entity/action/Action";
 import { ActionArgument, anyOf } from "game/entity/action/IAction";
+import EntityWithStats from "game/entity/EntityWithStats";
 import { EntityType, MoveType, StatusEffectChangeReason, StatusType } from "game/entity/IEntity";
 import { IStatMax, Stat } from "game/entity/IStats";
 import { PlayerState } from "game/entity/player/IPlayer";
@@ -23,6 +24,10 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
 			return;
 		}
 
+		if (!(entity instanceof EntityWithStats)) {
+			return;
+		}
+
 		const health = entity.stat.get<IStatMax>(Stat.Health);
 		const stamina = entity.stat.get<IStatMax>(Stat.Stamina);
 		const hunger = entity.stat.get<IStatMax>(Stat.Hunger);
@@ -38,9 +43,9 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
 		entity.setStatus(StatusType.Poisoned, false, StatusEffectChangeReason.Passed);
 
 		if (entity.asPlayer) {
+			const moveType = entity.asPlayer.isFlying ? MoveType.Flying : MoveType.Land;
 			entity.asPlayer.state = PlayerState.None;
 			entity.asPlayer.updateStatsAndAttributes();
-			const moveType = Actions.DEBUG_TOOLS.getPlayerData(entity.asPlayer, "noclip") ? MoveType.Flying : MoveType.Land;
 			entity.asPlayer.setMoveType(moveType);
 		}
 

@@ -1,18 +1,16 @@
 import Corpse from "game/entity/creature/corpse/Corpse";
-import { ITile } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import { TextContext } from "language/ITranslation";
 import Mod from "mod/Mod";
 import Button from "ui/component/Button";
 import { Tuple } from "utilities/collection/Arrays";
 import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
-import { IVector2 } from "utilities/math/IVector";
 import Heal from "../../action/Heal";
 import Remove from "../../action/Remove";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
-
 
 export default class CorpseInformation extends InspectInformationSection {
 
@@ -48,7 +46,7 @@ export default class CorpseInformation extends InspectInformationSection {
 		return this;
 	}
 
-	public override update(position: IVector2, tile: ITile) {
+	public override update(tile: Tile) {
 		const corpses = [...tile.corpses || []];
 
 		if (areArraysIdentical(corpses, this.corpses)) return;

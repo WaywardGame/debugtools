@@ -1,11 +1,11 @@
-import Entity from "game/entity/Entity";
+import EntityWithStats from "game/entity/EntityWithStats";
 import { StatusEffectChangeReason } from "game/entity/IEntity";
 import { Stat } from "game/entity/IStats";
 
 /**
  * Copies stats and status effects from one entity to another.
  */
-export default function (from: Entity, to: Entity) {
+export default function (from: EntityWithStats, to: EntityWithStats) {
 	for (const statName of Object.keys(from.stats)) {
 		const stat = Stat[statName as keyof typeof Stat];
 		const statObject = from.stat.get(stat)!;
