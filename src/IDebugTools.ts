@@ -1,5 +1,5 @@
-import * as Consts from "game/IGame";
 import Translation from "language/Translation";
+import { ZOOM_LEVEL_MAX as defaultZoomLevelMax } from "renderer/IRenderer";
 import { RenderLayerFlag } from "renderer/world/IWorldRenderer";
 import type DebugTools from "./DebugTools";
 import type DebugToolsPanel from "./ui/component/DebugToolsPanel";
@@ -10,7 +10,7 @@ import type { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect
 import type { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
 
 export const DEBUG_TOOLS_ID = "Debug Tools";
-export const ZOOM_LEVEL_MAX = Math.max(Consts.ZOOM_LEVEL_MAX, 16);
+export const ZOOM_LEVEL_MAX = Math.max(defaultZoomLevelMax, 16);
 
 let debugTools: DebugTools | undefined;
 

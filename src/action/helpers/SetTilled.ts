@@ -1,11 +1,10 @@
 import { TileUpdateType } from "game/IGame";
 import Island from "game/island/Island";
-import terrainDescriptions from "game/tile/Terrains";
 import Tile from "game/tile/Tile";
 
 export default function (island: Island, tile: Tile, tilled: boolean) {
 	const tileType = tile.type;
-	if (!terrainDescriptions[tileType]!.tillable) {
+	if (!tile.description()?.tillable) {
 		return;
 	}
 

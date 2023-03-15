@@ -2,7 +2,7 @@ import { Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import MapGenHelpers from "game/mapgen/MapGenHelpers";
 import { TileTemplateType } from "game/tile/ITerrain";
-import templateDescriptions from "game/tile/TerrainTemplates";
+import { terrainTemplates } from "game/tile/TerrainTemplates";
 import TranslationImpl from "language/impl/TranslationImpl";
 import Mod from "mod/Mod";
 import { Registry } from "mod/ModRegistry";
@@ -71,8 +71,8 @@ export default class TemplatePanel extends DebugToolsPanel {
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTemplate)))
 			.append(this.dropdownTemplate = new Dropdown<string>()
 				.setRefreshMethod(() => ({
-					defaultOption: Stream.keys<string>(templateDescriptions[this.dropdownType.selection]!).first()!,
-					options: Stream.keys<string>(templateDescriptions[this.dropdownType.selection]!)
+					defaultOption: Stream.keys<string>(terrainTemplates[this.dropdownType.selection]!).first()!,
+					options: Stream.keys<string>(terrainTemplates[this.dropdownType.selection]!)
 						.map(name => Tuple(name, TranslationImpl.generator(name)))
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
@@ -212,7 +212,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 	}
 
 	private getTemplate(options: MapGenHelpers.ITemplateOptions) {
-		const template = templateDescriptions[this.dropdownType.selection]?.[this.dropdownTemplate.selection];
+		const template = terrainTemplates[this.dropdownType.selection]?.[this.dropdownTemplate.selection];
 		if (!template) {
 			return undefined;
 		}
