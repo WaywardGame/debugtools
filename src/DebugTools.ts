@@ -1,5 +1,5 @@
 import { EventBus } from "event/EventBuses";
-import { Events, IEventEmitter, Priority } from "event/EventEmitter";
+import { Events, IEventEmitter } from "event/EventEmitter";
 import EventManager, { EventHandler } from "event/EventManager";
 import { ActionType } from "game/entity/action/IAction";
 import Creature from "game/entity/creature/Creature";
@@ -15,7 +15,7 @@ import Message from "language/dictionary/Message";
 import InterModRegistry from "mod/InterModRegistry";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
-import { RenderSource, UpdateRenderFlag } from "renderer/IRenderer";
+import { RenderSource, UpdateRenderFlag, ZOOM_LEVEL_MAX } from "renderer/IRenderer";
 import Renderer from "renderer/Renderer";
 import WorldRenderer from "renderer/world/WorldRenderer";
 import Bind, { IBindHandlerApi } from "ui/input/Bind";
@@ -32,7 +32,7 @@ import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import Actions from "./Actions";
-import { DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, ZOOM_LEVEL_MAX, translation } from "./IDebugTools";
+import { DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
 import AddItemToInventory from "./action/AddItemToInventory";
@@ -549,8 +549,21 @@ export default class DebugTools extends Mod {
 	@EventHandler(EventBus.Game, "rendererCreated")
 	protected onRendererCreated(_: any, renderer: Renderer) {
 		const rendererEventsUntilDeleted = renderer.event.until(renderer, "deleted");
+		rendererEventsUntilDeleted?.subscribe("getMaxZoomLevel", this.getMaxZoomLevel);
 		rendererEventsUntilDeleted?.subscribe("getZoomLevel", this.getZoomLevel);
 		rendererEventsUntilDeleted?.subscribe("getCameraPosition", this.getCameraPosition);
+	}
+
+	/**
+	 * We allow zooming out much further than normal. To facilitate this we use this hook.
+	 * Add 3 more levels
+	 */
+	@Bound public getMaxZoomLevel(): number | undefined {
+		if (!this.hasPermission()) {
+			return undefined;
+		}
+
+		return ZOOM_LEVEL_MAX + 3;
 	}
 
 	/**
@@ -562,16 +575,16 @@ export default class DebugTools extends Mod {
 	 * - If our internal zoom level is `1`: `0.125`
 	 * - If our internal zoom level is `0`: `0.0625`
 	 */
-	@Bound public getZoomLevel() {
-		if (this.data.zoomLevel === undefined || !this.hasPermission()) {
+	@Bound public getZoomLevel(_renderer: any, zoomLevel: number) {
+		if (!this.hasPermission()) {
 			return undefined;
 		}
 
-		if (this.data.zoomLevel > 3) {
-			return this.data.zoomLevel - 3;
+		if (zoomLevel > 3) {
+			return zoomLevel - 3;
 		}
 
-		return 1 / 2 ** (4 - this.data.zoomLevel);
+		return 1 / 2 ** (4 - zoomLevel);
 	}
 
 	/**
@@ -610,18 +623,6 @@ export default class DebugTools extends Mod {
 	@EventHandler(EventBus.Players, "getMaxWeight")
 	protected getPlayerMaxWeight(player: Player, weight: number) {
 		return weight + this.getPlayerData(player, "weightBonus");
-	}
-
-	@Bind.onDown(Bindable.GameZoomIn, Priority.High)
-	@Bind.onDown(Bindable.GameZoomOut, Priority.High)
-	public onZoomIn(api: IBindHandlerApi) {
-		if (!this.hasPermission() || !gameScreen?.isMouseWithin())
-			return false;
-
-		this.data.zoomLevel = this.data.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.data.zoomLevel;
-		this.data.zoomLevel = api.bindable === Bindable.GameZoomIn ? Math.min(ZOOM_LEVEL_MAX + 3, ++this.data.zoomLevel) : Math.max(0, --this.data.zoomLevel);
-		renderer?.updateZoomLevel();
-		return true;
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableToggleCameraLock"))

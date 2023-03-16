@@ -1,6 +1,6 @@
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import Mod from "mod/Mod";
-import { RenderSource } from "renderer/IRenderer";
+import { RenderSource, ZOOM_LEVEL_MAX } from "renderer/IRenderer";
 import { Shaders } from "renderer/Shaders";
 import { RenderLayerFlag } from "renderer/world/IWorldRenderer";
 import WorldLayerRenderer from "renderer/world/WorldLayerRenderer";
@@ -14,7 +14,7 @@ import ImagePath from "ui/util/ImagePath";
 import { Bound } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
 import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, ISaveData, translation, ZOOM_LEVEL_MAX } from "../../IDebugTools";
+import { DebugToolsTranslation, ISaveData, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 // import Component from "ui/component/Component";
 // import Renderer from "renderer/Renderer";
@@ -49,11 +49,11 @@ export default class DisplayPanel extends DebugToolsPanel {
 			.editRange(range => range
 				.setMin(0)
 				.setMax(ZOOM_LEVEL_MAX + 3)
-				.setRefreshMethod(() => this.saveData.zoomLevel === undefined ? saveDataGlobal.options.zoomLevel + 3 : this.saveData.zoomLevel))
+				.setRefreshMethod(() => saveDataGlobal.options.zoomLevel))
 			.setDisplayValue(() => translation(DebugToolsTranslation.ZoomLevel)
-				.get(this.DEBUG_TOOLS.getZoomLevel() || saveDataGlobal.options.zoomLevel))
+				.get(saveDataGlobal.options.zoomLevel))
 			.event.subscribe("change", (_, value) => {
-				this.saveData.zoomLevel = value;
+				saveDataGlobal.options.zoomLevel = value;
 				renderer?.updateZoomLevel();
 			})
 			.appendTo(this);

@@ -117,11 +117,11 @@ export default class DebugTools extends Mod {
     onGameScreenVisible(): void;
     protected onGamePlay(): void;
     protected onRendererCreated(_: any, renderer: Renderer): void;
-    getZoomLevel(): number | undefined;
+    getMaxZoomLevel(): number | undefined;
+    getZoomLevel(_renderer: any, zoomLevel: number): number | undefined;
     protected getCameraPosition(_: any, position: IVector2): IVector2 | undefined;
     onPlayerDie(player: Player): false | void;
     protected getPlayerMaxWeight(player: Player, weight: number): number;
-    onZoomIn(api: IBindHandlerApi): boolean;
     onToggleCameraLock(): boolean;
     onToggleFullVisibility(): boolean;
     onInspectTile(): boolean;
