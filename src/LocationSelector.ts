@@ -33,8 +33,8 @@ export default class SelectLocation {
 	// Fields
 	//
 
-	private _selecting = false;
-	public get selecting() { return this._selecting; }
+	public get selecting() { return this.selectionPromise !== undefined; }
+
 	private hoverTile?: Tile;
 	private selectTileHeld = false;
 	private selectionPromise: CancelablePromise<Tile> | undefined;
@@ -48,10 +48,14 @@ export default class SelectLocation {
 	 * this end (such as if the "cancel selection" bind is pressed).
 	 */
 	public select() {
-		this._selecting = true;
-		this.selectionTick();
-		return this.selectionPromise = new CancelablePromise<Tile>()
+		this.cancel();
+
+		this.selectionPromise = new CancelablePromise<Tile>()
 			.onCancel(this.cancel);
+
+		setTimeout(this.selectionTick, game.interval);
+
+		return this.selectionPromise
 	}
 
 	////////////////////////////////////
@@ -63,7 +67,7 @@ export default class SelectLocation {
 	 */
 	@EventHandler(MovementHandler, "canMove")
 	protected canClientMove(): false | undefined {
-		if (this._selecting || this.selectTileHeld) {
+		if (this.selecting || this.selectTileHeld) {
 			return false;
 		}
 
@@ -73,7 +77,7 @@ export default class SelectLocation {
 	@Bind.onDown(Registry<SelectLocation>().get("bindableSelectLocation"), Priority.High)
 	@Bind.onDown(Registry<SelectLocation>().get("bindableCancelSelectLocation"), Priority.High)
 	protected onSelectOrCancelSelectLocation() {
-		return this._selecting;
+		return this.selecting;
 	}
 
 	@Bind.onUp(Registry<SelectLocation>().get("bindableSelectLocation"))
@@ -87,8 +91,9 @@ export default class SelectLocation {
 	//
 
 	@Bound private selectionTick() {
-		if (!this._selecting)
+		if (!this.selectionPromise) {
 			return;
+		}
 
 		setTimeout(this.selectionTick, game.interval);
 
@@ -97,41 +102,29 @@ export default class SelectLocation {
 
 		let updateRender = false;
 
-		if (this._selecting) {
-			const tile = renderer?.worldRenderer.screenToTile(...InputManager.mouse.position.xy);
-			if (tile) {
-				if (tile !== this.hoverTile) {
-					updateRender = true;
+		const tile = renderer?.worldRenderer.screenToTile(...InputManager.mouse.position.xy);
+		if (tile) {
+			if (tile !== this.hoverTile) {
+				updateRender = true;
 
-					if (this.hoverTile) {
-						this.hoverTile.removeOverlay(Overlays.isHoverTarget);
-					}
+				this.hoverTile?.removeOverlay(Overlays.isHoverTarget);
 
-					this.hoverTile = tile;
-					tile.addOverlay({ type: this.DEBUG_TOOLS.overlayTarget }, Overlays.isHoverTarget);
-				}
-
-				if (cancelSelectTilePressed) {
-					updateRender = true;
-
-					if (this.selectionPromise) this.selectionPromise.cancel();
-					else this.cancel();
-
-				} else if (selectTilePressed) {
-					updateRender = true;
-
-					this.selectTile(tile);
-
-					this.selectTileHeld = true;
-				}
+				this.hoverTile = tile;
+				tile.addOverlay({ type: this.DEBUG_TOOLS.overlayTarget }, Overlays.isHoverTarget);
 			}
 
-		} else if (this.hoverTile) {
-			// if we previously had the target overlay on a tile, remove it
-			this.hoverTile.removeOverlay(Overlays.isHoverTarget);
-			delete this.hoverTile;
+			if (cancelSelectTilePressed) {
+				updateRender = true;
 
-			updateRender = true;
+				this.cancel();
+
+			} else if (selectTilePressed) {
+				updateRender = true;
+
+				this.selectTile(tile);
+
+				this.selectTileHeld = true;
+			}
 		}
 
 		if (updateRender) {
@@ -144,25 +137,27 @@ export default class SelectLocation {
 	 */
 	@Bound
 	private cancel() {
-		this._selecting = false;
+		const selectionPromise = this.selectionPromise;
+		if (!selectionPromise) {
+			return;
+		}
+
+		delete this.selectionPromise;
+
 		if (this.hoverTile) {
 			this.hoverTile.removeOverlay(Overlays.isHoverTarget);
 			delete this.hoverTile;
 		}
+
+		selectionPromise.cancel();
 	}
 
 	/**
 	 * Removes the hover overlay, then resolves the selection promise with the selected position.
 	 */
 	private selectTile(tile: Tile) {
-		if (this.hoverTile) {
-			this.hoverTile.removeOverlay(Overlays.isHoverTarget);
-			delete this.hoverTile;
-		}
-
-		this._selecting = false;
-		this.selectionPromise!.resolve(tile);
-		delete this.selectionPromise;
+		this.selectionPromise?.resolve(tile);
+		this.cancel();
 	}
 
 }

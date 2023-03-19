@@ -10,5 +10,5 @@ export default new Action(ActionArgument.Doodad, ActionArgument.Integer32)
 		if (!doodad) return;
 
 		doodad.setGrowingStage(growingStage);
-		action.setUpdateView();
+		action.setUpdateView(true);
 	});

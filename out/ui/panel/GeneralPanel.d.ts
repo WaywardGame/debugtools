@@ -1,4 +1,3 @@
-import { IBindHandlerApi } from "ui/input/Bind";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
@@ -19,10 +18,9 @@ export default class GeneralPanel extends DebugToolsPanel {
     protected onChangeZ(_: any, z: number): void;
     onGameTickEnd(): void;
     protected onLoadOnIsland(): void;
-    onSelectLocation(api: IBindHandlerApi): boolean;
+    private selectionLogic;
     protected onSwitchTo(): void;
     protected onSwitchAway(): void;
-    private inspectTile;
     private changeLayer;
     private travel;
     private sailToCivilization;

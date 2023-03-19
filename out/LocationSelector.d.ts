@@ -6,7 +6,6 @@ export default class SelectLocation {
     readonly DEBUG_TOOLS: DebugTools;
     readonly bindableSelectLocation: Bindable;
     readonly bindableCancelSelectLocation: Bindable;
-    private _selecting;
     get selecting(): boolean;
     private hoverTile?;
     private selectTileHeld;
