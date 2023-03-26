@@ -1,12 +1,12 @@
 import Translation from "language/Translation";
 import { RenderLayerFlag } from "renderer/world/IWorldRenderer";
 import type DebugTools from "./DebugTools";
+import type { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
+import type { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
 import type DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import type InspectEntityInformationSubsection from "./ui/component/InspectEntityInformationSubsection";
 import type InspectInformationSection from "./ui/component/InspectInformationSection";
-import type { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import type { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect/Entity";
-import type { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
 
 export const DEBUG_TOOLS_ID = "Debug Tools";
 
@@ -58,6 +58,7 @@ export enum DebugToolsTranslation {
 	PanelDisplay,
 	ButtonToggleFog,
 	ButtonToggleLighting,
+	ButtonToggleTemperature,
 	LabelZoomLevel,
 	ZoomLevel,
 	ButtonUnlockCamera,

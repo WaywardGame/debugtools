@@ -25,6 +25,7 @@ import Actions from "./Actions";
 import { IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
+import { TemperatureOverlay } from "./overlay/TemperatureOverlay";
 import { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 interface IDebugToolsEvents extends Events<Mod> {
@@ -95,6 +96,7 @@ export default class DebugTools extends Mod {
     readonly overlayPaint: OverlayType;
     data: ISaveData;
     globalData: IGlobalData;
+    temperatureOverlay: TemperatureOverlay;
     private cameraState;
     get isCameraUnlocked(): boolean;
     getPlayerData<K extends keyof IPlayerData>(player: Player, key: K): IPlayerData[K];

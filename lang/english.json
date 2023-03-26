@@ -55,6 +55,7 @@
 			"panelDisplay": "Display",
 			"buttonToggleFog": "Fog {BINDINGS:ModDebugToolsToggleFullVisibility}",
 			"buttonToggleLighting": "Lighting {BINDINGS:ModDebugToolsToggleFullVisibility}",
+			"buttonToggleTemperature": "Temperature Overlay",
 			"labelZoomLevel": "Zoom Level",
 			"zoomLevel": "{0}x",
 			"buttonUnlockCamera": "Unlock Camera {BINDINGS:ModDebugToolsToggleCameraLock}",

@@ -63,6 +63,7 @@ import ToggleNoClip from "./action/ToggleNoClip";
 import TogglePermissions from "./action/TogglePermissions";
 import ToggleTilled from "./action/ToggleTilled";
 import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
+import { TemperatureOverlay } from "./overlay/TemperatureOverlay";
 import MainDialog, { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import InspectDialog from "./ui/InspectDialog";
 import Container from "./ui/component/Container";
@@ -309,7 +310,7 @@ export default class DebugTools extends Mod {
 	public readonly overlayPaint: OverlayType;
 
 	////////////////////////////////////
-	// Fields & Other Data Storage
+	// Data Storage
 	//
 
 	@Mod.saveData<DebugTools>()
@@ -317,6 +318,11 @@ export default class DebugTools extends Mod {
 	@Mod.globalData<DebugTools>()
 	public globalData: IGlobalData;
 
+	////////////////////////////////////
+	// Fields
+	// 
+
+	public temperatureOverlay = new TemperatureOverlay();
 	private cameraState = CameraState.Locked;
 
 	/**
