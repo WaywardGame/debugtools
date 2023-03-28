@@ -1,19 +1,20 @@
 import { EventBus } from "event/EventBuses";
 import { EventHandler } from "event/EventManager";
-import { InfoDisplayLevel } from "game/inspection/IInfoProvider";
-import { basicInspectionPriorities, InspectType } from "game/inspection/IInspection";
-import { InfoProvider } from "game/inspection/InfoProvider";
+import { InfoClass, InfoDisplayLevel } from "game/inspection/IInfoProvider";
+import { InspectType, basicInspectionPriorities } from "game/inspection/IInspection";
 import { InfoProviderContext } from "game/inspection/InfoProviderContext";
 import Inspection from "game/inspection/Inspection";
+import LabelledValue from "game/inspection/infoProviders/LabelledValue";
+import MagicalPropertyValue from "game/inspection/infoProviders/MagicalPropertyValue";
 import { TempType } from "game/temperature/ITemperature";
 import { TEMPERATURE_INVALID } from "game/temperature/TemperatureManager";
-import { MiscTranslation } from "language/dictionary/Misc";
 import Translation from "language/Translation";
+import { MiscTranslation } from "language/dictionary/Misc";
 import Mod from "mod/Mod";
-import { Paragraph } from "ui/component/Text";
+import { Heading, Paragraph } from "ui/component/Text";
 import { IVector3 } from "utilities/math/IVector";
 import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 
 export default class TemperatureInspection extends Inspection<IVector3> {
 
@@ -47,45 +48,56 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 	public override get(context: InfoProviderContext) {
 		const tempValue = localIsland.temperature.get(localIsland.getTileFromPoint(this.value), undefined);
 		return [
-			InfoProvider.create()
+			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperature))
+				.add(new MagicalPropertyValue(tempValue))
 				.setDisplayLevel(InfoDisplayLevel.NonExtra)
-				.add(translation(DebugToolsTranslation.InspectionTemperature)
-					.addArgs(tempValue)),
-			InfoProvider.title()
+				.setComponent(Paragraph),
+			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperature))
+				.add(new MagicalPropertyValue(tempValue))
 				.setDisplayLevel(InfoDisplayLevel.Extra)
-				.add(translation(DebugToolsTranslation.InspectionTemperature)
-					.addArgs(tempValue)),
-			InfoProvider.create()
+				.addClasses(InfoClass.Title)
+				.setComponent(Heading),
+			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperatureBiome))
+				.add(new MagicalPropertyValue(localIsland.temperature.getBiomeBase()))
 				.setDisplayLevel(InfoDisplayLevel.Extra)
-				.setComponent(Paragraph)
-				.setChildComponent(Paragraph)
-				.add(translation(DebugToolsTranslation.InspectionTemperatureBiome)
-					.addArgs(localIsland.temperature.getBase()))
-				// the following bit is only used for if biomes themselves have time modifiers,
-				// but so far we only use layer-specific time modifiers so it's not very useful hence hidden!
-				// .add(translation(DebugToolsTranslation.InspectionTemperatureTimeModifier)
-				// 	.addArgs(Translation.difference(island.temperature.getTime())))
-				.add(translation(DebugToolsTranslation.InspectionTemperatureLayerModifier)
-					.addArgs(Translation.misc(MiscTranslation.Difference)
-						.addArgs(localIsland.temperature.getLayer(this.value.z)))),
-			InfoProvider.create()
+				.setComponent(Paragraph),
+			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperatureBiomeTimeModifier))
+				.add(new MagicalPropertyValue(localIsland.temperature.getBiomeTimeModifier()))
 				.setDisplayLevel(InfoDisplayLevel.Extra)
-				.setComponent(Paragraph)
-				.setChildComponent(Paragraph)
-				.add(translation(DebugToolsTranslation.InspectionTemperatureTileCalculated)
-					.addArgs(this.getTileMod())),
-			InfoProvider.create()
-				.setDisplayLevel(InfoDisplayLevel.Verbose)
-				.setComponent(Paragraph)
-				.setChildComponent(Paragraph)
-				.add(translation(DebugToolsTranslation.InspectionTemperatureTileCalculatedHeat)
+				.setComponent(Paragraph),
+			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperatureLayerModifier))
+				.add(new MagicalPropertyValue(localIsland.temperature.getLayerBase(this.value.z)))
+				.setDisplayLevel(InfoDisplayLevel.Extra)
+				.setComponent(Paragraph),
+			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperatureLayerTimeModifier))
+				.add(new MagicalPropertyValue(localIsland.temperature.getLayerTimeModifier(this.value.z)))
+				.setDisplayLevel(InfoDisplayLevel.Extra)
+				.setComponent(Paragraph),
+			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperatureTileCalculated))
+				.add(Translation.colorizeImportance("primary")
+					.addArgs(this.getTileMod()))
+				.setDisplayLevel(InfoDisplayLevel.Extra)
+				.setComponent(Paragraph),
+			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperatureTileCalculatedHeat))
+				.add(Translation.colorizeImportance("primary")
 					.addArgs(this.getTemperature(TempType.Heat, "calculated")))
-				.add(translation(DebugToolsTranslation.InspectionTemperatureTileCalculatedCold)
+				.setDisplayLevel(InfoDisplayLevel.Verbose)
+				.setComponent(Paragraph),
+			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperatureTileCalculatedCold))
+				.add(Translation.colorizeImportance("primary")
 					.addArgs(this.getTemperature(TempType.Cold, "calculated")))
-				.add(translation(DebugToolsTranslation.InspectionTemperatureTileProducedHeat)
+				.setDisplayLevel(InfoDisplayLevel.Verbose)
+				.setComponent(Paragraph),
+			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperatureTileProducedHeat))
+				.add(Translation.colorizeImportance("primary")
 					.addArgs(this.getTemperature(TempType.Heat, "produced")))
-				.add(translation(DebugToolsTranslation.InspectionTemperatureTileProducedCold)
-					.addArgs(this.getTemperature(TempType.Cold, "produced"))),
+				.setDisplayLevel(InfoDisplayLevel.Verbose)
+				.setComponent(Paragraph),
+			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperatureTileProducedCold))
+				.add(Translation.colorizeImportance("primary")
+					.addArgs(this.getTemperature(TempType.Cold, "produced")))
+				.setDisplayLevel(InfoDisplayLevel.Verbose)
+				.setComponent(Paragraph),
 		];
 	}
 

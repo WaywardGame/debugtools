@@ -58,13 +58,6 @@ export default class DisplayPanel extends DebugToolsPanel {
 			})
 			.appendTo(this);
 
-		let temperatureOverlay = false;
-		new CheckButton()
-			.setText(translation(DebugToolsTranslation.ButtonToggleTemperature))
-			.setRefreshMethod(() => temperatureOverlay)
-			.event.subscribe("toggle", (_, enabled) => (temperatureOverlay = enabled) ? this.DEBUG_TOOLS.temperatureOverlay.show() : this.DEBUG_TOOLS.temperatureOverlay.hide())
-			.appendTo(this);
-
 		new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonUnlockCamera))
 			.setRefreshMethod(() => this.DEBUG_TOOLS.isCameraUnlocked)

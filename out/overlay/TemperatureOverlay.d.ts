@@ -1,14 +1,19 @@
 import TemperatureManager from "game/temperature/TemperatureManager";
+import { IOverlayInfo } from "game/tile/ITerrain";
 import Tile from "game/tile/Tile";
-export declare class TemperatureOverlay {
-    private readonly overlay;
-    private alpha;
+import GenericOverlay from "renderer/overlay/GenericOverlay";
+export declare enum TemperatureOverlayMode {
+    None = 0,
+    Produced = 1,
+    Calculated = 2
+}
+export declare class TemperatureOverlay extends GenericOverlay {
+    private mode;
     constructor();
-    show(): void;
-    hide(): void;
-    addOrUpdate(tile: Tile): void;
-    clear(): void;
-    private updateAlpha;
+    getMode(): TemperatureOverlayMode;
+    setMode(mode: TemperatureOverlayMode): this;
+    protected generateOverlayInfo(tile: Tile): IOverlayInfo | undefined;
+    protected updateOverlayAlpha(tile: Tile): IOverlayInfo | undefined;
     protected onTickEnd(): void;
     private scheduledInvalidations;
     protected onUpdateProduced(temperatureManager: TemperatureManager, tile: Tile, invalidateRange?: number): void;

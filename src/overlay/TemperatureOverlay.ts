@@ -1,101 +1,92 @@
 import { EventBus } from "event/EventBuses";
+import { Priority } from "event/EventEmitter";
 import EventManager, { EventHandler } from "event/EventManager";
-import { TempType } from "game/temperature/ITemperature";
+import { TempType, Temperature } from "game/temperature/ITemperature";
 import TemperatureManager, { TEMPERATURE_BOUNDARY_MIN_VEC2, TEMPERATURE_INVALID } from "game/temperature/TemperatureManager";
 import { IOverlayInfo, OverlayType } from "game/tile/ITerrain";
 import Tile from "game/tile/Tile";
+import GenericOverlay from "renderer/overlay/GenericOverlay";
 import Color, { IRGB } from "utilities/Color";
-import { Bound } from "utilities/Decorators";
 import Math2 from "utilities/math/Math2";
 import Vector2 from "utilities/math/Vector2";
 
-const COLOR_COLD = Color.fromInt(0x00B5FF);
-const COLOR_NEUTRAL = Color.fromInt(0xFFFFFF);
+const COLOR_COOL = Color.fromInt(0x00B5FF);
+const COLOR_COLD = Color.fromInt(0x78FFFF);
+// const COLOR_NEUTRAL = Color.fromInt(0xFFFFFF);
+const COLOR_WARM = Color.fromInt(0xFFA600);
 const COLOR_HOT = Color.fromInt(0xFF1C00);
 
-export class TemperatureOverlay {
+export enum TemperatureOverlayMode {
+	None,
+	Produced,
+	Calculated,
+}
 
-	private readonly overlay: Map<string, IOverlayInfo> = new Map();
+export class TemperatureOverlay extends GenericOverlay {
 
-	private alpha = 0;
+	private mode = TemperatureOverlayMode.None;
 
 	public constructor() {
+		super();
 		EventManager.registerEventBusSubscriber(this);
 	}
 
-	public show() {
-		this.updateAlpha(200);
+	public getMode() {
+		return this.mode;
 	}
 
-	public hide() {
-		this.updateAlpha(0);
+	public setMode(mode: TemperatureOverlayMode) {
+		if (this.mode === mode)
+			return this;
+
+		if (mode === TemperatureOverlayMode.None)
+			this.hide();
+		else if (this.mode === TemperatureOverlayMode.None)
+			this.show();
+
+		this.mode = mode;
+
+		this.onTickEnd();
+		return this;
 	}
 
-	@Bound public addOrUpdate(tile: Tile) {
-		const key = `${tile.x},${tile.y},${tile.z}`;
-
-		let overlay = this.overlay.get(key);
-		if (overlay) {
-			tile.removeOverlay(overlay);
-		}
-
-		if (!this.alpha) {
-			return;
-		}
-
+	protected override generateOverlayInfo(tile: Tile): IOverlayInfo | undefined {
 		const temperature = this.getTileMod(tile);
-		if (temperature !== "?") {
-			let color: IRGB;
-
-			let alpha = 0;
-			if (temperature < 0) {
-				alpha = 1 - (temperature + 100) / 100;
-				color = Color.blend(COLOR_NEUTRAL, COLOR_COLD, alpha);
-
-			} else {
-				alpha = temperature / 100;
-				color = Color.blend(COLOR_NEUTRAL, COLOR_HOT, alpha);
-			}
-
-			overlay = {
-				type: OverlayType.Full,
-				size: 16,
-				...Color.getFullNames(color),
-				alpha: Math.floor(Math2.lerp(0, this.alpha, alpha)),
-			};
-
-		} else {
-			overlay = {
+		if (temperature === "?") {
+			return {
 				type: OverlayType.QuestionMark,
 				size: 16,
 				alpha: this.alpha ? 150 : 0,
 			};
 		}
 
-		this.overlay.set(key, overlay);
-		tile.addOverlay(overlay);
-	}
+		let color: IRGB | undefined;
 
-	public clear() {
-		if (localIsland) {
-			for (const [key, overlay] of this.overlay.entries()) {
-				const [x, y, z] = key.split(",");
-				localIsland.getTile(+x, +y, +z).removeOverlay(overlay);
-			}
+		let alpha = 0;
+		if (temperature < 0) {
+			alpha = 1 - (temperature + 100) / 100;
+			color = Color.blend(COLOR_COOL, COLOR_COLD, alpha);
+
+		} else if (temperature > 0) {
+			alpha = temperature / 100;
+			color = Color.blend(COLOR_WARM, COLOR_HOT, alpha);
 		}
 
-		this.overlay.clear();
-	}
-
-	private updateAlpha(alpha: number) {
-		this.alpha = alpha;
-
-		for (const [, overlay] of this.overlay.entries()) {
-			overlay.alpha = this.alpha;
+		if (color) {
+			return {
+				type: OverlayType.Full,
+				size: 16,
+				...Color.getFullNames(color),
+				alpha: Math.floor(Math2.lerp(0, this.alpha, Math2.curve2(0, 1, alpha))),
+			};
 		}
 	}
 
-	@EventHandler(EventBus.Game, "tickEnd")
+	protected override updateOverlayAlpha(tile: Tile): IOverlayInfo | undefined {
+		return this.generateOverlayInfo(tile);
+	}
+
+	@EventHandler(EventBus.Game, "tickEnd", Priority.Lowest - 1)
 	protected onTickEnd() {
 		this.clear();
 
@@ -135,7 +126,16 @@ export class TemperatureOverlay {
 		const heat = this.getTemperature(tile, TempType.Heat);
 		const cold = this.getTemperature(tile, TempType.Cold);
 		if (heat === "?" || cold === "?") return "?";
-		return heat - cold;
+
+		let tileTemp = heat - cold;
+		if (this.mode === TemperatureOverlayMode.Produced)
+			return tileTemp;
+
+		const base = tile.island.temperature.getBiomeBase();
+		const time = tile.island.temperature.getBiomeTimeModifier();
+		const layer = tile.island.temperature.getLayer(tile.z);
+
+		return Math2.clamp(Temperature.Coldest, Temperature.Hottest, base + time + layer + tileTemp);
 	}
 
 }

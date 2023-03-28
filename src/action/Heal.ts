@@ -1,10 +1,10 @@
-import { Action } from "game/entity/action/Action";
-import { ActionArgument, anyOf } from "game/entity/action/IAction";
+import { TickFlag } from "game/IGame";
 import EntityWithStats from "game/entity/EntityWithStats";
 import { EntityType, MoveType, StatusEffectChangeReason, StatusType } from "game/entity/IEntity";
 import { IStatMax, Stat } from "game/entity/IStats";
+import { Action } from "game/entity/action/Action";
+import { ActionArgument, anyOf } from "game/entity/action/IAction";
 import { PlayerState } from "game/entity/player/IPlayer";
-import { TickFlag } from "game/IGame";
 import Actions, { defaultUsability } from "../Actions";
 import ResurrectCorpse from "./helpers/ResurrectCorpse";
 
@@ -41,6 +41,7 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
 		entity.setStatus(StatusType.Bleeding, false, StatusEffectChangeReason.Passed);
 		entity.setStatus(StatusType.Burned, false, StatusEffectChangeReason.Passed);
 		entity.setStatus(StatusType.Poisoned, false, StatusEffectChangeReason.Passed);
+		entity.setStatus(StatusType.Frostbitten, false, StatusEffectChangeReason.Passed);
 
 		if (entity.asPlayer) {
 			const moveType = entity.asPlayer.isFlying ? MoveType.Flying : MoveType.Land;

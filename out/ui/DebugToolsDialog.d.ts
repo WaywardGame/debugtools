@@ -1,6 +1,6 @@
 import Translation from "language/Translation";
-import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import { DialogId, IDialogDescription } from "ui/screen/screens/game/Dialogs";
+import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import DebugTools from "../DebugTools";
 import DebugToolsPanel from "./component/DebugToolsPanel";
 export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;

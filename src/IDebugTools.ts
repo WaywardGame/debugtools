@@ -58,7 +58,6 @@ export enum DebugToolsTranslation {
 	PanelDisplay,
 	ButtonToggleFog,
 	ButtonToggleLighting,
-	ButtonToggleTemperature,
 	LabelZoomLevel,
 	ZoomLevel,
 	ButtonUnlockCamera,
@@ -127,6 +126,13 @@ export enum DebugToolsTranslation {
 	RangeRotateDegrees,
 	LabelDegrade,
 	RangeDegradeAmount,
+
+	// Temperature
+	PanelTemperature,
+	HeadingTemperatureOverlay,
+	TemperatureOverlayModeProduced,
+	TemperatureOverlayModeCalculated,
+
 	////////////////////////////////////
 	// Inspect Dialog
 	//
@@ -182,8 +188,9 @@ export enum DebugToolsTranslation {
 	//
 	InspectionTemperature,
 	InspectionTemperatureBiome,
-	InspectionTemperatureTimeModifier,
+	InspectionTemperatureBiomeTimeModifier,
 	InspectionTemperatureLayerModifier,
+	InspectionTemperatureLayerTimeModifier,
 	InspectionTemperatureTileCalculated,
 	InspectionTemperatureTileCalculatedHeat,
 	InspectionTemperatureTileCalculatedCold,
