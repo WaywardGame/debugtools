@@ -1,24 +1,24 @@
-import Creature from "game/entity/creature/Creature";
 import { SkillType } from "game/entity/IHuman";
+import Creature from "game/entity/creature/Creature";
 import NPC from "game/entity/npc/NPC";
 import Player from "game/entity/player/Player";
-import UiTranslation from "language/dictionary/UiTranslation";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
+import UiTranslation from "language/dictionary/UiTranslation";
 import Mod from "mod/Mod";
 import { BlockRow } from "ui/component/BlockRow";
 import { CheckButton } from "ui/component/CheckButton";
-import SkillDropdown from "ui/component/dropdown/SkillDropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
 import { RangeRow } from "ui/component/RangeRow";
+import SkillDropdown from "ui/component/dropdown/SkillDropdown";
 import { Bound } from "utilities/Decorators";
+import DebugTools from "../../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, translation } from "../../IDebugTools";
 import SetSkill from "../../action/SetSkill";
 import SetWeightBonus from "../../action/SetWeightBonus";
 import ToggleInvulnerable from "../../action/ToggleInvulnerable";
 import ToggleNoClip from "../../action/ToggleNoClip";
 import TogglePermissions from "../../action/TogglePermissions";
-import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, IPlayerData, translation } from "../../IDebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
 export default class PlayerInformation extends InspectEntityInformationSubsection {
@@ -131,9 +131,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 	@Bound
 	private setSkill(_: any, value: number) {
-		if (typeof (this.skill) === "number") {
-			SetSkill.execute(localPlayer, this.player!, this.skill, value);
-		}
+		SetSkill.execute(localPlayer, this.player!, typeof this.skill === "string" ? -1 : this.skill, value);
 	}
 
 	@Bound

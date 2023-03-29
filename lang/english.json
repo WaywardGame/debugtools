@@ -15,6 +15,7 @@
 			"modDebugToolsSelectLocation": "Select Location",
 			"modDebugToolsCancelSelectLocation": "Cancel Location Select",
 			"modDebugToolsInspectTile": "Inspect Tile",
+			"modDebugToolsInspectItem": "Inspect Item",
 			"modDebugToolsToggleCameraLock": "Toggle Camera Lock",
 			"modDebugToolsToggleFullVisibility": "Toggle Full Visibility",
 			"modDebugToolsCameraMoveUp": "Camera Up",

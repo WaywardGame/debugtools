@@ -8,6 +8,7 @@ import { Source } from "game/entity/player/IMessageManager";
 import Player from "game/entity/player/Player";
 import { InspectType } from "game/inspection/IInspection";
 import Island from "game/island/Island";
+import Item from "game/item/Item";
 import { OverlayType } from "game/tile/ITerrain";
 import Tile from "game/tile/Tile";
 import Dictionary from "language/Dictionary";
@@ -49,7 +50,9 @@ import PlaceTemplate from "./action/PlaceTemplate";
 import Remove from "./action/Remove";
 import RenameIsland from "./action/RenameIsland";
 import SelectionExecute from "./action/SelectionExecute";
+import SetDecay from "./action/SetDecay";
 import SetDecayBulk from "./action/SetDecayBulk";
+import SetDurability from "./action/SetDurability";
 import SetDurabilityBulk from "./action/SetDurabilityBulk";
 import SetGrowingStage from "./action/SetGrowingStage";
 import SetSkill from "./action/SetSkill";
@@ -154,6 +157,9 @@ export default class DebugTools extends Mod {
 	public readonly bindableInspectTile: Bindable;
 	@Register.bindable("InspectLocalPlayer", IInput.key("KeyP", "Alt"))
 	public readonly bindableInspectLocalPlayer: Bindable;
+	@Register.bindable("InspectItem", IInput.mouseButton(2, "Alt"))
+	public readonly bindableInspectItem: Bindable;
+
 	@Register.bindable("HealLocalPlayer", IInput.key("KeyH", "Alt"))
 	public readonly bindableHealLocalPlayer: Bindable;
 	@Register.bindable("TeleportLocalPlayer", IInput.mouseButton(0, "Alt"))
@@ -241,6 +247,12 @@ export default class DebugTools extends Mod {
 
 	@Register.action("AddItemToInventory", AddItemToInventory)
 	public readonly actionAddItemToInventory: ActionType;
+
+	@Register.action("SetDurability", SetDurability)
+	public readonly actionSetDurability: ActionType;
+
+	@Register.action("SetDecay", SetDecay)
+	public readonly actionSetDecay: ActionType;
 
 	@Register.action("SetDurabilityBulk", SetDurabilityBulk)
 	public readonly actionSetDurabilityBulk: ActionType;
@@ -472,7 +484,7 @@ export default class DebugTools extends Mod {
 	 * - Opens the `InspectDialog`.
 	 * - Emits `DebugToolsEvent.Inspect`
 	 */
-	public inspect(what: Tile | Creature | Player | NPC) {
+	public inspect(what: Tile | Creature | Player | NPC | Item) {
 		if (!gameScreen) {
 			return;
 		}
@@ -661,6 +673,17 @@ export default class DebugTools extends Mod {
 			return false;
 
 		this.inspect(tile);
+		return true;
+	}
+
+	@Bind.onDown(Registry<DebugTools>().get("bindableInspectItem"))
+	public onInspectItem(api: IBindHandlerApi) {
+		const itemElement = oldui.screenInGame?.getHoveredItem(api);
+		const item = itemElement && localIsland.items.get(+itemElement.dataset.itemId!);
+		if (!this.hasPermission() || !item)
+			return false;
+
+		this.inspect(item);
 		return true;
 	}
 

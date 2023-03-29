@@ -1,7 +1,9 @@
 import { EventBus } from "event/EventBuses";
+import { Events, IEventEmitter } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
-import Entity from "game/entity/Entity";
 import { TileUpdateType } from "game/IGame";
+import Entity from "game/entity/Entity";
+import Item from "game/item/Item";
 import { TerrainType } from "game/tile/ITerrain";
 import Tile from "game/tile/Tile";
 import Translation from "language/Translation";
@@ -15,15 +17,16 @@ import Text from "ui/component/Text";
 import Bind, { IBindHandlerApi } from "ui/input/Bind";
 import Bindable from "ui/input/Bindable";
 import InputManager from "ui/input/InputManager";
-import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
-import { Tuple } from "utilities/collection/Arrays";
+import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import { Bound, Debounce } from "utilities/Decorators";
 import Log from "utilities/Log";
+import { Tuple } from "utilities/collection/Arrays";
 import Vector2 from "utilities/math/Vector2";
 import DebugTools from "../DebugTools";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import Overlays from "../overlay/Overlays";
+import { ContainerClasses } from "./component/Container";
 import InspectInformationSection from "./component/InspectInformationSection";
 import CorpseInformation from "./inspect/Corpse";
 import DoodadInformation from "./inspect/Doodad";
@@ -46,6 +49,10 @@ const informationSectionClasses: InspectDialogInformationSectionClass[] = [
 	ItemInformation,
 ];
 
+export interface IInspectDialogEvents extends Events<TabDialog<InspectInformationSection>> {
+	updateSubpanels(): any;
+}
+
 export default class InspectDialog extends TabDialog<InspectInformationSection> {
 	/**
 	 * The positioning settings for the dialog.
@@ -66,6 +73,8 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	public readonly DEBUG_TOOLS: DebugTools;
 	@Mod.log(DEBUG_TOOLS_ID)
 	public readonly LOG: Log;
+
+	public override readonly event: IEventEmitter<this, IInspectDialogEvents>;
 
 	private entityButtons: Button[];
 	private entityInfoSection: EntityInformation;
@@ -151,9 +160,40 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	public setInspection(what: Tile | Entity) {
 		this.setInspectionTile(what);
 
+		let item: Item | undefined;
+		if (what instanceof Item) {
+			item = what;
+			this.LOG.info("Item:", item);
+			const human = what.getCurrentOwner();
+			if (human) {
+				what = human;
+			}
+		}
+
 		this.inspectionLock = "entityType" in what ? what : undefined;
 
 		this.update();
+
+		if (item) {
+			this.event.waitFor("updateSubpanels").then(() => {
+				const itemElement = this.queryX<HTMLDetailsElement>(`.${ContainerClasses.ItemDetails}[@data-item-id="${item!.id}"]`);
+				if (itemElement) {
+					for (const itemDetailsElement of this.element.querySelectorAll(`.${ContainerClasses.ItemDetails}, .${ContainerClasses.ContainedItemDetails}`) as Iterable<HTMLDetailsElement>)
+						itemDetailsElement.open = false;
+
+					let detailsElement: HTMLDetailsElement | null | undefined = itemElement;
+					while (detailsElement = detailsElement.parentElement?.closest<HTMLDetailsElement>(`.${ContainerClasses.ContainedItemDetails}, .${ContainerClasses.ItemDetails}`))
+						detailsElement.open = true;
+
+					itemElement.open = true;
+					const summary = itemElement.querySelector("summary");
+					if (summary) {
+						this.panelWrapper.scrollTo(summary, 300);
+						summary?.focus();
+					}
+				}
+			});
+		}
 
 		if (this.inspectionLock) this.willShowSubpanel = true;
 
@@ -263,6 +303,8 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 			this.entityButtons[this.entityInfoSection.getEntityIndex(this.inspectionLock)]
 				.classes.add("inspection-lock");
 		}
+
+		this.event.emit("updateSubpanels");
 	}
 
 	/**

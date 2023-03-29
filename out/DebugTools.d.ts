@@ -6,6 +6,7 @@ import { Source } from "game/entity/player/IMessageManager";
 import Player from "game/entity/player/Player";
 import { InspectType } from "game/inspection/IInspection";
 import Island from "game/island/Island";
+import Item from "game/item/Item";
 import { OverlayType } from "game/tile/ITerrain";
 import Tile from "game/tile/Tile";
 import Dictionary from "language/Dictionary";
@@ -47,6 +48,7 @@ export default class DebugTools extends Mod {
     readonly bindableCloseInspectDialog: Bindable;
     readonly bindableInspectTile: Bindable;
     readonly bindableInspectLocalPlayer: Bindable;
+    readonly bindableInspectItem: Bindable;
     readonly bindableHealLocalPlayer: Bindable;
     readonly bindableTeleportLocalPlayer: Bindable;
     readonly bindableToggleNoClipOnLocalPlayer: Bindable;
@@ -76,6 +78,8 @@ export default class DebugTools extends Mod {
     readonly actionToggleTilled: ActionType;
     readonly actionUpdateStatsAndAttributes: ActionType;
     readonly actionAddItemToInventory: ActionType;
+    readonly actionSetDurability: ActionType;
+    readonly actionSetDecay: ActionType;
     readonly actionSetDurabilityBulk: ActionType;
     readonly actionSetDecayBulk: ActionType;
     readonly actionClearInventory: ActionType;
@@ -109,7 +113,7 @@ export default class DebugTools extends Mod {
     onSave(): any;
     updateFog(): void;
     setCameraUnlocked(unlocked: boolean): void;
-    inspect(what: Tile | Creature | Player | NPC): void;
+    inspect(what: Tile | Creature | Player | NPC | Item): void;
     toggleDialog(): void;
     hasPermission(): boolean | undefined;
     toggleFog(fog: boolean): void;
@@ -127,6 +131,7 @@ export default class DebugTools extends Mod {
     onToggleCameraLock(): boolean;
     onToggleFullVisibility(): boolean;
     onInspectTile(): boolean;
+    onInspectItem(api: IBindHandlerApi): boolean;
     onInspectLocalPlayer(): boolean;
     onHealLocalPlayer(): boolean;
     onTeleportLocalPlayer(api: IBindHandlerApi): boolean;
