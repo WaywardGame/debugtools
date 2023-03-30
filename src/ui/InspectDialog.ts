@@ -4,7 +4,7 @@ import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { TileUpdateType } from "game/IGame";
 import Entity from "game/entity/Entity";
 import Item from "game/item/Item";
-import { TerrainType } from "game/tile/ITerrain";
+import { IOverlayInfo, TerrainType } from "game/tile/ITerrain";
 import Tile from "game/tile/Tile";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
@@ -25,7 +25,6 @@ import { Tuple } from "utilities/collection/Arrays";
 import Vector2 from "utilities/math/Vector2";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
-import Overlays from "../overlay/Overlays";
 import { ContainerClasses } from "./component/Container";
 import InspectInformationSection from "./component/InspectInformationSection";
 import CorpseInformation from "./inspect/Corpse";
@@ -81,7 +80,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 
 	private tile?: Tile;
 	private inspectionLock?: Entity;
-	private inspectingTile?: Tile;
+	private inspectingTile?: { tile: Tile; overlay: IOverlayInfo };
 	private shouldLog = false;
 	private willShowSubpanel = false;
 
@@ -274,7 +273,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	@OwnEventHandler(InspectDialog, "close")
 	protected onClose() {
 		if (this.inspectingTile) {
-			this.inspectingTile.removeOverlay(Overlays.isSelectedTarget);
+			this.inspectingTile.tile.removeOverlay(this.inspectingTile.overlay);
 			delete this.inspectingTile;
 		}
 
@@ -329,17 +328,20 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 		this.logUpdate();
 
 		// remove old inspection overlay
-		if (this.inspectingTile && this.inspectingTile !== this.tile) {
-			this.inspectingTile.removeOverlay(Overlays.isSelectedTarget);
+		if (this.inspectingTile && this.tile !== this.inspectingTile.tile) {
+			this.inspectingTile.tile.removeOverlay(this.inspectingTile.overlay);
 		}
 
 		// set new inspection overlay
-		this.inspectingTile = this.tile;
-		this.tile.addOverlay({
-			type: this.DEBUG_TOOLS.overlayTarget,
-			red: 0,
-			blue: 0,
-		}, Overlays.isSelectedTarget);
+		this.inspectingTile = {
+			tile: this.tile,
+			overlay: {
+				type: this.DEBUG_TOOLS.overlayTarget,
+				red: 0,
+				blue: 0,
+			},
+		};
+		this.tile.addOrUpdateOverlay(this.inspectingTile.overlay);
 		localPlayer.updateView(RenderSource.Mod, false);
 	}
 

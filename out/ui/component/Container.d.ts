@@ -1,5 +1,7 @@
 import { IContainer } from "game/item/IItem";
 import Item from "game/item/Item";
+import ItemManager from "game/item/ItemManager";
+import Tile from "game/tile/Tile";
 import Component from "ui/component/Component";
 import Details from "ui/component/Details";
 export declare enum ContainerClasses {
@@ -19,6 +21,7 @@ export default class Container extends Component {
     constructor();
     releaseAndRemove(): void;
     refreshItems(): void;
+    protected onContainerItemChange(items: ItemManager, item: Item, container?: IContainer, containerTile?: Tile): void;
     private willRemove;
     private getContainer;
     private clear;

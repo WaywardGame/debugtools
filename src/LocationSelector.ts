@@ -12,8 +12,8 @@ import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandle
 import { Bound } from "utilities/Decorators";
 import DebugTools from "./DebugTools";
 import { DEBUG_TOOLS_ID } from "./IDebugTools";
-import Overlays from "./overlay/Overlays";
 import CancelablePromise from "./util/CancelablePromise";
+import { IOverlayInfo } from "game/tile/ITerrain";
 
 export default class SelectLocation {
 
@@ -35,7 +35,7 @@ export default class SelectLocation {
 
 	public get selecting() { return this.selectionPromise !== undefined; }
 
-	private hoverTile?: Tile;
+	private hoverTile?: { tile: Tile; overlay: IOverlayInfo };
 	private selectTileHeld = false;
 	private selectionPromise: CancelablePromise<Tile> | undefined;
 
@@ -104,13 +104,15 @@ export default class SelectLocation {
 
 		const tile = renderer?.worldRenderer.screenToTile(...InputManager.mouse.position.xy);
 		if (tile) {
-			if (tile !== this.hoverTile) {
+			if (tile !== this.hoverTile?.tile) {
 				updateRender = true;
 
-				this.hoverTile?.removeOverlay(Overlays.isHoverTarget);
+				if (this.hoverTile?.tile) {
+					this.hoverTile.tile.removeOverlay(this.hoverTile.overlay);
+				}
 
-				this.hoverTile = tile;
-				tile.addOverlay({ type: this.DEBUG_TOOLS.overlayTarget }, Overlays.isHoverTarget);
+				this.hoverTile = { tile, overlay: { type: this.DEBUG_TOOLS.overlayTarget } };
+				tile.addOrUpdateOverlay(this.hoverTile.overlay);
 			}
 
 			if (cancelSelectTilePressed) {
@@ -145,7 +147,7 @@ export default class SelectLocation {
 		delete this.selectionPromise;
 
 		if (this.hoverTile) {
-			this.hoverTile.removeOverlay(Overlays.isHoverTarget);
+			this.hoverTile.tile.removeOverlay(this.hoverTile.overlay);
 			delete this.hoverTile;
 		}
 

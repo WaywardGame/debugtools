@@ -10,7 +10,7 @@ import InspectDialog from "../ui/InspectDialog";
 /**
  * Sets the decay of all items in a human's inventory
  */
-export default new Action(ActionArgument.Item, ActionArgument.Integer32)
+export default new Action(ActionArgument.Item, ActionArgument.Float64)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, item, decay) => setDecay(action, decay, item));
@@ -20,10 +20,10 @@ export function setDecay(action: IActionHandlerApi<Player>, decay: number, ...it
 	for (const item of items) {
 		owner ??= item.getCurrentOwner();
 		if (item.canDecay()) {
-			item.decay = decay;
-			if (!item.startingDecay || item.decay > item.startingDecay) {
+			item.decay = Number.isInteger(decay) || decay > 1 ? decay : (item.startingDecay ?? 1) * decay;
+			if (!item.startingDecay || item.decay > item.startingDecay)
 				item.startingDecay = item.decay;
-			}
+
 			oldui.updateItem(item, true);
 		}
 	}

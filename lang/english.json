@@ -157,7 +157,7 @@
 			"buttonToggleNoClip": "Noclip {BINDINGS:ModDebugToolsToggleNoClip}",
 			"labelSkill": "{#--text-secondary:Set Skill(s)}",
 			"none": "None",
-			"addToInventory": "Add to Inventory",
+			"addToInventory": "Add to Container",
 			"doodadName": "{#--text-secondary:Doodad:} {0}",
 			"tabItemStack": "Item Stack",
 			"unlockInspection": "Unlock Inspection",

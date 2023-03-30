@@ -1,13 +1,18 @@
+import { EventBus } from "event/EventBuses";
 import EventEmitter from "event/EventEmitter";
+import EventManager, { EventHandler } from "event/EventManager";
 import { IContainer } from "game/item/IItem";
 import Item from "game/item/Item";
+import ItemManager from "game/item/ItemManager";
+import Tile from "game/tile/Tile";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
+import { MiscTranslation } from "language/dictionary/Misc";
 import Button, { ButtonType } from "ui/component/Button";
 import Component from "ui/component/Component";
 import Details from "ui/component/Details";
 import { RangeRow } from "ui/component/RangeRow";
-import { Bound } from "utilities/Decorators";
+import { Bound, Debounce } from "utilities/Decorators";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import ClearInventory from "../../action/ClearInventory";
 import Remove from "../../action/Remove";
@@ -41,7 +46,9 @@ export default class Container extends Component {
 		this.containerSupplier = containerSupplier;
 		this.refreshItems();
 
+		EventManager.registerEventBusSubscriber(this);
 		await (host as EventEmitter.Host<IInspectInformationSectionEvents>).event.waitFor(["remove", "switchAway"]);
+		EventManager.deregisterEventBusSubscriber(this);
 		if (this.containerSupplier === containerSupplier)
 			delete this.containerSupplier;
 	}
@@ -67,9 +74,9 @@ export default class Container extends Component {
 				.classes.add("debug-tools-inspect-human-wrapper-set-durability-bulk")
 				.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDurability)))
 				.editRange(range => range
-					.setMax(60)
+					.setMax(100)
 					.setStep(0.01))
-				.setDisplayValue(value => [{ content: `${scale(value)}` }])
+				.setDisplayValue(value => Translation.misc(MiscTranslation.Percent).addArgs(value / 100))
 				.append(new Button()
 					.setText(translation(DebugToolsTranslation.ButtonApply))
 					.event.subscribe("activate", this.applyBulkDurability)))
@@ -77,9 +84,9 @@ export default class Container extends Component {
 				.classes.add("debug-tools-inspect-human-wrapper-set-decay-bulk")
 				.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDecay)))
 				.editRange(range => range
-					.setMax(60)
+					.setMax(100)
 					.setStep(0.01))
-				.setDisplayValue(value => [{ content: `${scale(value)}` }])
+				.setDisplayValue(value => Translation.misc(MiscTranslation.Percent).addArgs(value / 100))
 				.append(new Button()
 					.setText(translation(DebugToolsTranslation.ButtonApply))
 					.event.subscribe("activate", this.applyBulkDecay)))
@@ -99,6 +106,7 @@ export default class Container extends Component {
 			delete Container.INSTANCE;
 	}
 
+	@Debounce(100)
 	public refreshItems() {
 		const container = this.containerSupplier?.();
 		const itemIds = container?.containedItems.map(item => item.id) ?? [];
@@ -117,6 +125,13 @@ export default class Container extends Component {
 		}
 	}
 
+	@EventHandler(EventBus.ItemManager, "containerItemAdd")
+	@EventHandler(EventBus.ItemManager, "containerItemRemove")
+	protected onContainerItemChange(items: ItemManager, item: Item, container?: IContainer, containerTile?: Tile) {
+		if (container === this.containerSupplier?.())
+			this.refreshItems();
+	}
+
 	@Bound private willRemove() {
 		this.store(this.getScreen()!);
 		return false;
@@ -133,12 +148,12 @@ export default class Container extends Component {
 
 	@Bound private applyBulkDurability() {
 		const container = this.getContainer();
-		if (container) SetDurabilityBulk.execute(localPlayer, container, Math.floor(1.2 ** this.rangeBulkDurability.rangeInput.value) - 1);
+		if (container) SetDurabilityBulk.execute(localPlayer, container, this.rangeBulkDurability.rangeInput.value / 100);
 	}
 
 	@Bound private applyBulkDecay() {
 		const container = this.getContainer();
-		if (container) SetDecayBulk.execute(localPlayer, container, Math.floor(1.2 ** this.rangeBulkDecay.rangeInput.value) - 1);
+		if (container) SetDecayBulk.execute(localPlayer, container, this.rangeBulkDecay.rangeInput.value / 100);
 	}
 }
 

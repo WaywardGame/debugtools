@@ -5,6 +5,7 @@ import { TempType, Temperature } from "game/temperature/ITemperature";
 import TemperatureManager, { TEMPERATURE_BOUNDARY_MIN_VEC2, TEMPERATURE_INVALID } from "game/temperature/TemperatureManager";
 import { IOverlayInfo, OverlayType } from "game/tile/ITerrain";
 import Tile from "game/tile/Tile";
+import { RenderSource, UpdateRenderFlag } from "renderer/IRenderer";
 import GenericOverlay from "renderer/overlay/GenericOverlay";
 import Color, { IRGB } from "utilities/Color";
 import Math2 from "utilities/math/Math2";
@@ -36,17 +37,16 @@ export class TemperatureOverlay extends GenericOverlay {
 	}
 
 	public setMode(mode: TemperatureOverlayMode) {
-		if (this.mode === mode)
+		if (this.mode === mode) {
 			return this;
-
-		if (mode === TemperatureOverlayMode.None)
-			this.hide();
-		else if (this.mode === TemperatureOverlayMode.None)
-			this.show();
+		}
 
 		this.mode = mode;
 
-		this.onTickEnd();
+		this.refresh();
+
+		renderers.updateRender(undefined, RenderSource.Mod, UpdateRenderFlag.World);
+
 		return this;
 	}
 
@@ -88,26 +88,25 @@ export class TemperatureOverlay extends GenericOverlay {
 
 	@EventHandler(EventBus.Game, "tickEnd", Priority.Lowest - 1)
 	protected onTickEnd() {
-		this.clear();
-
-		const invalidations = this.scheduledInvalidations.splice(0, Infinity);
-		if (!this.alpha) {
+		if (this.mode === TemperatureOverlayMode.None || !this.alpha) {
 			return;
 		}
 
-		for (const { tile, range } of invalidations) {
+		// update overlays for tiles that had changes
+		for (const { tile, range } of this.scheduledInvalidations) {
+			if (tile.z !== localPlayer.z) {
+				continue;
+			}
+
 			Vector2.forRange(tile, range ?? 0, TEMPERATURE_BOUNDARY_MIN_VEC2, localIsland.temperature.temperatureBoundaryMaxVector, true,
 				vec => this.addOrUpdate(tile.island.getTile(vec.x, vec.y, tile.z)));
 		}
+	}
 
-		const topLeft = renderer?.worldRenderer.screenToVector(0, 0) ?? Vector2.ZERO;
-		const bottomRight = renderer?.worldRenderer.screenToVector(window.innerWidth, window.innerHeight) ?? Vector2.ZERO;
-		for (let y = topLeft.y; y < bottomRight.y; y++) {
-			for (let x = topLeft.x; x < bottomRight.x; x++) {
-				const tile = localIsland.getTile(x, y, localPlayer.z);
-				this.addOrUpdate(tile);
-			}
-		}
+	@EventHandler(EventBus.LocalPlayer, "changeZ")
+	@EventHandler(EventBus.LocalPlayer, "moveToIsland")
+	protected onChangeZOrIsland() {
+		this.refresh();
 	}
 
 	private scheduledInvalidations: { tile: Tile, range?: number }[] = [];
@@ -138,4 +137,22 @@ export class TemperatureOverlay extends GenericOverlay {
 		return Math2.clamp(Temperature.Coldest, Temperature.Hottest, base + time + layer + tileTemp);
 	}
 
+	private refresh() {
+		this.clear();
+
+		this.scheduledInvalidations.length = 0;
+
+		if (this.mode === TemperatureOverlayMode.None) {
+			return;
+		}
+
+		for (let y = 0; y < localIsland.mapSize; y++) {
+			for (let x = 0; x < localIsland.mapSize; x++) {
+				const tile = localIsland.getTileSafe(x, y, localPlayer.z);
+				if (tile) {
+					this.addOrUpdate(tile);
+				}
+			}
+		}
+	}
 }

@@ -15,8 +15,10 @@ export declare class TemperatureOverlay extends GenericOverlay {
     protected generateOverlayInfo(tile: Tile): IOverlayInfo | undefined;
     protected updateOverlayAlpha(tile: Tile): IOverlayInfo | undefined;
     protected onTickEnd(): void;
+    protected onChangeZOrIsland(): void;
     private scheduledInvalidations;
     protected onUpdateProduced(temperatureManager: TemperatureManager, tile: Tile, invalidateRange?: number): void;
     private getTemperature;
     private getTileMod;
+    private refresh;
 }

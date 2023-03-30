@@ -9,8 +9,6 @@ import Tile from "game/tile/Tile";
 import Mod from "mod/Mod";
 import { Registry } from "mod/ModRegistry";
 import { RenderSource } from "renderer/IRenderer";
-import { SpriteBatchLayer } from "renderer/world/IWorldRenderer";
-import WorldRenderer from "renderer/world/WorldRenderer";
 import { BlockRow } from "ui/component/BlockRow";
 import Button from "ui/component/Button";
 import { CheckButton } from "ui/component/CheckButton";
@@ -27,7 +25,6 @@ import Vector2 from "utilities/math/Vector2";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Paint from "../../action/Paint";
-import Overlays from "../../overlay/Overlays";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 import CorpsePaint from "../paint/Corpse";
@@ -96,7 +93,6 @@ export default class PaintPanel extends DebugToolsPanel {
 	private painting = false;
 	private readonly paintTiles = new Set<Tile>();
 	private lastPaintPosition?: IVector2;
-	private maxSprites = 1024;
 
 	public constructor() {
 		super();
@@ -148,11 +144,6 @@ export default class PaintPanel extends DebugToolsPanel {
 		if (this.painting) return false;
 
 		return undefined;
-	}
-
-	@EventHandler(WorldRenderer, "getMaxSpritesForLayer")
-	protected getMaxSpritesForLayer(_: any, maxSprites: number) {
-		return this.maxSprites = maxSprites + (this.painting ? this.paintTiles.size * 4 : 0);
 	}
 
 	@Bind.onDown(Bindable.MenuContextMenu, Priority.High)
@@ -209,7 +200,6 @@ export default class PaintPanel extends DebugToolsPanel {
 		}
 
 		if (shouldUpdateView) {
-			this.updateOverlayBatch();
 			localPlayer.updateView(RenderSource.Mod, false);
 		}
 
@@ -252,7 +242,6 @@ export default class PaintPanel extends DebugToolsPanel {
 		}
 
 		if (shouldUpdateView) {
-			this.updateOverlayBatch();
 			localPlayer.updateView(RenderSource.Mod, false);
 		}
 
@@ -327,12 +316,6 @@ export default class PaintPanel extends DebugToolsPanel {
 	// Internals
 	//
 
-	private updateOverlayBatch() {
-		if (this.paintTiles.size * 4 - 512 < this.maxSprites || this.paintTiles.size * 4 + 512 > this.maxSprites) {
-			renderer!.worldRenderer.initializeSpriteBatch(SpriteBatchLayer.Overlay);
-		}
-	}
-
 	@Bound
 	private onPaintSectionChange(paintSection: IPaintSection) {
 		if (paintSection.isChanging() && !this.painting) {
@@ -358,7 +341,7 @@ export default class PaintPanel extends DebugToolsPanel {
 			Object.assign(paintData, paintSection.getTilePaintData());
 		}
 
-		Paint.execute(localPlayer, Array.from(this.paintTiles), paintData);
+		Paint.execute(localPlayer, Array.from(this.paintTiles.keys()), paintData);
 
 		this.clearPaint();
 	}
@@ -366,12 +349,11 @@ export default class PaintPanel extends DebugToolsPanel {
 	@Bound
 	private clearPaint() {
 		for (const tile of this.paintTiles) {
-			tile.removeOverlay(Overlays.isPaint);
+			SelectionOverlay.remove(tile);
 		}
 
 		this.paintTiles.clear();
 
-		this.updateOverlayBatch();
 		localPlayer.updateView(RenderSource.Mod, false);
 	}
 }
