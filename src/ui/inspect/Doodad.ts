@@ -94,7 +94,7 @@ export default class DoodadInformation extends InspectInformationSection {
 	@Bound
 	private async setGrowthStage() {
 		const growthStage = await new EnumContextMenu(GrowingStage)
-			.setTranslator(stage => Translation.growthStage(stage, this.doodad!.description()?.usesSpores)!.inContext(TextContext.Title))
+			.setTranslator(stage => Translation.growthStage(stage, this.doodad!.description?.usesSpores)!.inContext(TextContext.Title))
 			.setSort(EnumSort.Id)
 			.waitForChoice();
 

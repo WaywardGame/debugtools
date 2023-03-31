@@ -19,7 +19,7 @@ export function setDurability(action: IActionHandlerApi<Player>, durability: num
 	let human: Human | undefined;
 	for (const item of items) {
 		human ??= item.getCurrentOwner();
-		item.durability = Number.isInteger(durability) || durability > 1 ? durability : Math.floor((item.durabilityMax ?? 1) * durability);
+		item.durability = Number.isInteger(durability) || durability > 1 ? durability : Math.ceil((item.durabilityMax ?? 1) * durability);
 
 		oldui.updateItem(item, true);
 	}

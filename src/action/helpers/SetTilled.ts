@@ -4,7 +4,7 @@ import Tile from "game/tile/Tile";
 
 export default function (island: Island, tile: Tile, tilled: boolean) {
 	const tileType = tile.type;
-	if (!tile.description()?.tillable) {
+	if (!tile.description?.tillable) {
 		return;
 	}
 

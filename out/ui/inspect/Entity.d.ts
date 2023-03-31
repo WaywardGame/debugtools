@@ -20,7 +20,7 @@ export default class EntityInformation extends InspectInformationSection {
     setTab(entity: number): this;
     update(tile: Tile): void;
     getEntityIndex(entity: Entity): number;
-    getEntity(index: number): Entity<number, unknown, unknown>;
+    getEntity(index: number): Entity<unknown, number, unknown, unknown>;
     logUpdate(): void;
     private initializeStats;
     private onStatChange;

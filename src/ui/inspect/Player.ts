@@ -86,7 +86,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.setInheritTextTooltip()
 			.editRange(range => range
 				.setMin(0)
-				.setMax(100)
+				.setMax(200)
 				.setRefreshMethod(() => typeof (this.skill) === "number" ? (this.player?.skill.getCore(this.skill) ?? 0) : 0))
 			.setDisplayValue(Translation.ui(UiTranslation.GameStatsPercentage).get)
 			.event.subscribe("finish", this.setSkill)

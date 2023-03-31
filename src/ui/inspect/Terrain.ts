@@ -1,5 +1,4 @@
 import { TerrainType } from "game/tile/ITerrain";
-import { terrainDescriptions } from "game/tile/Terrains";
 import Tile from "game/tile/Tile";
 import Dictionary from "language/Dictionary";
 import { TextContext } from "language/ITranslation";
@@ -109,7 +108,7 @@ export default class TerrainInformation extends InspectInformationSection {
 	}
 
 	private isTillable() {
-		return terrainDescriptions[this.tile.type]?.tillable === true;
+		return this.tile.description?.tillable === true;
 	}
 
 	@Bound

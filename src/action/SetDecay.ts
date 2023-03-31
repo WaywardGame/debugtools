@@ -20,7 +20,7 @@ export function setDecay(action: IActionHandlerApi<Player>, decay: number, ...it
 	for (const item of items) {
 		owner ??= item.getCurrentOwner();
 		if (item.canDecay()) {
-			item.decay = Number.isInteger(decay) || decay > 1 ? decay : (item.startingDecay ?? 1) * decay;
+			item.decay = Number.isInteger(decay) || decay > 1 ? decay : Math.ceil((item.startingDecay ?? 1) * decay);
 			if (!item.startingDecay || item.decay > item.startingDecay)
 				item.startingDecay = item.decay;
 

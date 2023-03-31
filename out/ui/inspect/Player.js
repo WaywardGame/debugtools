@@ -54,7 +54,7 @@ define(["require", "exports", "language/ITranslation", "language/Translation", "
                 .setInheritTextTooltip()
                 .editRange(range => range
                 .setMin(0)
-                .setMax(100)
+                .setMax(200)
                 .setRefreshMethod(() => typeof (this.skill) === "number" ? (this.player?.skill.getCore(this.skill) ?? 0) : 0))
                 .setDisplayValue(Translation_1.default.ui(UiTranslation_1.default.GameStatsPercentage).get)
                 .event.subscribe("finish", this.setSkill)

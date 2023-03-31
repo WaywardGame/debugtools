@@ -34,11 +34,26 @@ export default class Container extends Component {
 	public static INSTANCE: Container | undefined;
 
 	public static init() {
-		return Container.INSTANCE = Container.INSTANCE || new Container();
+		if (Container.INSTANCE)
+			return Container.INSTANCE;
+
+		const container = Container.INSTANCE = new Container();
+
+		container.event.subscribe("willRemove", container.willRemove);
+		return container;
 	}
 
 	public static appendTo(component: Component, host: Component, containerSupplier: () => IContainer | undefined) {
 		return Container.init().appendToHost(component, host, containerSupplier);
+	}
+
+	public static releaseAndRemove() {
+		if (!Container.INSTANCE)
+			return;
+
+		Container.INSTANCE.event.unsubscribe("willRemove", Container.INSTANCE.willRemove);
+		Container.INSTANCE.remove();
+		delete Container.INSTANCE;
 	}
 
 	public async appendToHost(component: Component, host: Component, containerSupplier: () => IContainer | undefined) {
@@ -75,8 +90,11 @@ export default class Container extends Component {
 				.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDurability)))
 				.editRange(range => range
 					.setMax(100)
-					.setStep(0.01))
-				.setDisplayValue(value => Translation.misc(MiscTranslation.Percent).addArgs(value / 100))
+					.setStep(0.01)
+					.setMin(-20)
+					.setRefreshMethod(() => -20))
+				.setDisplayValue(value => value <= -10 ? [{ content: "0" }] : value <= 0 ? [{ content: "1" }]
+					: Translation.misc(MiscTranslation.Percent).addArgs(value / 100))
 				.append(new Button()
 					.setText(translation(DebugToolsTranslation.ButtonApply))
 					.event.subscribe("activate", this.applyBulkDurability)))
@@ -85,8 +103,11 @@ export default class Container extends Component {
 				.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDecay)))
 				.editRange(range => range
 					.setMax(100)
-					.setStep(0.01))
-				.setDisplayValue(value => Translation.misc(MiscTranslation.Percent).addArgs(value / 100))
+					.setStep(0.01)
+					.setMin(-20)
+					.setRefreshMethod(() => -20))
+				.setDisplayValue(value => value <= -10 ? [{ content: "0" }] : value <= 0 ? [{ content: "1" }]
+					: Translation.misc(MiscTranslation.Percent).addArgs(value / 100))
 				.append(new Button()
 					.setText(translation(DebugToolsTranslation.ButtonApply))
 					.event.subscribe("activate", this.applyBulkDecay)))
@@ -95,15 +116,6 @@ export default class Container extends Component {
 				.setType(ButtonType.Warning)
 				.event.subscribe("activate", this.clear))
 			.appendTo(this);
-
-		this.event.subscribe("willRemove", this.willRemove);
-	}
-
-	public releaseAndRemove() {
-		this.event.unsubscribe("willRemove", this.willRemove);
-		this.remove();
-		if (Container.INSTANCE === this)
-			delete Container.INSTANCE;
 	}
 
 	@Debounce(100)
@@ -148,12 +160,14 @@ export default class Container extends Component {
 
 	@Bound private applyBulkDurability() {
 		const container = this.getContainer();
-		if (container) SetDurabilityBulk.execute(localPlayer, container, this.rangeBulkDurability.rangeInput.value / 100);
+		if (container) SetDurabilityBulk.execute(localPlayer, container, this.rangeBulkDurability.rangeInput.value <= -10 ? 0 : this.rangeBulkDurability.rangeInput.value <= 0 ? 1
+			: this.rangeBulkDurability.rangeInput.value === 100 ? 0.99999 : this.rangeBulkDurability.rangeInput.value / 100);
 	}
 
 	@Bound private applyBulkDecay() {
 		const container = this.getContainer();
-		if (container) SetDecayBulk.execute(localPlayer, container, this.rangeBulkDecay.rangeInput.value / 100);
+		if (container) SetDecayBulk.execute(localPlayer, container, this.rangeBulkDecay.rangeInput.value <= -10 ? 0 : this.rangeBulkDecay.rangeInput.value <= 0 ? 1
+			: this.rangeBulkDurability.rangeInput.value === 100 ? 0.99999 : this.rangeBulkDecay.rangeInput.value / 100);
 	}
 }
 

@@ -12,6 +12,7 @@ export default class Container extends Component {
     static INSTANCE: Container | undefined;
     static init(): Container;
     static appendTo(component: Component, host: Component, containerSupplier: () => IContainer | undefined): Promise<void>;
+    static releaseAndRemove(): void;
     appendToHost(component: Component, host: Component, containerSupplier: () => IContainer | undefined): Promise<void>;
     private readonly wrapperContainedItems;
     private readonly rangeBulkDurability;
@@ -19,7 +20,6 @@ export default class Container extends Component {
     private containerSupplier?;
     private items;
     constructor();
-    releaseAndRemove(): void;
     refreshItems(): void;
     protected onContainerItemChange(items: ItemManager, item: Item, container?: IContainer, containerTile?: Tile): void;
     private willRemove;
