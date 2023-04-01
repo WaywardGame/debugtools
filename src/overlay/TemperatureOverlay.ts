@@ -8,6 +8,7 @@ import Tile from "game/tile/Tile";
 import { RenderSource, UpdateRenderFlag } from "renderer/IRenderer";
 import GenericOverlay from "renderer/overlay/GenericOverlay";
 import Color, { IRGB } from "utilities/Color";
+import { Bound } from "utilities/Decorators";
 import Math2 from "utilities/math/Math2";
 import Vector2 from "utilities/math/Vector2";
 
@@ -27,9 +28,16 @@ export class TemperatureOverlay extends GenericOverlay {
 
 	private mode = TemperatureOverlayMode.None;
 
-	public constructor() {
-		super();
+	public subscribeEvents(island = localIsland) {
 		EventManager.registerEventBusSubscriber(this);
+		island.temperature.event.subscribe("updateProducedTile", this.onUpdateProduced);
+		island.temperature.event.subscribe("recalculate", this.recalculateTile);
+	}
+
+	public unsubscribeEvents(island = localIsland) {
+		EventManager.deregisterEventBusSubscriber(this);
+		island.temperature.event.unsubscribe("updateProducedTile", this.onUpdateProduced);
+		island.temperature.event.unsubscribe("recalculate", this.recalculateTile);
 	}
 
 	public getMode() {
@@ -103,6 +111,12 @@ export class TemperatureOverlay extends GenericOverlay {
 		}
 	}
 
+	@EventHandler(EventBus.LocalPlayer, "preMoveToIsland")
+	protected onPreMoveToIsland() {
+		// clear all existing overlays since we're leaving
+		this.clear();
+	}
+
 	@EventHandler(EventBus.LocalPlayer, "changeZ")
 	@EventHandler(EventBus.LocalPlayer, "moveToIsland")
 	protected onChangeZOrIsland() {
@@ -111,9 +125,12 @@ export class TemperatureOverlay extends GenericOverlay {
 
 	private scheduledInvalidations: { tile: Tile, range?: number }[] = [];
 
-	@EventHandler(TemperatureManager, "updateProducedTile")
-	protected onUpdateProduced(temperatureManager: TemperatureManager, tile: Tile, invalidateRange?: number) {
+	@Bound protected onUpdateProduced(temperatureManager: TemperatureManager, tile: Tile, invalidateRange?: number) {
 		this.scheduledInvalidations.push({ tile, range: invalidateRange });
+	}
+
+	@Bound protected recalculateTile(temperatureManager: TemperatureManager, x: number, y: number, z: number, tempType: TempType) {
+		this.addOrUpdate(localIsland.getTile(x, y, z));
 	}
 
 	private getTemperature(tile: Tile, tempType: TempType) {
@@ -142,7 +159,7 @@ export class TemperatureOverlay extends GenericOverlay {
 
 		this.scheduledInvalidations.length = 0;
 
-		if (this.mode === TemperatureOverlayMode.None) {
+		if (this.mode === TemperatureOverlayMode.None || !localIsland) {
 			return;
 		}
 

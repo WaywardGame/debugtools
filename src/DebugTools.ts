@@ -434,6 +434,7 @@ export default class DebugTools extends Mod {
 		EventManager.deregisterEventBusSubscriber(this.selector);
 		Bind.deregisterHandlers(this.selector);
 		this.unlockedCameraMovementHandler.end();
+		this.temperatureOverlay.unsubscribeEvents();
 	}
 
 	/**
@@ -561,7 +562,14 @@ export default class DebugTools extends Mod {
 
 	@EventHandler(EventBus.Game, "play")
 	protected onGamePlay() {
+		this.temperatureOverlay.subscribeEvents();
 		this.unlockedCameraMovementHandler.begin();
+	}
+
+	@EventHandler(EventBus.LocalPlayer, "moveToIsland")
+	protected onMoveToIsland(player: Player, oldIsland: Island, newIsland: Island) {
+		this.temperatureOverlay.unsubscribeEvents(oldIsland);
+		this.temperatureOverlay.subscribeEvents(newIsland);
 	}
 
 	@EventHandler(EventBus.Game, "rendererCreated")

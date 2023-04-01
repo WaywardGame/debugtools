@@ -1,3 +1,4 @@
+import { TempType } from "game/temperature/ITemperature";
 import TemperatureManager from "game/temperature/TemperatureManager";
 import { IOverlayInfo } from "game/tile/ITerrain";
 import Tile from "game/tile/Tile";
@@ -9,15 +10,18 @@ export declare enum TemperatureOverlayMode {
 }
 export declare class TemperatureOverlay extends GenericOverlay {
     private mode;
-    constructor();
+    subscribeEvents(island?: import("../../node_modules/@wayward/types/definitions/game/game/island/Island").default): void;
+    unsubscribeEvents(island?: import("../../node_modules/@wayward/types/definitions/game/game/island/Island").default): void;
     getMode(): TemperatureOverlayMode;
     setMode(mode: TemperatureOverlayMode): this;
     protected generateOverlayInfo(tile: Tile): IOverlayInfo | undefined;
     protected updateOverlayAlpha(tile: Tile): IOverlayInfo | undefined;
     protected onTickEnd(): void;
+    protected onPreMoveToIsland(): void;
     protected onChangeZOrIsland(): void;
     private scheduledInvalidations;
     protected onUpdateProduced(temperatureManager: TemperatureManager, tile: Tile, invalidateRange?: number): void;
+    protected recalculateTile(temperatureManager: TemperatureManager, x: number, y: number, z: number, tempType: TempType): void;
     private getTemperature;
     private getTileMod;
     private refresh;
