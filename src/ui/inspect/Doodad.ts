@@ -10,7 +10,6 @@ import Button from "ui/component/Button";
 import EnumContextMenu, { EnumSort } from "ui/component/EnumContextMenu";
 import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
-import Vector3 from "utilities/math/Vector3";
 import Clone from "../../action/Clone";
 import Remove from "../../action/Remove";
 import SetGrowingStage from "../../action/SetGrowingStage";
@@ -88,7 +87,7 @@ export default class DoodadInformation extends InspectInformationSection {
 		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
 		if (!teleportLocation) return;
 
-		Clone.execute(localPlayer, this.doodad!, new Vector3(teleportLocation, localPlayer.z));
+		Clone.execute(localPlayer, this.doodad!, teleportLocation);
 	}
 
 	@Bound

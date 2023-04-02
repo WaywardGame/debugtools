@@ -20,7 +20,6 @@ import Bindable from "ui/input/Bindable";
 import InputManager from "ui/input/InputManager";
 import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
 import { Bound } from "utilities/Decorators";
-import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -92,7 +91,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 	private painting = false;
 	private readonly paintTiles = new Set<Tile>();
-	private lastPaintPosition?: IVector2;
+	private lastPaintTile?: Tile;
 
 	public constructor() {
 		super();
@@ -171,23 +170,28 @@ export default class PaintPanel extends DebugToolsPanel {
 		}
 
 		const tilePosition = renderer.worldRenderer.screenToTile(...api.mouse.position.xy);
-		if (!tilePosition || this.lastPaintPosition === tilePosition) {
+		if (!tilePosition || this.lastPaintTile === tilePosition) {
 			return false;
 		}
 
-		this.lastPaintPosition = tilePosition;
+		this.lastPaintTile = tilePosition;
 
 		let shouldUpdateView = false;
 
-		const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
+		const direction = Vector2.direction(tilePosition, this.lastPaintTile = this.lastPaintTile || tilePosition);
 
-		let interpolatedPosition = new Vector2(this.lastPaintPosition);
+		let interpolatedPosition = new Vector2(this.lastPaintTile);
 		for (let i = 0; i < 300; i++) { // this is only used for if it goes into an infinite loop
-			interpolatedPosition = interpolatedPosition.add(direction).clamp(this.lastPaintPosition, tilePosition);
+			interpolatedPosition = interpolatedPosition.add(direction).clamp(this.lastPaintTile, tilePosition);
 
 			const paintPosition = interpolatedPosition.floor(new Vector2());
 
-			for (const paintTile of localIsland.getTileFromPoint({ x: paintPosition.x, y: paintPosition.y, z: localPlayer.z }).tilesInRange(this.paintRadius.value, true)) {
+			const tile = localIsland.getTileSafe(paintPosition.x, paintPosition.y, localPlayer.z);
+			if (!tile) {
+				break;
+			}
+
+			for (const paintTile of tile.tilesInRange(this.paintRadius.value, true)) {
 				if (SelectionOverlay.add(paintTile)) {
 					shouldUpdateView = true;
 					this.paintTiles.add(paintTile);
@@ -213,23 +217,28 @@ export default class PaintPanel extends DebugToolsPanel {
 		}
 
 		const tilePosition = renderer.worldRenderer.screenToTile(...api.mouse.position.xy);
-		if (!tilePosition || this.lastPaintPosition === tilePosition) {
+		if (!tilePosition || this.lastPaintTile === tilePosition) {
 			return false;
 		}
 
-		this.lastPaintPosition = tilePosition;
+		this.lastPaintTile = tilePosition;
 
 		let shouldUpdateView = false;
 
-		const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
+		const direction = Vector2.direction(tilePosition, this.lastPaintTile = this.lastPaintTile || tilePosition);
 
-		let interpolatedPosition = new Vector2(this.lastPaintPosition);
+		let interpolatedPosition = new Vector2(this.lastPaintTile);
 		for (let i = 0; i < 300; i++) { // this is only used for if it goes into an infinite loop
-			interpolatedPosition = interpolatedPosition.add(direction).clamp(this.lastPaintPosition, tilePosition);
+			interpolatedPosition = interpolatedPosition.add(direction).clamp(this.lastPaintTile, tilePosition);
 
 			const paintPosition = interpolatedPosition.floor(new Vector2());
 
-			for (const paintTile of localIsland.getTileFromPoint({ x: paintPosition.x, y: paintPosition.y, z: localPlayer.z }).tilesInRange(this.paintRadius.value, true)) {
+			const tile = localIsland.getTileSafe(paintPosition.x, paintPosition.y, localPlayer.z);
+			if (!tile) {
+				break;
+			}
+
+			for (const paintTile of tile.tilesInRange(this.paintRadius.value, true)) {
 				if (SelectionOverlay.remove(paintTile)) {
 					shouldUpdateView = true;
 					this.paintTiles.delete(paintTile);
@@ -252,7 +261,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	@Bind.onUp(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableErasePaint"))
 	protected onStopPaint(api: IBindHandlerApi) {
 		if (this.painting && !api.input.isHolding(this.DEBUG_TOOLS.bindablePaint) && !api.input.isHolding(this.DEBUG_TOOLS.bindableErasePaint))
-			delete this.lastPaintPosition;
+			delete this.lastPaintTile;
 
 		return false;
 	}

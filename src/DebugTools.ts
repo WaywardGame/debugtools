@@ -66,7 +66,7 @@ import ToggleNoClip from "./action/ToggleNoClip";
 import TogglePermissions from "./action/TogglePermissions";
 import ToggleTilled from "./action/ToggleTilled";
 import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
-import { TemperatureOverlay } from "./overlay/TemperatureOverlay";
+import { TemperatureOverlay, TemperatureOverlayMode } from "./overlay/TemperatureOverlay";
 import MainDialog, { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import InspectDialog from "./ui/InspectDialog";
 import Container from "./ui/component/Container";
@@ -435,6 +435,7 @@ export default class DebugTools extends Mod {
 		Bind.deregisterHandlers(this.selector);
 		this.unlockedCameraMovementHandler.end();
 		this.temperatureOverlay.unsubscribeEvents();
+		this.temperatureOverlay.setMode(TemperatureOverlayMode.None);
 	}
 
 	/**
@@ -562,14 +563,14 @@ export default class DebugTools extends Mod {
 
 	@EventHandler(EventBus.Game, "play")
 	protected onGamePlay() {
-		this.temperatureOverlay.subscribeEvents();
 		this.unlockedCameraMovementHandler.begin();
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "moveToIsland")
 	protected onMoveToIsland(player: Player, oldIsland: Island, newIsland: Island) {
 		this.temperatureOverlay.unsubscribeEvents(oldIsland);
-		this.temperatureOverlay.subscribeEvents(newIsland);
+		if (this.temperatureOverlay.getMode() !== TemperatureOverlayMode.None)
+			this.temperatureOverlay.subscribeEvents(newIsland);
 	}
 
 	@EventHandler(EventBus.Game, "rendererCreated")
@@ -722,7 +723,7 @@ export default class DebugTools extends Mod {
 		if (!tile)
 			return false;
 
-		TeleportEntity.execute(localPlayer, localPlayer, tile.point);
+		TeleportEntity.execute(localPlayer, localPlayer, tile);
 		return true;
 	}
 

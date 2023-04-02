@@ -29,7 +29,7 @@ export default new Action(ActionArgument.Integer32, ActionArgument.Array, option
 				case DebugToolsTranslation.ActionTeleport:
 					const playerToTeleport = game.playerManager.getAll(true, true).find(player => player.identifier === alternativeTarget);
 					if (playerToTeleport) {
-						teleportEntity(action, playerToTeleport, target);
+						teleportEntity(action, playerToTeleport, target.tile);
 					}
 					return;
 			}

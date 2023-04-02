@@ -21,8 +21,6 @@ import { Tuple } from "utilities/collection/Arrays";
 import { Bound } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
 import Log from "utilities/Log";
-import { IVector3 } from "utilities/math/IVector";
-import Vector3 from "utilities/math/Vector3";
 import Clone from "../../action/Clone";
 import Heal from "../../action/Heal";
 import Kill from "../../action/Kill";
@@ -237,11 +235,11 @@ export default class EntityInformation extends InspectInformationSection {
 			}],
 			this.entity === localPlayer ? undefined : ["to local player", {
 				translation: translation(DebugToolsTranslation.OptionTeleportToLocalPlayer),
-				onActivate: () => this.teleport(localPlayer),
+				onActivate: () => this.teleport(localPlayer.tile),
 			}],
 			!multiplayer.isConnected() || this.entity?.asLocalPlayer ? undefined : ["to host", {
 				translation: translation(DebugToolsTranslation.OptionTeleportToHost),
-				onActivate: () => this.teleport(game.playerManager.players[0]!),
+				onActivate: () => this.teleport(game.playerManager.players[0]!.tile),
 			}],
 			!multiplayer.isConnected() ? undefined : ["to player", {
 				translation: translation(DebugToolsTranslation.OptionTeleportToPlayer),
@@ -259,7 +257,7 @@ export default class EntityInformation extends InspectInformationSection {
 			.filter(player => player !== this.entity)
 			.map(player => Tuple(player.name, {
 				translation: TranslationImpl.generator(player.name),
-				onActivate: () => this.teleport(player),
+				onActivate: () => this.teleport(player.tile),
 			}))
 			.sort(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))
 			// create the context menu from them
@@ -276,8 +274,8 @@ export default class EntityInformation extends InspectInformationSection {
 	}
 
 	@Bound
-	private teleport(location: Tile | IVector3) {
-		TeleportEntity.execute(localPlayer, this.entity!, new Vector3(location, "z" in location ? location.z : localPlayer.z));
+	private teleport(tile: Tile) {
+		TeleportEntity.execute(localPlayer, this.entity!, tile);
 
 		this.event.emit("update");
 	}
@@ -293,7 +291,7 @@ export default class EntityInformation extends InspectInformationSection {
 		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
 		if (!teleportLocation) return;
 
-		Clone.execute(localPlayer, this.entity!, new Vector3(teleportLocation, localPlayer.z));
+		Clone.execute(localPlayer, this.entity!, teleportLocation);
 	}
 
 	@Bound

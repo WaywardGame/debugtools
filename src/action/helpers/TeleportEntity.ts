@@ -1,12 +1,12 @@
 import { ActionApi } from "game/entity/action/IAction";
 import Entity from "game/entity/Entity";
 import Player from "game/entity/player/Player";
-import { IVector3 } from "utilities/math/IVector";
-import GetPosition from "../../action/helpers/GetPosition";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
+import { getTile } from "./GetTile";
+import Tile from "game/tile/Tile";
 
-export function teleportEntity(action: ActionApi<any>, entity: Entity, position?: IVector3) {
-	const targetTile = GetPosition(action.executor as Player, position!, () => translation(DebugToolsTranslation.ActionTeleport)
+export function teleportEntity(action: ActionApi<any>, entity: Entity, tile: Tile) {
+	const targetTile = getTile(action.executor as Player, tile, () => translation(DebugToolsTranslation.ActionTeleport)
 		.get(entity.getName()));
 
 	if (!entity || !targetTile) return;

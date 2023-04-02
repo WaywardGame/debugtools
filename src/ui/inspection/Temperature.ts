@@ -12,20 +12,20 @@ import Translation from "language/Translation";
 import { MiscTranslation } from "language/dictionary/Misc";
 import Mod from "mod/Mod";
 import { Heading, Paragraph } from "ui/component/Text";
-import { IVector3 } from "utilities/math/IVector";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import Tile from "game/tile/Tile";
 
-export default class TemperatureInspection extends Inspection<IVector3> {
+export default class TemperatureInspection extends Inspection<Tile> {
 
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
 	public static readonly DEBUG_TOOLS: DebugTools;
 
-	public static getFromTile(position: IVector3) {
-		return TemperatureInspection.DEBUG_TOOLS ? new TemperatureInspection(position) : [];
+	public static getFromTile(tile: Tile) {
+		return TemperatureInspection.DEBUG_TOOLS ? new TemperatureInspection(tile) : [];
 	}
 
-	public constructor(tile: IVector3) {
+	public constructor(tile: Tile) {
 		super(TemperatureInspection.DEBUG_TOOLS.inspectionTemperature, tile);
 	}
 
@@ -46,7 +46,7 @@ export default class TemperatureInspection extends Inspection<IVector3> {
 	}
 
 	public override get(context: InfoProviderContext) {
-		const tempValue = localIsland.temperature.get(localIsland.getTileFromPoint(this.value), undefined);
+		const tempValue = localIsland.temperature.get(this.value, undefined);
 		return [
 			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperature))
 				.add(new MagicalPropertyValue(tempValue))

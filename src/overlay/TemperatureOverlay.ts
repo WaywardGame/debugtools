@@ -49,6 +49,10 @@ export class TemperatureOverlay extends GenericOverlay {
 			return this;
 		}
 
+		if (this.mode === TemperatureOverlayMode.None) {
+			this.subscribeEvents();
+		}
+
 		this.mode = mode;
 
 		this.refresh();

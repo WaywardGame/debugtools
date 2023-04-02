@@ -51,7 +51,7 @@ export default class PaintPanel extends DebugToolsPanel {
     private readonly paintRadius;
     private painting;
     private readonly paintTiles;
-    private lastPaintPosition?;
+    private lastPaintTile?;
     constructor();
     getTranslation(): DebugToolsTranslation;
     protected canClientMove(): false | undefined;
