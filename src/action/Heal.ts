@@ -3,7 +3,7 @@ import EntityWithStats from "game/entity/EntityWithStats";
 import { EntityType, MoveType, StatusEffectChangeReason, StatusType } from "game/entity/IEntity";
 import { IStatMax, Stat } from "game/entity/IStats";
 import { Action } from "game/entity/action/Action";
-import { ActionArgument, anyOf } from "game/entity/action/IAction";
+import { ActionArgument } from "game/entity/action/IAction";
 import { PlayerState } from "game/entity/player/IPlayer";
 import Actions, { defaultUsability } from "../Actions";
 import ResurrectCorpse from "./helpers/ResurrectCorpse";
@@ -11,13 +11,14 @@ import ResurrectCorpse from "./helpers/ResurrectCorpse";
 /**
  * The core stats, namely, Health, Stamina, Hunger, and Thirst, are all set to their maximum values. Any status effects are removed.
  */
-export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
+export default new Action(ActionArgument.Entity)
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, entity) => {
 		// resurrect corpses
-		if (action.isArgumentType(entity, 0, ActionArgument.Corpse)) {
-			if (ResurrectCorpse(action.executor, entity)) {
+		const corpse = entity.asCorpse;
+		if (corpse) {
+			if (ResurrectCorpse(action.executor, corpse)) {
 				action.setUpdateRender();
 			}
 
