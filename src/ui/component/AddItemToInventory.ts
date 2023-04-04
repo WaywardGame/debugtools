@@ -5,16 +5,18 @@ import Translation from "language/Translation";
 import Button from "ui/component/Button";
 import Component from "ui/component/Component";
 import Dropdown from "ui/component/Dropdown";
-import ItemDropdown from "ui/component/dropdown/ItemDropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
 import { RangeRow } from "ui/component/RangeRow";
-import { Tuple } from "utilities/collection/Arrays";
+import ItemDropdown from "ui/component/dropdown/ItemDropdown";
 import { Bound } from "utilities/Decorators";
+import { Tuple } from "utilities/collection/Arrays";
 import Enums from "utilities/enum/Enums";
-import AddItemToInventoryAction, { ADD_ITEM_ALL, ADD_ITEM_RANDOM } from "../../action/AddItemToInventory";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
+import AddItemToInventoryAction, { ADD_ITEM_ALL, ADD_ITEM_RANDOM } from "../../action/AddItemToInventory";
 
 export default class AddItemToInventory extends Component {
+
+	public static itemDropdown?: ItemDropdown<"None" | "Random" | "All">;
 
 	private readonly dropdownItemType: ItemDropdown<"None" | "Random" | "All">;
 	private readonly dropdownItemQuality: Dropdown<Quality>;
@@ -24,6 +26,12 @@ export default class AddItemToInventory extends Component {
 	public constructor(private readonly containerSupplier: () => IContainer | undefined) {
 		super();
 
+		AddItemToInventory.itemDropdown ??= new ItemDropdown("None", [
+			["None", option => option.setText(translation(DebugToolsTranslation.None))],
+			["Random", option => option.setText(translation(DebugToolsTranslation.MethodRandom))],
+			["All", option => option.setText(translation(DebugToolsTranslation.MethodAll))],
+		]);
+
 		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelItem)))
@@ -31,7 +39,8 @@ export default class AddItemToInventory extends Component {
 				["None", option => option.setText(translation(DebugToolsTranslation.None))],
 				["Random", option => option.setText(translation(DebugToolsTranslation.MethodRandom))],
 				["All", option => option.setText(translation(DebugToolsTranslation.MethodAll))],
-			])
+			], true)
+				.use(AddItemToInventory.itemDropdown)
 				.event.subscribe("selection", this.changeItem))
 			.appendTo(this);
 
