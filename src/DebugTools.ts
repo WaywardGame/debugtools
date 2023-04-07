@@ -67,6 +67,7 @@ import TogglePermissions from "./action/TogglePermissions";
 import ToggleTilled from "./action/ToggleTilled";
 import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
 import { TemperatureOverlay, TemperatureOverlayMode } from "./overlay/TemperatureOverlay";
+import AccidentalDeathHelper from "./ui/AccidentalDeathHelper";
 import MainDialog, { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import InspectDialog from "./ui/InspectDialog";
 import Container from "./ui/component/Container";
@@ -335,6 +336,7 @@ export default class DebugTools extends Mod {
 	// 
 
 	public temperatureOverlay = new TemperatureOverlay();
+	public accidentalDeathHelper = new AccidentalDeathHelper();
 	private cameraState = CameraState.Locked;
 
 	/**
@@ -422,6 +424,7 @@ export default class DebugTools extends Mod {
 	public override onLoad() {
 		EventManager.registerEventBusSubscriber(this.selector);
 		Bind.registerHandlers(this.selector);
+		EventManager.registerEventBusSubscriber(this.accidentalDeathHelper);
 	}
 
 	/**
@@ -436,6 +439,7 @@ export default class DebugTools extends Mod {
 		this.unlockedCameraMovementHandler.end();
 		this.temperatureOverlay.unsubscribeEvents();
 		this.temperatureOverlay.setMode(TemperatureOverlayMode.None);
+		EventManager.deregisterEventBusSubscriber(this.accidentalDeathHelper);
 	}
 
 	/**

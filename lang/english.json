@@ -182,7 +182,8 @@
 			"panelTemperature": "Temperature",
 			"headingTemperatureOverlay": "Temperature Overlay",
 			"temperatureOverlayModeProduced": "Produced",
-			"temperatureOverlayModeCalculated": "Calculated"
+			"temperatureOverlayModeCalculated": "Calculated",
+			"revertDeath": "Revert Death"
 		},
 		"item": {
 			"none": "none"

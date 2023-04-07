@@ -203,6 +203,7 @@ export enum DebugToolsTranslation {
 	ActionClone,
 	ActionTeleport,
 	To,
+	RevertDeath,
 }
 
 export interface ISaveData {
