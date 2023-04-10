@@ -24,11 +24,16 @@ export default new Action(ActionArgument.Container, ActionArgument.Integer32, Ac
 		}
 
 		const containerObject = action.executor.island.items.resolveContainer(target);
+
+		if (containerObject instanceof Human) {
+			oldui.startAddingMultipleItemsToContainer(action.executor.inventory);
+		}
+
 		const createdItems: Item[] = [];
 		for (let i = 0; i < quantity; i++) {
 			const addItem = item === ADD_ITEM_ALL ? i + 1 : item === ADD_ITEM_RANDOM ? action.executor.island.seededRandom.int(total) + 1 : item;
 			if (containerObject instanceof Human) {
-				const createdItem = containerObject.createItemInInventory(addItem, quality, false, true);
+				const createdItem = containerObject.createItemInInventory(addItem, quality, false);
 				createdItems.push(createdItem);
 			} else {
 				action.executor.island.items.create(addItem, target, quality);
@@ -36,9 +41,7 @@ export default new Action(ActionArgument.Container, ActionArgument.Integer32, Ac
 		}
 
 		if (containerObject instanceof Human) {
-			if (createdItems.length > 0) {
-				oldui.afterAddingMultipleItemsToContainer(action.executor.inventory, createdItems);
-			}
+			oldui.completeAddingMultipleItemsToContainer(action.executor.inventory, createdItems);
 
 			containerObject.updateTablesAndWeight("M");
 		} else {
