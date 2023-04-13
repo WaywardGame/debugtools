@@ -21,7 +21,7 @@ import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialo
 import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import { Bound, Debounce } from "utilities/Decorators";
 import Log from "utilities/Log";
-import { Tuple } from "utilities/collection/Arrays";
+import { Tuple } from "utilities/collection/Tuple";
 import Vector2 from "utilities/math/Vector2";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";

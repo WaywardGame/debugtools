@@ -17,7 +17,7 @@ import { RangeRow } from "ui/component/RangeRow";
 import { IRefreshable } from "ui/component/Refreshable";
 import Text from "ui/component/Text";
 import InputManager from "ui/input/InputManager";
-import { Tuple } from "utilities/collection/Arrays";
+import { Tuple } from "utilities/collection/Tuple";
 import { Bound } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
 import Log from "utilities/Log";

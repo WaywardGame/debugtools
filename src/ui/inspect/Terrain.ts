@@ -11,7 +11,7 @@ import { CheckButton } from "ui/component/CheckButton";
 import Dropdown from "ui/component/Dropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
 import Text from "ui/component/Text";
-import { Tuple } from "utilities/collection/Arrays";
+import { Tuple } from "utilities/collection/Tuple";
 import { Bound } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
 import Log from "utilities/Log";

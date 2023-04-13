@@ -25,7 +25,7 @@ import { RangeRow } from "ui/component/RangeRow";
 import Text, { Heading } from "ui/component/Text";
 import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
 import Tooltip from "ui/tooltip/Tooltip";
-import { Tuple } from "utilities/collection/Arrays";
+import { Tuple } from "utilities/collection/Tuple";
 import { Bound, Debounce } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
 import ChangeLayer from "../../action/ChangeLayer";

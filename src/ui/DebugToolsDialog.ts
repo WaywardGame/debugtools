@@ -2,7 +2,7 @@ import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
-import { Tuple } from "utilities/collection/Arrays";
+import { Tuple } from "utilities/collection/Tuple";
 import Vector2 from "utilities/math/Vector2";
 import { sleep } from "utilities/promise/Async";
 import DebugTools from "../DebugTools";

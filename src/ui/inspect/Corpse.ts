@@ -3,7 +3,7 @@ import Tile from "game/tile/Tile";
 import { TextContext } from "language/ITranslation";
 import Mod from "mod/Mod";
 import Button from "ui/component/Button";
-import { Tuple } from "utilities/collection/Arrays";
+import { Tuple } from "utilities/collection/Tuple";
 import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
 import Heal from "../../action/Heal";

@@ -5,7 +5,7 @@ import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import Button from "ui/component/Button";
-import { Tuple } from "utilities/collection/Arrays";
+import { Tuple } from "utilities/collection/Tuple";
 import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
 import Remove from "../../action/Remove";

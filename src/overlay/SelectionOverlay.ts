@@ -1,7 +1,7 @@
 import Stream from "@wayward/goodstream/Stream";
 import Tile from "game/tile/Tile";
 import Mod from "mod/Mod";
-import { Tuple } from "utilities/collection/Arrays";
+import { Tuple } from "utilities/collection/Tuple";
 import Enums from "utilities/enum/Enums";
 import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";

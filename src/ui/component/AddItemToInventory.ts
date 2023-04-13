@@ -9,7 +9,7 @@ import { LabelledRow } from "ui/component/LabelledRow";
 import { RangeRow } from "ui/component/RangeRow";
 import ItemDropdown from "ui/component/dropdown/ItemDropdown";
 import { Bound } from "utilities/Decorators";
-import { Tuple } from "utilities/collection/Arrays";
+import { Tuple } from "utilities/collection/Tuple";
 import Enums from "utilities/enum/Enums";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import AddItemToInventoryAction, { ADD_ITEM_ALL, ADD_ITEM_RANDOM } from "../../action/AddItemToInventory";

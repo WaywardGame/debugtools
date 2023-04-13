@@ -28,7 +28,7 @@ import { LabelledRow } from "ui/component/LabelledRow";
 import { RangeRow } from "ui/component/RangeRow";
 import Text from "ui/component/Text";
 import Spacer from "ui/screen/screens/menu/component/Spacer";
-import Arrays, { Tuple } from "utilities/collection/Arrays";
+import Arrays from "utilities/collection/Arrays";
 import { Bound } from "utilities/Decorators";
 import Math2 from "utilities/math/Math2";
 import Vector2 from "utilities/math/Vector2";
@@ -38,6 +38,7 @@ import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 import { IslandId } from "game/island/IIsland";
+import { Tuple } from "utilities/collection/Tuple";
 
 const entityTypeToSelectionTypeMap = {
 	[EntityType.Corpse]: SelectionType.Corpse,
