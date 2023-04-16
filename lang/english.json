@@ -183,7 +183,8 @@
 			"headingTemperatureOverlay": "Temperature Overlay",
 			"temperatureOverlayModeProduced": "Produced",
 			"temperatureOverlayModeCalculated": "Calculated",
-			"revertDeath": "Revert Death"
+			"revertDeath": "Revert Death",
+			"statsPercentage": "{0}%"
 		},
 		"item": {
 			"none": "none"

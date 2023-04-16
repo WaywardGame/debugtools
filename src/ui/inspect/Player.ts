@@ -4,7 +4,6 @@ import NPC from "game/entity/npc/NPC";
 import Player from "game/entity/player/Player";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
-import UiTranslation from "language/dictionary/UiTranslation";
 import Mod from "mod/Mod";
 import { BlockRow } from "ui/component/BlockRow";
 import { CheckButton } from "ui/component/CheckButton";
@@ -88,7 +87,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				.setMin(0)
 				.setMax(200)
 				.setRefreshMethod(() => typeof (this.skill) === "number" ? (this.player?.skill.getCore(this.skill) ?? 0) : 0))
-			.setDisplayValue(Translation.ui(UiTranslation.GameStatsPercentage).get)
+			.setDisplayValue(translation(DebugToolsTranslation.StatsPercentage).get)
 			.event.subscribe("finish", this.setSkill)
 			.appendTo(this);
 	}

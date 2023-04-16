@@ -164,7 +164,7 @@ function getNeighborVectors(tilePosition: IVector2) {
 	};
 }
 
-type INeighborTiles = { [key in NeighborPosition]: Tile };
+type INeighborTiles = Record<NeighborPosition, Tile>;
 
 enum NeighborPosition {
 	TopLeft = "T",
@@ -177,7 +177,7 @@ enum NeighborPosition {
 	Left = "E",
 }
 
-type ISubTileMap = { [key in SubTilePosition]: number };
+type ISubTileMap = Record<SubTilePosition, number>;
 
 enum SubTilePosition {
 	TopLeft,

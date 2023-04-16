@@ -204,6 +204,7 @@ export enum DebugToolsTranslation {
 	ActionTeleport,
 	To,
 	RevertDeath,
+	StatsPercentage,
 }
 
 export interface ISaveData {
