@@ -19,6 +19,7 @@ import ChangeTerrain from "../../action/ChangeTerrain";
 import ToggleTilled from "../../action/ToggleTilled";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
+import { TileUpdateType } from "game/IGame";
 
 export default class TerrainInformation extends InspectInformationSection {
 
@@ -128,7 +129,7 @@ export default class TerrainInformation extends InspectInformationSection {
 
 	@Bound
 	public refreshTile() {
-		localIsland.world.layers[this.tile.z].updateTile(this.tile.x, this.tile.y, this.tile, true, this.checkButtonIncludeNeighbors.checked, true, undefined, true);
+		localIsland.world.updateTile(this.tile, TileUpdateType.Mod, this.checkButtonIncludeNeighbors.checked, true);
 		localPlayer.updateView(RenderSource.Mod, false);
 	}
 }
