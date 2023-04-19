@@ -6,7 +6,12 @@ import Component from "ui/component/Component";
 import Details from "ui/component/Details";
 export declare enum ContainerClasses {
     ContainedItemDetails = "debug-tools-container-contained-item-details",
-    ItemDetails = "debug-tools-container-contained-item-details-item"
+    ItemDetails = "debug-tools-container-contained-item-details-item",
+    Paginator = "debug-tools-container-contained-item-details-paginator",
+    PaginatorButton = "debug-tools-container-contained-item-details-paginator-button",
+    PaginatorPrev = "debug-tools-container-contained-item-details-paginator-button-prev",
+    PaginatorNext = "debug-tools-container-contained-item-details-paginator-button-next",
+    PaginatorInfo = "debug-tools-container-contained-item-details-paginator-info"
 }
 export default class Container extends Component {
     static INSTANCE: Container | undefined;
@@ -19,8 +24,10 @@ export default class Container extends Component {
     private readonly rangeBulkDecay;
     private containerSupplier?;
     private items;
+    private page;
     constructor();
     refreshItems(): void;
+    private changeDisplayedItems;
     protected onContainerItemChange(items: ItemManager, item: Item, container?: IContainer, containerTile?: Tile): void;
     private willRemove;
     private getContainer;

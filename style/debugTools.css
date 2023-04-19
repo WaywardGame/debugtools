@@ -134,3 +134,14 @@
 .debug-tools-inspect-human-wrapper-set-decay-bulk {
 	grid-template-columns: auto 1fr auto !important;
 }
+
+.debug-tools-container-contained-item-details-paginator {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+}
+
+.debug-tools-container-contained-item-details-paginator-info {
+	align-self: center;
+	justify-self: center;
+	color: var(--color-text-secondary);
+}

@@ -8,10 +8,12 @@ import Tile from "game/tile/Tile";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
 import { MiscTranslation } from "language/dictionary/Misc";
+import { BlockRow } from "ui/component/BlockRow";
 import Button, { ButtonType } from "ui/component/Button";
 import Component from "ui/component/Component";
 import Details from "ui/component/Details";
 import { RangeRow } from "ui/component/RangeRow";
+import Text from "ui/component/Text";
 import { Bound, Debounce } from "utilities/Decorators";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import ClearInventory from "../../action/ClearInventory";
@@ -27,7 +29,14 @@ import { IInspectInformationSectionEvents } from "./InspectInformationSection";
 export enum ContainerClasses {
 	ContainedItemDetails = "debug-tools-container-contained-item-details",
 	ItemDetails = "debug-tools-container-contained-item-details-item",
+	Paginator = "debug-tools-container-contained-item-details-paginator",
+	PaginatorButton = "debug-tools-container-contained-item-details-paginator-button",
+	PaginatorPrev = "debug-tools-container-contained-item-details-paginator-button-prev",
+	PaginatorNext = "debug-tools-container-contained-item-details-paginator-button-next",
+	PaginatorInfo = "debug-tools-container-contained-item-details-paginator-info",
 }
+
+const CONTAINER_PAGE_LENGTH = 15;
 
 export default class Container extends Component {
 
@@ -73,6 +82,7 @@ export default class Container extends Component {
 	private readonly rangeBulkDecay: RangeRow;
 	private containerSupplier?: () => IContainer | undefined;
 	private items: number[] = [];
+	private page = 0;
 
 	public constructor() {
 		super();
@@ -126,15 +136,44 @@ export default class Container extends Component {
 			return;
 
 		this.items = itemIds;
+		this.changeDisplayedItems();
+	}
+
+	private changeDisplayedItems() {
 		this.wrapperContainedItems.dump();
 
-		if (!this.items.length)
+		const container = this.containerSupplier?.();
+		if (!container || !this.items.length)
 			return;
 
-		for (const item of container!.containedItems) {
+		const totalPages = Math.ceil(this.items.length / CONTAINER_PAGE_LENGTH);
+		this.page = this.page < 0 ? totalPages - 1
+			: this.page >= totalPages ? 0
+				: this.page;
+
+		for (const item of container.containedItems.slice(this.page * CONTAINER_PAGE_LENGTH, this.page * CONTAINER_PAGE_LENGTH + CONTAINER_PAGE_LENGTH)) {
 			new ContainerItemDetails(item)
 				.appendTo(this.wrapperContainedItems);
 		}
+
+		new BlockRow()
+			.classes.add(ContainerClasses.Paginator)
+			.append(new Button()
+				.classes.add(ContainerClasses.PaginatorButton, ContainerClasses.PaginatorPrev)
+				.setText(translation(DebugToolsTranslation.ButtonPreviousItems))
+				.event.subscribe("activate", () => { this.page--; this.changeDisplayedItems() }))
+			.append(new Text()
+				.classes.add(ContainerClasses.PaginatorButton, ContainerClasses.PaginatorInfo)
+				.classes.add("debug-tools-")
+				.setText(translation(DebugToolsTranslation.LabelItems),
+					this.page * CONTAINER_PAGE_LENGTH + 1,
+					Math.min(this.page * CONTAINER_PAGE_LENGTH + CONTAINER_PAGE_LENGTH, container.containedItems.length),
+					container.containedItems.length))
+			.append(new Button()
+				.classes.add(ContainerClasses.PaginatorButton, ContainerClasses.PaginatorNext)
+				.setText(translation(DebugToolsTranslation.ButtonNextItems))
+				.event.subscribe("activate", () => { this.page++; this.changeDisplayedItems() }))
+			.appendTo(this.wrapperContainedItems);
 	}
 
 	@EventHandler(EventBus.ItemManager, "containerItemAdd")

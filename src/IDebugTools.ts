@@ -183,6 +183,9 @@ export enum DebugToolsTranslation {
 	ButtonSetGrowthStage,
 	LabelItemDetails,
 	LabelBulkItemOperations,
+	ButtonPreviousItems,
+	ButtonNextItems,
+	LabelItems,
 	////////////////////////////////////
 	// Inspection
 	//
