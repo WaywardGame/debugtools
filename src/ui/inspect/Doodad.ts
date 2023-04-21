@@ -4,17 +4,17 @@ import { GrowingStage } from "game/doodad/IDoodad";
 import { IContainer } from "game/item/IItem";
 import Tile from "game/tile/Tile";
 import { TextContext } from "language/ITranslation";
-import Translation from "language/Translation";
+import Translation, { Article } from "language/Translation";
 import Mod from "mod/Mod";
 import Button from "ui/component/Button";
 import EnumContextMenu, { EnumSort } from "ui/component/EnumContextMenu";
 import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
+import DebugTools from "../../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Clone from "../../action/Clone";
 import Remove from "../../action/Remove";
 import SetGrowingStage from "../../action/SetGrowingStage";
-import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import Container from "../component/Container";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
@@ -58,7 +58,7 @@ export default class DoodadInformation extends InspectInformationSection {
 	public override getTabs(): TabInformation[] {
 		return this.doodad ? [
 			[0, () => translation(DebugToolsTranslation.DoodadName)
-				.get(this.doodad!.getName(false).inContext(TextContext.Title))],
+				.get(this.doodad!.getName(Article.None).inContext(TextContext.Title))],
 		] : [];
 	}
 
