@@ -178,7 +178,7 @@ export default class Container extends Component {
 
 	@EventHandler(EventBus.ItemManager, "containerItemAdd")
 	@EventHandler(EventBus.ItemManager, "containerItemRemove")
-	protected onContainerItemChange(items: ItemManager, item: Item, container?: IContainer, containerTile?: Tile) {
+	protected onContainerItemChange(itemManager: ItemManager, items: Item[], container?: IContainer, containerTile?: Tile) {
 		if (container === this.containerSupplier?.())
 			this.refreshItems();
 	}

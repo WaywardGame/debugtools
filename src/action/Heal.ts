@@ -58,9 +58,8 @@ export default new Action(ActionArgument.Entity, optional(ActionArgument.ItemArr
 
 		if (entity.asHuman?.inventory && itemsToRestoreToInventory) {
 			const human = entity.asHuman;
-			for (const item of itemsToRestoreToInventory) {
-				human.island.items.moveToContainer(human, item, human.inventory);
-			}
+
+			human.island.items.moveItemsToContainer(human, itemsToRestoreToInventory, human.inventory);
 
 			if (equippedReferences) {
 				for (const [equipType, itemReference] of Object.entries(equippedReferences)) {

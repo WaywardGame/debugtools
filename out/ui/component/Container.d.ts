@@ -28,7 +28,7 @@ export default class Container extends Component {
     constructor();
     refreshItems(): void;
     private changeDisplayedItems;
-    protected onContainerItemChange(items: ItemManager, item: Item, container?: IContainer, containerTile?: Tile): void;
+    protected onContainerItemChange(itemManager: ItemManager, items: Item[], container?: IContainer, containerTile?: Tile): void;
     private willRemove;
     private getContainer;
     private clear;
