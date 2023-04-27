@@ -4,7 +4,7 @@ import { EntityType } from "game/entity/IEntity";
 import { defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.String)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, name) => {
 		if (!name || action.executor.island.name === name)

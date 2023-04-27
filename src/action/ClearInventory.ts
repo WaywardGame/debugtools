@@ -9,7 +9,7 @@ import InspectDialog from "../ui/InspectDialog";
  * Adds an item to the inventory of a doodad, human, or tile.
  */
 export default new Action(ActionArgument.Container)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, container) => {
 		action.executor.island.items.removeContainerItems(container, true);

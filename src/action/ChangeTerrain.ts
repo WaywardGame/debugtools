@@ -6,7 +6,7 @@ import { defaultUsability } from "../Actions";
 import SetTilled from "./helpers/SetTilled";
 
 export default new Action(ActionArgument.Integer32, ActionArgument.Tile)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, terrain: TerrainType, tile) => {
 		tile.changeTile(terrain, false);

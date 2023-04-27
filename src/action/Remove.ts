@@ -9,7 +9,7 @@ import Remove from "./helpers/Remove";
  * Removes a creature, NPC, item, doodad, corpse, or tile event.
  */
 export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Doodad, ActionArgument.Corpse, ActionArgument.TileEvent, ActionArgument.Item))
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, toRemove) => {
 		if (toRemove instanceof Player) {

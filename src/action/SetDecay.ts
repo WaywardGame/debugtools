@@ -2,7 +2,6 @@ import Human from "game/entity/Human";
 import { EntityType } from "game/entity/IEntity";
 import { Action } from "game/entity/action/Action";
 import { ActionArgument, IActionHandlerApi } from "game/entity/action/IAction";
-import Player from "game/entity/player/Player";
 import Item from "game/item/Item";
 import { defaultUsability } from "../Actions";
 import InspectDialog from "../ui/InspectDialog";
@@ -11,11 +10,11 @@ import InspectDialog from "../ui/InspectDialog";
  * Sets the decay of all items in a human's inventory
  */
 export default new Action(ActionArgument.Item, ActionArgument.Float64)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, item, decay) => setDecay(action, decay, item));
 
-export function setDecay(action: IActionHandlerApi<Player>, decay: number, ...items: Item[]) {
+export function setDecay(action: IActionHandlerApi<Human>, decay: number, ...items: Item[]) {
 	let owner: Human | undefined;
 	for (const item of items) {
 		owner ??= item.getCurrentOwner();

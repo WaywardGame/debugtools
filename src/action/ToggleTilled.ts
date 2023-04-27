@@ -5,7 +5,7 @@ import { defaultUsability } from "../Actions";
 import SetTilled from "./helpers/SetTilled";
 
 export default new Action(ActionArgument.Tile, ActionArgument.Boolean)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, tile, tilled) => {
 		if (!tile) return;

@@ -6,7 +6,7 @@ import Enums from "utilities/enum/Enums";
 import { defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.Integer32)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, z) => {
 		if (!Enums.isValid(WorldZ, z))

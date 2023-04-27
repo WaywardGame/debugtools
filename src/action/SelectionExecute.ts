@@ -14,7 +14,7 @@ import { teleportEntity } from "./helpers/TeleportEntity";
  * @param selection An array of `[SelectionType, number]` tuples. Each represents a selected thing, such as a creature and its ID. 
  */
 export default new Action(ActionArgument.Integer32, ActionArgument.Array, optional(ActionArgument.String))
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, executionType: DebugToolsTranslation, selection: [SelectionType, number][], alternativeTarget) => {
 		for (const [type, id] of selection) {

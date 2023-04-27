@@ -4,7 +4,7 @@ import { EntityType } from "game/entity/IEntity";
 import Actions, { defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.Player, ActionArgument.Boolean)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, player, invulnerable) => {
 		Actions.DEBUG_TOOLS.setPlayerData(player, "invulnerable", invulnerable);

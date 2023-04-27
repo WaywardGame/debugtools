@@ -13,7 +13,7 @@ import { getTile } from "./helpers/GetTile";
  * Clones an entity or doodad to a new location. If given a player, an NPC with the appearance, items, and stats of the player is cloned.
  */
 export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Doodad), ActionArgument.Tile)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, toClone, tile: Tile) => {
 		const targetTile = getTile(action.executor, tile, () => translation(DebugToolsTranslation.ActionClone)

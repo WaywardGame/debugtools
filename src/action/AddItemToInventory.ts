@@ -15,7 +15,7 @@ export const ADD_ITEM_ALL = 1000000002;
  * Adds an item to the inventory of a doodad, human, or tile.
  */
 export default new Action(ActionArgument.Container, ActionArgument.Integer32, ActionArgument.Quality, ActionArgument.Integer32)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, target, item: ItemType | typeof ADD_ITEM_RANDOM | typeof ADD_ITEM_ALL, quality, quantity) => {
 		const total = Enums.values(ItemType).length - 1;

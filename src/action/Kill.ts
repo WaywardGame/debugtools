@@ -8,7 +8,7 @@ import { DebugToolsTranslation, translation } from "../IDebugTools";
  * Kills an entity by dealing `Infinity` true damage to it.
  */
 export default new Action(ActionArgument.Entity)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, entity) => {
 		(entity?.asHuman ?? entity?.asCreature)?.damage({

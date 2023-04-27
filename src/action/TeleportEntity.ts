@@ -8,6 +8,6 @@ import { teleportEntity } from "./helpers/TeleportEntity";
  * Teleports an entity to a position.
  */
 export default new Action(ActionArgument.Entity, ActionArgument.Tile)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler(teleportEntity);

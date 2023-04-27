@@ -5,7 +5,7 @@ import { defaultUsability } from "../Actions";
 
 
 export default new Action(ActionArgument.Float64)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, time) => {
 		action.executor.island.time.setTime(time);

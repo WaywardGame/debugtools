@@ -13,7 +13,7 @@ import { RenderSource } from "renderer/IRenderer";
  * @param data The data to paint (terrain, creature, npc, etc)
  */
 export default new Action(ActionArgument.TileArray, ActionArgument.Object)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, tiles: Tile[], data: IPaintData) => {
 		for (const tile of tiles) {

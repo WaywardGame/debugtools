@@ -8,6 +8,6 @@ import { setDecay } from "./SetDecay";
  * Sets the decay of all items in a human's inventory
  */
 export default new Action(ActionArgument.Container, ActionArgument.Integer32)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, target, decay) => setDecay(action, decay, ...target.containedItems));

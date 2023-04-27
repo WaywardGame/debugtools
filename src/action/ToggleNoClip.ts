@@ -5,7 +5,7 @@ import { RenderSource } from "renderer/IRenderer";
 import { defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.Player)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, player) => {
 		if (!player) return;
