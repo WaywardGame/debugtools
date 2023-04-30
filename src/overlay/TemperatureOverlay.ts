@@ -28,13 +28,27 @@ export class TemperatureOverlay extends GenericOverlay {
 
 	private mode = TemperatureOverlayMode.None;
 
+	private subscribed = false;
+
 	public subscribeEvents(island = localIsland) {
+		if (this.subscribed) {
+			return;
+		}
+
+		this.subscribed = true;
+
 		EventManager.registerEventBusSubscriber(this);
 		island.temperature.event.subscribe("updateProducedTile", this.onUpdateProduced);
 		island.temperature.event.subscribe("recalculate", this.recalculateTile);
 	}
 
 	public unsubscribeEvents(island = localIsland) {
+		if (!this.subscribed) {
+			return;
+		}
+
+		this.subscribed = false;
+
 		EventManager.deregisterEventBusSubscriber(this);
 		island.temperature.event.unsubscribe("updateProducedTile", this.onUpdateProduced);
 		island.temperature.event.unsubscribe("recalculate", this.recalculateTile);

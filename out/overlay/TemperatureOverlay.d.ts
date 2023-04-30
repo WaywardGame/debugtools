@@ -10,6 +10,7 @@ export declare enum TemperatureOverlayMode {
 }
 export declare class TemperatureOverlay extends GenericOverlay {
     private mode;
+    private subscribed;
     subscribeEvents(island?: import("../../node_modules/@wayward/types/definitions/game/game/island/Island").default): void;
     unsubscribeEvents(island?: import("../../node_modules/@wayward/types/definitions/game/game/island/Island").default): void;
     getMode(): TemperatureOverlayMode;
