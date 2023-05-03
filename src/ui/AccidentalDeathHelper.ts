@@ -10,6 +10,7 @@ import GameEndMenu from "ui/screen/screens/menu/menus/GameEndMenu";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import Heal from "../action/Heal";
+import { PlayerState } from "game/entity/player/IPlayer";
 
 export default class AccidentalDeathHelper {
 
@@ -30,7 +31,7 @@ export default class AccidentalDeathHelper {
 
 	@EventHandler(GameEndMenu, "show")
 	protected onShowGameEndMenu(menu: GameEndMenu) {
-		if (this.DEBUG_TOOLS.hasPermission()) {
+		if (this.DEBUG_TOOLS.hasPermission() && menu.gameEndData.state === PlayerState.Dead) {
 			new Button()
 				.event.subscribe("activate", () => {
 					Heal.execute(localPlayer, localPlayer, this.deathInventory?.slice(), this.equippedItems ? { ...this.equippedItems } : undefined);
