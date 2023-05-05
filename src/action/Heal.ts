@@ -1,25 +1,33 @@
-import { Action } from "game/entity/action/Action";
-import { ActionArgument, anyOf } from "game/entity/action/IAction";
-import { EntityType, MoveType, StatusEffectChangeReason, StatusType } from "game/entity/IEntity";
-import { IStatMax, Stat } from "game/entity/IStats";
-import { PlayerState } from "game/entity/player/IPlayer";
 import { TickFlag } from "game/IGame";
+import EntityWithStats from "game/entity/EntityWithStats";
+import { EntityType, MoveType, StatusEffectChangeReason, StatusType } from "game/entity/IEntity";
+import { EquipType } from "game/entity/IHuman";
+import { IStatMax, Stat } from "game/entity/IStats";
+import { Action } from "game/entity/action/Action";
+import { ActionArgument, optional } from "game/entity/action/IAction";
+import { PlayerState } from "game/entity/player/IPlayer";
+import ItemReference, { IItemReference } from "game/item/ItemReference";
 import Actions, { defaultUsability } from "../Actions";
 import ResurrectCorpse from "./helpers/ResurrectCorpse";
 
 /**
  * The core stats, namely, Health, Stamina, Hunger, and Thirst, are all set to their maximum values. Any status effects are removed.
  */
-export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
+export default new Action(ActionArgument.Entity, optional(ActionArgument.ItemArray), optional(ActionArgument.Object))
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
-	.setHandler((action, entity) => {
+	.setHandler((action, entity, itemsToRestoreToInventory, equippedReferences: Record<EquipType, IItemReference>) => {
 		// resurrect corpses
-		if (action.isArgumentType(entity, 0, ActionArgument.Corpse)) {
-			if (ResurrectCorpse(action.executor, entity)) {
+		const corpse = entity.asCorpse;
+		if (corpse) {
+			if (ResurrectCorpse(action.executor, corpse)) {
 				action.setUpdateRender();
 			}
 
+			return;
+		}
+
+		if (!(entity instanceof EntityWithStats)) {
 			return;
 		}
 
@@ -36,12 +44,31 @@ export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Corpse))
 		entity.setStatus(StatusType.Bleeding, false, StatusEffectChangeReason.Passed);
 		entity.setStatus(StatusType.Burned, false, StatusEffectChangeReason.Passed);
 		entity.setStatus(StatusType.Poisoned, false, StatusEffectChangeReason.Passed);
+		entity.setStatus(StatusType.Frostbitten, false, StatusEffectChangeReason.Passed);
 
 		if (entity.asPlayer) {
+			// i know you wanted to make it so noclip persisted after death but you're going to have to make noclip an option instead
+			// with this commented code it makes it so that you always respawn flying whether or not you were noclipping before
+			// const moveType = entity.asPlayer.isFlying ? MoveType.Flying : MoveType.Land;
 			entity.asPlayer.state = PlayerState.None;
 			entity.asPlayer.updateStatsAndAttributes();
-			const moveType = Actions.DEBUG_TOOLS.getPlayerData(entity.asPlayer, "noclip") ? MoveType.Flying : MoveType.Land;
-			entity.asPlayer.setMoveType(moveType);
+			entity.asPlayer.setMoveType(MoveType.Land);
+			game.playing = true;
+		}
+
+		if (entity.asHuman?.inventory && itemsToRestoreToInventory) {
+			const human = entity.asHuman;
+
+			human.island.items.moveItemsToContainer(human, itemsToRestoreToInventory, human.inventory);
+
+			if (equippedReferences) {
+				for (const [equipType, itemReference] of Object.entries(equippedReferences)) {
+					const item = ItemReference.item(itemReference);
+					if (item) {
+						human.equip(item, +equipType as EquipType);
+					}
+				}
+			}
 		}
 
 		action.setUpdateRender();

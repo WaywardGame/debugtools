@@ -1,8 +1,11 @@
 import { EventBus } from "event/EventBuses";
+import { Events, IEventEmitter } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
-import Entity from "game/entity/Entity";
 import { TileUpdateType } from "game/IGame";
-import { ITile, TerrainType } from "game/tile/ITerrain";
+import Entity from "game/entity/Entity";
+import Item from "game/item/Item";
+import { IOverlayInfo, TerrainType } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { Registry } from "mod/ModRegistry";
@@ -14,17 +17,15 @@ import Text from "ui/component/Text";
 import Bind, { IBindHandlerApi } from "ui/input/Bind";
 import Bindable from "ui/input/Bindable";
 import InputManager from "ui/input/InputManager";
-import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
-import { Tuple } from "utilities/collection/Arrays";
+import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import { Bound, Debounce } from "utilities/Decorators";
-import TileHelpers from "utilities/game/TileHelpers";
 import Log from "utilities/Log";
+import { Tuple } from "utilities/collection/Tuple";
 import Vector2 from "utilities/math/Vector2";
-import Vector3 from "utilities/math/Vector3";
 import DebugTools from "../DebugTools";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../IDebugTools";
-import Overlays from "../overlay/Overlays";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
+import { ContainerClasses } from "./component/Container";
 import InspectInformationSection from "./component/InspectInformationSection";
 import CorpseInformation from "./inspect/Corpse";
 import DoodadInformation from "./inspect/Doodad";
@@ -47,6 +48,10 @@ const informationSectionClasses: InspectDialogInformationSectionClass[] = [
 	ItemInformation,
 ];
 
+export interface IInspectDialogEvents extends Events<TabDialog<InspectInformationSection>> {
+	updateSubpanels(): any;
+}
+
 export default class InspectDialog extends TabDialog<InspectInformationSection> {
 	/**
 	 * The positioning settings for the dialog.
@@ -68,13 +73,14 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	@Mod.log(DEBUG_TOOLS_ID)
 	public readonly LOG: Log;
 
+	public override readonly event: IEventEmitter<this, IInspectDialogEvents>;
+
 	private entityButtons: Button[];
 	private entityInfoSection: EntityInformation;
 
-	private tilePosition?: Vector3;
-	private tile?: ITile;
+	private tile?: Tile;
 	private inspectionLock?: Entity;
-	private inspectingTile?: ITile;
+	private inspectingTile?: { tile: Tile; overlay: IOverlayInfo };
 	private shouldLog = false;
 	private willShowSubpanel = false;
 
@@ -150,12 +156,43 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * - Updates the dialog. (`update`)
 	 * - If the inspection is locked to an entity, it makes a note of needing to show the entity's subpanel (`willShowSubpanel`).
 	 */
-	public setInspection(what: Vector2 | Entity) {
+	public setInspection(what: Tile | Entity) {
 		this.setInspectionTile(what);
+
+		let item: Item | undefined;
+		if (what instanceof Item) {
+			item = what;
+			this.LOG.info("Item:", item);
+			const human = what.getCurrentOwner();
+			if (human) {
+				what = human;
+			}
+		}
 
 		this.inspectionLock = "entityType" in what ? what : undefined;
 
 		this.update();
+
+		if (item) {
+			this.event.waitFor("updateSubpanels").then(() => {
+				const itemElement = this.queryX<HTMLDetailsElement>(`.${ContainerClasses.ItemDetails}[@data-item-id="${item!.id}"]`);
+				if (itemElement) {
+					for (const itemDetailsElement of this.element.querySelectorAll(`.${ContainerClasses.ItemDetails}, .${ContainerClasses.ContainedItemDetails}`) as Iterable<HTMLDetailsElement>)
+						itemDetailsElement.open = false;
+
+					let detailsElement: HTMLDetailsElement | null | undefined = itemElement;
+					while (detailsElement = detailsElement.parentElement?.closest<HTMLDetailsElement>(`.${ContainerClasses.ContainedItemDetails}, .${ContainerClasses.ItemDetails}`))
+						detailsElement.open = true;
+
+					itemElement.open = true;
+					const summary = itemElement.querySelector("summary");
+					if (summary) {
+						this.panelWrapper.scrollTo(summary, 300);
+						summary?.focus();
+					}
+				}
+			});
+		}
 
 		if (this.inspectionLock) this.willShowSubpanel = true;
 
@@ -174,7 +211,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 
 		for (const section of this.subpanels) {
 			section.resetWillLog();
-			section.update(this.tilePosition!, this.tile!);
+			section.update(this.tile!);
 		}
 
 		this.logUpdate();
@@ -225,7 +262,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 
 	@EventHandler(EventBus.Island, "tileUpdate")
 	@Debounce(10)
-	public onTileUpdate(island: any, tile: ITile, x: number, y: number, z: number, tileUpdateType: TileUpdateType) {
+	public onTileUpdate(island: any, tile: Tile, tileUpdateType: TileUpdateType) {
 		this.update();
 	}
 
@@ -236,11 +273,11 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	@OwnEventHandler(InspectDialog, "close")
 	protected onClose() {
 		if (this.inspectingTile) {
-			TileHelpers.Overlay.remove(this.inspectingTile, Overlays.isSelectedTarget);
+			this.inspectingTile.tile.removeOverlay(this.inspectingTile.overlay);
 			delete this.inspectingTile;
 		}
 
-		renderers.updateView(RenderSource.Mod, false);
+		localPlayer.updateView(RenderSource.Mod, false);
 
 		delete InspectDialog.INSTANCE;
 	}
@@ -265,6 +302,8 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 			this.entityButtons[this.entityInfoSection.getEntityIndex(this.inspectionLock)]
 				.classes.add("inspection-lock");
 		}
+
+		this.event.emit("updateSubpanels");
 	}
 
 	/**
@@ -273,30 +312,37 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * - If there was an existing inspection overlay, removes it.
 	 * - Adds a new inspection overlay to the currently inspecting tile.
 	 */
-	private setInspectionTile(what: Vector2 | Entity) {
-		const position = new Vector3(what.x, what.y, "z" in what ? what.z : localPlayer.z);
+	private setInspectionTile(what: Tile | Entity) {
+		const tile = what instanceof Tile ? what : what.tile;;
+		if (!tile) {
+			return;
+		}
 
-		if (this.tilePosition && position.equals(this.tilePosition)) return;
-		this.tilePosition = position;
+		if (this.tile && this.tile === tile) {
+			return;
+		}
 
-		this.tile = localIsland.getTile(...this.tilePosition.xyz);
+		this.tile = tile;
 
 		this.shouldLog = true;
 		this.logUpdate();
 
 		// remove old inspection overlay
-		if (this.inspectingTile && this.inspectingTile !== this.tile) {
-			TileHelpers.Overlay.remove(this.inspectingTile, Overlays.isSelectedTarget);
+		if (this.inspectingTile && this.tile !== this.inspectingTile.tile) {
+			this.inspectingTile.tile.removeOverlay(this.inspectingTile.overlay);
 		}
 
 		// set new inspection overlay
-		this.inspectingTile = this.tile;
-		TileHelpers.Overlay.add(this.tile, {
-			type: this.DEBUG_TOOLS.overlayTarget,
-			red: 0,
-			blue: 0,
-		}, Overlays.isSelectedTarget);
-		renderers.updateView(RenderSource.Mod, false);
+		this.inspectingTile = {
+			tile: this.tile,
+			overlay: {
+				type: this.DEBUG_TOOLS.overlayTarget,
+				red: 0,
+				blue: 0,
+			},
+		};
+		this.tile.addOrUpdateOverlay(this.inspectingTile.overlay);
+		localPlayer.updateView(RenderSource.Mod, false);
 	}
 
 	/**
@@ -305,8 +351,8 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	@Bound
 	private logUpdate() {
 		if (this.shouldLog) {
-			const tileData = this.tilePosition ? localIsland.getTileData(this.tilePosition.x, this.tilePosition.y, this.tilePosition.z) : undefined;
-			this.LOG.info("Tile:", this.tile, this.tilePosition?.toString(), tileData?.map(data => TerrainType[data.type]).join(", "), tileData,);
+			const tileData = this.tile ? this.tile.getTileData() : undefined;
+			this.LOG.info("Tile:", this.tile, this.tile?.toString(), tileData?.map(data => TerrainType[data.type]).join(", "), tileData,);
 			this.shouldLog = false;
 		}
 

@@ -2,7 +2,7 @@ import { Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import MapGenHelpers from "game/mapgen/MapGenHelpers";
 import { TileTemplateType } from "game/tile/ITerrain";
-import templateDescriptions from "game/tile/TerrainTemplates";
+import { terrainTemplates } from "game/tile/TerrainTemplates";
 import TranslationImpl from "language/impl/TranslationImpl";
 import Mod from "mod/Mod";
 import { Registry } from "mod/ModRegistry";
@@ -17,19 +17,18 @@ import Bind from "ui/input/Bind";
 import InputManager from "ui/input/InputManager";
 import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
 import Spacer from "ui/screen/screens/menu/component/Spacer";
-import { Tuple } from "utilities/collection/Arrays";
+import { Tuple } from "utilities/collection/Tuple";
 import Enums from "utilities/enum/Enums";
 import Vector2 from "utilities/math/Vector2";
-import Vector3 from "utilities/math/Vector3";
 import { Bound } from "utilities/Decorators";
 
 import PlaceTemplate from "../../action/PlaceTemplate";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
-import { getTileId, getTilePosition } from "../../util/TilePosition";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 import Stream from "@wayward/goodstream/Stream";
+import Tile from "game/tile/Tile";
 
 export default class TemplatePanel extends DebugToolsPanel {
 
@@ -45,7 +44,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 	private readonly degrade: RangeRow;
 	private readonly place: CheckButton;
 
-	private readonly previewTiles: number[] = [];
+	private readonly previewTiles: Tile[] = [];
 	private selectHeld = false;
 	private center?: Vector2;
 	private templateOptions?: MapGenHelpers.ITemplateOptions;
@@ -72,8 +71,8 @@ export default class TemplatePanel extends DebugToolsPanel {
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTemplate)))
 			.append(this.dropdownTemplate = new Dropdown<string>()
 				.setRefreshMethod(() => ({
-					defaultOption: Stream.keys<string>(templateDescriptions[this.dropdownType.selection]).first()!,
-					options: Stream.keys<string>(templateDescriptions[this.dropdownType.selection])
+					defaultOption: Stream.keys<string>(terrainTemplates[this.dropdownType.selection]!).first()!,
+					options: Stream.keys<string>(terrainTemplates[this.dropdownType.selection]!)
 						.map(name => Tuple(name, TranslationImpl.generator(name)))
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
@@ -161,8 +160,9 @@ export default class TemplatePanel extends DebugToolsPanel {
 			}
 		}
 
-		if (updateRender)
-			renderers.updateView(RenderSource.Mod, false);
+		if (updateRender) {
+			localPlayer.updateView(RenderSource.Mod, false);
+		}
 	}
 
 	private updateTemplate([terrain, doodads]: [string[], string[]?], options: MapGenHelpers.ITemplateOptions) {
@@ -197,12 +197,14 @@ export default class TemplatePanel extends DebugToolsPanel {
 
 		for (let x = 0; x < width; x++) {
 			for (let y = 0; y < height; y++) {
-				if (!this.templateHasTile([terrain, doodads], x, y))
+				if (!this.templateHasTile([terrain, doodads], x, y)) {
 					continue;
+				}
 
-				const position = new Vector2(topLeft).add({ x, y }).mod(game.mapSize);
-				SelectionOverlay.add(position);
-				this.previewTiles.push(getTileId(position.x, position.y, localPlayer.z));
+				const position = new Vector2(topLeft).add({ x, y }).mod(localIsland.mapSize);
+				const tile = localIsland.getTile(position.x, position.y, localPlayer.z);
+				SelectionOverlay.add(tile);
+				this.previewTiles.push(tile);
 			}
 		}
 
@@ -210,9 +212,10 @@ export default class TemplatePanel extends DebugToolsPanel {
 	}
 
 	private getTemplate(options: MapGenHelpers.ITemplateOptions) {
-		const template = templateDescriptions[this.dropdownType.selection][this.dropdownTemplate.selection];
-		if (!template)
+		const template = terrainTemplates[this.dropdownType.selection]?.[this.dropdownTemplate.selection];
+		if (!template) {
 			return undefined;
+		}
 
 		return MapGenHelpers.manipulateTemplates(localIsland, options, [...template.terrain], template.doodad && [...template.doodad]);
 	}
@@ -268,14 +271,14 @@ export default class TemplatePanel extends DebugToolsPanel {
 			return false;
 
 		for (const previewTile of this.previewTiles) {
-			const tile = getTilePosition(previewTile);
-			SelectionOverlay.remove(new Vector3(tile));
+			SelectionOverlay.remove(previewTile);
 		}
 
 		this.previewTiles.splice(0, Infinity);
 
-		if (!this.place.checked)
-			renderers.updateView(RenderSource.Mod, false);
+		if (!this.place.checked) {
+			localPlayer.updateView(RenderSource.Mod, false);
+		}
 
 		return true;
 	}

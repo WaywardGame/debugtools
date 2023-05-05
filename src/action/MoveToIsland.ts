@@ -6,8 +6,8 @@ import { EntityType } from "game/entity/IEntity";
 import { defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.String, ActionArgument.Integer32)
-    .setUsableBy(EntityType.Player)
+    .setUsableBy(EntityType.Human)
     .setUsableWhen(...defaultUsability)
     .setHandler((action, islandId, biome) => {
-        action.executor.moveToIslandId(islandId as IslandId, { newWorldBiomeTypeOverride: biome });
+        action.executor.moveToIslandId(islandId as IslandId, { newIslandOverrides: { biomeType: biome } });
     });

@@ -1,18 +1,14 @@
-define(["require", "exports", "game/entity/action/Action", "game/entity/action/IAction", "game/entity/IEntity", "game/entity/IHuman", "renderer/IRenderer", "../Actions"], function (require, exports, Action_1, IAction_1, IEntity_1, IHuman_1, IRenderer_1, Actions_1) {
+define(["require", "exports", "game/entity/action/Action", "game/entity/action/IAction", "game/entity/IEntity", "renderer/IRenderer", "../Actions"], function (require, exports, Action_1, IAction_1, IEntity_1, IRenderer_1, Actions_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.default = new Action_1.Action(IAction_1.ActionArgument.Player, IAction_1.ActionArgument.Boolean)
-        .setUsableBy(IEntity_1.EntityType.Player)
+    exports.default = new Action_1.Action(IAction_1.ActionArgument.Player)
+        .setUsableBy(IEntity_1.EntityType.Human)
         .setUsableWhen(...Actions_1.defaultUsability)
-        .setHandler((action, player, noclip) => {
+        .setHandler((action, player) => {
         if (!player)
             return;
-        Actions_1.default.DEBUG_TOOLS.setPlayerData(player, "noclip", noclip ? {
-            moving: false,
-            delay: IHuman_1.Delay.Movement,
-        } : false);
-        player.setMoveType(noclip ? IEntity_1.MoveType.Flying : IEntity_1.MoveType.Land);
-        renderers.updateView(IRenderer_1.RenderSource.Mod, true);
+        player.setMoveType(player.isFlying ? IEntity_1.MoveType.Land : IEntity_1.MoveType.Flying);
+        player.updateView(IRenderer_1.RenderSource.Mod, true);
     });
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVG9nZ2xlTm9DbGlwLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL2FjdGlvbi9Ub2dnbGVOb0NsaXAudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0lBT0Esa0JBQWUsSUFBSSxlQUFNLENBQUMsd0JBQWMsQ0FBQyxNQUFNLEVBQUUsd0JBQWMsQ0FBQyxPQUFPLENBQUM7U0FDdEUsV0FBVyxDQUFDLG9CQUFVLENBQUMsTUFBTSxDQUFDO1NBQzlCLGFBQWEsQ0FBQyxHQUFHLDBCQUFnQixDQUFDO1NBQ2xDLFVBQVUsQ0FBQyxDQUFDLE1BQU0sRUFBRSxNQUFNLEVBQUUsTUFBTSxFQUFFLEVBQUU7UUFFdEMsSUFBSSxDQUFDLE1BQU07WUFBRSxPQUFPO1FBRXBCLGlCQUFPLENBQUMsV0FBVyxDQUFDLGFBQWEsQ0FBQyxNQUFNLEVBQUUsUUFBUSxFQUFFLE1BQU0sQ0FBQyxDQUFDLENBQUM7WUFDNUQsTUFBTSxFQUFFLEtBQUs7WUFDYixLQUFLLEVBQUUsY0FBSyxDQUFDLFFBQVE7U0FDckIsQ0FBQyxDQUFDLENBQUMsS0FBSyxDQUFDLENBQUM7UUFFWCxNQUFNLENBQUMsV0FBVyxDQUFDLE1BQU0sQ0FBQyxDQUFDLENBQUMsa0JBQVEsQ0FBQyxNQUFNLENBQUMsQ0FBQyxDQUFDLGtCQUFRLENBQUMsSUFBSSxDQUFDLENBQUM7UUFFN0QsU0FBUyxDQUFDLFVBQVUsQ0FBQyx3QkFBWSxDQUFDLEdBQUcsRUFBRSxJQUFJLENBQUMsQ0FBQztJQUM5QyxDQUFDLENBQUMsQ0FBQyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiVG9nZ2xlTm9DbGlwLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL2FjdGlvbi9Ub2dnbGVOb0NsaXAudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0lBTUEsa0JBQWUsSUFBSSxlQUFNLENBQUMsd0JBQWMsQ0FBQyxNQUFNLENBQUM7U0FDOUMsV0FBVyxDQUFDLG9CQUFVLENBQUMsS0FBSyxDQUFDO1NBQzdCLGFBQWEsQ0FBQyxHQUFHLDBCQUFnQixDQUFDO1NBQ2xDLFVBQVUsQ0FBQyxDQUFDLE1BQU0sRUFBRSxNQUFNLEVBQUUsRUFBRTtRQUM5QixJQUFJLENBQUMsTUFBTTtZQUFFLE9BQU87UUFFcEIsTUFBTSxDQUFDLFdBQVcsQ0FBQyxNQUFNLENBQUMsUUFBUSxDQUFDLENBQUMsQ0FBQyxrQkFBUSxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUMsa0JBQVEsQ0FBQyxNQUFNLENBQUMsQ0FBQztRQUV0RSxNQUFNLENBQUMsVUFBVSxDQUFDLHdCQUFZLENBQUMsR0FBRyxFQUFFLElBQUksQ0FBQyxDQUFDO0lBQzNDLENBQUMsQ0FBQyxDQUFDIn0=

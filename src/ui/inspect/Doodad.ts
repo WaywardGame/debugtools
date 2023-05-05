@@ -1,24 +1,22 @@
 import { OwnEventHandler } from "event/EventManager";
 import Doodad from "game/doodad/Doodad";
 import { GrowingStage } from "game/doodad/IDoodad";
-import { ITile } from "game/tile/ITerrain";
+import { IContainer } from "game/item/IItem";
+import Tile from "game/tile/Tile";
 import { TextContext } from "language/ITranslation";
-import Translation from "language/Translation";
+import Translation, { Article } from "language/Translation";
 import Mod from "mod/Mod";
 import Button from "ui/component/Button";
 import EnumContextMenu, { EnumSort } from "ui/component/EnumContextMenu";
 import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
-import { IVector2 } from "utilities/math/IVector";
-import Vector3 from "utilities/math/Vector3";
+import DebugTools from "../../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Clone from "../../action/Clone";
 import Remove from "../../action/Remove";
 import SetGrowingStage from "../../action/SetGrowingStage";
-import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import Container from "../component/Container";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
-
 
 export default class DoodadInformation extends InspectInformationSection {
 
@@ -54,23 +52,23 @@ export default class DoodadInformation extends InspectInformationSection {
 		if (!this.doodad!.containedItems)
 			return;
 
-		Container.appendTo(this, this, () => this.doodad);
+		Container.appendTo(this, this, () => this.doodad as IContainer);
 	}
 
 	public override getTabs(): TabInformation[] {
 		return this.doodad ? [
 			[0, () => translation(DebugToolsTranslation.DoodadName)
-				.get(this.doodad!.getName(false).inContext(TextContext.Title))],
+				.get(this.doodad!.getName(Article.None).inContext(TextContext.Title))],
 		] : [];
 	}
 
-	public override update(position: IVector2, tile: ITile) {
+	public override update(tile: Tile) {
 		if (tile.doodad === this.doodad) return;
 		this.doodad = tile.doodad;
 
 		if (!this.doodad) return;
 
-		this.buttonGrowthStage.toggle(this.doodad.getGrowingStage() !== undefined);
+		this.buttonGrowthStage.toggle(this.doodad.growth !== undefined);
 
 		this.setShouldLog();
 	}
@@ -89,13 +87,13 @@ export default class DoodadInformation extends InspectInformationSection {
 		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
 		if (!teleportLocation) return;
 
-		Clone.execute(localPlayer, this.doodad!, new Vector3(teleportLocation, localPlayer.z));
+		Clone.execute(localPlayer, this.doodad!, teleportLocation);
 	}
 
 	@Bound
 	private async setGrowthStage() {
 		const growthStage = await new EnumContextMenu(GrowingStage)
-			.setTranslator(stage => Translation.growthStage(stage, this.doodad!.description()?.usesSpores)!.inContext(TextContext.Title))
+			.setTranslator(stage => Translation.growthStage(stage, this.doodad!.description?.usesSpores)!.inContext(TextContext.Title))
 			.setSort(EnumSort.Id)
 			.waitForChoice();
 

@@ -5,11 +5,10 @@ import { CreatureType } from "game/entity/creature/ICreature";
 import { NPCType } from "game/entity/npc/INPCs";
 import { TerrainType } from "game/tile/ITerrain";
 import { TileEventType } from "game/tile/ITileEvent";
+import Tile from "game/tile/Tile";
 import Mod from "mod/Mod";
 import { Registry } from "mod/ModRegistry";
 import { RenderSource } from "renderer/IRenderer";
-import { SpriteBatchLayer } from "renderer/world/IWorldRenderer";
-import WorldRenderer from "renderer/world/WorldRenderer";
 import { BlockRow } from "ui/component/BlockRow";
 import Button from "ui/component/Button";
 import { CheckButton } from "ui/component/CheckButton";
@@ -21,16 +20,11 @@ import Bindable from "ui/input/Bindable";
 import InputManager from "ui/input/InputManager";
 import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
 import { Bound } from "utilities/Decorators";
-import TileHelpers from "utilities/game/TileHelpers";
-import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
-import Vector3 from "utilities/math/Vector3";
-import Paint from "../../action/Paint";
 import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
-import Overlays from "../../overlay/Overlays";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import Paint from "../../action/Paint";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
-import { getTileId, getTilePosition } from "../../util/TilePosition";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 import CorpsePaint from "../paint/Corpse";
 import CreaturePaint from "../paint/Creature";
@@ -96,9 +90,8 @@ export default class PaintPanel extends DebugToolsPanel {
 	private readonly paintRadius: RangeRow;
 
 	private painting = false;
-	private readonly paintTiles = new Set<number>();
-	private lastPaintPosition?: IVector2;
-	private maxSprites = 1024;
+	private readonly paintTiles = new Set<Tile>();
+	private lastPaintTile?: Tile;
 
 	public constructor() {
 		super();
@@ -116,8 +109,7 @@ export default class PaintPanel extends DebugToolsPanel {
 					.setMin(0)
 					.setMax(5)
 					.setRefreshMethod(() => 0)
-					.setTooltip(tooltip => tooltip.addText(text => text
-						.setText(translation(DebugToolsTranslation.PaintRadiusTooltip)))))
+					.setTooltip(tooltip => tooltip.setText(translation(DebugToolsTranslation.PaintRadiusTooltip))))
 				.setDisplayValue(true)
 				.addDefaultButton(() => 0))
 			.append(new BlockRow()
@@ -130,11 +122,11 @@ export default class PaintPanel extends DebugToolsPanel {
 					}))
 				.append(new Button()
 					.setText(translation(DebugToolsTranslation.ButtonPaintClear))
-					.setTooltip(tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.TooltipPaintClear))))
+					.setTooltip(tooltip => tooltip.setText(translation(DebugToolsTranslation.TooltipPaintClear)))
 					.event.subscribe("activate", this.clearPaint))
 				.append(new Button()
 					.setText(translation(DebugToolsTranslation.ButtonPaintComplete))
-					.setTooltip(tooltip => tooltip.addText(text => text.setText(translation(DebugToolsTranslation.TooltipPaintComplete))))
+					.setTooltip(tooltip => tooltip.setText(translation(DebugToolsTranslation.TooltipPaintComplete)))
 					.event.subscribe("activate", this.completePaint)));
 	}
 
@@ -151,11 +143,6 @@ export default class PaintPanel extends DebugToolsPanel {
 		if (this.painting) return false;
 
 		return undefined;
-	}
-
-	@EventHandler(WorldRenderer, "getMaxSpritesForLayer")
-	protected getMaxSpritesForLayer(_: any, maxSprites: number) {
-		return this.maxSprites = maxSprites + (this.painting ? this.paintTiles.size * 4 : 0);
 	}
 
 	@Bind.onDown(Bindable.MenuContextMenu, Priority.High)
@@ -183,26 +170,31 @@ export default class PaintPanel extends DebugToolsPanel {
 		}
 
 		const tilePosition = renderer.worldRenderer.screenToTile(...api.mouse.position.xy);
-		if (!tilePosition || this.lastPaintPosition === tilePosition) {
+		if (!tilePosition || this.lastPaintTile === tilePosition) {
 			return false;
 		}
 
-		this.lastPaintPosition = tilePosition;
+		this.lastPaintTile = tilePosition;
 
 		let shouldUpdateView = false;
 
-		const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
+		const direction = Vector2.direction(tilePosition, this.lastPaintTile = this.lastPaintTile || tilePosition);
 
-		let interpolatedPosition = new Vector2(this.lastPaintPosition);
+		let interpolatedPosition = new Vector2(this.lastPaintTile);
 		for (let i = 0; i < 300; i++) { // this is only used for if it goes into an infinite loop
-			interpolatedPosition = interpolatedPosition.add(direction).clamp(this.lastPaintPosition, tilePosition);
+			interpolatedPosition = interpolatedPosition.add(direction).clamp(this.lastPaintTile, tilePosition);
 
 			const paintPosition = interpolatedPosition.floor(new Vector2());
 
-			for (const [paintTilePosition] of TileHelpers.tilesInRange(localIsland, new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
-				if (SelectionOverlay.add(paintTilePosition)) {
+			const tile = localIsland.getTileSafe(paintPosition.x, paintPosition.y, localPlayer.z);
+			if (!tile) {
+				break;
+			}
+
+			for (const paintTile of tile.tilesInRange(this.paintRadius.value, true)) {
+				if (SelectionOverlay.add(paintTile)) {
 					shouldUpdateView = true;
-					this.paintTiles.add(getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z));
+					this.paintTiles.add(paintTile);
 				}
 			}
 
@@ -212,8 +204,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		}
 
 		if (shouldUpdateView) {
-			this.updateOverlayBatch();
-			renderers.updateView(RenderSource.Mod, false);
+			localPlayer.updateView(RenderSource.Mod, false);
 		}
 
 		return true;
@@ -226,26 +217,31 @@ export default class PaintPanel extends DebugToolsPanel {
 		}
 
 		const tilePosition = renderer.worldRenderer.screenToTile(...api.mouse.position.xy);
-		if (!tilePosition || this.lastPaintPosition === tilePosition) {
+		if (!tilePosition || this.lastPaintTile === tilePosition) {
 			return false;
 		}
 
-		this.lastPaintPosition = tilePosition;
+		this.lastPaintTile = tilePosition;
 
 		let shouldUpdateView = false;
 
-		const direction = Vector2.direction(tilePosition, this.lastPaintPosition = this.lastPaintPosition || tilePosition);
+		const direction = Vector2.direction(tilePosition, this.lastPaintTile = this.lastPaintTile || tilePosition);
 
-		let interpolatedPosition = new Vector2(this.lastPaintPosition);
+		let interpolatedPosition = new Vector2(this.lastPaintTile);
 		for (let i = 0; i < 300; i++) { // this is only used for if it goes into an infinite loop
-			interpolatedPosition = interpolatedPosition.add(direction).clamp(this.lastPaintPosition, tilePosition);
+			interpolatedPosition = interpolatedPosition.add(direction).clamp(this.lastPaintTile, tilePosition);
 
 			const paintPosition = interpolatedPosition.floor(new Vector2());
 
-			for (const [paintTilePosition] of TileHelpers.tilesInRange(localIsland, new Vector3(paintPosition, localPlayer.z), this.paintRadius.value, true)) {
-				if (SelectionOverlay.remove(paintTilePosition)) {
+			const tile = localIsland.getTileSafe(paintPosition.x, paintPosition.y, localPlayer.z);
+			if (!tile) {
+				break;
+			}
+
+			for (const paintTile of tile.tilesInRange(this.paintRadius.value, true)) {
+				if (SelectionOverlay.remove(paintTile)) {
 					shouldUpdateView = true;
-					this.paintTiles.delete(getTileId(paintTilePosition.x, paintTilePosition.y, localPlayer.z));
+					this.paintTiles.delete(paintTile);
 				}
 			}
 
@@ -255,8 +251,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		}
 
 		if (shouldUpdateView) {
-			this.updateOverlayBatch();
-			renderers.updateView(RenderSource.Mod, false);
+			localPlayer.updateView(RenderSource.Mod, false);
 		}
 
 		return true;
@@ -266,7 +261,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	@Bind.onUp(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableErasePaint"))
 	protected onStopPaint(api: IBindHandlerApi) {
 		if (this.painting && !api.input.isHolding(this.DEBUG_TOOLS.bindablePaint) && !api.input.isHolding(this.DEBUG_TOOLS.bindableErasePaint))
-			delete this.lastPaintPosition;
+			delete this.lastPaintTile;
 
 		return false;
 	}
@@ -330,12 +325,6 @@ export default class PaintPanel extends DebugToolsPanel {
 	// Internals
 	//
 
-	private updateOverlayBatch() {
-		if (this.paintTiles.size * 4 - 512 < this.maxSprites || this.paintTiles.size * 4 + 512 > this.maxSprites) {
-			renderer!.worldRenderer.initializeSpriteBatch(SpriteBatchLayer.Overlay);
-		}
-	}
-
 	@Bound
 	private onPaintSectionChange(paintSection: IPaintSection) {
 		if (paintSection.isChanging() && !this.painting) {
@@ -361,22 +350,19 @@ export default class PaintPanel extends DebugToolsPanel {
 			Object.assign(paintData, paintSection.getTilePaintData());
 		}
 
-		Paint.execute(localPlayer, Array.from(this.paintTiles), paintData);
+		Paint.execute(localPlayer, Array.from(this.paintTiles.keys()), paintData);
 
 		this.clearPaint();
 	}
 
 	@Bound
 	private clearPaint() {
-		for (const tileId of this.paintTiles) {
-			const position = getTilePosition(tileId);
-			const tile = localIsland.getTile(...position);
-			TileHelpers.Overlay.remove(tile, Overlays.isPaint);
+		for (const tile of this.paintTiles) {
+			SelectionOverlay.remove(tile);
 		}
 
 		this.paintTiles.clear();
 
-		this.updateOverlayBatch();
-		renderers.updateView(RenderSource.Mod, false);
+		localPlayer.updateView(RenderSource.Mod, false);
 	}
 }

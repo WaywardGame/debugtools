@@ -6,7 +6,7 @@ import Enums from "utilities/enum/Enums";
 import { defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.Player, ActionArgument.Integer32, ActionArgument.Float64)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, player, skill: SkillType, value) => {
 		if (!player) return;

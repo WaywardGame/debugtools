@@ -26,11 +26,11 @@
 	background: var(--background-dialog);
 }
 
-.debug-tools-paint-row:not(.painting) > .real-paint-row {
+.debug-tools-paint-row:not(.painting)>.real-paint-row {
 	grid-template-columns: 1fr !important;
 }
 
-.debug-tools-paint-row:not(.painting) > .real-paint-row > :not(:first-child) {
+.debug-tools-paint-row:not(.painting)>.real-paint-row> :not(:first-child) {
 	display: none;
 }
 
@@ -38,7 +38,7 @@
 	height: calc(100% - calc(20px * var(--scale)) + var(--negative-margin) * 2 - 54px) !important;
 }
 
-.debug-tools-inspect-dialog .tab-dialog-subpanel-link-wrapper > .game-dialog-scrollable-wrapper {
+.debug-tools-inspect-dialog .tab-dialog-subpanel-link-wrapper>.game-dialog-scrollable-wrapper {
 	padding-left: 1px;
 }
 
@@ -58,7 +58,7 @@
 	gap: 2px;
 }
 
-.debug-tools-dialog-selection-source > .dropdown-label {
+.debug-tools-dialog-selection-source>.dropdown-label {
 	gap: 2px;
 }
 
@@ -72,49 +72,49 @@
 	grid-template-columns: auto auto auto;
 }
 
-.debug-tools-selection-action > .text {
+.debug-tools-selection-action>.text {
 	min-height: fit-content;
 	align-self: center;
 	margin-top: calc(-2px * max(1, var(--scale)));
 }
 
-.debug-tools-island-heading .input > input {
-    width: 100%;
-    border: none;
-    height: 100%;
-    padding: calc(2px * max(1, var(--scale))) calc(5px * max(1, var(--scale)));
-    margin-top: calc(-2px * max(1, var(--scale)));
-    margin-bottom: calc(-1px * max(1, var(--scale)));
+.debug-tools-island-heading .input>input {
+	width: 100%;
+	border: none;
+	height: 100%;
+	padding: calc(2px * max(1, var(--scale))) calc(5px * max(1, var(--scale)));
+	margin-top: calc(-2px * max(1, var(--scale)));
+	margin-bottom: calc(-1px * max(1, var(--scale)));
 }
 
 .debug-tools-island-heading {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
+	display: grid;
+	grid-template-columns: auto 1fr auto;
 }
 
-.debug-tools-island-heading > .text {
-    height: fit-content;
-    display: inline-block;
-    align-self: center;
+.debug-tools-island-heading>.text {
+	height: fit-content;
+	display: inline-block;
+	align-self: center;
 }
 
 .debug-tools-selection-preview-wrapper {
-    margin: calc(10px * max(1, var(--scale))) 0;
+	margin: calc(10px * max(1, var(--scale))) 0;
 	display: grid;
 	grid-template-columns: auto 1fr auto;
 	gap: calc(10px * max(1, var(--scale)));
 }
 
 .debug-tools-selection-preview {
-    width: 100%;
+	width: 100%;
 	height: calc(200px * max(1, var(--scale)));
-    position: relative;	
+	position: relative;
 	grid-column: 2;
 	grid-row: 1;
 }
 
 .debug-tools-selection-preview:not(.has-targets) {
-	filter: grayscale() brightness(0.2);
+	filter: brightness(0);
 }
 
 .debug-tools-selection-preview-wrapper .button-icon {
@@ -129,4 +129,19 @@
 
 .debug-tools-inspect-human-wrapper-set-durability-bulk {
 	grid-template-columns: auto 1fr auto !important;
+}
+
+.debug-tools-inspect-human-wrapper-set-decay-bulk {
+	grid-template-columns: auto 1fr auto !important;
+}
+
+.debug-tools-container-contained-item-details-paginator {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+}
+
+.debug-tools-container-contained-item-details-paginator-info {
+	align-self: center;
+	justify-self: center;
+	color: var(--color-text-secondary);
 }

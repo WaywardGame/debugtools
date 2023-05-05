@@ -1,5 +1,6 @@
 import Island from "game/island/Island";
 import { IContainer } from "game/item/IItem";
+import MagicalPropertyManager from "game/magic/MagicalPropertyManager";
 
 /**
  * Clones the items in one container to another. If a container is empty or invalid, returns silently.
@@ -16,6 +17,6 @@ export default function (island: Island, from: Partial<IContainer>, to: Partial<
 		clone.durabilityMax = item.durabilityMax;
 		clone.renamed = item.renamed;
 		clone.weight = item.weight;
-		clone.magic.inherit(item.magic);
+		MagicalPropertyManager.inherit(item, clone);
 	}
 }

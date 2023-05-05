@@ -1,6 +1,6 @@
 import { Priority } from "event/EventEmitter";
 import { EventHandler } from "event/EventManager";
-import { ITile } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import Mod from "mod/Mod";
 import Register, { Registry } from "mod/ModRegistry";
 import { RenderSource } from "renderer/IRenderer";
@@ -10,12 +10,10 @@ import { IInput } from "ui/input/IInput";
 import InputManager from "ui/input/InputManager";
 import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
 import { Bound } from "utilities/Decorators";
-import TileHelpers from "utilities/game/TileHelpers";
-import Vector2 from "utilities/math/Vector2";
 import DebugTools from "./DebugTools";
 import { DEBUG_TOOLS_ID } from "./IDebugTools";
-import Overlays from "./overlay/Overlays";
 import CancelablePromise from "./util/CancelablePromise";
+import { IOverlayInfo } from "game/tile/ITerrain";
 
 export default class SelectLocation {
 
@@ -35,11 +33,11 @@ export default class SelectLocation {
 	// Fields
 	//
 
-	private _selecting = false;
-	public get selecting() { return this._selecting; }
-	private hoverTile?: ITile;
+	public get selecting() { return this.selectionPromise !== undefined; }
+
+	private hoverTile?: { tile: Tile; overlay: IOverlayInfo };
 	private selectTileHeld = false;
-	private selectionPromise: CancelablePromise<Vector2> | undefined;
+	private selectionPromise: CancelablePromise<Tile> | undefined;
 
 	////////////////////////////////////
 	// Public API
@@ -50,10 +48,14 @@ export default class SelectLocation {
 	 * this end (such as if the "cancel selection" bind is pressed).
 	 */
 	public select() {
-		this._selecting = true;
-		this.selectionTick();
-		return this.selectionPromise = new CancelablePromise<Vector2>()
+		this.cancel();
+
+		this.selectionPromise = new CancelablePromise<Tile>()
 			.onCancel(this.cancel);
+
+		setTimeout(this.selectionTick, game.interval);
+
+		return this.selectionPromise
 	}
 
 	////////////////////////////////////
@@ -65,7 +67,7 @@ export default class SelectLocation {
 	 */
 	@EventHandler(MovementHandler, "canMove")
 	protected canClientMove(): false | undefined {
-		if (this._selecting || this.selectTileHeld) {
+		if (this.selecting || this.selectTileHeld) {
 			return false;
 		}
 
@@ -75,7 +77,7 @@ export default class SelectLocation {
 	@Bind.onDown(Registry<SelectLocation>().get("bindableSelectLocation"), Priority.High)
 	@Bind.onDown(Registry<SelectLocation>().get("bindableCancelSelectLocation"), Priority.High)
 	protected onSelectOrCancelSelectLocation() {
-		return this._selecting;
+		return this.selecting;
 	}
 
 	@Bind.onUp(Registry<SelectLocation>().get("bindableSelectLocation"))
@@ -88,10 +90,10 @@ export default class SelectLocation {
 	// Helpers
 	//
 
-	// tslint:disable-next-line cyclomatic-complexity
 	@Bound private selectionTick() {
-		if (!this._selecting)
+		if (!this.selectionPromise) {
 			return;
+		}
 
 		setTimeout(this.selectionTick, game.interval);
 
@@ -100,48 +102,36 @@ export default class SelectLocation {
 
 		let updateRender = false;
 
-		if (this._selecting) {
-			const tilePosition = renderer?.worldRenderer.screenToTile(...InputManager.mouse.position.xy);
-			if (tilePosition) {
-				// add the target overlay to the tile currently being hovered
-				const tile = localIsland.getTile(tilePosition.x, tilePosition.y, localPlayer.z);
+		const tile = renderer?.worldRenderer.screenToTile(...InputManager.mouse.position.xy);
+		if (tile) {
+			if (tile !== this.hoverTile?.tile) {
+				updateRender = true;
 
-				if (tile !== this.hoverTile) {
-					updateRender = true;
-
-					if (this.hoverTile) {
-						TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
-					}
-
-					this.hoverTile = tile;
-					TileHelpers.Overlay.add(tile, { type: this.DEBUG_TOOLS.overlayTarget }, Overlays.isHoverTarget);
+				if (this.hoverTile?.tile) {
+					this.hoverTile.tile.removeOverlay(this.hoverTile.overlay);
 				}
 
-				if (cancelSelectTilePressed) {
-					updateRender = true;
-
-					if (this.selectionPromise) this.selectionPromise.cancel();
-					else this.cancel();
-
-				} else if (selectTilePressed) {
-					updateRender = true;
-
-					this.selectTile(tilePosition);
-
-					this.selectTileHeld = true;
-				}
+				this.hoverTile = { tile, overlay: { type: this.DEBUG_TOOLS.overlayTarget } };
+				tile.addOrUpdateOverlay(this.hoverTile.overlay);
 			}
 
-		} else if (this.hoverTile) {
-			// if we previously had the target overlay on a tile, remove it
-			TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
-			delete this.hoverTile;
+			if (cancelSelectTilePressed) {
+				updateRender = true;
 
-			updateRender = true;
+				this.cancel();
+
+			} else if (selectTilePressed) {
+				updateRender = true;
+
+				this.selectTile(tile);
+
+				this.selectTileHeld = true;
+			}
 		}
 
-		if (updateRender)
-			renderers.updateView(RenderSource.Mod, false);
+		if (updateRender) {
+			localPlayer.updateView(RenderSource.Mod, false);
+		}
 	}
 
 	/**
@@ -149,25 +139,27 @@ export default class SelectLocation {
 	 */
 	@Bound
 	private cancel() {
-		this._selecting = false;
+		const selectionPromise = this.selectionPromise;
+		if (!selectionPromise) {
+			return;
+		}
+
+		delete this.selectionPromise;
+
 		if (this.hoverTile) {
-			TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
+			this.hoverTile.tile.removeOverlay(this.hoverTile.overlay);
 			delete this.hoverTile;
 		}
+
+		selectionPromise.cancel();
 	}
 
 	/**
 	 * Removes the hover overlay, then resolves the selection promise with the selected position.
 	 */
-	private selectTile(tilePosition: Vector2) {
-		if (this.hoverTile) {
-			TileHelpers.Overlay.remove(this.hoverTile, Overlays.isHoverTarget);
-			delete this.hoverTile;
-		}
-
-		this._selecting = false;
-		this.selectionPromise!.resolve(tilePosition);
-		delete this.selectionPromise;
+	private selectTile(tile: Tile) {
+		this.selectionPromise?.resolve(tile);
+		this.cancel();
 	}
 
 }

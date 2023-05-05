@@ -1,16 +1,15 @@
-import { ITile } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import TileEvent from "game/tile/TileEvent";
 import Dictionary from "language/Dictionary";
 import { TextContext } from "language/ITranslation";
-import Translation from "language/Translation";
+import Translation, { Article } from "language/Translation";
 import Mod from "mod/Mod";
 import Button from "ui/component/Button";
-import { Tuple } from "utilities/collection/Arrays";
 import { Bound } from "utilities/Decorators";
 import Log from "utilities/Log";
-import { IVector2 } from "utilities/math/IVector";
+import { Tuple } from "utilities/collection/Tuple";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Remove from "../../action/Remove";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import { areArraysIdentical } from "../../util/Array";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 
@@ -36,7 +35,7 @@ export default class TileEventInformation extends InspectInformationSection {
 	public override getTabs(): TabInformation[] {
 		return this.tileEvents.entries().stream()
 			.map(([i, tileEvent]) => Tuple(i, () => translation(DebugToolsTranslation.TileEventName)
-				.get(Translation.nameOf(Dictionary.TileEvent, tileEvent, false).inContext(TextContext.Title))))
+				.get(Translation.nameOf(Dictionary.TileEvent, tileEvent, Article.None).inContext(TextContext.Title))))
 			.toArray();
 	}
 
@@ -45,7 +44,7 @@ export default class TileEventInformation extends InspectInformationSection {
 		return this;
 	}
 
-	public override update(position: IVector2, tile: ITile) {
+	public override update(tile: Tile) {
 		const tileEvents = [...tile.events || []];
 
 		if (areArraysIdentical(tileEvents, this.tileEvents)) return;

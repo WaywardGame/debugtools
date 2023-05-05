@@ -11,7 +11,7 @@ export default class CorpsePaint extends Component implements IPaintSection {
     constructor();
     getTilePaintData(): {
         corpse: {
-            type: "remove" | CreatureType | undefined;
+            type: CreatureType | "remove" | undefined;
             aberrant: boolean;
             replaceExisting: boolean;
         };

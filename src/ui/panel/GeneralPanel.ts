@@ -1,17 +1,16 @@
 import { SfxType } from "audio/IAudio";
 import { EventBus } from "event/EventBuses";
-import { Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { BiomeType } from "game/biome/IBiome";
 import { DEFAULT_ISLAND_ID, IslandId, IslandPosition } from "game/island/IIsland";
 import { ReferenceType } from "game/reference/IReferenceManager";
+import Tile from "game/tile/Tile";
 import { WorldZ } from "game/WorldZ";
 import Dictionary from "language/Dictionary";
 import TranslationImpl from "language/impl/TranslationImpl";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
-import { Registry } from "mod/ModRegistry";
 import { ParticleType } from "renderer/particle/IParticle";
 import particles from "renderer/particle/Particles";
 import { BlockRow } from "ui/component/BlockRow";
@@ -24,13 +23,11 @@ import Input from "ui/component/Input";
 import { LabelledRow } from "ui/component/LabelledRow";
 import { RangeRow } from "ui/component/RangeRow";
 import Text, { Heading } from "ui/component/Text";
-import Bind, { IBindHandlerApi } from "ui/input/Bind";
 import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
 import Tooltip from "ui/tooltip/Tooltip";
-import { Tuple } from "utilities/collection/Arrays";
+import { Tuple } from "utilities/collection/Tuple";
 import { Bound, Debounce } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
-import Vector2 from "utilities/math/Vector2";
 import ChangeLayer from "../../action/ChangeLayer";
 import ForceSailToCivilization from "../../action/ForceSailToCivilization";
 import MoveToIsland from "../../action/MoveToIsland";
@@ -62,7 +59,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 	private readonly dropdownTravel: IslandDropdown<string>;
 	private readonly checkButtonParticle: CheckButton;
 
-	private selectionPromise: CancelablePromise<Vector2> | undefined;
+	private selectionPromise: CancelablePromise<Tile> | undefined;
 
 	public constructor() {
 		super();
@@ -71,23 +68,16 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.setText(translation(DebugToolsTranslation.ButtonInspect))
 			.setRefreshMethod(() => !!this.selectionPromise)
 			.event.subscribe("willToggle", (_, checked) => {
-				if (!!this.selectionPromise !== checked) {
-					if (checked && this.DEBUG_TOOLS.selector.selecting) return false;
+				this.checkButtonAudio.setChecked(false, false);
+				this.checkButtonParticle.setChecked(false, false);
 
-					if (!checked) {
-						if (this.selectionPromise && !this.selectionPromise.isResolved) {
-							this.selectionPromise.cancel();
-						}
+				return this.selectionLogic(checked, (tile) => {
+					this.inspectButton.setChecked(false, false);
 
-						delete this.selectionPromise;
-
-					} else {
-						this.selectionPromise = this.DEBUG_TOOLS.selector.select();
-						this.selectionPromise.then(this.inspectTile);
+					if (tile) {
+						this.DEBUG_TOOLS.inspect(tile);
 					}
-				}
-
-				return true;
+				});
 			})
 			.appendTo(this);
 
@@ -145,8 +135,8 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.append(this.dropdownLayer = new Dropdown<number>()
 				.setRefreshMethod(() => ({
 					options: Object.values(localIsland.world.layers)
-						.map(layer => [layer.level, option => option.setText(translation(DebugToolsTranslation.OptionLayer)
-							.addArgs(layer.level, Translation.get(Dictionary.WorldLayer, layer.level).inContext(TextContext.Title), Enums.getMod(WorldZ, layer.level)?.config.name))] as IDropdownOption<number>),
+						.map(layer => [layer.z, option => option.setText(translation(DebugToolsTranslation.OptionLayer)
+							.addArgs(layer.z, Translation.get(Dictionary.WorldLayer, layer.z).inContext(TextContext.Title), Enums.getMod(WorldZ, layer.z)?.config.name))] as IDropdownOption<number>),
 					defaultOption: localPlayer.z,
 				}))
 				.event.subscribe("selection", this.changeLayer))
@@ -181,7 +171,13 @@ export default class GeneralPanel extends DebugToolsPanel {
 		new BlockRow()
 			.classes.add("debug-tools-dialog-checkbutton-dropdown-row")
 			.append(this.checkButtonAudio = new CheckButton()
-				.setText(translation(DebugToolsTranslation.ButtonAudio)))
+				.setText(translation(DebugToolsTranslation.ButtonAudio))
+				.event.subscribe("willToggle", (_, checked) => {
+					this.inspectButton.setChecked(false, false);
+					this.checkButtonParticle.setChecked(false, false);
+
+					return this.selectionLogic(checked, (tile) => tile?.queueSoundEffect(this.dropdownAudio.selection), () => this.checkButtonAudio.checked);
+				}))
 			.append(this.dropdownAudio = new Dropdown<SfxType>()
 				.setRefreshMethod(() => ({
 					defaultOption: SfxType.Click,
@@ -195,7 +191,13 @@ export default class GeneralPanel extends DebugToolsPanel {
 		new BlockRow()
 			.classes.add("debug-tools-dialog-checkbutton-dropdown-row")
 			.append(this.checkButtonParticle = new CheckButton()
-				.setText(translation(DebugToolsTranslation.ButtonParticle)))
+				.setText(translation(DebugToolsTranslation.ButtonParticle))
+				.event.subscribe("willToggle", (_, checked) => {
+					this.inspectButton.setChecked(false, false);
+					this.checkButtonAudio.setChecked(false, false);
+
+					return this.selectionLogic(checked, (tile) => tile?.createParticles(particles[this.dropdownParticle.selection]), () => this.checkButtonParticle.checked);
+				}))
 			.append(this.dropdownParticle = new Dropdown<ParticleType>()
 				.setRefreshMethod(() => ({
 					defaultOption: ParticleType.Blood,
@@ -239,20 +241,27 @@ export default class GeneralPanel extends DebugToolsPanel {
 		this.dropdownTravel.refresh();
 	}
 
-	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).registry("selector").get("bindableSelectLocation"), Priority.High)
-	public onSelectLocation(api: IBindHandlerApi) {
-		if (!this.checkButtonAudio.checked && !this.checkButtonParticle.checked)
-			return false;
+	private selectionLogic(checked: boolean, onSelection: (tile: Tile | undefined) => void, triggerAgain?: () => boolean) {
+		if (this.selectionPromise && !this.selectionPromise.isResolved) {
+			this.selectionPromise.cancel();
+		}
 
-		const position = renderer?.worldRenderer.screenToTile(...api.mouse.position.xy);
-		if (!position)
-			return false;
+		delete this.selectionPromise;
 
-		if (this.checkButtonAudio.checked)
-			audio?.queueEffect(this.dropdownAudio.selection, localIsland, position.x, position.y, localPlayer.z);
+		if (checked) {
+			this.selectionPromise = this.DEBUG_TOOLS.selector.select();
+			this.selectionPromise.then((tile) => {
+				delete this.selectionPromise;
 
-		else
-			renderers.particle.create(localIsland, position.x, position.y, localPlayer.z, particles[this.dropdownParticle.selection]);
+				onSelection(tile);
+
+				if (triggerAgain?.()) {
+					setTimeout(() => {
+						this.selectionLogic(triggerAgain?.(), onSelection, triggerAgain);
+					}, 100);
+				}
+			});
+		}
 
 		return true;
 	}
@@ -270,20 +279,12 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 	@OwnEventHandler(GeneralPanel, "switchAway")
 	protected onSwitchAway() {
-		if (this.selectionPromise) {
-			this.selectionPromise.cancel();
-			delete this.selectionPromise;
-		}
-	}
-
-	@Bound
-	private inspectTile(tilePosition?: Vector2) {
+		this.selectionPromise?.cancel();
 		delete this.selectionPromise;
-		this.inspectButton.refresh();
 
-		if (!tilePosition) return;
-
-		this.DEBUG_TOOLS.inspect(tilePosition);
+		this.inspectButton.setChecked(false, false);
+		this.checkButtonAudio.setChecked(false, false);
+		this.checkButtonParticle.setChecked(false, false);
 	}
 
 	@Bound private changeLayer(_: any, layer: WorldZ) {
@@ -342,7 +343,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 class IslandDropdown<OTHER_OPTIONS extends string = never> extends GroupDropdown<Record<IslandId, string>, OTHER_OPTIONS, BiomeType> {
 
 	public constructor(defaultOption: IslandId | OTHER_OPTIONS, options: SupplierOr<Iterable<IDropdownOption<OTHER_OPTIONS>>>) {
-		super(game.islands.keyStream().toObject(key => [key, key]), -1, defaultOption, options);
+		super(game.islands.keyStream().toObject(key => [key, key]), undefined, defaultOption, options);
 		this.setPrefix("biome");
 	}
 

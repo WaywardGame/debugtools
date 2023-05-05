@@ -51,12 +51,10 @@ export default class PaintPanel extends DebugToolsPanel {
     private readonly paintRadius;
     private painting;
     private readonly paintTiles;
-    private lastPaintPosition?;
-    private maxSprites;
+    private lastPaintTile?;
     constructor();
     getTranslation(): DebugToolsTranslation;
     protected canClientMove(): false | undefined;
-    protected getMaxSpritesForLayer(_: any, maxSprites: number): number;
     protected onContextMenuBind(api: IBindHandlerApi): boolean;
     protected onStartPaintOrErasePaint(api: IBindHandlerApi): boolean;
     protected onPaint(api: IBindHandlerApi): boolean;
@@ -68,7 +66,6 @@ export default class PaintPanel extends DebugToolsPanel {
     protected onSwitchTo(): void;
     protected onSwitchAway(): void;
     protected onWillRemove(): void;
-    private updateOverlayBatch;
     private onPaintSectionChange;
     private showPaintSectionResetMenu;
     private completePaint;

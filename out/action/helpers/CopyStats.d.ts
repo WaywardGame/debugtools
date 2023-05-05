@@ -1,2 +1,2 @@
-import Entity from "game/entity/Entity";
-export default function (from: Entity, to: Entity): void;
+import EntityWithStats from "game/entity/EntityWithStats";
+export default function (from: EntityWithStats, to: EntityWithStats): void;

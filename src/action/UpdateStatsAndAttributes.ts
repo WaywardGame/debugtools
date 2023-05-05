@@ -4,7 +4,7 @@ import { EntityType } from "game/entity/IEntity";
 import { defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.Player)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, player) => {
 		player.updateStatsAndAttributes();

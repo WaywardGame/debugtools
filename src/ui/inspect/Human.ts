@@ -56,7 +56,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 			this.reputationSliders[type]!.refresh();
 		}
 
-		entity.event.until(this, "switchAway")
+		entity?.asEntityWithStats?.event.until(this, "switchAway")
 			.subscribe("statChanged", this.onStatChange);
 	}
 

@@ -4,14 +4,13 @@ import SailToCivilization from "game/entity/action/actions/SailToCivilization";
 import { EntityType } from "game/entity/IEntity";
 import { ItemType } from "game/item/IItem";
 import { TerrainType } from "game/tile/ITerrain";
-import TileHelpers from "utilities/game/TileHelpers";
 import { defaultUsability } from "../Actions";
 
 export default new Action()
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
 	.setHandler(action => {
-		const position = TileHelpers.findMatchingTile(action.executor.island, action.executor, (_1, _2, tile) => TileHelpers.getType(tile) === TerrainType.DeepSeawater);
+		const position = action.executor.tile.findMatchingTile((tile) => tile.type === TerrainType.DeepSeawater);
 		if (!position) {
 			return;
 		}

@@ -14,7 +14,7 @@ import { teleportEntity } from "./helpers/TeleportEntity";
  * @param selection An array of `[SelectionType, number]` tuples. Each represents a selected thing, such as a creature and its ID. 
  */
 export default new Action(ActionArgument.Integer32, ActionArgument.Array, optional(ActionArgument.String))
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, executionType: DebugToolsTranslation, selection: [SelectionType, number][], alternativeTarget) => {
 		for (const [type, id] of selection) {
@@ -27,15 +27,15 @@ export default new Action(ActionArgument.Integer32, ActionArgument.Array, option
 					Remove(action, target);
 					break;
 				case DebugToolsTranslation.ActionTeleport:
-					const playerToTeleport = playerManager.getAll(true, true).find(player => player.identifier === alternativeTarget);
+					const playerToTeleport = game.playerManager.getAll(true, true).find(player => player.identifier === alternativeTarget);
 					if (playerToTeleport) {
-						teleportEntity(action, playerToTeleport, target);
+						teleportEntity(action, playerToTeleport, target.tile);
 					}
 					return;
 			}
 		}
 
-		renderers.computeSpritesInViewport();
+		renderers.computeSpritesInViewport(action.executor);
 		action.setUpdateRender();
 	});
 
@@ -46,7 +46,7 @@ function getTarget(island: Island, type: SelectionType, id: string | number) {
 		case SelectionType.TileEvent: return island.tileEvents.get(id as number);
 		case SelectionType.Doodad: return island.doodads.get(id as number);
 		case SelectionType.Corpse: return island.corpses.get(id as number);
-		case SelectionType.Player: return playerManager.getAll(true, true).find(player => player.identifier === id);
+		case SelectionType.Player: return game.playerManager.getAll(true, true).find(player => player.identifier === id);
 	}
 }
 

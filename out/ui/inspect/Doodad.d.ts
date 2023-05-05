@@ -1,6 +1,5 @@
-import { ITile } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import Log from "utilities/Log";
-import { IVector2 } from "utilities/math/IVector";
 import DebugTools from "../../DebugTools";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 export default class DoodadInformation extends InspectInformationSection {
@@ -11,7 +10,7 @@ export default class DoodadInformation extends InspectInformationSection {
     constructor();
     protected onSwitchTo(): void;
     getTabs(): TabInformation[];
-    update(position: IVector2, tile: ITile): void;
+    update(tile: Tile): void;
     logUpdate(): void;
     private removeDoodad;
     private cloneDoodad;

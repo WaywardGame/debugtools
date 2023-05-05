@@ -55,8 +55,9 @@ export default class UnlockedCameraMovementHandler {
 	 * Simple velocity movement implementation
 	 */
 	@Bound public tick() {
-		if (!this.running || !renderer)
+		if (!this.running || !renderer || !localIsland) {
 			return;
+		}
 
 		setTimeout(this.tick, game.interval);
 
@@ -87,7 +88,7 @@ export default class UnlockedCameraMovementHandler {
 		this.velocity.multiply(friction);
 
 		const beforePosition = this.position.raw();
-		this.position.add(this.velocity).mod(game.mapSize);
+		this.position.add(this.velocity).mod(localIsland.mapSize);
 
 		// homes in on the player again if in the 'transition' state
 		if (this.transition) {
@@ -98,7 +99,7 @@ export default class UnlockedCameraMovementHandler {
 
 		if (!this.position.equals(beforePosition)) {
 			gameScreen?.worldTooltipHandler?.["updatePosition"]();
-			renderers.updateView(RenderSource.Mod, false);
+			localPlayer.updateView(RenderSource.Mod, false);
 		}
 	}
 }

@@ -1,10 +1,10 @@
 import { IActionApi } from "game/entity/action/IAction";
 import Entity from "game/entity/Entity";
-import Player from "game/entity/player/Player";
 import Item from "game/item/Item";
 import InspectDialog from "../../ui/InspectDialog";
+import Human from "game/entity/Human";
 
-export default function (action: IActionApi<Player>, item: Item) {
+export default function (action: IActionApi<Human>, item: Item) {
 	const container = item.containedWithin;
 	action.executor.island.items.remove(item);
 

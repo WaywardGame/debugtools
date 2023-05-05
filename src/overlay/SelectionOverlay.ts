@@ -1,103 +1,141 @@
 import Stream from "@wayward/goodstream/Stream";
-import { ITile } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import Mod from "mod/Mod";
-import { Tuple } from "utilities/collection/Arrays";
+import { Tuple } from "utilities/collection/Tuple";
 import Enums from "utilities/enum/Enums";
-import TileHelpers from "utilities/game/TileHelpers";
-import { IVector2, IVector3 } from "utilities/math/IVector";
+import { IVector2 } from "utilities/math/IVector";
 import Vector2 from "utilities/math/Vector2";
 import Vector3 from "utilities/math/Vector3";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID } from "../IDebugTools";
-import Overlays from "./Overlays";
+import { IOverlayInfo } from "game/tile/ITerrain";
 
 export default class SelectionOverlay {
+
+	/**
+	 * Tiles that have a selection overlay
+	 */
+	private static readonly overlays: Set<Tile> = new Set();
+
+	/**
+	 * List of overlays being rendered for each tile
+	 */
+	private static readonly subTileOverlays: Map<Tile, Set<IOverlayInfo>> = new Map();
 
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
 	public static readonly debugTools: DebugTools;
 
-	public static add(tilePosition: IVector2 | IVector3, tile = getTile(tilePosition)) {
-		if (TileHelpers.Overlay.add(tile, { type: this.debugTools.overlayPaint }, Overlays.isPaint)) {
-			updateSelectionOverlay(tile, tilePosition);
+	public static add(tile: Tile) {
+		if (!this.overlays.has(tile)) {
+			this.overlays.add(tile);
+
+			this.updateSelectionOverlay(tile);
+
 			return true;
 		}
 
 		return false;
 	}
 
-	public static remove(tilePosition: IVector2 | IVector3, tile = getTile(tilePosition)) {
-		if (TileHelpers.Overlay.remove(tile, Overlays.isPaint)) {
-			updateSelectionOverlay(tile, tilePosition);
+	public static remove(tile: Tile) {
+		if (this.overlays.delete(tile)) {
+			this.updateSelectionOverlay(tile);
+
 			return true;
 		}
 
 		return false;
 	}
-}
 
-function getTile(tilePosition: IVector2 | IVector3) {
-	return localIsland.getTile(tilePosition.x, tilePosition.y, "z" in tilePosition ? tilePosition.z : localPlayer.z);
-}
+	/**
+	 * Selection overlay tilemapping
+	 * @param tile The tile to update
+	 * @param updateNeighbors Whether to update the tile's neighbours. Defaults to `true`. This method calls itself to update its neighbours,
+	 * but doesn't update neighbours in the recursive call.
+	 */
+	private static updateSelectionOverlay(tile: Tile, updateNeighbors = true) {
+		let neighborTiles: INeighborTiles | undefined;
+		let connections: NeighborPosition[] | undefined;
 
-/**
- * Selection overlay tilemapping
- * @param tile The tile to update
- * @param tilePosition The position of this tile
- * @param updateNeighbors Whether to update the tile's neighbours. Defaults to `true`. This method calls itself to update its neighbours,
- * but doesn't update neighbours in the recursive call.
- */
-function updateSelectionOverlay(tile: ITile, tilePosition: IVector2, updateNeighbors = true) {
-	let neighborTiles: INeighborTiles | undefined;
-	let connections: NeighborPosition[] | undefined;
-
-	const isTilePainted = TileHelpers.Overlay.remove(tile, Overlays.isPaint);
-
-	// if this tile is painted (has the selection overlay), we tilemap this tile based on its neighbours
-	if (isTilePainted) {
-		neighborTiles = getNeighborTiles(tilePosition);
-		connections = getPaintOverlayConnections(neighborTiles);
-
-		const mappedTile: ISubTileMap = {
-			[SubTilePosition.TopLeft]: paintTileMap[SubTilePosition.TopLeft][getId(SubTilePosition.TopLeft, ...connections)],
-			[SubTilePosition.TopRight]: paintTileMap[SubTilePosition.TopRight][getId(SubTilePosition.TopRight, ...connections)],
-			[SubTilePosition.BottomLeft]: paintTileMap[SubTilePosition.BottomLeft][getId(SubTilePosition.BottomLeft, ...connections)],
-			[SubTilePosition.BottomRight]: paintTileMap[SubTilePosition.BottomRight][getId(SubTilePosition.BottomRight, ...connections)],
-		};
-
-		for (const subTilePosition of Enums.values(SubTilePosition)) {
-			const offset = subTilePositionMap[subTilePosition];
-
-			if (mappedTile[subTilePosition] === 4) {
-				TileHelpers.Overlay.add(tile, {
-					type: SelectionOverlay.debugTools.overlayPaint,
-					size: 8,
-					offsetX: 20,
-					offsetY: 4,
-					spriteOffsetX: offset.x / 16,
-					spriteOffsetY: offset.y / 16,
-				});
-				continue;
+		// clear existing subtile overlays
+		const subTileOverlays = this.subTileOverlays.get(tile);
+		if (subTileOverlays) {
+			for (const overlay of subTileOverlays) {
+				tile.removeOverlay(overlay);
 			}
 
-			TileHelpers.Overlay.add(tile, {
-				type: SelectionOverlay.debugTools.overlayPaint,
-				size: 8,
-				offsetX: mappedTile[subTilePosition] * 16 + offset.x,
-				offsetY: offset.y,
-				spriteOffsetX: offset.x / 16,
-				spriteOffsetY: offset.y / 16,
-			});
+			this.subTileOverlays.delete(tile);
+		}
+
+		// if this tile should have a selection overlay, we tilemap this tile based on its neighbours
+		if (this.overlays.has(tile)) {
+			neighborTiles = getNeighborTiles(tile);
+			connections = this.getPaintOverlayConnections(neighborTiles);
+
+			const mappedTile: ISubTileMap = {
+				[SubTilePosition.TopLeft]: paintTileMap[SubTilePosition.TopLeft][getId(SubTilePosition.TopLeft, ...connections)],
+				[SubTilePosition.TopRight]: paintTileMap[SubTilePosition.TopRight][getId(SubTilePosition.TopRight, ...connections)],
+				[SubTilePosition.BottomLeft]: paintTileMap[SubTilePosition.BottomLeft][getId(SubTilePosition.BottomLeft, ...connections)],
+				[SubTilePosition.BottomRight]: paintTileMap[SubTilePosition.BottomRight][getId(SubTilePosition.BottomRight, ...connections)],
+			};
+
+			let subTileOverlays = this.subTileOverlays.get(tile);
+			if (!subTileOverlays) {
+				subTileOverlays = new Set();
+				this.subTileOverlays.set(tile, subTileOverlays);
+			}
+
+			for (const subTilePosition of Enums.values(SubTilePosition)) {
+				const offset = subTilePositionMap[subTilePosition];
+
+				let subTileOverlay: IOverlayInfo;
+
+				if (mappedTile[subTilePosition] === 4) {
+					subTileOverlay = {
+						type: SelectionOverlay.debugTools.overlayPaint,
+						size: 8,
+						offsetX: 20,
+						offsetY: 4,
+						spriteOffsetX: offset.x / 16,
+						spriteOffsetY: offset.y / 16,
+					};
+
+				} else {
+					subTileOverlay = {
+						type: SelectionOverlay.debugTools.overlayPaint,
+						size: 8,
+						offsetX: mappedTile[subTilePosition] * 16 + offset.x,
+						offsetY: offset.y,
+						spriteOffsetX: offset.x / 16,
+						spriteOffsetY: offset.y / 16,
+					};
+				}
+
+				subTileOverlays.add(subTileOverlay);
+
+				tile.addOrUpdateOverlay(subTileOverlay);
+			}
+		}
+
+		if (!updateNeighbors) return;
+
+		neighborTiles = neighborTiles || getNeighborTiles(tile);
+		connections = connections || this.getPaintOverlayConnections(neighborTiles);
+
+		for (const neighborTile of Object.values(neighborTiles)) {
+			this.updateSelectionOverlay(neighborTile, false);
 		}
 	}
 
-	if (!updateNeighbors) return;
-
-	neighborTiles = neighborTiles || getNeighborTiles(tilePosition);
-	connections = connections || getPaintOverlayConnections(neighborTiles);
-
-	for (const [neighborPosition, neighborTile] of Object.values(neighborTiles)) {
-		updateSelectionOverlay(neighborTile, neighborPosition, false);
+	/**
+	 * Returns an array of neighbor positions that are painted/selected
+	 */
+	private static getPaintOverlayConnections(neighbors: INeighborTiles) {
+		return Stream.keys(neighbors)
+			.filter(neighborPosition => this.overlays.has(neighbors[neighborPosition]))
+			.toArray();
 	}
+
 }
 
 /**
@@ -106,17 +144,8 @@ function updateSelectionOverlay(tile: ITile, tilePosition: IVector2, updateNeigh
 function getNeighborTiles(tilePosition: IVector2): INeighborTiles {
 	const vectors = getNeighborVectors(tilePosition);
 	return Enums.values(NeighborPosition)
-		.map(pos => Tuple(pos, Tuple(vectors[pos], localIsland.getTile(...vectors[pos].xyz))))
+		.map(pos => Tuple(pos, localIsland.getTile(...vectors[pos].xyz)))
 		.toObject();
-}
-
-/**
- * Returns an array of neighbor positions that are painted/selected
- */
-function getPaintOverlayConnections(neighbors: INeighborTiles) {
-	return Stream.keys(neighbors)
-		.filter(neighborPosition => TileHelpers.Overlay.has(neighbors[neighborPosition][1], Overlays.isPaint))
-		.toArray();
 }
 
 /**
@@ -135,7 +164,7 @@ function getNeighborVectors(tilePosition: IVector2) {
 	};
 }
 
-type INeighborTiles = { [key in NeighborPosition]: [Vector3, ITile] };
+type INeighborTiles = Record<NeighborPosition, Tile>;
 
 enum NeighborPosition {
 	TopLeft = "T",
@@ -148,7 +177,7 @@ enum NeighborPosition {
 	Left = "E",
 }
 
-type ISubTileMap = { [key in SubTilePosition]: number };
+type ISubTileMap = Record<SubTilePosition, number>;
 
 enum SubTilePosition {
 	TopLeft,
@@ -215,7 +244,6 @@ function getId(relevantFor: SubTilePosition, ...positions: (NeighborPosition | u
 /**
  * Returns whether the given neighbor position is relevant for the given sub tile position (EG: when the sub tile sprite is affected by the neighbor)
  */
-// tslint:disable cyclomatic-complexity
 function isRelevant(subTilePosition: SubTilePosition, neighborPosition: NeighborPosition) {
 	switch (subTilePosition) {
 		case SubTilePosition.TopLeft:
@@ -228,7 +256,6 @@ function isRelevant(subTilePosition: SubTilePosition, neighborPosition: Neighbor
 			return neighborPosition === NeighborPosition.Bottom || neighborPosition === NeighborPosition.BottomRight || neighborPosition === NeighborPosition.Right;
 	}
 }
-// tslint:enable cyclomatic-complexity
 
 const subTilePositionMap = {
 	[SubTilePosition.TopLeft]: Vector2.ZERO,

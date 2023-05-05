@@ -1,14 +1,13 @@
 import Translation from "language/Translation";
 import { RenderLayerFlag } from "renderer/world/IWorldRenderer";
 import type DebugTools from "./DebugTools";
+import type { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
+import type { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
 import type DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import type InspectEntityInformationSubsection from "./ui/component/InspectEntityInformationSubsection";
 import type InspectInformationSection from "./ui/component/InspectInformationSection";
-import type { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import type { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect/Entity";
-import type { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
 export declare const DEBUG_TOOLS_ID = "Debug Tools";
-export declare const ZOOM_LEVEL_MAX: number;
 export declare function translation(debugToolsTranslation: DebugToolsTranslation | Translation): import("../node_modules/@wayward/types/definitions/game/language/impl/TranslationImpl").default;
 export declare module translation {
     function setDebugToolsInstance(instance: DebugTools): void;
@@ -98,69 +97,79 @@ export declare enum DebugToolsTranslation {
     RangeRotateDegrees = 81,
     LabelDegrade = 82,
     RangeDegradeAmount = 83,
-    DialogTitleInspect = 84,
-    InspectTileTitle = 85,
-    InspectTerrain = 86,
-    LabelChangeTerrain = 87,
-    ButtonToggleTilled = 88,
-    ButtonIncludeNeighbors = 89,
-    ButtonRefreshTile = 90,
-    EntityName = 91,
-    ButtonKillEntity = 92,
-    ButtonHealEntity = 93,
-    ButtonTeleportEntity = 94,
-    ButtonHealLocalPlayer = 95,
-    ButtonTeleportLocalPlayer = 96,
-    ButtonCloneEntity = 97,
-    ButtonClearInventory = 98,
-    KillEntityDeathMessage = 99,
-    CorpseName = 100,
-    ButtonResurrectCorpse = 101,
-    ButtonRemoveThing = 102,
-    ButtonTameCreature = 103,
-    LabelWeightBonus = 104,
-    LabelItem = 105,
-    LabelMalignity = 106,
-    LabelBenignity = 107,
-    OptionTeleportSelectLocation = 108,
-    OptionTeleportToLocalPlayer = 109,
-    OptionTeleportToHost = 110,
-    OptionTeleportToPlayer = 111,
-    ButtonToggleInvulnerable = 112,
-    ButtonToggleNoClip = 113,
-    LabelSkill = 114,
-    None = 115,
-    LabelQuality = 116,
-    LabelQuantity = 117,
-    LabelDurability = 118,
-    ButtonApply = 119,
-    AddToInventory = 120,
-    DoodadName = 121,
-    TabItemStack = 122,
-    UnlockInspection = 123,
-    LockInspection = 124,
-    TileEventName = 125,
-    ButtonTogglePermissions = 126,
-    ButtonSetGrowthStage = 127,
-    LabelItemDetails = 128,
-    LabelBulkItemOperations = 129,
-    InspectionTemperature = 130,
-    InspectionTemperatureBiome = 131,
-    InspectionTemperatureTimeModifier = 132,
-    InspectionTemperatureLayerModifier = 133,
-    InspectionTemperatureTileCalculated = 134,
-    InspectionTemperatureTileCalculatedHeat = 135,
-    InspectionTemperatureTileCalculatedCold = 136,
-    InspectionTemperatureTileProducedHeat = 137,
-    InspectionTemperatureTileProducedCold = 138,
-    ActionResurrect = 139,
-    ActionClone = 140,
-    ActionTeleport = 141,
-    To = 142
+    PanelTemperature = 84,
+    HeadingTemperatureOverlay = 85,
+    TemperatureOverlayModeProduced = 86,
+    TemperatureOverlayModeCalculated = 87,
+    DialogTitleInspect = 88,
+    InspectTileTitle = 89,
+    InspectTerrain = 90,
+    LabelChangeTerrain = 91,
+    ButtonToggleTilled = 92,
+    ButtonIncludeNeighbors = 93,
+    ButtonRefreshTile = 94,
+    EntityName = 95,
+    ButtonKillEntity = 96,
+    ButtonHealEntity = 97,
+    ButtonTeleportEntity = 98,
+    ButtonHealLocalPlayer = 99,
+    ButtonTeleportLocalPlayer = 100,
+    ButtonCloneEntity = 101,
+    ButtonClearInventory = 102,
+    KillEntityDeathMessage = 103,
+    CorpseName = 104,
+    ButtonResurrectCorpse = 105,
+    ButtonRemoveThing = 106,
+    ButtonTameCreature = 107,
+    LabelWeightBonus = 108,
+    LabelItem = 109,
+    LabelMalignity = 110,
+    LabelBenignity = 111,
+    OptionTeleportSelectLocation = 112,
+    OptionTeleportToLocalPlayer = 113,
+    OptionTeleportToHost = 114,
+    OptionTeleportToPlayer = 115,
+    ButtonToggleInvulnerable = 116,
+    ButtonToggleNoClip = 117,
+    LabelSkill = 118,
+    None = 119,
+    LabelQuality = 120,
+    LabelQuantity = 121,
+    LabelDurability = 122,
+    LabelDecay = 123,
+    ButtonApply = 124,
+    AddToInventory = 125,
+    DoodadName = 126,
+    TabItemStack = 127,
+    UnlockInspection = 128,
+    LockInspection = 129,
+    TileEventName = 130,
+    ButtonTogglePermissions = 131,
+    ButtonSetGrowthStage = 132,
+    LabelItemDetails = 133,
+    LabelBulkItemOperations = 134,
+    ButtonPreviousItems = 135,
+    ButtonNextItems = 136,
+    LabelItems = 137,
+    InspectionTemperature = 138,
+    InspectionTemperatureBiome = 139,
+    InspectionTemperatureBiomeTimeModifier = 140,
+    InspectionTemperatureLayerModifier = 141,
+    InspectionTemperatureLayerTimeModifier = 142,
+    InspectionTemperatureTileCalculated = 143,
+    InspectionTemperatureTileCalculatedHeat = 144,
+    InspectionTemperatureTileCalculatedCold = 145,
+    InspectionTemperatureTileProducedHeat = 146,
+    InspectionTemperatureTileProducedCold = 147,
+    ActionResurrect = 148,
+    ActionClone = 149,
+    ActionTeleport = 150,
+    To = 151,
+    RevertDeath = 152,
+    StatsPercentage = 153
 }
 export interface ISaveData {
     lastVersion: string;
-    zoomLevel?: number;
     playerData: {
         [key: string]: IPlayerData;
     };
@@ -171,10 +180,6 @@ export interface IPlayerData {
     invulnerable?: boolean;
     lighting?: boolean;
     fog?: boolean;
-    noclip: false | {
-        moving: boolean;
-        delay: number;
-    };
     permissions?: boolean;
 }
 export interface IGlobalData {

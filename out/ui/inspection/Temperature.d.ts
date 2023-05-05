@@ -1,15 +1,16 @@
 import { InfoProviderContext } from "game/inspection/InfoProviderContext";
 import Inspection from "game/inspection/Inspection";
-import { IVector3 } from "utilities/math/IVector";
+import LabelledValue from "game/inspection/infoProviders/LabelledValue";
 import DebugTools from "../../DebugTools";
-export default class TemperatureInspection extends Inspection<IVector3> {
+import Tile from "game/tile/Tile";
+export default class TemperatureInspection extends Inspection<Tile> {
     static readonly DEBUG_TOOLS: DebugTools;
-    static getFromTile(position: IVector3): never[] | TemperatureInspection;
-    constructor(tile: IVector3);
+    static getFromTile(tile: Tile): never[] | TemperatureInspection;
+    constructor(tile: Tile);
     getId(): string;
     getPriority(): number;
     hasContent(): boolean;
-    get(context: InfoProviderContext): import("game/inspection/InfoProvider").SimpleInfoProvider[];
+    get(context: InfoProviderContext): LabelledValue[];
     onTickEnd(): void;
     private getTemperature;
     private getTileMod;

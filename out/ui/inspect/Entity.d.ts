@@ -1,7 +1,6 @@
 import Entity from "game/entity/Entity";
-import { ITile } from "game/tile/ITerrain";
+import Tile from "game/tile/Tile";
 import Log from "utilities/Log";
-import { IVector2 } from "utilities/math/IVector";
 import DebugTools from "../../DebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 import InspectInformationSection from "../component/InspectInformationSection";
@@ -19,9 +18,9 @@ export default class EntityInformation extends InspectInformationSection {
     constructor();
     getTabs(): [number, () => import("../../../node_modules/@wayward/types/definitions/game/utilities/string/Interpolator").IStringSection[]][];
     setTab(entity: number): this;
-    update(position: IVector2, tile: ITile): void;
+    update(tile: Tile): void;
     getEntityIndex(entity: Entity): number;
-    getEntity(index: number): Entity;
+    getEntity(index: number): Entity<unknown, number, unknown, unknown>;
     logUpdate(): void;
     private initializeStats;
     private onStatChange;

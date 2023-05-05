@@ -1,2 +1,3 @@
 import Island from "game/island/Island";
-export default function (island: Island, x: number, y: number, z: number, tilled: boolean): void;
+import Tile from "game/tile/Tile";
+export default function (island: Island, tile: Tile, tilled: boolean): void;

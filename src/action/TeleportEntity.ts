@@ -4,12 +4,10 @@ import { EntityType } from "game/entity/IEntity";
 import { defaultUsability } from "../Actions";
 import { teleportEntity } from "./helpers/TeleportEntity";
 
-
-
 /**
  * Teleports an entity to a position.
  */
-export default new Action(ActionArgument.Entity, ActionArgument.Vector3)
-	.setUsableBy(EntityType.Player)
+export default new Action(ActionArgument.Entity, ActionArgument.Tile)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler(teleportEntity);

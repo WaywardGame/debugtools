@@ -8,16 +8,16 @@ import { DebugToolsTranslation, translation } from "../IDebugTools";
  * Kills an entity by dealing `Infinity` true damage to it.
  */
 export default new Action(ActionArgument.Entity)
-	.setUsableBy(EntityType.Player)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, entity) => {
-		entity.damage({
+		(entity?.asHuman ?? entity?.asCreature)?.damage({
 			type: DamageType.True,
 			amount: Infinity,
 			damageMessage: translation(DebugToolsTranslation.KillEntityDeathMessage),
 		});
 
-		renderers.computeSpritesInViewport();
+		renderers.computeSpritesInViewport(entity);
 		action.setUpdateRender();
 
 		if (!multiplayer.isConnected() && entity.asPlayer?.isLocalPlayer()) {

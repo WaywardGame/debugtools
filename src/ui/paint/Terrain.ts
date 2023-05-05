@@ -1,6 +1,6 @@
 import { Events, IEventEmitter } from "event/EventEmitter";
 import { TerrainType } from "game/tile/ITerrain";
-import terrainDescriptions from "game/tile/Terrains";
+import { terrainDescriptions } from "game/tile/Terrains";
 import { CheckButton } from "ui/component/CheckButton";
 import Component from "ui/component/Component";
 import TerrainDropdown from "ui/component/dropdown/TerrainDropdown";

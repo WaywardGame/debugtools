@@ -10,7 +10,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
     private readonly checkButtonNoClip;
     private readonly skillRangeRow;
     private readonly checkButtonPermissions?;
-    private skill?;
+    private skill;
     private player?;
     constructor();
     update(entity: Creature | NPC | Player): void;
