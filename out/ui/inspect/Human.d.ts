@@ -4,6 +4,7 @@ import InspectEntityInformationSubsection from "../component/InspectEntityInform
 export default class HumanInformation extends InspectEntityInformationSubsection {
     private readonly addItemContainer;
     private readonly reputationSliders;
+    private readonly statusCheckButtons;
     private human;
     constructor();
     protected onSwitchTo(): void;
@@ -12,4 +13,5 @@ export default class HumanInformation extends InspectEntityInformationSubsection
     private addReputationSlider;
     private setReputation;
     private onStatChange;
+    private onStatusChange;
 }

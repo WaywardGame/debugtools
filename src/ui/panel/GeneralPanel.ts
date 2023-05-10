@@ -1,15 +1,15 @@
 import { SfxType } from "audio/IAudio";
 import { EventBus } from "event/EventBuses";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
+import { WorldZ } from "game/WorldZ";
 import { BiomeType } from "game/biome/IBiome";
 import { DEFAULT_ISLAND_ID, IslandId, IslandPosition } from "game/island/IIsland";
 import { ReferenceType } from "game/reference/IReferenceManager";
 import Tile from "game/tile/Tile";
-import { WorldZ } from "game/WorldZ";
 import Dictionary from "language/Dictionary";
-import TranslationImpl from "language/impl/TranslationImpl";
 import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
+import TranslationImpl from "language/impl/TranslationImpl";
 import Mod from "mod/Mod";
 import { ParticleType } from "renderer/particle/IParticle";
 import particles from "renderer/particle/Particles";
@@ -25,16 +25,16 @@ import { RangeRow } from "ui/component/RangeRow";
 import Text, { Heading } from "ui/component/Text";
 import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
 import Tooltip from "ui/tooltip/Tooltip";
-import { Tuple } from "utilities/collection/Tuple";
 import { Bound, Debounce } from "utilities/Decorators";
+import { Tuple } from "utilities/collection/Tuple";
 import Enums from "utilities/enum/Enums";
+import DebugTools from "../../DebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import ChangeLayer from "../../action/ChangeLayer";
 import ForceSailToCivilization from "../../action/ForceSailToCivilization";
 import MoveToIsland from "../../action/MoveToIsland";
 import RenameIsland from "../../action/RenameIsland";
 import SetTime from "../../action/SetTime";
-import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import CancelablePromise from "../../util/CancelablePromise";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 
@@ -180,7 +180,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 				}))
 			.append(this.dropdownAudio = new Dropdown<SfxType>()
 				.setRefreshMethod(() => ({
-					defaultOption: SfxType.Click,
+					defaultOption: SfxType.UiActivate,
 					options: Enums.values(SfxType)
 						.map(sfx => Tuple(sfx, TranslationImpl.generator(SfxType[sfx])))
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
