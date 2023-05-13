@@ -1,6 +1,5 @@
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
-import Bindable from "ui/input/Bindable";
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import { Tuple } from "utilities/collection/Tuple";
@@ -59,8 +58,12 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 		return translation(DebugToolsTranslation.DialogTitleMain);
 	}
 
-	public override getBindable(): Bindable | undefined {
+	public override getBindable() {
 		return this.DEBUG_TOOLS.bindableToggleDialog;
+	}
+
+	override getIcon() {
+		return this.DEBUG_TOOLS.menuBarButton;
 	}
 
 	/**
