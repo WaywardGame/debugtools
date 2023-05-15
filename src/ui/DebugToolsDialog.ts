@@ -58,6 +58,14 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 		return translation(DebugToolsTranslation.DialogTitleMain);
 	}
 
+	public override getBindable() {
+		return this.DEBUG_TOOLS.bindableToggleDialog;
+	}
+
+	override getIcon() {
+		return this.DEBUG_TOOLS.menuBarButton;
+	}
+
 	/**
 	 * Implements the abstract method in "TabDialog". Returns an array of subpanels.
 	 * This will only be called once

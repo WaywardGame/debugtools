@@ -1,19 +1,24 @@
-import Stream from "@wayward/goodstream/Stream";
 import { OwnEventHandler } from "event/EventManager";
 import Entity from "game/entity/Entity";
 import Human, { REPUTATION_MAX } from "game/entity/Human";
+import { StatusEffectChangeReason, StatusType } from "game/entity/IEntity";
 import { IStat, Stat } from "game/entity/IStats";
+import Dictionary from "language/Dictionary";
+import { TextContext } from "language/ITranslation";
+import Translation from "language/Translation";
+import { CheckButton } from "ui/component/CheckButton";
 import Component from "ui/component/Component";
 import { RangeRow } from "ui/component/RangeRow";
 import { Bound } from "utilities/Decorators";
-import SetStat from "../../action/SetStat";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
+import SetStat from "../../action/SetStat";
 import Container from "../component/Container";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
 export default class HumanInformation extends InspectEntityInformationSubsection {
 	private readonly addItemContainer: Component;
 	private readonly reputationSliders: { [key in Stat.Malignity | Stat.Benignity]?: RangeRow } = {};
+	private readonly statusCheckButtons: PartialRecord<StatusType, CheckButton> = {};
 
 	private human: Human | undefined;
 
@@ -24,6 +29,14 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 		this.addReputationSlider(DebugToolsTranslation.LabelMalignity, Stat.Malignity);
 		this.addReputationSlider(DebugToolsTranslation.LabelBenignity, Stat.Benignity);
+
+		for (const status of [StatusType.Bleeding, StatusType.Burned, StatusType.Poisoned, StatusType.Frostbitten]) {
+			this.statusCheckButtons[status] = new CheckButton()
+				.setText(Translation.get(Dictionary.StatusEffect, status).inContext(TextContext.Title))
+				.setRefreshMethod(() => !!this.human?.hasStatus(status))
+				.event.subscribe("toggle", (_: any, state: boolean) => this.human?.setStatus(status, state, state ? StatusEffectChangeReason.Gained : StatusEffectChangeReason.Treated))
+				.appendTo(this);
+		}
 	}
 
 	@OwnEventHandler(HumanInformation, "switchTo")
@@ -52,12 +65,17 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 		if (!this.human) return;
 
-		for (const type of Stream.keys(this.reputationSliders)) {
-			this.reputationSliders[type]!.refresh();
+		for (const slider of Object.values(this.reputationSliders)) {
+			slider.refresh();
 		}
 
-		entity?.asEntityWithStats?.event.until(this, "switchAway")
-			.subscribe("statChanged", this.onStatChange);
+		for (const checkButton of Object.values(this.statusCheckButtons)) {
+			checkButton.refresh();
+		}
+
+		const entityEvents = entity?.asEntityWithStats?.event.until(this, "switchAway");
+		entityEvents?.subscribe("statChanged", this.onStatChange);
+		entityEvents?.subscribe("statusChange", this.onStatusChange);
 	}
 
 	private addReputationSlider(labelTranslation: DebugToolsTranslation, type: Stat.Benignity | Stat.Malignity) {
@@ -87,5 +105,9 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 				this.reputationSliders[stat.type]!.refresh();
 				break;
 		}
+	}
+
+	@Bound private onStatusChange(_: any, status: StatusType) {
+		this.statusCheckButtons[status]?.refresh();
 	}
 }

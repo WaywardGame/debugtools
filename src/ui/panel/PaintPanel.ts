@@ -298,6 +298,14 @@ export default class PaintPanel extends DebugToolsPanel {
 		this.getParent()!.classes.add("debug-tools-paint-panel");
 		this.paintRow.appendTo(this.getParent()!.getParent()!);
 
+		this.paintSections.length = 0;
+
+		for (const childComponent of this.getChildren()) {
+			if ((childComponent as IPaintSection).getTilePaintData) {
+				this.paintSections.push(childComponent as IPaintSection);
+			}
+		}
+
 		Bind.registerHandlers(this);
 	}
 

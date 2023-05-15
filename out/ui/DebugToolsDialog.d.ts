@@ -9,6 +9,8 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
     readonly DEBUG_TOOLS: DebugTools;
     constructor(id: DialogId);
     getName(): Translation;
+    getBindable(): import("../../node_modules/@wayward/types/definitions/game/ui/input/Bindable").default;
+    getIcon(): import("../../node_modules/@wayward/types/definitions/game/ui/screen/screens/game/static/menubar/IMenuBarButton").MenuBarButtonType;
     protected getSubpanels(): DebugToolsPanel[];
     protected getSubpanelInformation(subpanels: DebugToolsPanel[]): SubpanelInformation[];
 }

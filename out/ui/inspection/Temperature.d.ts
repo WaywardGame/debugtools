@@ -5,7 +5,7 @@ import DebugTools from "../../DebugTools";
 import Tile from "game/tile/Tile";
 export default class TemperatureInspection extends Inspection<Tile> {
     static readonly DEBUG_TOOLS: DebugTools;
-    static getFromTile(tile: Tile): never[] | TemperatureInspection;
+    static getFromTile(tile: Tile): TemperatureInspection | never[];
     constructor(tile: Tile);
     getId(): string;
     getPriority(): number;
