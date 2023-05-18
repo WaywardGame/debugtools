@@ -157,7 +157,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTravel)))
 			.append(this.dropdownTravel = new IslandDropdown<string>(getTravelDropdownNewIslandOptionId(BiomeType.Random), () => [
-				...Enums.values(BiomeType)
+				...Enums.values(BiomeType).filter(biomeType => biomeType !== BiomeType.Template)
 					.map(biome => [getTravelDropdownNewIslandOptionId(biome), option => option
 						.setText(translation(DebugToolsTranslation.OptionTravelNewIsland)
 							.addArgs(Translation.get(Dictionary.Biome, biome).inContext(TextContext.Title)))] as IDropdownOption<string>),
