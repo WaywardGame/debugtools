@@ -21,12 +21,12 @@ define(["require", "exports", "game/entity/action/IAction", "mod/Mod", "./IDebug
     exports.defaultUsability = [IAction_1.ActionUsability.Ghost, IAction_1.ActionUsability.Paused, IAction_1.ActionUsability.Delayed, IAction_1.ActionUsability.Moving];
     class Actions {
     }
+    exports.default = Actions;
     __decorate([
         Mod_1.default.instance(IDebugTools_1.DEBUG_TOOLS_ID)
     ], Actions, "DEBUG_TOOLS", void 0);
     __decorate([
         Mod_1.default.log(IDebugTools_1.DEBUG_TOOLS_ID)
     ], Actions, "LOG", void 0);
-    exports.default = Actions;
 });
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQWN0aW9ucy5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uL3NyYy9BY3Rpb25zLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7Ozs7R0FTRzs7Ozs7Ozs7Ozs7SUFTVSxRQUFBLGdCQUFnQixHQUFzQixDQUFDLHlCQUFlLENBQUMsS0FBSyxFQUFFLHlCQUFlLENBQUMsTUFBTSxFQUFFLHlCQUFlLENBQUMsT0FBTyxFQUFFLHlCQUFlLENBQUMsTUFBTSxDQUFDLENBQUM7SUFFcEosTUFBcUIsT0FBTztLQUszQjtJQUh1QjtRQUR0QixhQUFHLENBQUMsUUFBUSxDQUFhLDRCQUFjLENBQUM7c0NBQ007SUFFeEI7UUFEdEIsYUFBRyxDQUFDLEdBQUcsQ0FBQyw0QkFBYyxDQUFDOzhCQUNRO0lBSmpDLDBCQUtDIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQWN0aW9ucy5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uL3NyYy9BY3Rpb25zLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBOzs7Ozs7Ozs7R0FTRzs7Ozs7Ozs7Ozs7SUFTVSxRQUFBLGdCQUFnQixHQUFzQixDQUFDLHlCQUFlLENBQUMsS0FBSyxFQUFFLHlCQUFlLENBQUMsTUFBTSxFQUFFLHlCQUFlLENBQUMsT0FBTyxFQUFFLHlCQUFlLENBQUMsTUFBTSxDQUFDLENBQUM7SUFFcEosTUFBcUIsT0FBTztLQUszQjtJQUxELDBCQUtDO0lBSHVCO1FBRHRCLGFBQUcsQ0FBQyxRQUFRLENBQWEsNEJBQWMsQ0FBQztzQ0FDTTtJQUV4QjtRQUR0QixhQUFHLENBQUMsR0FBRyxDQUFDLDRCQUFjLENBQUM7OEJBQ1EifQ==
