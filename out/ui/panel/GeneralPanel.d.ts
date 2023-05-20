@@ -8,6 +8,7 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
+import { WorldZ } from "game/WorldZ";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
@@ -25,7 +26,7 @@ export default class GeneralPanel extends DebugToolsPanel {
     constructor();
     getTranslation(): DebugToolsTranslation;
     canClientMove(): false | undefined;
-    protected onChangeZ(_: any, z: number): void;
+    protected onChangeZ(_: any, z: WorldZ): void;
     onGameTickEnd(): void;
     protected onLoadOnIsland(): void;
     private selectionLogic;

@@ -66,7 +66,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 	private readonly checkButtonAudio: CheckButton;
 	private readonly dropdownAudio: Dropdown<SfxType>;
 	private readonly dropdownParticle: Dropdown<ParticleType>;
-	private readonly dropdownLayer: Dropdown<number>;
+	private readonly dropdownLayer: Dropdown<WorldZ>;
 	private readonly dropdownTravel: IslandDropdown<string>;
 	private readonly checkButtonParticle: CheckButton;
 
@@ -143,9 +143,9 @@ export default class GeneralPanel extends DebugToolsPanel {
 		new LabelledRow()
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelLayer)))
-			.append(this.dropdownLayer = new Dropdown<number>()
+			.append(this.dropdownLayer = new Dropdown<WorldZ>()
 				.setRefreshMethod(() => ({
-					options: Object.values(localIsland.world.layers)
+					options: Array.from(localIsland.world.layers.values())
 						.map(layer => [layer.z, option => option.setText(translation(DebugToolsTranslation.OptionLayer)
 							.addArgs(layer.z, Translation.get(Dictionary.WorldLayer, layer.z).inContext(TextContext.Title), Enums.getMod(WorldZ, layer.z)?.config.name))] as IDropdownOption<number>),
 					defaultOption: localPlayer.z,
@@ -232,7 +232,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "changeZ")
-	protected onChangeZ(_: any, z: number) {
+	protected onChangeZ(_: any, z: WorldZ) {
 		if (this.dropdownLayer.selection === z)
 			return;
 
