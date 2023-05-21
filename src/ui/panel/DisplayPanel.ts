@@ -10,6 +10,8 @@
  */
 
 import { EventHandler, OwnEventHandler } from "event/EventManager";
+import Translation from "language/Translation";
+import UiTranslation from "language/dictionary/UiTranslation";
 import Mod from "mod/Mod";
 import { RenderSource, ZOOM_LEVEL_MAX } from "renderer/IRenderer";
 import { Shaders } from "renderer/Shaders";
@@ -24,6 +26,7 @@ import { Heading } from "ui/component/Text";
 import ImagePath from "ui/util/ImagePath";
 import { Bound } from "utilities/Decorators";
 import Enums from "utilities/enum/Enums";
+import { sleep } from "utilities/promise/Async";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, ISaveData, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
@@ -96,6 +99,22 @@ export default class DisplayPanel extends DebugToolsPanel {
 		new Button()
 			.setText(translation(DebugToolsTranslation.ButtonReloadUIImages))
 			.event.subscribe("activate", ImagePath.cachebust)
+			.appendTo(this);
+
+		new RangeRow()
+			.setLabel(label => label.setText(UiTranslation.MenuOptionsLabelInterfaceScale))
+			.editRange(range => range
+				.noClampOnRefresh()
+				.setMin(ui.scale.getMinimum(), false)
+				.setMax(ui.scale.getMaximum(), false)
+				.setStep(0.25)
+				.setRefreshMethod(() => ui.scale.getClamped()))
+			.addDefaultButton(() => ui.scale.getClamped(1))
+			.setDisplayValue(value => Translation.merge(ui.scale.getClamped(value)))
+			.event.subscribe("finish", async (_, scale) => {
+				ui.scale.setUserSetting(scale);
+				await sleep(10);
+			})
 			.appendTo(this);
 
 		new Divider()
