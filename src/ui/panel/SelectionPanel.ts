@@ -14,42 +14,42 @@ import { EventBus } from "event/EventBuses";
 import { Events, IEventEmitter } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import Doodad from "game/doodad/Doodad";
-import Corpse from "game/entity/creature/corpse/Corpse";
-import Creature from "game/entity/creature/Creature";
 import { EntityType } from "game/entity/IEntity";
+import Creature from "game/entity/creature/Creature";
+import Corpse from "game/entity/creature/corpse/Corpse";
 import NPC from "game/entity/npc/NPC";
 import Player from "game/entity/player/Player";
+import { IslandId } from "game/island/IIsland";
 import TileEvent from "game/tile/TileEvent";
 import { TextContext } from "language/ITranslation";
 import Mod from "mod/Mod";
-import { RendererOrigin } from "renderer/context/RendererOrigin";
 import { RenderSource } from "renderer/IRenderer";
 import Renderer from "renderer/Renderer";
+import { RendererOrigin } from "renderer/context/RendererOrigin";
 import { BlockRow } from "ui/component/BlockRow";
 import Button, { ButtonClasses } from "ui/component/Button";
 import { CheckButton } from "ui/component/CheckButton";
 import Component from "ui/component/Component";
 import Dropdown, { IDropdownOption } from "ui/component/Dropdown";
+import { LabelledRow } from "ui/component/LabelledRow";
+import { RangeRow } from "ui/component/RangeRow";
+import Text from "ui/component/Text";
 import CorpseDropdown from "ui/component/dropdown/CorpseDropdown";
 import CreatureDropdown from "ui/component/dropdown/CreatureDropdown";
 import DoodadDropdown from "ui/component/dropdown/DoodadDropdown";
 import NPCTypeDropdown from "ui/component/dropdown/NPCTypeDropdown";
 import TileEventDropdown from "ui/component/dropdown/TileEventDropdown";
-import { LabelledRow } from "ui/component/LabelledRow";
-import { RangeRow } from "ui/component/RangeRow";
-import Text from "ui/component/Text";
 import Spacer from "ui/screen/screens/menu/component/Spacer";
-import Arrays from "utilities/collection/Arrays";
 import { Bound } from "utilities/Decorators";
+import Arrays from "utilities/collection/Arrays";
+import { Tuple } from "utilities/collection/Tuple";
 import Math2 from "utilities/math/Math2";
 import Vector2 from "utilities/math/Vector2";
 import { generalRandom } from "utilities/random/RandomUtilities";
-import SelectionExecute, { SelectionType } from "../../action/SelectionExecute";
 import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import SelectionExecute, { SelectionType } from "../../action/SelectionExecute";
 import DebugToolsPanel from "../component/DebugToolsPanel";
-import { IslandId } from "game/island/IIsland";
-import { Tuple } from "utilities/collection/Tuple";
 
 const entityTypeToSelectionTypeMap = {
 	[EntityType.Corpse]: SelectionType.Corpse,
@@ -344,7 +344,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 		this.targets.splice(0, Infinity);
 		this.targets.push(...targets.slice(0, quantity));
 
-		SelectionPanel.DEBUG_TOOLS.getLog().info("Targets:", this.targets);
+		SelectionPanel.DEBUG_TOOLS.log.info("Targets:", this.targets);
 
 		this.canvas?.classes.toggle(!!this.targets.length, "has-targets");
 		this.buttonPreviewPrevious.toggle(this.targets.length > 1);
