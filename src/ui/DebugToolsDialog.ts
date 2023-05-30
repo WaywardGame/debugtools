@@ -25,6 +25,8 @@ import PaintPanel from "./panel/PaintPanel";
 import SelectionPanel from "./panel/SelectionPanel";
 import TemperaturePanel from "./panel/TemperaturePanel";
 import TemplatePanel from "./panel/TemplatePanel";
+import { Save, SaveLocation } from "ui/IUi";
+import { OwnEventHandler } from "event/EventManager";
 
 export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
 
@@ -56,6 +58,9 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
 	public readonly DEBUG_TOOLS: DebugTools;
 
+	@Save(SaveLocation.Local)
+	private current: string | number | undefined;
+
 	public constructor(id: DialogId) {
 		super(id);
 		this.classes.add("debug-tools-dialog");
@@ -75,6 +80,16 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 
 	override getIcon() {
 		return this.DEBUG_TOOLS.menuBarButton;
+	}
+
+
+	protected override getDefaultSubpanelInformation(): SubpanelInformation | undefined {
+		return this.subpanelInformations.find(spi => spi[0] === this.current) ?? super.getDefaultSubpanelInformation();
+	}
+
+	@OwnEventHandler(DebugToolsDialog, "changeSubpanel")
+	protected onChangeSubpanel(activeSubpanel: SubpanelInformation) {
+		this.current = activeSubpanel[0];
 	}
 
 	/**

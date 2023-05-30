@@ -17,10 +17,13 @@ export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
 export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
     static description: IDialogDescription;
     readonly DEBUG_TOOLS: DebugTools;
+    private current;
     constructor(id: DialogId);
     getName(): Translation;
     getBindable(): import("../../node_modules/@wayward/types/definitions/game/ui/input/Bindable").default;
     getIcon(): import("../../node_modules/@wayward/types/definitions/game/ui/screen/screens/game/static/menubar/IMenuBarButton").MenuBarButtonType;
+    protected getDefaultSubpanelInformation(): SubpanelInformation | undefined;
+    protected onChangeSubpanel(activeSubpanel: SubpanelInformation): void;
     protected getSubpanels(): DebugToolsPanel[];
     protected getSubpanelInformation(subpanels: DebugToolsPanel[]): SubpanelInformation[];
 }
