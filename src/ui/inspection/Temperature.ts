@@ -29,6 +29,8 @@ import Tile from "game/tile/Tile";
 
 export default class TemperatureInspection extends Inspection<Tile> {
 
+	private tempValue?: number;
+
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
 	public static readonly DEBUG_TOOLS: DebugTools;
 
@@ -57,14 +59,14 @@ export default class TemperatureInspection extends Inspection<Tile> {
 	}
 
 	public override get(context: InfoProviderContext) {
-		const tempValue = localIsland.temperature.get(this.value, undefined);
+		this.tempValue = localIsland.temperature.get(this.value, undefined);
 		return [
 			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperature))
-				.add(new MagicalPropertyValue(tempValue))
+				.add(new MagicalPropertyValue(this.tempValue))
 				.setDisplayLevel(InfoDisplayLevel.NonExtra)
 				.setComponent(Paragraph),
 			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperature))
-				.add(new MagicalPropertyValue(tempValue))
+				.add(new MagicalPropertyValue(this.tempValue))
 				.setDisplayLevel(InfoDisplayLevel.Extra)
 				.addClasses(InfoClass.Title)
 				.setComponent(Heading),
@@ -116,21 +118,16 @@ export default class TemperatureInspection extends Inspection<Tile> {
 	// Event Handlers
 	//
 
-	// @EventHandler(World, "updateTile")
-	// public onUpdateTile(_: any, x: number, y: number, z: number) {
-	// 	if (x === this.value.x && y === this.value.y && z === this.value.z) {
-	// 		this.refresh();
-	// 	}
-	// }
-
 	@EventHandler(EventBus.Game, "tickEnd")
 	public onTickEnd() {
-		// todo: only refresh when changes occur?
 		if (localPlayer.isResting()) {
 			return;
 		}
 
-		this.refresh();
+		const newTempValue = localIsland.temperature.get(this.value, undefined);
+		if (this.tempValue !== newTempValue) {
+			this.refresh();
+		}
 	}
 
 	////////////////////////////////////

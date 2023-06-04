@@ -14,6 +14,7 @@ import LabelledValue from "game/inspection/infoProviders/LabelledValue";
 import DebugTools from "../../DebugTools";
 import Tile from "game/tile/Tile";
 export default class TemperatureInspection extends Inspection<Tile> {
+    private tempValue?;
     static readonly DEBUG_TOOLS: DebugTools;
     static getFromTile(tile: Tile): never[] | TemperatureInspection;
     constructor(tile: Tile);
