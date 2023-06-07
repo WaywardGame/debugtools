@@ -16,7 +16,7 @@ import type { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
 import type DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import type InspectEntityInformationSubsection from "./ui/component/InspectEntityInformationSubsection";
 import type InspectInformationSection from "./ui/component/InspectInformationSection";
-import type { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect/Entity";
+import type { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect/EntityInformation";
 export declare const DEBUG_TOOLS_ID = "Debug Tools";
 export declare function translation(debugToolsTranslation: DebugToolsTranslation | Translation): import("../node_modules/@wayward/types/definitions/game/language/impl/TranslationImpl").default;
 export declare module translation {

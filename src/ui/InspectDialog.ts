@@ -38,12 +38,12 @@ import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import { ContainerClasses } from "./component/Container";
 import InspectInformationSection from "./component/InspectInformationSection";
-import CorpseInformation from "./inspect/Corpse";
-import DoodadInformation from "./inspect/Doodad";
-import EntityInformation from "./inspect/Entity";
-import ItemInformation from "./inspect/Item";
-import TerrainInformation from "./inspect/Terrain";
-import TileEventInformation from "./inspect/TileEvent";
+import CorpseInformation from "./inspect/CorpseInformation";
+import DoodadInformation from "./inspect/DoodadInformation";
+import EntityInformation from "./inspect/EntityInformation";
+import ItemInformation from "./inspect/ItemInformation";
+import TerrainInformation from "./inspect/TerrainInformation";
+import TileEventInformation from "./inspect/TileEventInformation";
 
 export type InspectDialogInformationSectionClass = new () => InspectInformationSection;
 
