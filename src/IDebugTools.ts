@@ -115,6 +115,7 @@ export enum DebugToolsTranslation {
 	FilterDoodads,
 	FilterCorpses,
 	FilterPlayers,
+	FilterTreasure,
 	ActionRemove,
 	ActionSelect,
 	// ActionCount,

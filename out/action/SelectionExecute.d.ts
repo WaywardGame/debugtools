@@ -18,5 +18,6 @@ export declare enum SelectionType {
     TileEvent = 2,
     Doodad = 3,
     Corpse = 4,
-    Player = 5
+    Player = 5,
+    Location = 6
 }

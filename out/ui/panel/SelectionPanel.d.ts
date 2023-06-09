@@ -34,6 +34,7 @@ export default class SelectionPanel extends DebugToolsPanel {
     private doodads?;
     private corpses?;
     private players?;
+    private treasure?;
     private renderer?;
     private previewCursor;
     constructor();

@@ -9,11 +9,14 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
+import Entity from "game/entity/Entity";
+import { EntityType } from "game/entity/IEntity";
 import { Action } from "game/entity/action/Action";
 import { ActionArgument, optional } from "game/entity/action/IAction";
-import { EntityType } from "game/entity/IEntity";
 import Player from "game/entity/player/Player";
 import Island from "game/island/Island";
+import { IVector3 } from "utilities/math/IVector";
+import Vector3 from "utilities/math/Vector3";
 import { defaultUsability } from "../Actions";
 import { DebugToolsTranslation } from "../IDebugTools";
 import Remove from "./helpers/Remove";
@@ -35,12 +38,13 @@ export default new Action(ActionArgument.Integer32, ActionArgument.Array, option
 			switch (executionType) {
 				case DebugToolsTranslation.ActionRemove:
 					if (target instanceof Player) continue;
+					if (!(target instanceof Entity) && IVector3.is(target)) continue;
 					Remove(action, target);
 					break;
 				case DebugToolsTranslation.ActionTeleport:
 					const playerToTeleport = game.playerManager.getAll(true, true).find(player => player.identifier === alternativeTarget);
 					if (playerToTeleport) {
-						teleportEntity(action, playerToTeleport, target.tile);
+						teleportEntity(action, playerToTeleport, target instanceof Entity ? target.tile : action.executor.island.getTile(...target.xyz));
 					}
 					return;
 			}
@@ -58,6 +62,10 @@ function getTarget(island: Island, type: SelectionType, id: string | number) {
 		case SelectionType.Doodad: return island.doodads.get(id as number);
 		case SelectionType.Corpse: return island.corpses.get(id as number);
 		case SelectionType.Player: return game.playerManager.getAll(true, true).find(player => player.identifier === id);
+		case SelectionType.Location: return island.treasureMaps
+			.flatMap(map => map.getTreasure()
+				.map(treasure => new Vector3(treasure, map.position.z)))
+			.find(treasure => treasure.xyz.join(",") === id);
 	}
 }
 
@@ -68,4 +76,5 @@ export enum SelectionType {
 	Doodad,
 	Corpse,
 	Player,
+	Location,
 }
