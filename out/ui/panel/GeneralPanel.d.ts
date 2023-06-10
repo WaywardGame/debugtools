@@ -28,7 +28,6 @@ export default class GeneralPanel extends DebugToolsPanel {
     canClientMove(): false | undefined;
     protected onChangeZ(_: any, z: WorldZ): void;
     onGameTickEnd(): void;
-    protected onLoadOnIsland(): void;
     private selectionLogic;
     protected onSwitchTo(): void;
     protected onSwitchAway(): void;

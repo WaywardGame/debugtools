@@ -15,7 +15,6 @@ import { EventHandler, OwnEventHandler } from "event/EventManager";
 import { WorldZ } from "game/WorldZ";
 import { BiomeType } from "game/biome/IBiome";
 import { DEFAULT_ISLAND_ID, IslandId, IslandPosition } from "game/island/IIsland";
-import { ReferenceType } from "game/reference/IReferenceManager";
 import Tile from "game/tile/Tile";
 import Dictionary from "language/Dictionary";
 import { TextContext } from "language/ITranslation";
@@ -29,13 +28,12 @@ import Button from "ui/component/Button";
 import { CheckButton } from "ui/component/CheckButton";
 import Divider from "ui/component/Divider";
 import Dropdown, { IDropdownOption } from "ui/component/Dropdown";
-import GroupDropdown from "ui/component/GroupDropdown";
 import Input from "ui/component/Input";
 import { LabelledRow } from "ui/component/LabelledRow";
 import { RangeRow } from "ui/component/RangeRow";
 import Text, { Heading } from "ui/component/Text";
+import BaseIslandDropdown from "ui/component/dropdown/IslandDropdown";
 import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
-import Tooltip from "ui/tooltip/Tooltip";
 import { Bound, Debounce } from "utilities/Decorators";
 import { Tuple } from "utilities/collection/Tuple";
 import Enums from "utilities/enum/Enums";
@@ -247,11 +245,6 @@ export default class GeneralPanel extends DebugToolsPanel {
 		}
 	}
 
-	@EventHandler(EventBus.LocalPlayer, "loadedOnIsland")
-	protected onLoadOnIsland() {
-		this.dropdownTravel.refresh();
-	}
-
 	private selectionLogic(checked: boolean, onSelection: (tile: Tile | undefined) => void, triggerAgain?: () => boolean) {
 		if (this.selectionPromise && !this.selectionPromise.isResolved) {
 			this.selectionPromise.cancel();
@@ -351,50 +344,16 @@ export default class GeneralPanel extends DebugToolsPanel {
 	}
 }
 
-class IslandDropdown<OTHER_OPTIONS extends string = never> extends GroupDropdown<Record<IslandId, string>, OTHER_OPTIONS, BiomeType> {
+class IslandDropdown<OTHER_OPTIONS extends string = never> extends BaseIslandDropdown<OTHER_OPTIONS> {
 
 	public constructor(defaultOption: IslandId | OTHER_OPTIONS, options: SupplierOr<Iterable<IDropdownOption<OTHER_OPTIONS>>>) {
-		super(game.islands.keyStream().toObject(key => [key, key]), undefined, defaultOption, options);
-		this.setPrefix("biome");
-	}
-
-	protected override getTranslation(islandId: IslandId) {
-		const island = game.islands.get(islandId);
-		return translation(DebugToolsTranslation.Island)
-			.addArgs(islandId, island?.getName(), Translation.get(Dictionary.Biome, island?.biomeType ?? BiomeType.Random));
-	}
-
-	protected override getGroupName(biome: BiomeType) {
-		return Translation.get(Dictionary.Biome, biome).getString();
-	}
-
-	protected override optionTooltipInitializer(tooltip: Tooltip, islandId: IslandId) {
-		const island = game.islands.getIfExists(islandId);
-		if (island?.referenceId === undefined) {
-			return undefined;
-		}
-
-		return game.references.tooltip([island.referenceId, ReferenceType.Island])(tooltip);
-	}
-
-	protected override shouldIncludeOtherOptionsInGroupFilter() {
-		return true;
+		super(defaultOption, options);
 	}
 
 	protected override isInGroup(islandId: IslandId, biome: BiomeType) {
 		if (islandId.startsWith(TRAVEL_DROPDOWN_NEW_ISLAND_PREFIX))
 			return islandId === getTravelDropdownNewIslandOptionId(biome);
 
-		return game.islands.getIfExists(islandId)?.biomeType === biome;
-	}
-
-	protected override getGroups() {
-		return Enums.values(BiomeType).slice(1);
-	}
-
-	@OwnEventHandler(IslandDropdown, "refresh")
-	protected onRefresh() {
-		this.options.get(localIsland.id)?.setDisabled(true);
-		this.options.get("random")?.setDisabled(game.islands.size <= 1);
+		return super.isInGroup(islandId, biome);
 	}
 }
