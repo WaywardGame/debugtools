@@ -1,3 +1,14 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
+
 import { EventBus } from "event/EventBuses";
 import { Events, IEventEmitter } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
@@ -27,12 +38,12 @@ import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import { ContainerClasses } from "./component/Container";
 import InspectInformationSection from "./component/InspectInformationSection";
-import CorpseInformation from "./inspect/Corpse";
-import DoodadInformation from "./inspect/Doodad";
-import EntityInformation from "./inspect/Entity";
-import ItemInformation from "./inspect/Item";
-import TerrainInformation from "./inspect/Terrain";
-import TileEventInformation from "./inspect/TileEvent";
+import CorpseInformation from "./inspect/CorpseInformation";
+import DoodadInformation from "./inspect/DoodadInformation";
+import EntityInformation from "./inspect/EntityInformation";
+import ItemInformation from "./inspect/ItemInformation";
+import TerrainInformation from "./inspect/TerrainInformation";
+import TileEventInformation from "./inspect/TileEventInformation";
 
 export type InspectDialogInformationSectionClass = new () => InspectInformationSection;
 

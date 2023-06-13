@@ -1,10 +1,10 @@
 {
 	"name": "Debug Tools",
 	"description": "Adds a special debug tools menu into the game.",
-	"version": "2.3.1",
+	"version": "2.3.2",
 	"author": "Chiri Vulpes",
 	"github": "https://github.com/WaywardGame/debugtools",
-	"waywardVersion": "2.13.0-beta",
+	"waywardVersion": "2.13.2-beta",
 	"multiplayer": "compatible",
 	"file": "out/DebugTools",
 	"allowUnlockingMilestones": true,

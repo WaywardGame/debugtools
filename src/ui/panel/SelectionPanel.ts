@@ -1,44 +1,57 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
+
 import Stream from "@wayward/goodstream/Stream";
 import { EventBus } from "event/EventBuses";
 import { Events, IEventEmitter } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import Doodad from "game/doodad/Doodad";
-import Corpse from "game/entity/creature/corpse/Corpse";
-import Creature from "game/entity/creature/Creature";
 import { EntityType } from "game/entity/IEntity";
+import Creature from "game/entity/creature/Creature";
+import Corpse from "game/entity/creature/corpse/Corpse";
 import NPC from "game/entity/npc/NPC";
 import Player from "game/entity/player/Player";
+import { IslandId } from "game/island/IIsland";
 import TileEvent from "game/tile/TileEvent";
 import { TextContext } from "language/ITranslation";
 import Mod from "mod/Mod";
-import { RendererOrigin } from "renderer/context/RendererOrigin";
 import { RenderSource } from "renderer/IRenderer";
 import Renderer from "renderer/Renderer";
+import { RendererOrigin } from "renderer/context/RendererOrigin";
 import { BlockRow } from "ui/component/BlockRow";
 import Button, { ButtonClasses } from "ui/component/Button";
 import { CheckButton } from "ui/component/CheckButton";
 import Component from "ui/component/Component";
 import Dropdown, { IDropdownOption } from "ui/component/Dropdown";
+import { LabelledRow } from "ui/component/LabelledRow";
+import { RangeRow } from "ui/component/RangeRow";
+import Text from "ui/component/Text";
 import CorpseDropdown from "ui/component/dropdown/CorpseDropdown";
 import CreatureDropdown from "ui/component/dropdown/CreatureDropdown";
 import DoodadDropdown from "ui/component/dropdown/DoodadDropdown";
 import NPCTypeDropdown from "ui/component/dropdown/NPCTypeDropdown";
 import TileEventDropdown from "ui/component/dropdown/TileEventDropdown";
-import { LabelledRow } from "ui/component/LabelledRow";
-import { RangeRow } from "ui/component/RangeRow";
-import Text from "ui/component/Text";
 import Spacer from "ui/screen/screens/menu/component/Spacer";
-import Arrays from "utilities/collection/Arrays";
 import { Bound } from "utilities/Decorators";
+import Arrays from "utilities/collection/Arrays";
+import { Tuple } from "utilities/collection/Tuple";
+import { IVector3 } from "utilities/math/IVector";
 import Math2 from "utilities/math/Math2";
 import Vector2 from "utilities/math/Vector2";
+import Vector3 from "utilities/math/Vector3";
 import { generalRandom } from "utilities/random/RandomUtilities";
-import SelectionExecute, { SelectionType } from "../../action/SelectionExecute";
 import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import SelectionExecute, { SelectionType } from "../../action/SelectionExecute";
 import DebugToolsPanel from "../component/DebugToolsPanel";
-import { IslandId } from "game/island/IIsland";
-import { Tuple } from "utilities/collection/Tuple";
 
 const entityTypeToSelectionTypeMap = {
 	[EntityType.Corpse]: SelectionType.Corpse,
@@ -49,10 +62,12 @@ const entityTypeToSelectionTypeMap = {
 	[EntityType.TileEvent]: SelectionType.TileEvent,
 };
 
-type Target = Creature | NPC | TileEvent | Doodad | Corpse | Player;
+type Target = Creature | NPC | TileEvent | Doodad | Corpse | Player | IVector3;
 
 function getSelectionType(target: Target) {
-	return "entityType" in target ? entityTypeToSelectionTypeMap[target.entityType] : undefined;
+	return "entityType" in target ? entityTypeToSelectionTypeMap[target.entityType]
+		: "z" in target ? SelectionType.Location
+			: undefined;
 }
 
 export default class SelectionPanel extends DebugToolsPanel {
@@ -139,6 +154,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 	private doodads?: SelectionSource<any, any>;
 	private corpses?: SelectionSource<any, any>;
 	private players?: SelectionSource<any, any>;
+	private treasure?: SelectionSource<any, any>;
 
 	private renderer?: Renderer;
 	private previewCursor = 0;
@@ -205,7 +221,13 @@ export default class SelectionPanel extends DebugToolsPanel {
 				&& (filter === "all" || (player && player.identifier === filter)),
 			DebugToolsTranslation.SelectionFilterNamed);
 
-		[this.creatures, this.npcs, this.tileEvents, this.doodads, this.corpses, this.players]
+		this.treasure = new SelectionSource(
+			localIsland.treasureMaps
+				.flatMap(map => map.getTreasure()
+					.map(treasure => new Vector3(treasure, map.position.z))),
+			DebugToolsTranslation.FilterTreasure);
+
+		[this.creatures, this.npcs, this.tileEvents, this.doodads, this.corpses, this.players, this.treasure]
 			.map(selectionSource => (selectionSource as SelectionSource<any, any>).event.subscribe("change", this.updateTargets))
 			.collect(this.selectionContainer.append);
 	}
@@ -215,8 +237,14 @@ export default class SelectionPanel extends DebugToolsPanel {
 		if (!this.targets.length)
 			return;
 
-		SelectionExecute.execute(localPlayer, this.dropdownAction.selection, this.targets
-			.map(target => Tuple(getSelectionType(target), target instanceof Player ? target.identifier : target.id)), this.dropdownAlternativeTarget.selection);
+		SelectionExecute.execute(localPlayer,
+			this.dropdownAction.selection,
+			this.targets.map(target => Tuple(
+				getSelectionType(target),
+				target instanceof Player ? target.identifier
+					: "entityType" in target ? target.id
+						: `${target.x},${target.y},${target.z}`)),
+			this.dropdownAlternativeTarget.selection);
 
 		this.updateTargets();
 	}
@@ -277,6 +305,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 		}
 
 		this.players?.checkButton.setDisabled(action === DebugToolsTranslation.ActionRemove);
+		this.treasure?.checkButton.setDisabled(action === DebugToolsTranslation.ActionRemove);
 		this.dropdownMethod.options.get(DebugToolsTranslation.MethodAll)!.setDisabled(action === DebugToolsTranslation.ActionTeleport);
 		this.rangeQuantity.setDisabled(action === DebugToolsTranslation.ActionTeleport);
 		this.dropdownAlternativeTarget.toggle(action === DebugToolsTranslation.ActionTeleport);
@@ -302,13 +331,14 @@ export default class SelectionPanel extends DebugToolsPanel {
 			this.setupSelectionSources();
 		}
 
-		const targets = Stream.of<(Target | undefined)[][]>(
+		let targets = Stream.of<(Target | undefined)[][]>(
 			this.creatures?.getTargetable() ?? [],
 			this.npcs?.getTargetable() ?? [],
 			this.tileEvents?.getTargetable() ?? [],
 			this.doodads?.getTargetable() ?? [],
 			this.corpses?.getTargetable() ?? [],
 			this.players?.getTargetable() ?? [],
+			this.treasure?.getTargetable() ?? [],
 		)
 			.flatMap(value => Arrays.arrayOr(value))
 			.filter<undefined>(entity => !!entity)
@@ -322,7 +352,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 				break;
 
 			case DebugToolsTranslation.MethodRandom:
-				generalRandom.shuffle(targets);
+				targets = generalRandom.shuffle(targets);
 				break;
 
 			case DebugToolsTranslation.MethodNearest:
@@ -333,7 +363,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 		this.targets.splice(0, Infinity);
 		this.targets.push(...targets.slice(0, quantity));
 
-		SelectionPanel.DEBUG_TOOLS.getLog().info("Targets:", this.targets);
+		SelectionPanel.DEBUG_TOOLS.log.info("Targets:", this.targets);
 
 		this.canvas?.classes.toggle(!!this.targets.length, "has-targets");
 		this.buttonPreviewPrevious.toggle(this.targets.length > 1);
@@ -376,9 +406,9 @@ export default class SelectionPanel extends DebugToolsPanel {
 		this.countRow.dump()
 			.append(new Text()
 				.setText(translation(DebugToolsTranslation.SelectionPreview)
-					.addArgs(which + 1, this.targets.length, target.getName().inContext(TextContext.Title))));
+					.addArgs(which + 1, this.targets.length, "entityType" in target ? target.getName().inContext(TextContext.Title) : `${target.x}, ${target.y}, ${target.z}`)));
 
-		this.renderer?.setOrigin(RendererOrigin.fromEntity(target));
+		this.renderer?.setOrigin("entityType" in target ? RendererOrigin.fromEntity(target) : new RendererOrigin(localIsland.id, target.x, target.y, target.z));
 
 		this.rerender();
 	}
@@ -406,16 +436,21 @@ class SelectionSource<T, F> extends BlockRow {
 
 	private readonly filter = new LabelledRow()
 		.classes.add("dropdown-label")
-		.setLabel(label => label.setText(() => translation((this.dropdown.selection as any) === "all" ? DebugToolsTranslation.SelectionFilterAll : this.filterLabel)))
-		.hide()
-		.appendTo(this);
+		.setLabel(label => label.setText(() => translation((this.dropdown?.selection as any) === "all" ? DebugToolsTranslation.SelectionFilterAll : this.filterLabel)))
+		.hide();
 
-	public constructor(private readonly objectArray: T[], dTranslation: DebugToolsTranslation, private readonly dropdown: Dropdown<F>, private readonly filterPredicate: (value: T, filter: F) => any, private readonly filterLabel = DebugToolsTranslation.SelectionFilter) {
+	public constructor(private readonly objectArray: T[], dTranslation: DebugToolsTranslation, private readonly dropdown?: Dropdown<F>, private readonly filterPredicate?: (value: T, filter?: F) => any, private readonly filterLabel = DebugToolsTranslation.SelectionFilter) {
 		super();
 		this.classes.add("debug-tools-dialog-selection-source");
 		this.checkButton.setText(translation(dTranslation));
+
+		if (dropdown) {
+			this.filter.appendTo(this)
+		}
+
 		this.filter.append(dropdown);
-		dropdown.event.subscribe("selection", () => {
+
+		dropdown?.event.subscribe("selection", () => {
 			this.event.emit("change");
 			this.filter.refresh();
 		});
@@ -425,6 +460,6 @@ class SelectionSource<T, F> extends BlockRow {
 		if (!this.checkButton.checked)
 			return [];
 
-		return this.objectArray.filter(value => this.filterPredicate(value, this.dropdown.selection));
+		return this.objectArray.filter(value => this.filterPredicate?.(value, this.dropdown?.selection) ?? true);
 	}
 }

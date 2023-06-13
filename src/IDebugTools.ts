@@ -1,3 +1,14 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
+
 import Translation from "language/Translation";
 import { RenderLayerFlag } from "renderer/world/IWorldRenderer";
 import type DebugTools from "./DebugTools";
@@ -6,7 +17,7 @@ import type { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
 import type DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import type InspectEntityInformationSubsection from "./ui/component/InspectEntityInformationSubsection";
 import type InspectInformationSection from "./ui/component/InspectInformationSection";
-import type { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect/Entity";
+import type { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect/EntityInformation";
 
 export const DEBUG_TOOLS_ID = "Debug Tools";
 
@@ -104,6 +115,7 @@ export enum DebugToolsTranslation {
 	FilterDoodads,
 	FilterCorpses,
 	FilterPlayers,
+	FilterTreasure,
 	ActionRemove,
 	ActionSelect,
 	// ActionCount,

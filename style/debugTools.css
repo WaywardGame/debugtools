@@ -145,3 +145,11 @@
 	justify-self: center;
 	color: var(--color-text-secondary);
 }
+
+.debug-tools-selection-method .icon-dice {
+	--min-img-scale: 0.5;
+	flex-wrap: nowrap;
+	height: var(--block-height);
+	background: none !important;
+	box-shadow: none !important;
+}

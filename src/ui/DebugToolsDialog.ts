@@ -1,3 +1,14 @@
+/*!
+ * Copyright 2011-2023 Unlok
+ * https://www.unlok.ca
+ *
+ * Credits & Thanks:
+ * https://www.unlok.ca/credits-thanks/
+ *
+ * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
+ * https://github.com/WaywardGame/types/wiki
+ */
+
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
@@ -14,6 +25,8 @@ import PaintPanel from "./panel/PaintPanel";
 import SelectionPanel from "./panel/SelectionPanel";
 import TemperaturePanel from "./panel/TemperaturePanel";
 import TemplatePanel from "./panel/TemplatePanel";
+import { Save, SaveLocation } from "ui/IUi";
+import { OwnEventHandler } from "event/EventManager";
 
 export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
 
@@ -45,6 +58,9 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
 	public readonly DEBUG_TOOLS: DebugTools;
 
+	@Save(SaveLocation.Local)
+	private current: string | number | undefined;
+
 	public constructor(id: DialogId) {
 		super(id);
 		this.classes.add("debug-tools-dialog");
@@ -64,6 +80,16 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 
 	override getIcon() {
 		return this.DEBUG_TOOLS.menuBarButton;
+	}
+
+
+	protected override getDefaultSubpanelInformation(): SubpanelInformation | undefined {
+		return this.subpanelInformations.find(spi => spi[0] === this.current) ?? super.getDefaultSubpanelInformation();
+	}
+
+	@OwnEventHandler(DebugToolsDialog, "changeSubpanel")
+	protected onChangeSubpanel(activeSubpanel: SubpanelInformation) {
+		this.current = activeSubpanel[0];
 	}
 
 	/**
