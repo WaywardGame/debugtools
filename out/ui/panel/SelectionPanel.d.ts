@@ -11,6 +11,7 @@
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
+import { IBindHandlerApi } from "ui/input/Bind";
 export default class SelectionPanel extends DebugToolsPanel {
     static DEBUG_TOOLS: DebugTools;
     private readonly targets;
@@ -21,6 +22,7 @@ export default class SelectionPanel extends DebugToolsPanel {
     private readonly buttonPreviewNext;
     private readonly previewWrapper;
     private canvas;
+    private zoomLevel;
     private readonly buttonExecute;
     private readonly rangeQuantity;
     private readonly dropdownMethod;
@@ -42,6 +44,8 @@ export default class SelectionPanel extends DebugToolsPanel {
     private setupSelectionSources;
     execute(): void;
     protected onAppend(): void;
+    protected onSwitchTo(): void;
+    protected onSwitchAway(): void;
     protected onDispose(): void;
     private disposeRenderer;
     private disposeRendererAndCanvas;
@@ -49,6 +53,7 @@ export default class SelectionPanel extends DebugToolsPanel {
     private onMethodChange;
     private updateTargets;
     private resize;
+    onZoomIn(api: IBindHandlerApi): boolean;
     private updatePreview;
     private rerender;
     onTickEnd(): void;
