@@ -39,6 +39,8 @@ import CreatureDropdown from "ui/component/dropdown/CreatureDropdown";
 import DoodadDropdown from "ui/component/dropdown/DoodadDropdown";
 import NPCTypeDropdown from "ui/component/dropdown/NPCTypeDropdown";
 import TileEventDropdown from "ui/component/dropdown/TileEventDropdown";
+import Bind, { IBindHandlerApi } from "ui/input/Bind";
+import Bindable from "ui/input/Bindable";
 import Spacer from "ui/screen/screens/menu/component/Spacer";
 import { Bound, Debounce } from "utilities/Decorators";
 import Arrays from "utilities/collection/Arrays";
@@ -52,8 +54,6 @@ import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import SelectionExecute, { SelectionType } from "../../action/SelectionExecute";
 import DebugToolsPanel from "../component/DebugToolsPanel";
-import Bind, { IBindHandlerApi } from "ui/input/Bind";
-import Bindable from "ui/input/Bindable";
 
 const entityTypeToSelectionTypeMap = {
 	[EntityType.Corpse]: SelectionType.Corpse,
@@ -416,8 +416,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 			this.zoomLevel = Math.max(Math.min(this.zoomLevel + (api.bindable === Bindable.GameZoomIn ? 1 : -1), ZOOM_LEVEL_MAX), ZOOM_LEVEL_MIN);
 			this.renderer?.updateZoomLevel();
 
-			// todo: cancel scroll event for the panel
-
+			api.preventDefault = true;
 			return true;
 		}
 

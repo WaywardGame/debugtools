@@ -8,10 +8,10 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
+import { IBindHandlerApi } from "ui/input/Bind";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
-import { IBindHandlerApi } from "ui/input/Bind";
 export default class SelectionPanel extends DebugToolsPanel {
     static DEBUG_TOOLS: DebugTools;
     private readonly targets;

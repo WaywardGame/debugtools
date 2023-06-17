@@ -436,6 +436,8 @@ export default class DebugTools extends Mod {
 		EventManager.registerEventBusSubscriber(this.selector);
 		Bind.registerHandlers(this.selector);
 		EventManager.registerEventBusSubscriber(this.accidentalDeathHelper);
+		this.temperatureOverlay.register();
+		this.temperatureOverlay.hide();
 	}
 
 	/**
@@ -448,7 +450,7 @@ export default class DebugTools extends Mod {
 		EventManager.deregisterEventBusSubscriber(this.selector);
 		Bind.deregisterHandlers(this.selector);
 		this.unlockedCameraMovementHandler.end();
-		this.temperatureOverlay.unsubscribeEvents();
+		this.temperatureOverlay.deregister();
 		this.temperatureOverlay.setMode(TemperatureOverlayMode.None);
 		EventManager.deregisterEventBusSubscriber(this.accidentalDeathHelper);
 	}
@@ -579,13 +581,6 @@ export default class DebugTools extends Mod {
 	@EventHandler(EventBus.Game, "play")
 	protected onGamePlay() {
 		this.unlockedCameraMovementHandler.begin();
-	}
-
-	@EventHandler(EventBus.LocalPlayer, "moveToIsland")
-	protected onMoveToIsland(player: Player, oldIsland: Island, newIsland: Island) {
-		this.temperatureOverlay.unsubscribeEvents(oldIsland);
-		if (this.temperatureOverlay.getMode() !== TemperatureOverlayMode.None)
-			this.temperatureOverlay.subscribeEvents(newIsland);
 	}
 
 	@EventHandler(EventBus.Game, "rendererCreated")
@@ -803,6 +798,5 @@ export default class DebugTools extends Mod {
 	}
 }
 
-export { ModRegistrationMainDialogPanel };
-export { DebugToolsPanel, DebugToolsDialogPanelClass };
+export { DebugToolsDialogPanelClass, DebugToolsPanel, ModRegistrationMainDialogPanel };
 

@@ -134,7 +134,6 @@ export default class DebugTools extends Mod {
     postFieldOfView(): void;
     onGameScreenVisible(): void;
     protected onGamePlay(): void;
-    protected onMoveToIsland(player: Player, oldIsland: Island, newIsland: Island): void;
     protected onRendererCreated(_: any, renderer: Renderer): void;
     getMaxZoomLevel(): number | undefined;
     getZoomLevel(_renderer: any, zoomLevel: number): number | undefined;
@@ -153,5 +152,4 @@ export default class DebugTools extends Mod {
     getTileLightLevel(api: IInjectionApi<Island, "calculateTileLightLevel">, tile: Tile): void;
     private needsUpgrade;
 }
-export { ModRegistrationMainDialogPanel };
-export { DebugToolsPanel, DebugToolsDialogPanelClass };
+export { DebugToolsDialogPanelClass, DebugToolsPanel, ModRegistrationMainDialogPanel };
