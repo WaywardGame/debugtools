@@ -9,8 +9,10 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
+import { OwnEventHandler } from "event/EventManager";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
+import { Save, SaveLocation } from "ui/IUi";
 import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
 import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
 import { Tuple } from "utilities/collection/Tuple";
@@ -25,8 +27,6 @@ import PaintPanel from "./panel/PaintPanel";
 import SelectionPanel from "./panel/SelectionPanel";
 import TemperaturePanel from "./panel/TemperaturePanel";
 import TemplatePanel from "./panel/TemplatePanel";
-import { Save, SaveLocation } from "ui/IUi";
-import { OwnEventHandler } from "event/EventManager";
 
 export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
 
@@ -48,10 +48,10 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 	 */
 	public static description: IDialogDescription = {
 		minResolution: new Vector2(300, 200),
-		size: new Vector2(29, 25),
+		size: new Vector2(29, 31),
 		edges: [
 			[Edge.Right, 50],
-			[Edge.Bottom, 31],
+			[Edge.Bottom, 38],
 		],
 	};
 

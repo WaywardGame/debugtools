@@ -14,7 +14,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "mod/Mod", "ui/screen/screens/game/Dialogs", "ui/screen/screens/game/component/TabDialog", "utilities/collection/Tuple", "utilities/math/Vector2", "utilities/promise/Async", "../IDebugTools", "./component/DebugToolsPanel", "./panel/DisplayPanel", "./panel/GeneralPanel", "./panel/PaintPanel", "./panel/SelectionPanel", "./panel/TemperaturePanel", "./panel/TemplatePanel", "ui/IUi", "event/EventManager"], function (require, exports, Mod_1, Dialogs_1, TabDialog_1, Tuple_1, Vector2_1, Async_1, IDebugTools_1, DebugToolsPanel_1, DisplayPanel_1, GeneralPanel_1, PaintPanel_1, SelectionPanel_1, TemperaturePanel_1, TemplatePanel_1, IUi_1, EventManager_1) {
+define(["require", "exports", "event/EventManager", "mod/Mod", "ui/IUi", "ui/screen/screens/game/Dialogs", "ui/screen/screens/game/component/TabDialog", "utilities/collection/Tuple", "utilities/math/Vector2", "utilities/promise/Async", "../IDebugTools", "./component/DebugToolsPanel", "./panel/DisplayPanel", "./panel/GeneralPanel", "./panel/PaintPanel", "./panel/SelectionPanel", "./panel/TemperaturePanel", "./panel/TemplatePanel"], function (require, exports, EventManager_1, Mod_1, IUi_1, Dialogs_1, TabDialog_1, Tuple_1, Vector2_1, Async_1, IDebugTools_1, DebugToolsPanel_1, DisplayPanel_1, GeneralPanel_1, PaintPanel_1, SelectionPanel_1, TemperaturePanel_1, TemplatePanel_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     const subpanelClasses = [
@@ -62,10 +62,10 @@ define(["require", "exports", "mod/Mod", "ui/screen/screens/game/Dialogs", "ui/s
     }
     DebugToolsDialog.description = {
         minResolution: new Vector2_1.default(300, 200),
-        size: new Vector2_1.default(29, 25),
+        size: new Vector2_1.default(29, 31),
         edges: [
             [Dialogs_1.Edge.Right, 50],
-            [Dialogs_1.Edge.Bottom, 31],
+            [Dialogs_1.Edge.Bottom, 38],
         ],
     };
     exports.default = DebugToolsDialog;
