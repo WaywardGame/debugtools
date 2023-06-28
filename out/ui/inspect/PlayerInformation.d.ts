@@ -20,6 +20,8 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
     private readonly checkButtonNoClip;
     private readonly skillRangeRow;
     private readonly checkButtonPermissions?;
+    private readonly playerToReplaceDataWithDropdown?;
+    private readonly buttonExecuteDataReplace;
     private skill;
     private player?;
     constructor();
@@ -32,4 +34,5 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
     private togglePermissions;
     private setWeightBonus;
     private onPlayerDataChange;
+    private replaceData;
 }

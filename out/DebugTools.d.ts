@@ -39,6 +39,7 @@ import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
 import { TemperatureOverlay } from "./overlay/TemperatureOverlay";
 import AccidentalDeathHelper from "./ui/AccidentalDeathHelper";
 import { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
+import DebugToolsPrompts from "./ui/DebugToolsPrompts";
 import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 interface IDebugToolsEvents extends Events<Mod> {
     playerDataChange<K extends keyof IPlayerData>(playerId: number, property: K, newValue: IPlayerData[K]): any;
@@ -52,6 +53,7 @@ export default class DebugTools extends Mod {
     readonly actions: Actions;
     readonly selector: LocationSelector;
     readonly unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
+    readonly prompts: DebugToolsPrompts;
     readonly modRegistryMainDialogPanels: InterModRegistry<ModRegistrationMainDialogPanel>;
     readonly modRegistryInspectDialogPanels: InterModRegistry<ModRegistrationInspectDialogInformationSection>;
     readonly modRegistryInspectDialogEntityInformationSubsections: InterModRegistry<ModRegistrationInspectDialogEntityInformationSubsection>;
@@ -103,6 +105,7 @@ export default class DebugTools extends Mod {
     readonly actionRenameIsland: ActionType;
     readonly actionMoveToIsland: ActionType;
     readonly actionForceSailToCivilization: ActionType;
+    readonly actionReplacePlayerData: ActionType;
     readonly dialogMain: DialogId;
     readonly dialogInspect: DialogId;
     readonly inspectionTemperature: InspectType;

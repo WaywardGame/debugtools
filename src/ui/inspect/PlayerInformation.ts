@@ -17,13 +17,16 @@ import { TextContext } from "language/ITranslation";
 import Translation from "language/Translation";
 import Mod from "mod/Mod";
 import { BlockRow } from "ui/component/BlockRow";
+import Button from "ui/component/Button";
 import { CheckButton } from "ui/component/CheckButton";
+import Dropdown, { IDropdownOption } from "ui/component/Dropdown";
 import { LabelledRow } from "ui/component/LabelledRow";
 import { RangeRow } from "ui/component/RangeRow";
 import SkillDropdown from "ui/component/dropdown/SkillDropdown";
 import { Bound } from "utilities/Decorators";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, translation } from "../../IDebugTools";
+import ReplacePlayerData from "../../action/ReplacePlayerData";
 import SetSkill from "../../action/SetSkill";
 import SetWeightBonus from "../../action/SetWeightBonus";
 import ToggleInvulnerable from "../../action/ToggleInvulnerable";
@@ -41,6 +44,8 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	private readonly checkButtonNoClip: CheckButton;
 	private readonly skillRangeRow: RangeRow;
 	private readonly checkButtonPermissions?: CheckButton;
+	private readonly playerToReplaceDataWithDropdown?: Dropdown<string>;
+	private readonly buttonExecuteDataReplace: Button;
 
 	private skill: SkillType | "all" | "none" = "none";
 	private player?: Player;
@@ -101,6 +106,33 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.setDisplayValue(translation(DebugToolsTranslation.StatsPercentage).get)
 			.event.subscribe("finish", this.setSkill)
 			.appendTo(this);
+
+		const replaceDataRow: LabelledRow = new LabelledRow()
+			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelReplaceData)))
+			.appendTo(this);
+
+		this.buttonExecuteDataReplace = new Button()
+			.setText(translation(DebugToolsTranslation.ButtonReplace).addArgs(() => this.player?.getName()))
+			.event.subscribe("activate", this.replaceData);
+
+		replaceDataRow.append(this.playerToReplaceDataWithDropdown = new Dropdown<string>()
+			.setRefreshMethod(() => {
+				const playerOptions = game.playerManager.getAll(true, true, false, true)
+					.filter(player => player !== this.player)
+					.map((player): IDropdownOption<string> => [player.identifier, option => option.setText(player.getName())]);
+
+				replaceDataRow.toggle(!!playerOptions.length);
+
+				return {
+					defaultOption: "",
+					options: [
+						["", option => option.setText(translation(DebugToolsTranslation.None))],
+						...playerOptions,
+					],
+				};
+			})
+			.event.subscribe("selection", (_, selection) => this.buttonExecuteDataReplace.toggle(!!selection)))
+			.append(this.buttonExecuteDataReplace);
 	}
 
 	public override update(entity: Creature | NPC | Player) {
@@ -129,6 +161,8 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 		this.checkButtonNoClip.refresh();
 		this.checkButtonInvulnerable.refresh();
 		this.rangeWeightBonus.refresh();
+		this.playerToReplaceDataWithDropdown?.refresh();
+		this.buttonExecuteDataReplace.refreshText();
 	}
 
 	@Bound
@@ -187,5 +221,15 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				if (this.checkButtonPermissions) this.checkButtonPermissions.refresh();
 				break;
 		}
+	}
+
+	@Bound private replaceData() {
+		const playerId = this.playerToReplaceDataWithDropdown?.selection;
+		const replaceFrom = playerId && game.playerManager.getByIdentifier(playerId, true);
+		if (!playerId || !this.player || !replaceFrom) {
+			return;
+		}
+
+		ReplacePlayerData.execute(localPlayer, this.player, replaceFrom);
 	}
 }

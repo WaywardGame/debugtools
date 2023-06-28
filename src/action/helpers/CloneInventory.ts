@@ -17,7 +17,11 @@ import MagicalPropertyManager from "game/magic/MagicalPropertyManager";
  */
 export default function (from: Human, to: Human) {
 	for (const item of [...to.inventory.containedItems]) {
-		from.island.items.remove(item);
+		if (item.isContainer()) {
+			to.island.items.removeContainerItems(item);
+		}
+
+		to.island.items.remove(item);
 	}
 
 	for (const item of [...to.getEquippedItems()]) {

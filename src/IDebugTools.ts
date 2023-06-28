@@ -198,6 +198,8 @@ export enum DebugToolsTranslation {
 	ButtonPreviousItems,
 	ButtonNextItems,
 	LabelItems,
+	LabelReplaceData,
+	ButtonReplace,
 	////////////////////////////////////
 	// Inspection
 	//

@@ -60,6 +60,7 @@ import Paint from "./action/Paint";
 import PlaceTemplate from "./action/PlaceTemplate";
 import Remove from "./action/Remove";
 import RenameIsland from "./action/RenameIsland";
+import ReplacePlayerData from "./action/ReplacePlayerData";
 import SelectionExecute from "./action/SelectionExecute";
 import SetDecay from "./action/SetDecay";
 import SetDecayBulk from "./action/SetDecayBulk";
@@ -80,6 +81,7 @@ import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
 import { TemperatureOverlay, TemperatureOverlayMode } from "./overlay/TemperatureOverlay";
 import AccidentalDeathHelper from "./ui/AccidentalDeathHelper";
 import MainDialog, { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
+import DebugToolsPrompts from "./ui/DebugToolsPrompts";
 import InspectDialog from "./ui/InspectDialog";
 import Container from "./ui/component/Container";
 import DebugToolsPanel from "./ui/component/DebugToolsPanel";
@@ -144,6 +146,8 @@ export default class DebugTools extends Mod {
 	public readonly selector: LocationSelector;
 	@Register.registry(UnlockedCameraMovementHandler)
 	public readonly unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
+	@Register.registry(DebugToolsPrompts)
+	public readonly prompts: DebugToolsPrompts;
 
 	////////////////////////////////////
 	// Extension Registries
@@ -301,6 +305,9 @@ export default class DebugTools extends Mod {
 
 	@Register.action("ForceSailToCivilization", ForceSailToCivilization)
 	public readonly actionForceSailToCivilization: ActionType;
+
+	@Register.action("ReplacePlayerData", ReplacePlayerData)
+	public readonly actionReplacePlayerData: ActionType;
 
 	////////////////////////////////////
 	// UI
