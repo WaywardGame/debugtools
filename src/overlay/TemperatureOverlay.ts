@@ -9,15 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { EventBus } from "event/EventBuses";
-import { Priority } from "event/EventEmitter";
-import EventManager, { EventHandler } from "event/EventManager";
 import { TempType, Temperature } from "game/temperature/ITemperature";
 import TemperatureManager, { TEMPERATURE_BOUNDARY_MIN_VEC2, TEMPERATURE_INVALID } from "game/temperature/TemperatureManager";
 import { IOverlayInfo, OverlayType } from "game/tile/ITerrain";
 import Tile from "game/tile/Tile";
-import { RenderSource, UpdateRenderFlag } from "renderer/IRenderer";
-import GenericOverlay from "renderer/overlay/GenericOverlay";
+import UniversalOverlay from "renderer/overlay/UniversalOverlay";
 import Color, { IRGB } from "utilities/Color";
 import { Bound } from "utilities/Decorators";
 import Math2 from "utilities/math/Math2";
@@ -35,35 +31,17 @@ export enum TemperatureOverlayMode {
 	Calculated,
 }
 
-export class TemperatureOverlay extends GenericOverlay {
+export class TemperatureOverlay extends UniversalOverlay {
+
+	public override get minVector(): Vector2 {
+		return TEMPERATURE_BOUNDARY_MIN_VEC2;
+	}
+
+	public override get maxVector(): Vector2 {
+		return localIsland.temperature.temperatureBoundaryMaxVector;
+	}
 
 	private mode = TemperatureOverlayMode.None;
-
-	private subscribed = false;
-
-	public subscribeEvents(island = localIsland) {
-		if (this.subscribed) {
-			return;
-		}
-
-		this.subscribed = true;
-
-		EventManager.registerEventBusSubscriber(this);
-		island.temperature.event.subscribe("updateProducedTile", this.onUpdateProduced);
-		island.temperature.event.subscribe("recalculate", this.recalculateTile);
-	}
-
-	public unsubscribeEvents(island = localIsland) {
-		if (!this.subscribed) {
-			return;
-		}
-
-		this.subscribed = false;
-
-		EventManager.deregisterEventBusSubscriber(this);
-		island.temperature.event.unsubscribe("updateProducedTile", this.onUpdateProduced);
-		island.temperature.event.unsubscribe("recalculate", this.recalculateTile);
-	}
 
 	public getMode() {
 		return this.mode;
@@ -75,15 +53,16 @@ export class TemperatureOverlay extends GenericOverlay {
 		}
 
 		if (this.mode === TemperatureOverlayMode.None) {
-			this.subscribeEvents();
+			this.show();
 		}
 
 		this.mode = mode;
 
+		if (this.mode === TemperatureOverlayMode.None) {
+			this.hide();
+		}
+
 		this.refresh();
-
-		renderers.updateRender(undefined, RenderSource.Mod, UpdateRenderFlag.World);
-
 		return this;
 	}
 
@@ -123,39 +102,20 @@ export class TemperatureOverlay extends GenericOverlay {
 		return this.generateOverlayInfo(tile);
 	}
 
-	@EventHandler(EventBus.Game, "tickEnd", Priority.Lowest - 1)
-	protected onTickEnd() {
-		if (this.mode === TemperatureOverlayMode.None || !this.alpha) {
-			return;
-		}
-
-		// update overlays for tiles that had changes
-		for (const { tile, range } of this.scheduledInvalidations) {
-			if (tile.z !== localPlayer.z) {
-				continue;
-			}
-
-			Vector2.forRange(tile, range ?? 0, TEMPERATURE_BOUNDARY_MIN_VEC2, localIsland.temperature.temperatureBoundaryMaxVector, true,
-				vec => this.addOrUpdate(tile.island.getTile(vec.x, vec.y, tile.z)));
-		}
+	protected override onPreMoveToIsland() {
+		super.onPreMoveToIsland();
+		localIsland.temperature.event.unsubscribe("updateProducedTile", this.onUpdateProduced);
+		localIsland.temperature.event.unsubscribe("recalculate", this.recalculateTile);
 	}
 
-	@EventHandler(EventBus.LocalPlayer, "preMoveToIsland")
-	protected onPreMoveToIsland() {
-		// clear all existing overlays since we're leaving
-		this.clear();
+	protected override onLoadOnIsland(): void {
+		super.onLoadOnIsland();
+		localIsland.temperature.event.subscribe("updateProducedTile", this.onUpdateProduced);
+		localIsland.temperature.event.subscribe("recalculate", this.recalculateTile);
 	}
-
-	@EventHandler(EventBus.LocalPlayer, "changeZ")
-	@EventHandler(EventBus.LocalPlayer, "moveToIsland")
-	protected onChangeZOrIsland() {
-		this.refresh();
-	}
-
-	private scheduledInvalidations: { tile: Tile, range?: number }[] = [];
 
 	@Bound protected onUpdateProduced(temperatureManager: TemperatureManager, tile: Tile, invalidateRange?: number) {
-		this.scheduledInvalidations.push({ tile, range: invalidateRange });
+		this.invalidate(tile, invalidateRange);
 	}
 
 	@Bound protected recalculateTile(temperatureManager: TemperatureManager, x: number, y: number, z: number, tempType: TempType) {
@@ -181,24 +141,5 @@ export class TemperatureOverlay extends GenericOverlay {
 		const layer = tile.island.temperature.getLayer(tile.z);
 
 		return Math2.clamp(Temperature.Coldest, Temperature.Hottest, base + time + layer + tileTemp);
-	}
-
-	private refresh() {
-		this.clear();
-
-		this.scheduledInvalidations.length = 0;
-
-		if (this.mode === TemperatureOverlayMode.None || !localIsland) {
-			return;
-		}
-
-		for (let y = 0; y < localIsland.mapSize; y++) {
-			for (let x = 0; x < localIsland.mapSize; x++) {
-				const tile = localIsland.getTileSafe(x, y, localPlayer.z);
-				if (tile) {
-					this.addOrUpdate(tile);
-				}
-			}
-		}
 	}
 }

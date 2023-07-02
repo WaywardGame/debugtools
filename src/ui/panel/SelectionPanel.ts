@@ -11,7 +11,7 @@
 
 import Stream from "@wayward/goodstream/Stream";
 import { EventBus } from "event/EventBuses";
-import { Events, IEventEmitter } from "event/EventEmitter";
+import { Events, IEventEmitter, Priority } from "event/EventEmitter";
 import { EventHandler, OwnEventHandler } from "event/EventManager";
 import Doodad from "game/doodad/Doodad";
 import { EntityType } from "game/entity/IEntity";
@@ -23,7 +23,7 @@ import { IslandId } from "game/island/IIsland";
 import TileEvent from "game/tile/TileEvent";
 import { TextContext } from "language/ITranslation";
 import Mod from "mod/Mod";
-import { RenderSource } from "renderer/IRenderer";
+import { RenderSource, ZOOM_LEVEL_MAX, ZOOM_LEVEL_MIN } from "renderer/IRenderer";
 import Renderer from "renderer/Renderer";
 import { RendererOrigin } from "renderer/context/RendererOrigin";
 import { BlockRow } from "ui/component/BlockRow";
@@ -39,8 +39,10 @@ import CreatureDropdown from "ui/component/dropdown/CreatureDropdown";
 import DoodadDropdown from "ui/component/dropdown/DoodadDropdown";
 import NPCTypeDropdown from "ui/component/dropdown/NPCTypeDropdown";
 import TileEventDropdown from "ui/component/dropdown/TileEventDropdown";
+import Bind, { IBindHandlerApi } from "ui/input/Bind";
+import Bindable from "ui/input/Bindable";
 import Spacer from "ui/screen/screens/menu/component/Spacer";
-import { Bound } from "utilities/Decorators";
+import { Bound, Debounce } from "utilities/Decorators";
 import Arrays from "utilities/collection/Arrays";
 import { Tuple } from "utilities/collection/Tuple";
 import { IVector3 } from "utilities/math/IVector";
@@ -99,6 +101,8 @@ export default class SelectionPanel extends DebugToolsPanel {
 		.append(this.buttonPreviewPrevious, this.buttonPreviewNext);
 
 	private canvas: Component<HTMLCanvasElement> | undefined;
+
+	private zoomLevel: number = 2;
 
 	private readonly buttonExecute = new Button()
 		.classes.add("has-icon-before", "icon-arrow-right", "icon-no-scale")
@@ -251,7 +255,8 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 	@OwnEventHandler(SelectionPanel, "append")
 	protected onAppend() {
-		this.getDialog()?.event.until(this, "remove").subscribe("resize", this.resize);
+		this.getDialog()?.event.until(this, "switchAway", "remove")
+			.subscribe("resize", () => this.resize());
 
 		this.disposeRendererAndCanvas();
 
@@ -263,10 +268,23 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 		this.renderer = new Renderer(this.canvas.element);
 		this.renderer.fieldOfView.disabled = true;
-		this.renderer.event.subscribe("getZoomLevel", () => 2);
+		this.renderer.event.subscribe("getZoomLevel", () => this.zoomLevel);
 		this.renderer.setOrigin(localPlayer);
 
 		this.resize();
+	}
+
+	@OwnEventHandler(SelectionPanel, "switchTo")
+	protected onSwitchTo() {
+		this.resize();
+
+		Bind.registerHandlers(this);
+	}
+
+	@OwnEventHandler(SelectionPanel, "switchAway")
+	@OwnEventHandler(SelectionPanel, "remove")
+	protected onSwitchAway() {
+		Bind.deregisterHandlers(this);
 	}
 
 	@OwnEventHandler(SelectionPanel, "remove")
@@ -372,8 +390,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 		this.updatePreview();
 	}
 
-	@OwnEventHandler(SelectionPanel, "switchTo")
-	@Bound
+	@Debounce(250)
 	private resize() {
 		if (!this.canvas || !this.renderer) {
 			return;
@@ -390,6 +407,20 @@ export default class SelectionPanel extends DebugToolsPanel {
 		this.renderer.setViewportSize(this.canvas.element.width, this.canvas.element.height);
 
 		this.rerender(RenderSource.Resize);
+	}
+
+	@Bind.onDown(Bindable.GameZoomIn, Priority.High)
+	@Bind.onDown(Bindable.GameZoomOut, Priority.High)
+	public onZoomIn(api: IBindHandlerApi) {
+		if (api.mouse.isWithin(this.canvas)) {
+			this.zoomLevel = Math.max(Math.min(this.zoomLevel + (api.bindable === Bindable.GameZoomIn ? 1 : -1), ZOOM_LEVEL_MAX), ZOOM_LEVEL_MIN);
+			this.renderer?.updateZoomLevel();
+
+			api.preventDefault = true;
+			return true;
+		}
+
+		return false;
 	}
 
 	private updatePreview() {

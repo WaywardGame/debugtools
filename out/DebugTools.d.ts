@@ -39,6 +39,7 @@ import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
 import { TemperatureOverlay } from "./overlay/TemperatureOverlay";
 import AccidentalDeathHelper from "./ui/AccidentalDeathHelper";
 import { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
+import DebugToolsPrompts from "./ui/DebugToolsPrompts";
 import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 interface IDebugToolsEvents extends Events<Mod> {
     playerDataChange<K extends keyof IPlayerData>(playerId: number, property: K, newValue: IPlayerData[K]): any;
@@ -52,6 +53,7 @@ export default class DebugTools extends Mod {
     readonly actions: Actions;
     readonly selector: LocationSelector;
     readonly unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
+    readonly prompts: DebugToolsPrompts;
     readonly modRegistryMainDialogPanels: InterModRegistry<ModRegistrationMainDialogPanel>;
     readonly modRegistryInspectDialogPanels: InterModRegistry<ModRegistrationInspectDialogInformationSection>;
     readonly modRegistryInspectDialogEntityInformationSubsections: InterModRegistry<ModRegistrationInspectDialogEntityInformationSubsection>;
@@ -103,6 +105,7 @@ export default class DebugTools extends Mod {
     readonly actionRenameIsland: ActionType;
     readonly actionMoveToIsland: ActionType;
     readonly actionForceSailToCivilization: ActionType;
+    readonly actionReplacePlayerData: ActionType;
     readonly dialogMain: DialogId;
     readonly dialogInspect: DialogId;
     readonly inspectionTemperature: InspectType;
@@ -134,7 +137,6 @@ export default class DebugTools extends Mod {
     postFieldOfView(): void;
     onGameScreenVisible(): void;
     protected onGamePlay(): void;
-    protected onMoveToIsland(player: Player, oldIsland: Island, newIsland: Island): void;
     protected onRendererCreated(_: any, renderer: Renderer): void;
     getMaxZoomLevel(): number | undefined;
     getZoomLevel(_renderer: any, zoomLevel: number): number | undefined;
@@ -153,5 +155,4 @@ export default class DebugTools extends Mod {
     getTileLightLevel(api: IInjectionApi<Island, "calculateTileLightLevel">, tile: Tile): void;
     private needsUpgrade;
 }
-export { ModRegistrationMainDialogPanel };
-export { DebugToolsPanel, DebugToolsDialogPanelClass };
+export { DebugToolsDialogPanelClass, DebugToolsPanel, ModRegistrationMainDialogPanel };

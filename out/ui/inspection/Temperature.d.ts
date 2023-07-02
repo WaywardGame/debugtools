@@ -16,7 +16,7 @@ import Tile from "game/tile/Tile";
 export default class TemperatureInspection extends Inspection<Tile> {
     private tempValue?;
     static readonly DEBUG_TOOLS: DebugTools;
-    static getFromTile(tile: Tile): TemperatureInspection | never[];
+    static getFromTile(tile: Tile): never[] | TemperatureInspection;
     constructor(tile: Tile);
     getId(): string;
     getPriority(): number;

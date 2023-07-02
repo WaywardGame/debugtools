@@ -188,7 +188,9 @@
 			"temperatureOverlayModeProduced": "Produced",
 			"temperatureOverlayModeCalculated": "Calculated",
 			"revertDeath": "Revert Death",
-			"statsPercentage": "{0}%"
+			"statsPercentage": "{0}%",
+			"labelReplaceData": "Using",
+			"buttonReplace": "Replace Data For {0}"
 		},
 		"item": {
 			"none": "none"
@@ -198,6 +200,9 @@
 		},
 		"command": {
 			"modDebugToolsDebugToolsPermission": "debugtoolspermission"
+		},
+		"prompt": {
+			"modDebugToolsReplacePlayerData": ["Are you sure you want to replace\n{0}'s player data with {1}'s?", "{#--COLOR-BAD:There is no undo!}"]
 		}
 	}
 }
