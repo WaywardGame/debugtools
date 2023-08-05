@@ -19,7 +19,7 @@ export default class DoodadPaint extends Component implements IPaintSection {
     constructor();
     getTilePaintData(): {
         doodad: {
-            type: "remove" | DoodadType;
+            type: DoodadType | "remove";
         };
     } | undefined;
     isChanging(): boolean;
