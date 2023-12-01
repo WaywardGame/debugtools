@@ -9,25 +9,41 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Quality } from "game/IObject";
-import { IContainer, ItemType } from "game/item/IItem";
-import Dictionary from "language/Dictionary";
-import Translation from "language/Translation";
-import Button from "ui/component/Button";
-import Component from "ui/component/Component";
-import Dropdown from "ui/component/Dropdown";
-import { LabelledRow } from "ui/component/LabelledRow";
-import { RangeRow } from "ui/component/RangeRow";
-import ItemDropdown from "ui/component/dropdown/ItemDropdown";
-import { Bound } from "utilities/Decorators";
-import { Tuple } from "utilities/collection/Tuple";
-import Enums from "utilities/enum/Enums";
+import { Quality } from "@wayward/game/game/IObject";
+import { IContainer, ItemType } from "@wayward/game/game/item/IItem";
+import Dictionary from "@wayward/game/language/Dictionary";
+import { TextContext } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
+import Button from "@wayward/game/ui/component/Button";
+import Component from "@wayward/game/ui/component/Component";
+import Dropdown from "@wayward/game/ui/component/Dropdown";
+import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
+import { RangeRow } from "@wayward/game/ui/component/RangeRow";
+import ItemDropdown from "@wayward/game/ui/component/dropdown/ItemDropdown";
+import Enums from "@wayward/game/utilities/enum/Enums";
+import { Bound } from "@wayward/utilities/Decorators";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import AddItemToInventoryAction, { ADD_ITEM_ALL, ADD_ITEM_RANDOM } from "../../action/AddItemToInventory";
 
 export default class AddItemToInventory extends Component {
 
 	public static itemDropdown?: ItemDropdown<"None" | "Random" | "All">;
+
+	private static initItemDropdown(): ItemDropdown<"None" | "Random" | "All"> {
+		const itemDropdown = new ItemDropdown("None", [
+			["None", option => option.setText(translation(DebugToolsTranslation.None))],
+			["Random", option => option.setText(translation(DebugToolsTranslation.MethodRandom))],
+			["All", option => option.setText(translation(DebugToolsTranslation.MethodAll))],
+		]);
+
+		game.event.subscribeNext("stoppingPlay", () => {
+			itemDropdown.remove();
+			delete AddItemToInventory.itemDropdown;
+		});
+
+		return itemDropdown;
+	}
 
 	private readonly dropdownItemType: ItemDropdown<"None" | "Random" | "All">;
 	private readonly dropdownItemQuality: Dropdown<Quality>;
@@ -37,11 +53,7 @@ export default class AddItemToInventory extends Component {
 	public constructor(private readonly containerSupplier: () => IContainer | undefined) {
 		super();
 
-		AddItemToInventory.itemDropdown ??= new ItemDropdown("None", [
-			["None", option => option.setText(translation(DebugToolsTranslation.None))],
-			["Random", option => option.setText(translation(DebugToolsTranslation.MethodRandom))],
-			["All", option => option.setText(translation(DebugToolsTranslation.MethodAll))],
-		]);
+		AddItemToInventory.itemDropdown ??= AddItemToInventory.initItemDropdown();
 
 		new LabelledRow()
 			.classes.add("dropdown-label")
@@ -52,7 +64,9 @@ export default class AddItemToInventory extends Component {
 				["All", option => option.setText(translation(DebugToolsTranslation.MethodAll))],
 			], true)
 				.use(AddItemToInventory.itemDropdown)
-				.event.subscribe("selection", this.changeItem))
+				.event.subscribe("selection", this.changeItem)
+				.event.subscribe("usingSearch", this.usingSearch)
+				.setSearchValidOption())
 			.appendTo(this);
 
 		this.wrapperAddItem = new Component()
@@ -65,7 +79,7 @@ export default class AddItemToInventory extends Component {
 					.setRefreshMethod(() => ({
 						defaultOption: Quality.Random,
 						options: Enums.values(Quality)
-							.map(quality => Tuple(quality, Translation.get(Dictionary.Quality, quality)))
+							.map(quality => Tuple(quality, Translation.get(Dictionary.Quality, quality).inContext(TextContext.Title)))
 							.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 					}))))
 			.append(this.rangeItemQuantity = new RangeRow()
@@ -82,21 +96,25 @@ export default class AddItemToInventory extends Component {
 	}
 
 	@Bound
-	private changeItem(_: any, item: ItemType | "None" | "Random" | "All") {
+	private changeItem(_: any, item: ItemType | "None" | "Random" | "All" | "search"): void {
 		this.wrapperAddItem.toggle(item !== "None");
-		this.rangeItemQuantity.toggle(item !== "All");
 	}
 
 	@Bound
-	private addItem() {
+	private usingSearch(): void {
+		this.changeItem(undefined, "search");
+	}
+
+	@Bound
+	private addItem(): void {
 		const selection = this.dropdownItemType.selection;
 		const container = this.containerSupplier();
 		if (!container)
 			return;
 
 		AddItemToInventoryAction.execute(localPlayer, container,
-			selection === "Random" ? ADD_ITEM_RANDOM : selection === "All" ? ADD_ITEM_ALL : selection as ItemType,
-			this.dropdownItemQuality.selection,
+			selection === "Random" ? ADD_ITEM_RANDOM : selection === "All" ? ADD_ITEM_ALL : typeof selection === "object" ? selection.matching : selection,
+			this.dropdownItemQuality.selectedOption,
 			Math.floor(1.2 ** this.rangeItemQuantity.value));
 	}
 }

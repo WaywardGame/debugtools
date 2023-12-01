@@ -9,10 +9,10 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { IslandId } from "game/island/IIsland";
-import { Action } from "game/entity/action/Action";
-import { ActionArgument } from "game/entity/action/IAction";
-import { EntityType } from "game/entity/IEntity";
+import { IslandId } from "@wayward/game/game/island/IIsland";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
 
 import { defaultUsability } from "../Actions";
 

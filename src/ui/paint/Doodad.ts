@@ -9,12 +9,12 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Events, IEventEmitter } from "event/EventEmitter";
-import { DoodadType } from "game/doodad/IDoodad";
-import Component from "ui/component/Component";
-import DoodadDropdown from "ui/component/dropdown/DoodadDropdown";
-import { LabelledRow } from "ui/component/LabelledRow";
-import { Bound } from "utilities/Decorators";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import { DoodadType } from "@wayward/game/game/doodad/IDoodad";
+import Component from "@wayward/game/ui/component/Component";
+import DoodadDropdown from "@wayward/game/ui/component/dropdown/DoodadDropdown";
+import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
+import { Bound } from "@wayward/utilities/Decorators";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
@@ -39,7 +39,7 @@ export default class DoodadPaint extends Component implements IPaintSection {
 			.appendTo(this);
 	}
 
-	public getTilePaintData() {
+	public getTilePaintData(): { doodad: { type: DoodadType | "remove"; }; } | undefined {
 		return this.doodad === undefined ? undefined : {
 			doodad: {
 				type: this.doodad,
@@ -47,16 +47,16 @@ export default class DoodadPaint extends Component implements IPaintSection {
 		};
 	}
 
-	public isChanging() {
+	public isChanging(): boolean {
 		return this.doodad !== undefined;
 	}
 
-	public reset() {
+	public reset(): void {
 		this.dropdown.select("nochange");
 	}
 
 	@Bound
-	private changeDoodad(_: any, doodad: DoodadType | "nochange" | "remove") {
+	private changeDoodad(_: any, doodad: DoodadType | "nochange" | "remove"): void {
 		this.doodad = doodad === "nochange" ? undefined : doodad === "remove" ? "remove" : doodad;
 
 		this.event.emit("change");

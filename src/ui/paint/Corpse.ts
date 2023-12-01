@@ -9,13 +9,13 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Events, IEventEmitter } from "event/EventEmitter";
-import { CreatureType } from "game/entity/creature/ICreature";
-import { CheckButton } from "ui/component/CheckButton";
-import Component from "ui/component/Component";
-import CorpseDropdown from "ui/component/dropdown/CorpseDropdown";
-import { LabelledRow } from "ui/component/LabelledRow";
-import { Bound } from "utilities/Decorators";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
+import Component from "@wayward/game/ui/component/Component";
+import CorpseDropdown from "@wayward/game/ui/component/dropdown/CorpseDropdown";
+import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
+import { Bound } from "@wayward/utilities/Decorators";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
@@ -53,7 +53,7 @@ export default class CorpsePaint extends Component implements IPaintSection {
 			.appendTo(this);
 	}
 
-	public getTilePaintData() {
+	public getTilePaintData(): { corpse: { type: CreatureType | "remove" | undefined; aberrant: boolean; replaceExisting: boolean; }; } {
 		return {
 			corpse: {
 				type: this.corpse,
@@ -63,16 +63,16 @@ export default class CorpsePaint extends Component implements IPaintSection {
 		};
 	}
 
-	public isChanging() {
+	public isChanging(): boolean {
 		return this.corpse !== undefined || this.replaceExisting.checked;
 	}
 
-	public reset() {
+	public reset(): void {
 		this.dropdown.select("nochange");
 	}
 
 	@Bound
-	private changeCorpse(_: any, corpse: CreatureType | "remove" | "nochange") {
+	private changeCorpse(_: any, corpse: CreatureType | "remove" | "nochange"): void {
 		this.corpse = corpse === "nochange" ? undefined : corpse === "remove" ? "remove" : corpse;
 
 		const isReplaceable = this.corpse !== undefined && this.corpse !== "remove";

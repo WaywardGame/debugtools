@@ -9,47 +9,49 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
+import { EventBus } from "@wayward/game/event/EventBuses";
+import { EventHandler } from "@wayward/game/event/EventManager";
+import Doodad from "@wayward/game/game/doodad/Doodad";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
+import Creature from "@wayward/game/game/entity/creature/Creature";
+import Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
+import NPC from "@wayward/game/game/entity/npc/NPC";
+import Player from "@wayward/game/game/entity/player/Player";
+import { IslandId } from "@wayward/game/game/island/IIsland";
+import Island from "@wayward/game/game/island/Island";
+import TileEvent from "@wayward/game/game/tile/TileEvent";
+import { TextContext } from "@wayward/game/language/ITranslation";
+import Mod from "@wayward/game/mod/Mod";
+import { RenderSource, ZOOM_LEVEL_MAX, ZOOM_LEVEL_MIN } from "@wayward/game/renderer/IRenderer";
+import { Renderer } from "@wayward/game/renderer/Renderer";
+import { RendererOrigin } from "@wayward/game/renderer/context/RendererOrigin";
+import { BlockRow } from "@wayward/game/ui/component/BlockRow";
+import Button, { ButtonClasses } from "@wayward/game/ui/component/Button";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
+import Component from "@wayward/game/ui/component/Component";
+import Dropdown, { IDropdownOption } from "@wayward/game/ui/component/Dropdown";
+import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
+import { RangeRow } from "@wayward/game/ui/component/RangeRow";
+import Text from "@wayward/game/ui/component/Text";
+import CorpseDropdown from "@wayward/game/ui/component/dropdown/CorpseDropdown";
+import CreatureDropdown from "@wayward/game/ui/component/dropdown/CreatureDropdown";
+import DoodadDropdown from "@wayward/game/ui/component/dropdown/DoodadDropdown";
+import NPCTypeDropdown from "@wayward/game/ui/component/dropdown/NPCTypeDropdown";
+import TileEventDropdown from "@wayward/game/ui/component/dropdown/TileEventDropdown";
+import Bind, { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
+import Bindable from "@wayward/game/ui/input/Bindable";
+import Spacer from "@wayward/game/ui/screen/screens/menu/component/Spacer";
+import { IVector3 } from "@wayward/game/utilities/math/IVector";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
+import Vector3 from "@wayward/game/utilities/math/Vector3";
 import Stream from "@wayward/goodstream/Stream";
-import { EventBus } from "event/EventBuses";
-import { Events, IEventEmitter, Priority } from "event/EventEmitter";
-import { EventHandler, OwnEventHandler } from "event/EventManager";
-import Doodad from "game/doodad/Doodad";
-import { EntityType } from "game/entity/IEntity";
-import Creature from "game/entity/creature/Creature";
-import Corpse from "game/entity/creature/corpse/Corpse";
-import NPC from "game/entity/npc/NPC";
-import Player from "game/entity/player/Player";
-import { IslandId } from "game/island/IIsland";
-import TileEvent from "game/tile/TileEvent";
-import { TextContext } from "language/ITranslation";
-import Mod from "mod/Mod";
-import { RenderSource, ZOOM_LEVEL_MAX, ZOOM_LEVEL_MIN } from "renderer/IRenderer";
-import Renderer from "renderer/Renderer";
-import { RendererOrigin } from "renderer/context/RendererOrigin";
-import { BlockRow } from "ui/component/BlockRow";
-import Button, { ButtonClasses } from "ui/component/Button";
-import { CheckButton } from "ui/component/CheckButton";
-import Component from "ui/component/Component";
-import Dropdown, { IDropdownOption } from "ui/component/Dropdown";
-import { LabelledRow } from "ui/component/LabelledRow";
-import { RangeRow } from "ui/component/RangeRow";
-import Text from "ui/component/Text";
-import CorpseDropdown from "ui/component/dropdown/CorpseDropdown";
-import CreatureDropdown from "ui/component/dropdown/CreatureDropdown";
-import DoodadDropdown from "ui/component/dropdown/DoodadDropdown";
-import NPCTypeDropdown from "ui/component/dropdown/NPCTypeDropdown";
-import TileEventDropdown from "ui/component/dropdown/TileEventDropdown";
-import Bind, { IBindHandlerApi } from "ui/input/Bind";
-import Bindable from "ui/input/Bindable";
-import Spacer from "ui/screen/screens/menu/component/Spacer";
-import { Bound, Debounce } from "utilities/Decorators";
-import Arrays from "utilities/collection/Arrays";
-import { Tuple } from "utilities/collection/Tuple";
-import { IVector3 } from "utilities/math/IVector";
-import Math2 from "utilities/math/Math2";
-import Vector2 from "utilities/math/Vector2";
-import Vector3 from "utilities/math/Vector3";
-import { generalRandom } from "utilities/random/RandomUtilities";
+import { Bound, Debounce } from "@wayward/utilities/Decorators";
+import Arrays from "@wayward/utilities/collection/Arrays";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
+import { Events, IEventEmitter, Priority } from "@wayward/utilities/event/EventEmitter";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
+import Math2 from "@wayward/utilities/math/Math2";
+import { generalRandom } from "@wayward/utilities/random/RandomUtilities";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import SelectionExecute, { SelectionType } from "../../action/SelectionExecute";
@@ -66,7 +68,7 @@ const entityTypeToSelectionTypeMap = {
 
 type Target = Creature | NPC | TileEvent | Doodad | Corpse | Player | IVector3;
 
-function getSelectionType(target: Target) {
+function getSelectionType(target: Target): SelectionType | undefined {
 	return "entityType" in target ? entityTypeToSelectionTypeMap[target.entityType]
 		: "z" in target ? SelectionType.Location
 			: undefined;
@@ -187,11 +189,11 @@ export default class SelectionPanel extends DebugToolsPanel {
 		this.updateTargets();
 	}
 
-	public override getTranslation() {
+	public override getTranslation(): DebugToolsTranslation {
 		return DebugToolsTranslation.PanelSelection;
 	}
 
-	private setupSelectionSources() {
+	private setupSelectionSources(): void {
 		[this.creatures, this.npcs, this.tileEvents, this.doodads, this.corpses, this.players].forEach(a => a?.remove());
 
 		this.creatures = new SelectionSource(localIsland.creatures.getObjects(), DebugToolsTranslation.FilterCreatures,
@@ -237,36 +239,38 @@ export default class SelectionPanel extends DebugToolsPanel {
 	}
 
 	@Bound
-	public execute() {
+	public execute(): void {
 		if (!this.targets.length)
 			return;
 
 		SelectionExecute.execute(localPlayer,
-			this.dropdownAction.selection,
+			this.dropdownAction.selectedOption,
 			this.targets.map(target => Tuple(
 				getSelectionType(target),
 				target instanceof Player ? target.identifier
 					: "entityType" in target ? target.id
 						: `${target.x},${target.y},${target.z}`)),
-			this.dropdownAlternativeTarget.selection);
+			this.dropdownAlternativeTarget.selectedOption);
 
 		this.updateTargets();
 	}
 
 	@OwnEventHandler(SelectionPanel, "append")
-	protected onAppend() {
+	protected async onAppend(): Promise<void> {
 		this.getDialog()?.event.until(this, "switchAway", "remove")
 			.subscribe("resize", () => this.resize());
 
 		this.disposeRendererAndCanvas();
 
-		this.canvas = new Component<HTMLCanvasElement>("canvas")
-			.attributes.set("width", "300")
-			.attributes.set("height", "200")
-			.classes.add("debug-tools-selection-preview")
-			.appendTo(this.previewWrapper);
-
-		this.renderer = new Renderer(this.canvas.element);
+		this.renderer = await Renderer.create(() => {
+			this.canvas?.remove();
+			this.canvas = new Component<HTMLCanvasElement>("canvas")
+				.attributes.set("width", "300")
+				.attributes.set("height", "200")
+				.classes.add("debug-tools-selection-preview")
+				.appendTo(this.previewWrapper);
+			return this.canvas.element;
+		});
 		this.renderer.fieldOfView.disabled = true;
 		this.renderer.event.subscribe("getZoomLevel", () => this.zoomLevel);
 		this.renderer.setOrigin(localPlayer);
@@ -275,7 +279,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 	}
 
 	@OwnEventHandler(SelectionPanel, "switchTo")
-	protected onSwitchTo() {
+	protected onSwitchTo(): void {
 		this.resize();
 
 		Bind.registerHandlers(this);
@@ -283,21 +287,21 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 	@OwnEventHandler(SelectionPanel, "switchAway")
 	@OwnEventHandler(SelectionPanel, "remove")
-	protected onSwitchAway() {
+	protected onSwitchAway(): void {
 		Bind.deregisterHandlers(this);
 	}
 
 	@OwnEventHandler(SelectionPanel, "remove")
-	protected onDispose() {
+	protected onDispose(): void {
 		this.disposeRendererAndCanvas();
 	}
 
-	private disposeRenderer() {
+	private disposeRenderer(): void {
 		this.renderer?.delete();
 		this.renderer = undefined;
 	}
 
-	private disposeRendererAndCanvas() {
+	private disposeRendererAndCanvas(): void {
 		this.disposeRenderer();
 
 		this.canvas?.remove();
@@ -305,7 +309,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 	}
 
 	@Bound
-	private onActionChange(_: any, action: DebugToolsTranslation) {
+	private onActionChange(_: any, action: DebugToolsTranslation): void {
 		switch (action) {
 			case DebugToolsTranslation.ActionTeleport:
 				this.dropdownMethod.select(DebugToolsTranslation.MethodNearest);
@@ -334,7 +338,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 	}
 
 	@Bound
-	private onMethodChange(_: any, method: DebugToolsTranslation) {
+	private onMethodChange(_: any, method: DebugToolsTranslation): void {
 		this.rangeQuantity.toggle(method !== DebugToolsTranslation.MethodAll);
 		this.buttonReroll.toggle(method === DebugToolsTranslation.MethodRandom);
 		this.updateTargets();
@@ -343,7 +347,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 	@OwnEventHandler(SelectionPanel, "switchTo")
 	@EventHandler(EventBus.LocalPlayer, "loadedOnIsland")
 	@Bound
-	private updateTargets() {
+	private updateTargets(): void {
 		if (this.targetIslandId !== localPlayer.islandId) {
 			this.targetIslandId = localPlayer.islandId;
 			this.setupSelectionSources();
@@ -383,7 +387,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 		SelectionPanel.DEBUG_TOOLS.log.info("Targets:", this.targets);
 
-		this.canvas?.classes.toggle(!!this.targets.length, "has-targets");
+		this.previewWrapper.classes.toggle(!!this.targets.length, "has-targets");
 		this.buttonPreviewPrevious.toggle(this.targets.length > 1);
 		this.buttonPreviewNext.toggle(this.targets.length > 1);
 		this.previewCursor = 0;
@@ -391,7 +395,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 	}
 
 	@Debounce(250)
-	private resize() {
+	private resize(): void {
 		if (!this.canvas || !this.renderer) {
 			return;
 		}
@@ -411,7 +415,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 	@Bind.onDown(Bindable.GameZoomIn, Priority.High)
 	@Bind.onDown(Bindable.GameZoomOut, Priority.High)
-	public onZoomIn(api: IBindHandlerApi) {
+	public onZoomIn(api: IBindHandlerApi): boolean {
 		if (api.mouse.isWithin(this.canvas)) {
 			this.zoomLevel = Math.max(Math.min(this.zoomLevel + (api.bindable === Bindable.GameZoomIn ? 1 : -1), ZOOM_LEVEL_MAX), ZOOM_LEVEL_MIN);
 			this.renderer?.updateZoomLevel();
@@ -423,7 +427,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 		return false;
 	}
 
-	private updatePreview() {
+	private updatePreview(): void {
 		const which = Math2.mod(this.previewCursor, (this.targets.length || 1));
 		const target = this.targets[which];
 		if (!target) {
@@ -444,13 +448,15 @@ export default class SelectionPanel extends DebugToolsPanel {
 		this.rerender();
 	}
 
-	private rerender(reason = RenderSource.Mod) {
+	private rerender(reason = RenderSource.Mod): void {
 		this.renderer?.updateView(reason, true);
 	}
 
-	@EventHandler(EventBus.Game, "tickEnd")
-	public onTickEnd() {
-		this.rerender();
+	@EventHandler(EventBus.Island, "tickEnd")
+	public onTickEnd(island: Island): void {
+		if (island.isLocalIsland) {
+			this.rerender();
+		}
 	}
 }
 
@@ -487,10 +493,10 @@ class SelectionSource<T, F> extends BlockRow {
 		});
 	}
 
-	public getTargetable() {
+	public getTargetable(): T[] {
 		if (!this.checkButton.checked)
 			return [];
 
-		return this.objectArray.filter(value => this.filterPredicate?.(value, this.dropdown?.selection) ?? true);
+		return this.objectArray.filter(value => this.filterPredicate?.(value, this.dropdown?.selectedOption) ?? true);
 	}
 }

@@ -9,8 +9,8 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Translation from "language/Translation";
-import { RenderLayerFlag } from "renderer/world/IWorldRenderer";
+import Translation from "@wayward/game/language/Translation";
+import { RenderLayerFlag } from "@wayward/game/renderer/world/IWorldRenderer";
 import type DebugTools from "./DebugTools";
 import type { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import type { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
@@ -18,6 +18,7 @@ import type DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import type InspectEntityInformationSubsection from "./ui/component/InspectEntityInformationSubsection";
 import type InspectInformationSection from "./ui/component/InspectInformationSection";
 import type { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect/EntityInformation";
+import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 
 export const DEBUG_TOOLS_ID = "Debug Tools";
 
@@ -27,13 +28,13 @@ let debugTools: DebugTools | undefined;
  * Returns a translation object using the `DebugToolsTranslation` dictionary
  * @param debugToolsTranslation The `DebugToolsTranslation` to get a `Translation` instance of
  */
-export function translation(debugToolsTranslation: DebugToolsTranslation | Translation) {
+export function translation(debugToolsTranslation: DebugToolsTranslation | Translation): TranslationImpl {
 	return !debugTools ? Translation.empty()
 		: typeof debugToolsTranslation !== "number" ? debugToolsTranslation : Translation.get(debugTools.dictionary, debugToolsTranslation);
 }
 
 export module translation {
-	export function setDebugToolsInstance(instance: DebugTools) {
+	export function setDebugToolsInstance(instance: DebugTools): void {
 		debugTools = instance;
 	}
 }
@@ -73,9 +74,10 @@ export enum DebugToolsTranslation {
 	ZoomLevel,
 	ButtonUnlockCamera,
 	ButtonResetRenderer,
+	ButtonLoseWebGlContext,
 	ButtonRefreshTiles,
 	ButtonReloadShaders,
-	ButtonReloadUIImages,
+	ButtonReloadTextures,
 	HeadingLayers,
 	ButtonToggleLayer,
 	// Manipulation
@@ -170,13 +172,13 @@ export enum DebugToolsTranslation {
 	ButtonTameCreature,
 	LabelWeightBonus,
 	LabelItem,
-	LabelMalignity,
-	LabelBenignity,
+	LabelEvilAlignment,
+	LabelGoodAlignment,
 	OptionTeleportSelectLocation,
 	OptionTeleportToLocalPlayer,
 	OptionTeleportToHost,
 	OptionTeleportToPlayer,
-	ButtonToggleInvulnerable,
+	ButtonToggleUnkillable,
 	ButtonToggleNoClip,
 	LabelSkill,
 	None,
@@ -187,6 +189,7 @@ export enum DebugToolsTranslation {
 	ButtonApply,
 	AddToInventory,
 	DoodadName,
+	VehicleName,
 	TabItemStack,
 	UnlockInspection,
 	LockInspection,
@@ -200,6 +203,7 @@ export enum DebugToolsTranslation {
 	LabelItems,
 	LabelReplaceData,
 	ButtonReplace,
+	LabelMax,
 	////////////////////////////////////
 	// Inspection
 	//
@@ -242,9 +246,9 @@ export interface IPlayerData {
 	 */
 	weightBonus: number;
 	/**
-	 * Whether the player is immune to damage
+	 * Whether the player cannot die from negative damage
 	 */
-	invulnerable?: boolean;
+	unkillable?: boolean;
 	/**
 	 * Whether lighting is enabled
 	 */

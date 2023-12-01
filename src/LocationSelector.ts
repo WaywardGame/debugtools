@@ -9,22 +9,22 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Priority } from "event/EventEmitter";
-import { EventHandler } from "event/EventManager";
-import Tile from "game/tile/Tile";
-import Mod from "mod/Mod";
-import Register, { Registry } from "mod/ModRegistry";
-import { RenderSource } from "renderer/IRenderer";
-import Bind from "ui/input/Bind";
-import Bindable from "ui/input/Bindable";
-import { IInput } from "ui/input/IInput";
-import InputManager from "ui/input/InputManager";
-import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
-import { Bound } from "utilities/Decorators";
+import { Priority } from "@wayward/utilities/event/EventEmitter";
+import { EventHandler } from "@wayward/game/event/EventManager";
+import Tile from "@wayward/game/game/tile/Tile";
+import Mod from "@wayward/game/mod/Mod";
+import Register, { Registry } from "@wayward/game/mod/ModRegistry";
+import { RenderSource } from "@wayward/game/renderer/IRenderer";
+import Bind from "@wayward/game/ui/input/Bind";
+import Bindable from "@wayward/game/ui/input/Bindable";
+import { IInput } from "@wayward/game/ui/input/IInput";
+import InputManager from "@wayward/game/ui/input/InputManager";
+import MovementHandler from "@wayward/game/ui/screen/screens/game/util/movement/MovementHandler";
+import { Bound } from "@wayward/utilities/Decorators";
 import DebugTools from "./DebugTools";
 import { DEBUG_TOOLS_ID } from "./IDebugTools";
-import CancelablePromise from "./util/CancelablePromise";
-import { IOverlayInfo } from "game/tile/ITerrain";
+import CancelablePromise from "@wayward/utilities/promise/CancelablePromise";
+import { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
 
 export default class SelectLocation {
 
@@ -58,7 +58,7 @@ export default class SelectLocation {
 	 * Returns a `CancelablePromise` that may return a `Vector2`. The promise can be canceled on the executor's end, or canceled on
 	 * this end (such as if the "cancel selection" bind is pressed).
 	 */
-	public select() {
+	public select(): CancelablePromise<Tile> {
 		this.cancel();
 
 		this.selectionPromise = new CancelablePromise<Tile>()
@@ -87,12 +87,12 @@ export default class SelectLocation {
 
 	@Bind.onDown(Registry<SelectLocation>().get("bindableSelectLocation"), Priority.High)
 	@Bind.onDown(Registry<SelectLocation>().get("bindableCancelSelectLocation"), Priority.High)
-	protected onSelectOrCancelSelectLocation() {
+	protected onSelectOrCancelSelectLocation(): boolean {
 		return this.selecting;
 	}
 
 	@Bind.onUp(Registry<SelectLocation>().get("bindableSelectLocation"))
-	protected onStopSelectLocation() {
+	protected onStopSelectLocation(): boolean {
 		this.selectTileHeld = false;
 		return false;
 	}
@@ -101,7 +101,7 @@ export default class SelectLocation {
 	// Helpers
 	//
 
-	@Bound private selectionTick() {
+	@Bound private selectionTick(): void {
 		if (!this.selectionPromise) {
 			return;
 		}
@@ -149,7 +149,7 @@ export default class SelectLocation {
 	 * Cleanup after the location selection is canceled.
 	 */
 	@Bound
-	private cancel() {
+	private cancel(): void {
 		const selectionPromise = this.selectionPromise;
 		if (!selectionPromise) {
 			return;
@@ -168,7 +168,7 @@ export default class SelectLocation {
 	/**
 	 * Removes the hover overlay, then resolves the selection promise with the selected position.
 	 */
-	private selectTile(tile: Tile) {
+	private selectTile(tile: Tile): void {
 		this.selectionPromise?.resolve(tile);
 		this.cancel();
 	}

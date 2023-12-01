@@ -8,12 +8,12 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import Doodad from "game/doodad/Doodad";
-import { IActionApi } from "game/entity/action/IAction";
-import Corpse from "game/entity/creature/corpse/Corpse";
-import Creature from "game/entity/creature/Creature";
-import NPC from "game/entity/npc/NPC";
-import Item from "game/item/Item";
-import TileEvent from "game/tile/TileEvent";
-import Human from "game/entity/Human";
+import Doodad from "@wayward/game/game/doodad/Doodad";
+import { IActionApi } from "@wayward/game/game/entity/action/IAction";
+import Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
+import Creature from "@wayward/game/game/entity/creature/Creature";
+import NPC from "@wayward/game/game/entity/npc/NPC";
+import Item from "@wayward/game/game/item/Item";
+import TileEvent from "@wayward/game/game/tile/TileEvent";
+import Human from "@wayward/game/game/entity/Human";
 export default function (action: IActionApi<Human>, target: Creature | NPC | Doodad | Item | Corpse | TileEvent): void;

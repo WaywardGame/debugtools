@@ -8,7 +8,7 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-define(["require", "exports", "game/entity/IEntity", "game/entity/action/Action", "game/entity/action/IAction", "../Actions", "./SetDurability"], function (require, exports, IEntity_1, Action_1, IAction_1, Actions_1, SetDurability_1) {
+define(["require", "exports", "@wayward/game/game/entity/IEntity", "@wayward/game/game/entity/action/Action", "@wayward/game/game/entity/action/IAction", "../Actions", "./SetDurability"], function (require, exports, IEntity_1, Action_1, IAction_1, Actions_1, SetDurability_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.default = new Action_1.Action(IAction_1.ActionArgument.Container, IAction_1.ActionArgument.Integer32)

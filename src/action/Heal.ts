@@ -9,22 +9,22 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { TickFlag } from "game/IGame";
-import EntityWithStats from "game/entity/EntityWithStats";
-import { EntityType, MoveType, StatusEffectChangeReason, StatusType } from "game/entity/IEntity";
-import { EquipType } from "game/entity/IHuman";
-import { IStatMax, Stat } from "game/entity/IStats";
-import { Action } from "game/entity/action/Action";
-import { ActionArgument, optional } from "game/entity/action/IAction";
-import { PlayerState } from "game/entity/player/IPlayer";
-import ItemReference, { IItemReference } from "game/item/ItemReference";
+import { TickFlag } from "@wayward/game/game/IGame";
+import EntityWithStats from "@wayward/game/game/entity/EntityWithStats";
+import { EntityType, MoveType, StatusEffectChangeReason, StatusType } from "@wayward/game/game/entity/IEntity";
+import { EquipType } from "@wayward/game/game/entity/IHuman";
+import { IStatMax, Stat } from "@wayward/game/game/entity/IStats";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import { PlayerState } from "@wayward/game/game/entity/player/IPlayer";
+import ItemReference, { IItemReference } from "@wayward/game/game/item/ItemReference";
 import Actions, { defaultUsability } from "../Actions";
 import ResurrectCorpse from "./helpers/ResurrectCorpse";
 
 /**
  * The core stats, namely, Health, Stamina, Hunger, and Thirst, are all set to their maximum values. Any status effects are removed.
  */
-export default new Action(ActionArgument.Entity, optional(ActionArgument.ItemArray), optional(ActionArgument.Object))
+export default new Action(ActionArgument.Entity, ActionArgument.OPTIONAL(ActionArgument.ItemArray), ActionArgument.OPTIONAL(ActionArgument.Object))
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, entity, itemsToRestoreToInventory, equippedReferences: Record<EquipType, IItemReference>) => {
@@ -61,16 +61,24 @@ export default new Action(ActionArgument.Entity, optional(ActionArgument.ItemArr
 			// i know you wanted to make it so noclip persisted after death but you're going to have to make noclip an option instead
 			// with this commented code it makes it so that you always respawn flying whether or not you were noclipping before
 			// const moveType = entity.asPlayer.isFlying ? MoveType.Flying : MoveType.Land;
-			entity.asPlayer.state = PlayerState.None;
+
+			// Revive player
+			if (entity.asPlayer.state === PlayerState.Dead || entity.asPlayer.isGhost) {
+				entity.asPlayer.state = PlayerState.None;
+				entity.asPlayer.setMoveType(MoveType.Land);
+			}
+
 			entity.asPlayer.updateStatsAndAttributes();
-			entity.asPlayer.setMoveType(MoveType.Land);
 			game.playing = true;
 		}
 
 		if (entity.asHuman?.inventory && itemsToRestoreToInventory) {
 			const human = entity.asHuman;
 
-			human.island.items.moveItemsToContainer(human, itemsToRestoreToInventory, human.inventory);
+			for (const containables of human.island.items.getContainers(itemsToRestoreToInventory).values()) {
+				// must move from one container at a time
+				human.island.items.moveItemsToContainer(human, containables, human.inventory);
+			}
 
 			if (equippedReferences) {
 				for (const [equipType, itemReference] of Object.entries(equippedReferences)) {
@@ -84,5 +92,5 @@ export default new Action(ActionArgument.Entity, optional(ActionArgument.ItemArr
 
 		action.setUpdateRender();
 		Actions.DEBUG_TOOLS.updateFog();
-		gameScreen?.onGameTickEnd(game, TickFlag.All);
+		gameScreen?.onIslandTickEnd(entity.island, TickFlag.All);
 	});

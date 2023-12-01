@@ -9,40 +9,42 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { EventBus } from "event/EventBuses";
-import { Events, IEventEmitter } from "event/EventEmitter";
-import EventManager, { EventHandler } from "event/EventManager";
-import { ActionType } from "game/entity/action/IAction";
-import Creature from "game/entity/creature/Creature";
-import NPC from "game/entity/npc/NPC";
-import { Source } from "game/entity/player/IMessageManager";
-import Player from "game/entity/player/Player";
-import { InspectType } from "game/inspection/IInspection";
-import Island from "game/island/Island";
-import Item from "game/item/Item";
-import { OverlayType } from "game/tile/ITerrain";
-import Tile from "game/tile/Tile";
-import Dictionary from "language/Dictionary";
-import Message from "language/dictionary/Message";
-import InterModRegistry from "mod/InterModRegistry";
-import Mod from "mod/Mod";
-import Register, { Registry } from "mod/ModRegistry";
-import { RenderSource, UpdateRenderFlag, ZOOM_LEVEL_MAX } from "renderer/IRenderer";
-import Renderer from "renderer/Renderer";
-import WorldRenderer from "renderer/world/WorldRenderer";
-import Bind, { IBindHandlerApi } from "ui/input/Bind";
-import Bindable from "ui/input/Bindable";
-import { IInput } from "ui/input/IInput";
-import InputManager from "ui/input/InputManager";
-import GameScreen from "ui/screen/screens/GameScreen";
-import { DialogId } from "ui/screen/screens/game/Dialogs";
-import { MenuBarButtonGroup, MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
-import { Bound } from "utilities/Decorators";
-import Log from "utilities/Log";
-import { IInjectionApi, Inject, InjectionPosition } from "utilities/class/Inject";
-import { IVector2 } from "utilities/math/IVector";
-import Vector2 from "utilities/math/Vector2";
-import Vector3 from "utilities/math/Vector3";
+import { EventBus } from "@wayward/game/event/EventBuses";
+import { EventHandler, eventManager } from "@wayward/game/event/EventManager";
+import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import Creature from "@wayward/game/game/entity/creature/Creature";
+import NPC from "@wayward/game/game/entity/npc/NPC";
+import { Source } from "@wayward/game/game/entity/player/IMessageManager";
+import Player from "@wayward/game/game/entity/player/Player";
+import { InspectType } from "@wayward/game/game/inspection/IInspection";
+import Island from "@wayward/game/game/island/Island";
+import Item from "@wayward/game/game/item/Item";
+import { OverlayType } from "@wayward/game/game/tile/ITerrain";
+import Tile from "@wayward/game/game/tile/Tile";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Message from "@wayward/game/language/dictionary/Message";
+import InterModRegistry from "@wayward/game/mod/InterModRegistry";
+import Mod from "@wayward/game/mod/Mod";
+import Register, { Registry } from "@wayward/game/mod/ModRegistry";
+import { RenderSource, UpdateRenderFlag, ZOOM_LEVEL_MAX } from "@wayward/game/renderer/IRenderer";
+import { Renderer } from "@wayward/game/renderer/Renderer";
+import { WorldRenderer } from "@wayward/game/renderer/world/WorldRenderer";
+import Bind, { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
+import Bindable from "@wayward/game/ui/input/Bindable";
+import { IInput } from "@wayward/game/ui/input/IInput";
+import InputManager from "@wayward/game/ui/input/InputManager";
+import GameScreen from "@wayward/game/ui/screen/screens/GameScreen";
+import { DialogId } from "@wayward/game/ui/screen/screens/game/Dialogs";
+import ItemComponent, { ItemClasses } from "@wayward/game/ui/screen/screens/game/component/ItemComponent";
+import { MenuBarButtonGroup, MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
+import Draggable from "@wayward/game/ui/util/Draggable";
+import { IVector2 } from "@wayward/game/utilities/math/IVector";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
+import Vector3 from "@wayward/game/utilities/math/Vector3";
+import { Bound } from "@wayward/utilities/Decorators";
+import Log from "@wayward/utilities/Log";
+import { IInjectionApi, Inject, InjectionPosition } from "@wayward/utilities/class/Inject";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import Actions from "./Actions";
 import { DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
@@ -62,21 +64,25 @@ import Remove from "./action/Remove";
 import RenameIsland from "./action/RenameIsland";
 import ReplacePlayerData from "./action/ReplacePlayerData";
 import SelectionExecute from "./action/SelectionExecute";
+import SetAlignment from "./action/SetAlignment";
 import SetDecay from "./action/SetDecay";
 import SetDecayBulk from "./action/SetDecayBulk";
 import SetDurability from "./action/SetDurability";
 import SetDurabilityBulk from "./action/SetDurabilityBulk";
 import SetGrowingStage from "./action/SetGrowingStage";
+import SetQuality from "./action/SetQuality";
+import SetQualityBulk from "./action/SetQualityBulk";
 import SetSkill from "./action/SetSkill";
 import SetStat from "./action/SetStat";
+import SetStatMax from "./action/SetStatMax";
 import SetTamed from "./action/SetTamed";
 import SetTime from "./action/SetTime";
 import SetWeightBonus from "./action/SetWeightBonus";
 import TeleportEntity from "./action/TeleportEntity";
-import ToggleInvulnerable from "./action/ToggleInvulnerable";
 import ToggleNoClip from "./action/ToggleNoClip";
 import TogglePermissions from "./action/TogglePermissions";
 import ToggleTilled from "./action/ToggleTilled";
+import ToggleUnkillable from "./action/ToggleUnkillable";
 import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
 import { TemperatureOverlay, TemperatureOverlayMode } from "./overlay/TemperatureOverlay";
 import AccidentalDeathHelper from "./ui/AccidentalDeathHelper";
@@ -240,6 +246,12 @@ export default class DebugTools extends Mod {
 	@Register.action("SetStat", SetStat)
 	public readonly actionSetStat: ActionType;
 
+	@Register.action("SetStatMax", SetStatMax)
+	public readonly actionSetStatMax: ActionType;
+
+	@Register.action("setAlignment", SetAlignment)
+	public readonly actionSetAlignment: ActionType;
+
 	@Register.action("SetTamed", SetTamed)
 	public readonly actionSetTamed: ActionType;
 
@@ -270,6 +282,12 @@ export default class DebugTools extends Mod {
 	@Register.action("SetDecay", SetDecay)
 	public readonly actionSetDecay: ActionType;
 
+	@Register.action("setQuality", SetQuality)
+	public readonly actionSetQuality: ActionType;
+
+	@Register.action("setQualityBulk", SetQualityBulk)
+	public readonly actionSetQualityBulk: ActionType;
+
 	@Register.action("SetDurabilityBulk", SetDurabilityBulk)
 	public readonly actionSetDurabilityBulk: ActionType;
 
@@ -282,8 +300,8 @@ export default class DebugTools extends Mod {
 	@Register.action("Paint", Paint)
 	public readonly actionPaint: ActionType;
 
-	@Register.action("ToggleInvulnerable", ToggleInvulnerable)
-	public readonly actionToggleInvulnerable: ActionType;
+	@Register.action("ToggleUnkillable", ToggleUnkillable)
+	public readonly actionToggleUnkillable: ActionType;
 
 	@Register.action("SetSkill", SetSkill)
 	public readonly actionSetSkill: ActionType;
@@ -380,8 +398,8 @@ export default class DebugTools extends Mod {
 
 		return (playerData[player.identifier] = {
 			weightBonus: 0,
-			invulnerable: false,
-			permissions: player.isServer(),
+			unkillable: false,
+			permissions: player.isServer,
 			fog: undefined,
 			lighting: true,
 		})[key];
@@ -397,7 +415,7 @@ export default class DebugTools extends Mod {
 	 * 
 	 * Note: Emits `DebugToolsEvent.PlayerDataChange` with the id of the player, the key of the changing data, and the new value.
 	 */
-	public setPlayerData<K extends keyof IPlayerData>(player: Player, key: K, value: IPlayerData[K]) {
+	public setPlayerData<K extends keyof IPlayerData>(player: Player, key: K, value: IPlayerData[K]): void {
 		this.getPlayerData(player, key); // initializes it if it doesn't exist
 		this.data.playerData[player.identifier][key] = value;
 		this.event.emit("playerDataChange", player.id, key, value);
@@ -415,23 +433,23 @@ export default class DebugTools extends Mod {
 	/**
 	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
 	 */
-	public override initializeGlobalData(data?: IGlobalData) {
+	public override initializeGlobalData(data?: IGlobalData): IGlobalData | undefined {
 		return !this.needsUpgrade(data) ? data : {
-			lastVersion: game.modManager.getVersion(this.getIndex()),
+			lastVersion: this.mod.version,
 		};
 	}
 
 	/**
 	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
 	 */
-	public override initializeSaveData(data?: ISaveData) {
+	public override initializeSaveData(data?: ISaveData): ISaveData | undefined {
 		return !this.needsUpgrade(data) ? data : {
 			playerData: {},
-			lastVersion: game.modManager.getVersion(this.getIndex()),
+			lastVersion: this.mod.version,
 		};
 	}
 
-	public override onInitialize() {
+	public override onInitialize(): void {
 		translation.setDebugToolsInstance(this);
 	}
 
@@ -439,10 +457,10 @@ export default class DebugTools extends Mod {
 	 * Called when Debug Tools is loaded (in a save)
 	 * - Registers the `LocationSelector` stored in `this.selector` as a hook host.
 	 */
-	public override onLoad() {
-		EventManager.registerEventBusSubscriber(this.selector);
+	public override onLoad(): void {
+		eventManager.registerEventBusSubscriber(this.selector);
 		Bind.registerHandlers(this.selector);
-		EventManager.registerEventBusSubscriber(this.accidentalDeathHelper);
+		eventManager.registerEventBusSubscriber(this.accidentalDeathHelper);
 		this.temperatureOverlay.register();
 		this.temperatureOverlay.hide();
 	}
@@ -452,20 +470,20 @@ export default class DebugTools extends Mod {
 	 * - Deregisters `this.selector` as a hook host.
 	 * - Removes the `AddItemToInventory` UI Component.
 	 */
-	public override onUnload() {
+	public override onUnload(): void {
 		Container.releaseAndRemove();
-		EventManager.deregisterEventBusSubscriber(this.selector);
+		eventManager.deregisterEventBusSubscriber(this.selector);
 		Bind.deregisterHandlers(this.selector);
 		this.unlockedCameraMovementHandler.end();
 		this.temperatureOverlay.deregister();
 		this.temperatureOverlay.setMode(TemperatureOverlayMode.None);
-		EventManager.deregisterEventBusSubscriber(this.accidentalDeathHelper);
+		this.accidentalDeathHelper.deregister();
 	}
 
 	/**
 	 * Saves the save data for Debug Tools
 	 */
-	public onSave(): any {
+	public onSave(): ISaveData {
 		return this.data;
 	}
 
@@ -476,7 +494,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * Updates the field of view based on whether it's disabled in the mod.
 	 */
-	public updateFog() {
+	public updateFog(): void {
 		if (renderer) {
 			const fogForceEnabled = this.getPlayerData(localPlayer, "fog");
 			if (fogForceEnabled !== undefined && renderer.fieldOfView.disabled !== !fogForceEnabled) {
@@ -491,7 +509,7 @@ export default class DebugTools extends Mod {
 	 * @param unlocked If true, unlocks the camera. Otherwise, sets the camera state to `CameraState.Transition`, allowing the camera
 	 * movement handler to transition it back to the player so it can be locked.
 	 */
-	public setCameraUnlocked(unlocked: boolean) {
+	public setCameraUnlocked(unlocked: boolean): void {
 		if (unlocked) {
 			this.cameraState = CameraState.Unlocked;
 			this.unlockedCameraMovementHandler.position = new Vector2(localPlayer);
@@ -510,7 +528,7 @@ export default class DebugTools extends Mod {
 	 * - Opens the `InspectDialog`.
 	 * - Emits `DebugToolsEvent.Inspect`
 	 */
-	public inspect(what: Tile | Creature | Player | NPC | Item) {
+	public inspect(what: Tile | Creature | Player | NPC | Item): void {
 		if (!gameScreen) {
 			return;
 		}
@@ -524,22 +542,22 @@ export default class DebugTools extends Mod {
 	/**
 	 * Toggles the main dialog.
 	 */
-	public toggleDialog() {
+	public toggleDialog(): void {
 		if (!this.hasPermission() || !gameScreen) return;
 
 		gameScreen.dialogs.toggle(this.dialogMain);
 	}
 
-	public hasPermission() {
-		return !multiplayer.isConnected() || multiplayer.isServer() || this.getPlayerData(localPlayer, "permissions");
+	public hasPermission(): boolean | undefined {
+		return !multiplayer.isConnected || multiplayer.isServer || this.getPlayerData(localPlayer, "permissions");
 	}
 
-	public toggleFog(fog: boolean) {
+	public toggleFog(fog: boolean): void {
 		this.setPlayerData(localPlayer, "fog", fog);
 		this.updateFog();
 	}
 
-	public toggleLighting(lighting: boolean) {
+	public toggleLighting(lighting: boolean): void {
 		this.setPlayerData(localPlayer, "lighting", lighting);
 		UpdateStatsAndAttributes.execute(localPlayer, localPlayer);
 		localPlayer.updateView(RenderSource.Mod, true);
@@ -550,13 +568,13 @@ export default class DebugTools extends Mod {
 	//
 
 	@Register.command("DebugToolsPermission")
-	public debugToolsAccessCommand(_: any, player: Player, args: string) {
+	public debugToolsAccessCommand(_: any, player: Player, args: string): void {
 		if (!this.hasPermission()) {
 			return;
 		}
 
 		const targetPlayer = game.playerManager.getByName(args);
-		if (targetPlayer !== undefined && !targetPlayer.isLocalPlayer()) {
+		if (targetPlayer !== undefined && !targetPlayer.isLocalPlayer) {
 			const newPermissions = !this.getPlayerData(targetPlayer, "permissions");
 			TogglePermissions.execute(localPlayer, targetPlayer, newPermissions);
 			DebugTools.LOG.info(`Updating permissions for ${targetPlayer.getName().toString()} to ${newPermissions}`);
@@ -571,7 +589,7 @@ export default class DebugTools extends Mod {
 	 * When the field of view has initialized, we update the fog (enables/disables it based on the mod save data)
 	 */
 	@EventHandler(EventBus.Game, "postFieldOfView")
-	public postFieldOfView() {
+	public postFieldOfView(): void {
 		this.updateFog();
 	}
 
@@ -581,17 +599,17 @@ export default class DebugTools extends Mod {
 	 * the UI that use it. We initialize it only once so the slow initialization only happens once.)
 	 */
 	@EventHandler(GameScreen, "show")
-	public onGameScreenVisible() {
+	public onGameScreenVisible(): void {
 		Container.init();
 	}
 
 	@EventHandler(EventBus.Game, "play")
-	protected onGamePlay() {
+	protected onGamePlay(): void {
 		this.unlockedCameraMovementHandler.begin();
 	}
 
 	@EventHandler(EventBus.Game, "rendererCreated")
-	protected onRendererCreated(_: any, renderer: Renderer) {
+	protected onRendererCreated(_: any, renderer: Renderer): void {
 		const rendererEventsUntilDeleted = renderer.event.until(renderer, "deleted");
 		rendererEventsUntilDeleted?.subscribe("getMaxZoomLevel", this.getMaxZoomLevel);
 		rendererEventsUntilDeleted?.subscribe("getZoomLevel", this.getZoomLevel);
@@ -619,7 +637,7 @@ export default class DebugTools extends Mod {
 	 * - If our internal zoom level is `1`: `0.125`
 	 * - If our internal zoom level is `0`: `0.0625`
 	 */
-	@Bound public getZoomLevel(_renderer: any, zoomLevel: number) {
+	@Bound public getZoomLevel(_renderer: any, zoomLevel: number): number | undefined {
 		if (!this.hasPermission()) {
 			return undefined;
 		}
@@ -657,7 +675,7 @@ export default class DebugTools extends Mod {
 
 	@EventHandler(EventBus.Players, "shouldDie")
 	public onPlayerDie(player: Player): false | void {
-		if (this.getPlayerData(player, "invulnerable"))
+		if (this.getPlayerData(player, "unkillable"))
 			return false;
 	}
 
@@ -665,12 +683,12 @@ export default class DebugTools extends Mod {
 	 * We add the weight bonus from the player's save data to the existing strength.
 	 */
 	@EventHandler(EventBus.Players, "getMaxWeight")
-	protected getPlayerMaxWeight(player: Player, weight: number) {
+	protected getPlayerMaxWeight(player: Player, weight: number): number {
 		return weight + this.getPlayerData(player, "weightBonus");
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableToggleCameraLock"))
-	public onToggleCameraLock() {
+	public onToggleCameraLock(): boolean {
 		if (!this.hasPermission())
 			return false;
 
@@ -679,7 +697,7 @@ export default class DebugTools extends Mod {
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableToggleFullVisibility"))
-	public onToggleFullVisibility() {
+	public onToggleFullVisibility(): boolean {
 		if (!this.hasPermission())
 			return false;
 
@@ -690,7 +708,7 @@ export default class DebugTools extends Mod {
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableInspectTile"))
-	public onInspectTile() {
+	public onInspectTile(): boolean {
 		if (!this.hasPermission() || !gameScreen?.isMouseWithin() || !renderer)
 			return false;
 
@@ -703,9 +721,8 @@ export default class DebugTools extends Mod {
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableInspectItem"))
-	public onInspectItem(api: IBindHandlerApi) {
-		const itemElement = oldui.screenInGame?.getHoveredItem(api);
-		const item = itemElement && localIsland.items.get(+itemElement.dataset.itemId!);
+	public onInspectItem(api: IBindHandlerApi): boolean {
+		const item = api.mouse.isWithin(`.${ItemClasses.Main}`)?.component?.getAs(ItemComponent)?.handler.getItem?.();
 		if (!this.hasPermission() || !item)
 			return false;
 
@@ -714,7 +731,7 @@ export default class DebugTools extends Mod {
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableInspectLocalPlayer"))
-	public onInspectLocalPlayer() {
+	public onInspectLocalPlayer(): boolean {
 		if (!this.hasPermission())
 			return false;
 
@@ -723,7 +740,7 @@ export default class DebugTools extends Mod {
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableHealLocalPlayer"))
-	public onHealLocalPlayer() {
+	public onHealLocalPlayer(): boolean {
 		if (!this.hasPermission())
 			return false;
 
@@ -732,8 +749,8 @@ export default class DebugTools extends Mod {
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableTeleportLocalPlayer"))
-	public onTeleportLocalPlayer(api: IBindHandlerApi) {
-		if (!this.hasPermission() || !renderer)
+	public onTeleportLocalPlayer(api: IBindHandlerApi): boolean {
+		if (!this.hasPermission() || !renderer || Draggable.isDragging)
 			return false;
 
 		const tile = renderer.worldRenderer.screenToTile(...api.mouse.position.xy);
@@ -745,7 +762,7 @@ export default class DebugTools extends Mod {
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableToggleNoClipOnLocalPlayer"))
-	public onToggleNoClipOnLocalPlayer() {
+	public onToggleNoClipOnLocalPlayer(): boolean {
 		if (!this.hasPermission())
 			return false;
 
@@ -757,7 +774,7 @@ export default class DebugTools extends Mod {
 	 * If lighting is disabled, we return maximum light on all channels.
 	 */
 	@Inject(WorldRenderer, "calculateAmbientColor", InjectionPosition.Pre)
-	public getAmbientColor(api: IInjectionApi<WorldRenderer, "calculateAmbientColor">) {
+	public getAmbientColor(api: IInjectionApi<WorldRenderer, "calculateAmbientColor">): void {
 		if (this.getPlayerData(localPlayer, "lighting") === false) {
 			api.returnValue = Vector3.ONE.xyz;
 			api.cancelled = true;
@@ -769,7 +786,7 @@ export default class DebugTools extends Mod {
 	 */
 	// @Inject(Renderer, "calculateAmbientLightLevel", InjectionPosition.Pre)
 	// public getAmbientLightLevel(api: IInjectionApi<Renderer, "calculateAmbientLightLevel">, entity: Entity, z: number) {
-	// 	if (entity === localPlayer && this.getPlayerData(localPlayer, "lighting") === false) {
+	// 	if (entity?.asLocalPlayer && this.getPlayerData(localPlayer, "lighting") === false) {
 	// 		api.returnValue = 1;
 	// 		api.cancelled = true;
 	// 	}
@@ -779,19 +796,19 @@ export default class DebugTools extends Mod {
 	 * If lighting is disabled, we return the minimum light level.
 	 */
 	@Inject(Island, "calculateTileLightLevel", InjectionPosition.Pre)
-	public getTileLightLevel(api: IInjectionApi<Island, "calculateTileLightLevel">, tile: Tile) {
+	public getTileLightLevel(api: IInjectionApi<Island, "calculateTileLightLevel">, tile: Tile): void {
 		if (this.getPlayerData(localPlayer, "lighting") === false) {
 			api.returnValue = 0;
 			api.cancelled = true;
 		}
 	}
 
-	private needsUpgrade(data?: { lastVersion?: string }) {
+	private needsUpgrade(data?: { lastVersion?: string }): boolean {
 		if (!data) {
 			return true;
 		}
 
-		const versionString = game.modManager.getVersion(this.getIndex());
+		const versionString = this.mod.version;
 		const lastLoadVersionString = (data && data.lastVersion) || "0.0.0";
 
 		if (versionString === lastLoadVersionString) {

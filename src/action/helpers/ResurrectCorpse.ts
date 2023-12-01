@@ -9,12 +9,12 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Corpse from "game/entity/creature/corpse/Corpse";
-import Human from "game/entity/Human";
+import Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
+import Human from "@wayward/game/game/entity/Human";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { getTile } from "./GetTile";
 
-export default function (human: Human, corpse: Corpse) {
+export default function (human: Human, corpse: Corpse): boolean {
 	// fail if the location is blocked
 	const tile = getTile(human, corpse.tile, () => translation(DebugToolsTranslation.ActionResurrect)
 		.get(human.island.corpses.getName(corpse)));

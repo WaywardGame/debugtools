@@ -9,11 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { TileUpdateType } from "game/IGame";
-import Island from "game/island/Island";
-import Tile from "game/tile/Tile";
+import { TileUpdateType } from "@wayward/game/game/IGame";
+import Island from "@wayward/game/game/island/Island";
+import Tile from "@wayward/game/game/tile/Tile";
 
-export default function (island: Island, tile: Tile, tilled: boolean) {
+export default function (island: Island, tile: Tile, tilled: boolean): void {
 	const tileType = tile.type;
 	if (!tile.description?.tillable) {
 		return;
@@ -30,5 +30,5 @@ export default function (island: Island, tile: Tile, tilled: boolean) {
 		tileData[0].tilled = tilled;
 	}
 
-	island.world.updateTile(tile, TileUpdateType.Tilled);
+	tile.updateWorldTile(TileUpdateType.Tilled);
 }

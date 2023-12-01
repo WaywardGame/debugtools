@@ -9,15 +9,15 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Corpse from "game/entity/creature/corpse/Corpse";
-import Tile from "game/tile/Tile";
-import { TextContext } from "language/ITranslation";
-import { Article } from "language/Translation";
-import Mod from "mod/Mod";
-import Button from "ui/component/Button";
-import { Bound } from "utilities/Decorators";
-import Log from "utilities/Log";
-import { Tuple } from "utilities/collection/Tuple";
+import Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
+import Tile from "@wayward/game/game/tile/Tile";
+import { TextContext } from "@wayward/game/language/ITranslation";
+import { Article } from "@wayward/game/language/Translation";
+import Mod from "@wayward/game/mod/Mod";
+import Button from "@wayward/game/ui/component/Button";
+import { Bound } from "@wayward/utilities/Decorators";
+import Log from "@wayward/utilities/Log";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Heal from "../../action/Heal";
 import Remove from "../../action/Remove";
@@ -53,12 +53,12 @@ export default class CorpseInformation extends InspectInformationSection {
 			.toArray();
 	}
 
-	public override setTab(corpse: number) {
+	public override setTab(corpse: number): this {
 		this.corpse = this.corpses[corpse];
 		return this;
 	}
 
-	public override update(tile: Tile) {
+	public override update(tile: Tile): void {
 		const corpses = [...tile.corpses || []];
 
 		if (areArraysIdentical(corpses, this.corpses)) return;
@@ -69,20 +69,20 @@ export default class CorpseInformation extends InspectInformationSection {
 		this.setShouldLog();
 	}
 
-	public override logUpdate() {
+	public override logUpdate(): void {
 		for (const corpse of this.corpses) {
 			this.LOG.info("Corpse:", corpse);
 		}
 	}
 
 	@Bound
-	private resurrect() {
+	private resurrect(): void {
 		Heal.execute(localPlayer, this.corpse!);
 		this.event.emit("update");
 	}
 
 	@Bound
-	private removeCorpse() {
+	private removeCorpse(): void {
 		Remove.execute(localPlayer, this.corpse!);
 		this.event.emit("update");
 	}

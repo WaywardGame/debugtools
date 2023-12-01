@@ -9,29 +9,29 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { EventHandler, OwnEventHandler } from "event/EventManager";
-import Translation from "language/Translation";
-import UiTranslation from "language/dictionary/UiTranslation";
-import Mod from "mod/Mod";
-import { RenderSource, ZOOM_LEVEL_MAX } from "renderer/IRenderer";
-import { Shaders } from "renderer/Shaders";
-import { RenderLayerFlag } from "renderer/world/IWorldRenderer";
-import WorldLayerRenderer from "renderer/world/WorldLayerRenderer";
-import WorldRenderer from "renderer/world/WorldRenderer";
-import Button, { ButtonType } from "ui/component/Button";
-import { CheckButton } from "ui/component/CheckButton";
-import Divider from "ui/component/Divider";
-import { RangeRow } from "ui/component/RangeRow";
-import { Heading } from "ui/component/Text";
-import ImagePath from "ui/util/ImagePath";
-import { Bound } from "utilities/Decorators";
-import Enums from "utilities/enum/Enums";
-import { sleep } from "utilities/promise/Async";
+import { EventHandler } from "@wayward/game/event/EventManager";
+import Translation from "@wayward/game/language/Translation";
+import UiTranslation from "@wayward/game/language/dictionary/UiTranslation";
+import Mod from "@wayward/game/mod/Mod";
+import { RenderSource, ZOOM_LEVEL_MAX } from "@wayward/game/renderer/IRenderer";
+import { loadWebGlShaders } from "@wayward/game/renderer/platform/webgl/WebGlShaders";
+import { RenderLayerFlag } from "@wayward/game/renderer/world/IWorldRenderer";
+import { WorldLayerRenderer } from "@wayward/game/renderer/world/WorldLayerRenderer";
+import { WorldRenderer } from "@wayward/game/renderer/world/WorldRenderer";
+import Button, { ButtonType } from "@wayward/game/ui/component/Button";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
+import Divider from "@wayward/game/ui/component/Divider";
+import { RangeRow } from "@wayward/game/ui/component/RangeRow";
+import { Heading } from "@wayward/game/ui/component/Text";
+import Enums from "@wayward/game/utilities/enum/Enums";
+import { Bound } from "@wayward/utilities/Decorators";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
+import { sleep } from "@wayward/utilities/promise/Async";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation, ISaveData, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
-// import Component from "ui/component/Component";
-// import Renderer from "renderer/Renderer";
+// import Component from "@wayward/game/ui/component/Component";
+// import Renderer from "@wayward/game/renderer/Renderer";
 
 export default class DisplayPanel extends DebugToolsPanel {
 	private readonly zoomRange: RangeRow;
@@ -81,7 +81,13 @@ export default class DisplayPanel extends DebugToolsPanel {
 		new Button()
 			.setType(ButtonType.Warning)
 			.setText(translation(DebugToolsTranslation.ButtonResetRenderer))
-			.event.subscribe("activate", this.resetWebGL)
+			.event.subscribe("activate", this.resetRenderer)
+			.appendTo(this);
+
+		new Button()
+			.setType(ButtonType.Warning)
+			.setText(translation(DebugToolsTranslation.ButtonLoseWebGlContext))
+			.event.subscribe("activate", this.loseWebGlContext)
 			.appendTo(this);
 
 		new Button()
@@ -97,8 +103,8 @@ export default class DisplayPanel extends DebugToolsPanel {
 			.appendTo(this);
 
 		new Button()
-			.setText(translation(DebugToolsTranslation.ButtonReloadUIImages))
-			.event.subscribe("activate", ImagePath.cachebust)
+			.setText(translation(DebugToolsTranslation.ButtonReloadTextures))
+			.event.subscribe("activate", ui.reloadTextures)
 			.appendTo(this);
 
 		new RangeRow()
@@ -136,43 +142,48 @@ export default class DisplayPanel extends DebugToolsPanel {
 			.splat(this.append);
 	}
 
-	public override getTranslation() {
+	public override getTranslation(): DebugToolsTranslation {
 		return DebugToolsTranslation.PanelDisplay;
 	}
 
 	@Bound
-	public toggleFog(_: any, fog: boolean) {
+	public toggleFog(_: any, fog: boolean): void {
 		this.DEBUG_TOOLS.toggleFog(fog);
 	}
 
 	@Bound
-	public toggleLighting(_: any, lighting: boolean) {
+	public toggleLighting(_: any, lighting: boolean): void {
 		this.DEBUG_TOOLS.toggleLighting(lighting);
 	}
 
 	@OwnEventHandler(DisplayPanel, "switchTo")
-	protected onSwitchTo() {
+	protected onSwitchTo(): void {
 		this.zoomRange?.refresh();
 	}
 
 	@EventHandler(WorldRenderer, "updateZoom")
-	protected onUpdateZoom() {
+	protected onUpdateZoom(): void {
 		this.zoomRange?.refresh();
 	}
 
 	@Bound
-	private resetWebGL() {
-		game.resetWebGL();
+	private resetRenderer(): void {
+		game.initializeRenderer();
 	}
 
 	@Bound
-	private refreshTiles() {
+	private loseWebGlContext(): void {
+		game.loseWebGlContext();
+	}
+
+	@Bound
+	private refreshTiles(): void {
 		renderer?.worldRenderer.updateAllTiles();
 	}
 
 	@Bound
-	private async reloadShaders() {
-		await Shaders.load();
+	private async reloadShaders(): Promise<void> {
+		await loadWebGlShaders();
 
 		await game.webGlContext?.recompilePrograms();
 
@@ -180,7 +191,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 	}
 
 	@Bound
-	private updateRenderLayerFlag(flag: RenderLayerFlag, checked: boolean) {
+	private updateRenderLayerFlag(flag: RenderLayerFlag, checked: boolean): void {
 		if (this.saveData.renderLayerFlags === undefined) {
 			this.saveData.renderLayerFlags = RenderLayerFlag.All;
 		}

@@ -8,14 +8,14 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import { Events, IEventEmitter } from "event/EventEmitter";
-import { DoodadType } from "game/doodad/IDoodad";
-import { CreatureType } from "game/entity/creature/ICreature";
-import { NPCType } from "game/entity/npc/INPCs";
-import { TerrainType } from "game/tile/ITerrain";
-import { TileEventType } from "game/tile/ITileEvent";
-import Component from "ui/component/Component";
-import { IBindHandlerApi } from "ui/input/Bind";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import { DoodadType } from "@wayward/game/game/doodad/IDoodad";
+import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import { NPCType } from "@wayward/game/game/entity/npc/INPCs";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import { TileEventType } from "@wayward/game/game/tile/ITileEvent";
+import Component from "@wayward/game/ui/component/Component";
+import { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
 import DebugTools from "../../DebugTools";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";

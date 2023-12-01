@@ -9,13 +9,13 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { IActionApi } from "game/entity/action/IAction";
-import Entity from "game/entity/Entity";
-import Item from "game/item/Item";
+import { IActionApi } from "@wayward/game/game/entity/action/IAction";
+import Entity from "@wayward/game/game/entity/Entity";
+import Item from "@wayward/game/game/item/Item";
 import InspectDialog from "../../ui/InspectDialog";
-import Human from "game/entity/Human";
+import Human from "@wayward/game/game/entity/Human";
 
-export default function (action: IActionApi<Human>, item: Item) {
+export default function (action: IActionApi<Human>, item: Item): void {
 	const container = item.containedWithin;
 	action.executor.island.items.remove(item);
 

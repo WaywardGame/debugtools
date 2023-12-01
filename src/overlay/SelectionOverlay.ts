@@ -10,16 +10,16 @@
  */
 
 import Stream from "@wayward/goodstream/Stream";
-import Tile from "game/tile/Tile";
-import Mod from "mod/Mod";
-import { Tuple } from "utilities/collection/Tuple";
-import Enums from "utilities/enum/Enums";
-import { IVector2 } from "utilities/math/IVector";
-import Vector2 from "utilities/math/Vector2";
-import Vector3 from "utilities/math/Vector3";
+import Tile from "@wayward/game/game/tile/Tile";
+import Mod from "@wayward/game/mod/Mod";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
+import Enums from "@wayward/game/utilities/enum/Enums";
+import { IVector2 } from "@wayward/game/utilities/math/IVector";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
+import Vector3 from "@wayward/game/utilities/math/Vector3";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID } from "../IDebugTools";
-import { IOverlayInfo } from "game/tile/ITerrain";
+import { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
 
 export default class SelectionOverlay {
 
@@ -36,7 +36,7 @@ export default class SelectionOverlay {
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
 	public static readonly debugTools: DebugTools;
 
-	public static add(tile: Tile) {
+	public static add(tile: Tile): boolean {
 		if (!this.overlays.has(tile)) {
 			this.overlays.add(tile);
 
@@ -48,7 +48,7 @@ export default class SelectionOverlay {
 		return false;
 	}
 
-	public static remove(tile: Tile) {
+	public static remove(tile: Tile): boolean {
 		if (this.overlays.delete(tile)) {
 			this.updateSelectionOverlay(tile);
 
@@ -64,7 +64,7 @@ export default class SelectionOverlay {
 	 * @param updateNeighbors Whether to update the tile's neighbours. Defaults to `true`. This method calls itself to update its neighbours,
 	 * but doesn't update neighbours in the recursive call.
 	 */
-	private static updateSelectionOverlay(tile: Tile, updateNeighbors = true) {
+	private static updateSelectionOverlay(tile: Tile, updateNeighbors = true): void {
 		let neighborTiles: INeighborTiles | undefined;
 		let connections: NeighborPosition[] | undefined;
 
@@ -141,7 +141,7 @@ export default class SelectionOverlay {
 	/**
 	 * Returns an array of neighbor positions that are painted/selected
 	 */
-	private static getPaintOverlayConnections(neighbors: INeighborTiles) {
+	private static getPaintOverlayConnections(neighbors: INeighborTiles): NeighborPosition[] {
 		return Stream.keys(neighbors)
 			.filter(neighborPosition => this.overlays.has(neighbors[neighborPosition]))
 			.toArray();
@@ -162,7 +162,7 @@ function getNeighborTiles(tilePosition: IVector2): INeighborTiles {
 /**
  * Returns a map of neighbor positions to their corresponding tile position.
  */
-function getNeighborVectors(tilePosition: IVector2) {
+function getNeighborVectors(tilePosition: IVector2): { T: Vector3; O: Vector3; P: Vector3; R: Vector3; B: Vector3; M: Vector3; L: Vector3; E: Vector3; } {
 	return {
 		[NeighborPosition.TopLeft]: new Vector3(tilePosition.x - 1, tilePosition.y - 1, localPlayer.z),
 		[NeighborPosition.Top]: new Vector3(tilePosition.x, tilePosition.y - 1, localPlayer.z),
@@ -246,7 +246,7 @@ const paintTileMap = {
 /**
  * Returns an ID from a list of neighbor positions, fitlered by ones that are actually relevant to the sub tile position (quadrant of a tile)
  */
-function getId(relevantFor: SubTilePosition, ...positions: (NeighborPosition | undefined)[]) {
+function getId(relevantFor: SubTilePosition, ...positions: (NeighborPosition | undefined)[]): string {
 	return positions.filter((p): p is NeighborPosition => p !== undefined && isRelevant(relevantFor, p))
 		.sort((a, b) => a.localeCompare(b))
 		.join("");
@@ -255,7 +255,7 @@ function getId(relevantFor: SubTilePosition, ...positions: (NeighborPosition | u
 /**
  * Returns whether the given neighbor position is relevant for the given sub tile position (EG: when the sub tile sprite is affected by the neighbor)
  */
-function isRelevant(subTilePosition: SubTilePosition, neighborPosition: NeighborPosition) {
+function isRelevant(subTilePosition: SubTilePosition, neighborPosition: NeighborPosition): boolean {
 	switch (subTilePosition) {
 		case SubTilePosition.TopLeft:
 			return neighborPosition === NeighborPosition.Top || neighborPosition === NeighborPosition.TopLeft || neighborPosition === NeighborPosition.Left;

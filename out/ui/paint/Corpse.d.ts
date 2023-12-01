@@ -8,9 +8,9 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import { Events, IEventEmitter } from "event/EventEmitter";
-import { CreatureType } from "game/entity/creature/ICreature";
-import Component from "ui/component/Component";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import Component from "@wayward/game/ui/component/Component";
 import { IPaintSection } from "../panel/PaintPanel";
 export default class CorpsePaint extends Component implements IPaintSection {
     event: IEventEmitter<this, Events<IPaintSection>>;
@@ -21,7 +21,7 @@ export default class CorpsePaint extends Component implements IPaintSection {
     constructor();
     getTilePaintData(): {
         corpse: {
-            type: "remove" | CreatureType | undefined;
+            type: CreatureType | "remove" | undefined;
             aberrant: boolean;
             replaceExisting: boolean;
         };

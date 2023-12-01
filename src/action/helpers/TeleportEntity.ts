@@ -9,15 +9,15 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ActionApi } from "game/entity/action/IAction";
-import Entity from "game/entity/Entity";
-import Player from "game/entity/player/Player";
+import { ActionApi } from "@wayward/game/game/entity/action/IAction";
+import Entity from "@wayward/game/game/entity/Entity";
+import Player from "@wayward/game/game/entity/player/Player";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { getTile } from "./GetTile";
-import Tile from "game/tile/Tile";
-import { MoveAnimation } from "game/entity/IEntity";
+import Tile from "@wayward/game/game/tile/Tile";
+import { MoveAnimation } from "@wayward/game/game/entity/IEntity";
 
-export function teleportEntity(action: ActionApi<any>, entity: Entity, tile: Tile) {
+export function teleportEntity(action: ActionApi<any>, entity: Entity, tile: Tile): void {
 	const targetTile = getTile(action.executor as Player, tile, () => translation(DebugToolsTranslation.ActionTeleport)
 		.get(entity.getName()));
 
@@ -39,7 +39,7 @@ export function teleportEntity(action: ActionApi<any>, entity: Entity, tile: Til
 		}
 	}
 
-	if (entity.asPlayer?.isLocalPlayer()) {
+	if (entity.asPlayer?.isLocalPlayer) {
 		gameScreen!.movementHandler.walkToTileHandler.reset();
 	}
 

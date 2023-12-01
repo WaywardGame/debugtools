@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-export function areArraysIdentical(arr1: any[], ...arrs: any[][]) {
+export function areArraysIdentical(arr1: any[], ...arrs: any[][]): boolean {
 	arrs.unshift(arr1);
 	// first check that the lengths of all arrays are the same
 	for (let i = 0; i < arrs.length - 1; i++) {

@@ -9,14 +9,14 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Mod from "mod/Mod";
-import Register from "mod/ModRegistry";
-import { RenderSource } from "renderer/IRenderer";
-import Bindable from "ui/input/Bindable";
-import { IInput } from "ui/input/IInput";
-import InputManager from "ui/input/InputManager";
-import Vector2 from "utilities/math/Vector2";
-import { Bound } from "utilities/Decorators";
+import Mod from "@wayward/game/mod/Mod";
+import Register from "@wayward/game/mod/ModRegistry";
+import { RenderSource } from "@wayward/game/renderer/IRenderer";
+import Bindable from "@wayward/game/ui/input/Bindable";
+import { IInput } from "@wayward/game/ui/input/IInput";
+import InputManager from "@wayward/game/ui/input/InputManager";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
+import { Bound } from "@wayward/utilities/Decorators";
 
 import type DebugTools from "./DebugTools";
 import { DEBUG_TOOLS_ID } from "./IDebugTools";
@@ -53,19 +53,19 @@ export default class UnlockedCameraMovementHandler {
 	public homingVelocity = 0;
 	private running = false;
 
-	public begin() {
+	public begin(): void {
 		this.running = true;
 		this.tick();
 	}
 
-	public end() {
+	public end(): void {
 		this.running = false;
 	}
 
 	/**
 	 * Simple velocity movement implementation
 	 */
-	@Bound public tick() {
+	@Bound public tick(): void {
 		if (!this.running || !renderer || !localIsland) {
 			return;
 		}

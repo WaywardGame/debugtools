@@ -8,10 +8,10 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import Tile from "game/tile/Tile";
-import Bindable from "ui/input/Bindable";
+import Tile from "@wayward/game/game/tile/Tile";
+import Bindable from "@wayward/game/ui/input/Bindable";
 import DebugTools from "./DebugTools";
-import CancelablePromise from "./util/CancelablePromise";
+import CancelablePromise from "@wayward/utilities/promise/CancelablePromise";
 export default class SelectLocation {
     readonly DEBUG_TOOLS: DebugTools;
     readonly bindableSelectLocation: Bindable;

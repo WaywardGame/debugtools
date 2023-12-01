@@ -9,10 +9,10 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Events, IEventEmitter } from "event/EventEmitter";
-import Entity from "game/entity/Entity";
-import { Stat } from "game/entity/IStats";
-import Component from "ui/component/Component";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import Entity from "@wayward/game/game/entity/Entity";
+import { Stat } from "@wayward/game/game/entity/IStats";
+import Component from "@wayward/game/ui/component/Component";
 
 interface IInspectEntityInformationSubsectionEvents extends Events<Component> {
 	change(): any;

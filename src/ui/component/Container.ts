@@ -9,23 +9,30 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { EventBus } from "event/EventBuses";
-import EventEmitter from "event/EventEmitter";
-import EventManager, { EventHandler } from "event/EventManager";
-import { IContainer } from "game/item/IItem";
-import Item from "game/item/Item";
-import ItemManager from "game/item/ItemManager";
-import Tile from "game/tile/Tile";
-import { TextContext } from "language/ITranslation";
-import Translation from "language/Translation";
-import { MiscTranslation } from "language/dictionary/Misc";
-import { BlockRow } from "ui/component/BlockRow";
-import Button, { ButtonType } from "ui/component/Button";
-import Component from "ui/component/Component";
-import Details from "ui/component/Details";
-import { RangeRow } from "ui/component/RangeRow";
-import Text from "ui/component/Text";
-import { Bound, Debounce } from "utilities/Decorators";
+import { EventBus } from "@wayward/game/event/EventBuses";
+import { EventHandler, eventManager } from "@wayward/game/event/EventManager";
+import { Quality } from "@wayward/game/game/IObject";
+import { IContainable, IContainer } from "@wayward/game/game/item/IItem";
+import Item from "@wayward/game/game/item/Item";
+import ItemManager from "@wayward/game/game/item/ItemManager";
+import Tile from "@wayward/game/game/tile/Tile";
+import Dictionary from "@wayward/game/language/Dictionary";
+import { TextContext } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
+import { MiscTranslation } from "@wayward/game/language/dictionary/Misc";
+import { BlockRow } from "@wayward/game/ui/component/BlockRow";
+import Button, { ButtonType } from "@wayward/game/ui/component/Button";
+import Component from "@wayward/game/ui/component/Component";
+import Details from "@wayward/game/ui/component/Details";
+import Dropdown from "@wayward/game/ui/component/Dropdown";
+import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
+import { RangeRow } from "@wayward/game/ui/component/RangeRow";
+import Text from "@wayward/game/ui/component/Text";
+import Enums from "@wayward/game/utilities/enum/Enums";
+import { Bound } from "@wayward/utilities/Decorators";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
+import EventEmitter from "@wayward/utilities/event/EventEmitter";
+import { debounce } from "@wayward/utilities/promise/Async";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import ClearInventory from "../../action/ClearInventory";
 import Remove from "../../action/Remove";
@@ -33,6 +40,8 @@ import SetDecay from "../../action/SetDecay";
 import SetDecayBulk from "../../action/SetDecayBulk";
 import SetDurability from "../../action/SetDurability";
 import SetDurabilityBulk from "../../action/SetDurabilityBulk";
+import SetQuality from "../../action/SetQuality";
+import SetQualityBulk from "../../action/SetQualityBulk";
 import { areArraysIdentical } from "../../util/Array";
 import AddItemToInventory from "./AddItemToInventory";
 import { IInspectInformationSectionEvents } from "./InspectInformationSection";
@@ -53,7 +62,7 @@ export default class Container extends Component {
 
 	public static INSTANCE: Container | undefined;
 
-	public static init() {
+	public static init(): Container {
 		if (Container.INSTANCE)
 			return Container.INSTANCE;
 
@@ -63,11 +72,11 @@ export default class Container extends Component {
 		return container;
 	}
 
-	public static appendTo(component: Component, host: Component, containerSupplier: () => IContainer | undefined) {
+	public static appendTo(component: Component, host: Component, containerSupplier: () => IContainer | undefined): Promise<void> {
 		return Container.init().appendToHost(component, host, containerSupplier);
 	}
 
-	public static releaseAndRemove() {
+	public static releaseAndRemove(): void {
 		if (!Container.INSTANCE)
 			return;
 
@@ -76,14 +85,14 @@ export default class Container extends Component {
 		delete Container.INSTANCE;
 	}
 
-	public async appendToHost(component: Component, host: Component, containerSupplier: () => IContainer | undefined) {
+	public async appendToHost(component: Component, host: Component, containerSupplier: () => IContainer | undefined): Promise<void> {
 		this.appendTo(component);
 		this.containerSupplier = containerSupplier;
 		this.refreshItems();
 
-		EventManager.registerEventBusSubscriber(this);
+		eventManager.registerEventBusSubscriber(this);
 		await (host as EventEmitter.Host<IInspectInformationSectionEvents>).event.waitFor(["remove", "switchAway"]);
-		EventManager.deregisterEventBusSubscriber(this);
+		eventManager.deregisterEventBusSubscriber(this);
 		if (this.containerSupplier === containerSupplier)
 			delete this.containerSupplier;
 	}
@@ -91,6 +100,9 @@ export default class Container extends Component {
 	private readonly wrapperContainedItems: Details;
 	private readonly rangeBulkDurability: RangeRow;
 	private readonly rangeBulkDecay: RangeRow;
+	private readonly dropdownBulkQuality: Dropdown<Quality>;
+	private readonly buttonBulkQualityApply: Button;
+
 	private containerSupplier?: () => IContainer | undefined;
 	private items: number[] = [];
 	private page = 0;
@@ -107,7 +119,7 @@ export default class Container extends Component {
 		new Details()
 			.setSummary(summary => summary.setText(translation(DebugToolsTranslation.LabelBulkItemOperations)))
 			.append(this.rangeBulkDurability = new RangeRow()
-				.classes.add("debug-tools-inspect-human-wrapper-set-durability-bulk")
+				.classes.add("debug-tools-inspect-human-wrapper-set-bulk")
 				.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDurability)))
 				.editRange(range => range
 					.setMax(100)
@@ -120,7 +132,7 @@ export default class Container extends Component {
 					.setText(translation(DebugToolsTranslation.ButtonApply))
 					.event.subscribe("activate", this.applyBulkDurability)))
 			.append(this.rangeBulkDecay = new RangeRow()
-				.classes.add("debug-tools-inspect-human-wrapper-set-decay-bulk")
+				.classes.add("debug-tools-inspect-human-wrapper-set-bulk")
 				.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDecay)))
 				.editRange(range => range
 					.setMax(100)
@@ -132,6 +144,20 @@ export default class Container extends Component {
 				.append(new Button()
 					.setText(translation(DebugToolsTranslation.ButtonApply))
 					.event.subscribe("activate", this.applyBulkDecay)))
+			.append(new LabelledRow()
+				.classes.add("dropdown-label", "debug-tools-inspect-human-wrapper-set-bulk")
+				.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelQuality)))
+				.append(this.dropdownBulkQuality = new Dropdown<Quality>()
+					.setRefreshMethod(() => ({
+						defaultOption: Quality.Random,
+						options: Enums.values(Quality)
+							.map(quality => Tuple(quality, Translation.get(Dictionary.Quality, quality).inContext(TextContext.Title)))
+							.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
+					}))
+					.event.subscribe("selection", this.applyBulkQuality))
+				.append(this.buttonBulkQualityApply = new Button()
+					.setText(translation(DebugToolsTranslation.ButtonApply))
+					.event.subscribe("activate", this.applyBulkQuality)))
 			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonClearInventory))
 				.setType(ButtonType.Warning)
@@ -139,31 +165,84 @@ export default class Container extends Component {
 			.appendTo(this);
 	}
 
-	@Debounce(100)
-	public refreshItems() {
+	public showItem(item?: Item): ContainerItemDetails | undefined {
+		this.wrapperContainedItems.open();
+
+		const container = this.containerSupplier?.();
+		if (!container)
+			return undefined;
+
+		const itemChain: Item[] = [];
+		let searchContainer: IContainable | undefined = item;
+		while (searchContainer instanceof Item && searchContainer !== container) {
+			itemChain.push(searchContainer);
+			searchContainer = searchContainer.containedWithin;
+		}
+
+		itemChain.reverse();
+		item = itemChain[0];
+
+		const page = Math.max(0, item ? this.getPageOf(item) : 0);
+
+		this.page = page;
+		return this.changeDisplayedItems(itemChain);
+	}
+
+	@Bound public refreshItems(): void {
 		const container = this.containerSupplier?.();
 		const itemIds = container?.containedItems.map(item => item.id) ?? [];
 		if (areArraysIdentical(itemIds, this.items))
 			return;
 
-		this.items = itemIds;
 		this.changeDisplayedItems();
 	}
 
-	private changeDisplayedItems() {
+	private getTotalPages(): number {
+		const container = this.containerSupplier?.();
+		return Math.ceil((container?.containedItems.length ?? 0) / CONTAINER_PAGE_LENGTH);
+	}
+
+	private getPageOf(item: Item): number {
+		const container = this.containerSupplier?.();
+		if (!container)
+			return -1;
+
+		const index = container.containedItems.indexOf(item);
+		if (index === -1) {
+			return -1;
+		}
+
+		return Math.floor(index / CONTAINER_PAGE_LENGTH);
+	}
+
+	private getItemsOfPage(page: number): Item[] {
+		const container = this.containerSupplier?.();
+		if (!container)
+			return [];
+
+		return container.containedItems.slice(page * CONTAINER_PAGE_LENGTH, page * CONTAINER_PAGE_LENGTH + CONTAINER_PAGE_LENGTH);
+	}
+
+	private changeDisplayedItems(itemChain: Item[] = []): ContainerItemDetails | undefined {
 		this.wrapperContainedItems.dump();
 
 		const container = this.containerSupplier?.();
-		if (!container || !this.items.length)
+		if (!container)
 			return;
 
-		const totalPages = Math.ceil(this.items.length / CONTAINER_PAGE_LENGTH);
+		this.items = container.containedItems.map(item => item.id) ?? [];
+
+		const totalPages = this.getTotalPages();
 		this.page = this.page < 0 ? totalPages - 1
 			: this.page >= totalPages ? 0
 				: this.page;
 
-		for (const item of container.containedItems.slice(this.page * CONTAINER_PAGE_LENGTH, this.page * CONTAINER_PAGE_LENGTH + CONTAINER_PAGE_LENGTH)) {
+		let result: ContainerItemDetails | undefined;
+		for (const item of this.getItemsOfPage(this.page)) {
 			new ContainerItemDetails(item)
+				.toggleOpen(itemChain.includes(item))
+				.schedule(details => result ??= !details.isOpen ? undefined
+					: details.container?.showItem(itemChain.last()) ?? details)
 				.appendTo(this.wrapperContainedItems);
 		}
 
@@ -185,39 +264,47 @@ export default class Container extends Component {
 				.setText(translation(DebugToolsTranslation.ButtonNextItems))
 				.event.subscribe("activate", () => { this.page++; this.changeDisplayedItems() }))
 			.appendTo(this.wrapperContainedItems);
+
+		return result;
 	}
 
 	@EventHandler(EventBus.ItemManager, "containerItemAdd")
 	@EventHandler(EventBus.ItemManager, "containerItemRemove")
-	protected onContainerItemChange(itemManager: ItemManager, items: Item[], container?: IContainer, containerTile?: Tile) {
+	protected onContainerItemChange(itemManager: ItemManager, items: Item[], container?: IContainer, containerTile?: Tile): void {
 		if (container === this.containerSupplier?.())
-			this.refreshItems();
+			debounce(100, true, this.refreshItems);
 	}
 
-	@Bound private willRemove() {
+	@Bound private willRemove(): boolean {
 		this.store(this.getScreen()!);
 		return false;
 	}
 
-	@Bound private getContainer() {
+	@Bound private getContainer(): IContainer | undefined {
 		return this.containerSupplier?.();
 	}
 
-	@Bound private clear() {
+	@Bound private clear(): void {
 		const container = this.getContainer();
 		if (container) ClearInventory.execute(localPlayer, container);
 	}
 
-	@Bound private applyBulkDurability() {
+	@Bound private applyBulkDurability(): void {
 		const container = this.getContainer();
 		if (container) SetDurabilityBulk.execute(localPlayer, container, this.rangeBulkDurability.rangeInput.value <= -10 ? 0 : this.rangeBulkDurability.rangeInput.value <= 0 ? 1
 			: this.rangeBulkDurability.rangeInput.value === 100 ? 0.99999 : this.rangeBulkDurability.rangeInput.value / 100);
 	}
 
-	@Bound private applyBulkDecay() {
+	@Bound private applyBulkDecay(): void {
 		const container = this.getContainer();
 		if (container) SetDecayBulk.execute(localPlayer, container, this.rangeBulkDecay.rangeInput.value <= -10 ? 0 : this.rangeBulkDecay.rangeInput.value <= 0 ? 1
 			: this.rangeBulkDurability.rangeInput.value === 100 ? 0.99999 : this.rangeBulkDecay.rangeInput.value / 100);
+	}
+
+	@Bound private applyBulkQuality(): void {
+		this.buttonBulkQualityApply.toggle(this.dropdownBulkQuality.selectedOption === Quality.Random);
+		const container = this.getContainer();
+		if (container && this.dropdownBulkQuality.selectedOption !== undefined) SetQualityBulk.execute(localPlayer, container, this.dropdownBulkQuality.selectedOption);
 	}
 }
 
@@ -225,9 +312,13 @@ export class ContainerItemDetails extends Details {
 
 	private readonly itemRef: WeakRef<Item>;
 
-	public get item() {
+	public get item(): Item {
 		return this.itemRef.deref()!;
 	}
+
+	public readonly container?: Container;
+	public readonly dropdownQuality: Dropdown<Quality>;
+	public readonly buttonQualityApply: Button;
 
 	public constructor(item: Item) {
 		super();
@@ -242,8 +333,23 @@ export class ContainerItemDetails extends Details {
 				.passTo(Translation.colorizeImportance("secondary")))
 			.setInheritTextTooltip());
 
+		new LabelledRow()
+			.classes.add("dropdown-label", "debug-tools-inspect-human-wrapper-set-bulk")
+			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelQuality)))
+			.append(this.dropdownQuality = new Dropdown<Quality>()
+				.setRefreshMethod(() => ({
+					defaultOption: Quality.Random,
+					options: Enums.values(Quality)
+						.map(quality => Tuple(quality, Translation.get(Dictionary.Quality, quality).inContext(TextContext.Title)))
+						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
+				}))
+				.event.subscribe("selection", this.applyQuality))
+			.append(this.buttonQualityApply = new Button()
+				.setText(translation(DebugToolsTranslation.ButtonApply))
+				.event.subscribe("activate", this.applyQuality))
+			.appendTo(this);
+
 		new RangeRow()
-			.classes.add("debug-tools-inspect-human-wrapper-set-durability-bulk")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDurability)))
 			.editRange(range => range
 				.setMax(unscale(this.item.durabilityMax))
@@ -255,12 +361,11 @@ export class ContainerItemDetails extends Details {
 
 		if (this.item.canDecay())
 			new RangeRow()
-				.classes.add("debug-tools-inspect-human-wrapper-set-decay-bulk")
 				.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDecay)))
 				.editRange(range => range
 					.setMax(this.item.startingDecay ? unscale(this.item.startingDecay) : 60)
 					.setStep(0.01)
-					.setRefreshMethod(() => unscale(this.item.decay ?? 0)))
+					.setRefreshMethod(() => unscale(this.item.getDecayTime() ?? 0)))
 				.setDisplayValue(value => [{ content: `${scale(value)}` }])
 				.event.subscribe("finish", this.applyDecay)
 				.appendTo(this);
@@ -271,22 +376,29 @@ export class ContainerItemDetails extends Details {
 			.appendTo(this);
 
 		if (this.item.isContainer())
-			new Container().appendToHost(this, this, () => this.item.isContainer() ? this.item : undefined);
+			this.container = new Container()
+				.schedule(container => container
+					.appendToHost(this, this, () => this.item.isContainer() ? this.item : undefined));
 	}
 
-	@Bound private applyDurability(_: any, value: number) {
+	@Bound private applyDurability(_: any, value: number): void {
 		SetDurability.execute(localPlayer, this.item, scale(value));
 	}
 
-	@Bound private applyDecay(_: any, value: number) {
+	@Bound private applyDecay(_: any, value: number): void {
 		SetDecay.execute(localPlayer, this.item, scale(value));
+	}
+
+	@Bound private applyQuality(): void {
+		this.buttonQualityApply.toggle(this.dropdownQuality.selectedOption === Quality.Random);
+		SetQuality.execute(localPlayer, this.item, this.dropdownQuality.selectedOption);
 	}
 }
 
-function scale(value: number) {
+function scale(value: number): number {
 	return Math.floor(1.2 ** value) - 1;
 }
 
-function unscale(value: number) {
+function unscale(value: number): number {
 	return Math.ceil(Math.log((value + 1)) / Math.log(1.2) * 100) / 100;
 }

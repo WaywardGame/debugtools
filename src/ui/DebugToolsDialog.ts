@@ -9,15 +9,15 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { OwnEventHandler } from "event/EventManager";
-import Translation from "language/Translation";
-import Mod from "mod/Mod";
-import { Save, SaveLocation } from "ui/IUi";
-import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
-import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
-import { Tuple } from "utilities/collection/Tuple";
-import Vector2 from "utilities/math/Vector2";
-import { sleep } from "utilities/promise/Async";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
+import Translation from "@wayward/game/language/Translation";
+import Mod from "@wayward/game/mod/Mod";
+import { Save, SaveLocation } from "@wayward/game/ui/IUi";
+import { DialogId, Edge, IDialogDescription } from "@wayward/game/ui/screen/screens/game/Dialogs";
+import TabDialog, { SubpanelInformation } from "@wayward/game/ui/screen/screens/game/component/TabDialog";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
+import { sleep } from "@wayward/utilities/promise/Async";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import DebugToolsPanel from "./component/DebugToolsPanel";
@@ -27,6 +27,8 @@ import PaintPanel from "./panel/PaintPanel";
 import SelectionPanel from "./panel/SelectionPanel";
 import TemperaturePanel from "./panel/TemperaturePanel";
 import TemplatePanel from "./panel/TemplatePanel";
+import Bindable from "@wayward/game/ui/input/Bindable";
+import { MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
 
 export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
 
@@ -51,7 +53,7 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 		size: new Vector2(29, 31),
 		edges: [
 			[Edge.Right, 50],
-			[Edge.Bottom, 38],
+			[Edge.Top, 7],
 		],
 	};
 
@@ -74,11 +76,11 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 		return translation(DebugToolsTranslation.DialogTitleMain);
 	}
 
-	public override getBindable() {
+	public override getBindable(): Bindable {
 		return this.DEBUG_TOOLS.bindableToggleDialog;
 	}
 
-	override getIcon() {
+	override getIcon(): MenuBarButtonType {
 		return this.DEBUG_TOOLS.menuBarButton;
 	}
 
@@ -88,7 +90,7 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 	}
 
 	@OwnEventHandler(DebugToolsDialog, "changeSubpanel")
-	protected onChangeSubpanel(activeSubpanel: SubpanelInformation) {
+	protected onChangeSubpanel(activeSubpanel: SubpanelInformation): void {
 		this.current = activeSubpanel[0];
 	}
 

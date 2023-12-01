@@ -8,7 +8,7 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-define(["require", "exports", "ui/component/Component"], function (require, exports, Component_1) {
+define(["require", "exports", "@wayward/game/ui/component/Component"], function (require, exports, Component_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class InspectEntityInformationSubsection extends Component_1.default {

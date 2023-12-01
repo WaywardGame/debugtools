@@ -9,11 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Events, IEventEmitter } from "event/EventEmitter";
-import Tile from "game/tile/Tile";
-import Component from "ui/component/Component";
-import { TranslationGenerator } from "ui/component/IComponent";
-import TabDialogPanel from "ui/screen/screens/game/component/TabDialogPanel";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import Tile from "@wayward/game/game/tile/Tile";
+import Component from "@wayward/game/ui/component/Component";
+import { TranslationGenerator } from "@wayward/game/ui/component/IComponent";
+import TabDialogPanel from "@wayward/game/ui/screen/screens/game/component/TabDialogPanel";
 
 export type TabInformation = [number, TranslationGenerator];
 
@@ -30,9 +30,9 @@ export default abstract class InspectInformationSection extends TabDialogPanel {
 	private shouldLog = false;
 	public get willLog() { return this.shouldLog; }
 
-	public setTab(tab: number) { return this; }
-	public setShouldLog() { this.shouldLog = true; }
-	public resetWillLog() { this.shouldLog = false; }
+	public setTab(tab: number): this { return this; }
+	public setShouldLog(): void { this.shouldLog = true; }
+	public resetWillLog(): void { this.shouldLog = false; }
 
 	public abstract getTabs(): TabInformation[];
 	public abstract update(tile: Tile): void;

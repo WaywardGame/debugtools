@@ -9,11 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Action } from "game/entity/action/Action";
-import { ActionArgument } from "game/entity/action/IAction";
-import { EntityType } from "game/entity/IEntity";
-import { Stat } from "game/entity/IStats";
-import { ScreenId } from "ui/screen/IScreen";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
+import { Stat } from "@wayward/game/game/entity/IStats";
+import { ScreenId } from "@wayward/game/ui/screen/IScreen";
 import { defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.Entity, ActionArgument.Integer32, ActionArgument.Float64)

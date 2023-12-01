@@ -9,11 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Creature from "game/entity/creature/Creature";
-import Entity from "game/entity/Entity";
-import Button from "ui/component/Button";
-import { CheckButton } from "ui/component/CheckButton";
-import { Bound } from "utilities/Decorators";
+import Creature from "@wayward/game/game/entity/creature/Creature";
+import Entity from "@wayward/game/game/entity/Entity";
+import Button from "@wayward/game/ui/component/Button";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
+import { Bound } from "@wayward/utilities/Decorators";
 import Remove from "../../action/Remove";
 import SetTamed from "../../action/SetTamed";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
@@ -28,7 +28,7 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 
 		this.tamedButton = new CheckButton()
 			.setText(translation(DebugToolsTranslation.ButtonTameCreature))
-			.setRefreshMethod(() => this.creature ? this.creature.isTamed() : false)
+			.setRefreshMethod(() => this.creature ? this.creature.isTamed : false)
 			.event.subscribe("toggle", this.setTamed)
 			.appendTo(this);
 
@@ -38,19 +38,19 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 			.appendTo(this);
 	}
 
-	public override update(entity: Entity) {
+	public override update(entity: Entity): void {
 		this.creature = entity.asCreature;
 		this.tamedButton.refresh();
 		this.toggle(!!this.creature);
 	}
 
 	@Bound
-	private setTamed(_: any, tamed: boolean) {
+	private setTamed(_: any, tamed: boolean): void {
 		SetTamed.execute(localPlayer, this.creature!, tamed);
 	}
 
 	@Bound
-	private removeCreature() {
+	private removeCreature(): void {
 		Remove.execute(localPlayer, this.creature!);
 	}
 }

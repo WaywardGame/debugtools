@@ -9,26 +9,27 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { OwnEventHandler } from "event/EventManager";
-import Entity from "game/entity/Entity";
-import Human, { REPUTATION_MAX } from "game/entity/Human";
-import { StatusEffectChangeReason, StatusType } from "game/entity/IEntity";
-import { IStat, Stat } from "game/entity/IStats";
-import Dictionary from "language/Dictionary";
-import { TextContext } from "language/ITranslation";
-import Translation from "language/Translation";
-import { CheckButton } from "ui/component/CheckButton";
-import Component from "ui/component/Component";
-import { RangeRow } from "ui/component/RangeRow";
-import { Bound } from "utilities/Decorators";
+import { Deity } from "@wayward/game/game/deity/Deity";
+import Entity from "@wayward/game/game/entity/Entity";
+import Human from "@wayward/game/game/entity/Human";
+import { StatusEffectChangeReason, StatusType } from "@wayward/game/game/entity/IEntity";
+import { Stat } from "@wayward/game/game/entity/IStats";
+import Dictionary from "@wayward/game/language/Dictionary";
+import { TextContext } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
+import Component from "@wayward/game/ui/component/Component";
+import { RangeRow } from "@wayward/game/ui/component/RangeRow";
+import { Bound } from "@wayward/utilities/Decorators";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
-import SetStat from "../../action/SetStat";
+import SetAlignment from "../../action/SetAlignment";
 import Container from "../component/Container";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
 export default class HumanInformation extends InspectEntityInformationSubsection {
 	private readonly addItemContainer: Component;
-	private readonly reputationSliders: { [key in Stat.Malignity | Stat.Benignity]?: RangeRow } = {};
+	private readonly alignmentSliders: { [key in Deity.Evil | Deity.Good]?: RangeRow } = {};
 	private readonly statusCheckButtons: PartialRecord<StatusType, CheckButton> = {};
 
 	private human: Human | undefined;
@@ -38,8 +39,8 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 		this.addItemContainer = new Component().appendTo(this);
 
-		this.addReputationSlider(DebugToolsTranslation.LabelMalignity, Stat.Malignity);
-		this.addReputationSlider(DebugToolsTranslation.LabelBenignity, Stat.Benignity);
+		this.addAlignmentSlider(DebugToolsTranslation.LabelEvilAlignment, Deity.Evil);
+		this.addAlignmentSlider(DebugToolsTranslation.LabelGoodAlignment, Deity.Good);
 
 		for (const status of [StatusType.Bleeding, StatusType.Burned, StatusType.Poisoned, StatusType.Frostbitten]) {
 			this.statusCheckButtons[status] = new CheckButton()
@@ -51,22 +52,22 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 	}
 
 	@OwnEventHandler(HumanInformation, "switchTo")
-	protected onSwitchTo() {
+	protected onSwitchTo(): void {
 		Container.appendTo(this.addItemContainer, this, () => this.human?.inventory);
 	}
 
-	public override getImmutableStats() {
+	public override getImmutableStats(): Stat[] {
 		return this.human ? [
-			Stat.Benignity,
-			Stat.Malignity,
 			Stat.Attack,
 			Stat.Defense,
-			Stat.Reputation,
+			Stat.Ferocity,
 			Stat.Weight,
+			Stat.InsulationHeat,
+			Stat.InsulationCold,
 		] : [];
 	}
 
-	public override update(entity: Entity) {
+	public override update(entity: Entity): void {
 		if (this.human === entity) return;
 
 		this.human = entity.asHuman;
@@ -76,7 +77,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 		if (!this.human) return;
 
-		for (const slider of Object.values(this.reputationSliders)) {
+		for (const slider of Object.values(this.alignmentSliders)) {
 			slider.refresh();
 		}
 
@@ -84,41 +85,41 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 			checkButton.refresh();
 		}
 
-		const entityEvents = entity?.asEntityWithStats?.event.until(this, "switchAway");
-		entityEvents?.subscribe("statChanged", this.onStatChange);
+		const entityEvents = entity?.asHuman?.event.until(this, "switchAway");
+		entityEvents?.subscribe("alignmentChange", this.onAlignmentChange);
 		entityEvents?.subscribe("statusChange", this.onStatusChange);
 	}
 
-	private addReputationSlider(labelTranslation: DebugToolsTranslation, type: Stat.Benignity | Stat.Malignity) {
-		this.reputationSliders[type] = new RangeRow()
+	private addAlignmentSlider(labelTranslation: DebugToolsTranslation, type: Deity.Good | Deity.Evil): void {
+		this.alignmentSliders[type] = new RangeRow()
 			.setLabel(label => label.setText(translation(labelTranslation)))
 			.editRange(range => range
 				.setMin(0)
-				.setMax(REPUTATION_MAX)
-				.setRefreshMethod(() => this.human ? this.human.stat.getValue(type)! : 0))
+				.setMax(game.getGameOptions().player.alignment[type === Deity.Good ? "goodCap" : "evilCap"])
+				.setRefreshMethod(() => this.human ? this.human.alignment[type === Deity.Good ? "good" : "evil"] : 0))
 			.setDisplayValue(true)
-			.event.subscribe("finish", this.setReputation(type))
+			.event.subscribe("finish", this.setAlignment(type))
 			.appendTo(this);
 	}
 
-	private setReputation(type: Stat.Malignity | Stat.Benignity) {
+	private setAlignment(type: Deity.Evil | Deity.Good): (_: any, value: number) => void {
 		return (_: any, value: number) => {
-			if (this.human!.stat.getValue(type) === value) return;
-			SetStat.execute(localPlayer, this.human!, type, value);
+			if (this.human!.alignment[type === Deity.Good ? "good" : "evil"] === value) return;
+			SetAlignment.execute(localPlayer, this.human!, type, value);
 		};
 	}
 
 	@Bound
-	private onStatChange(_: any, stat: IStat) {
-		switch (stat.type) {
-			case Stat.Malignity:
-			case Stat.Benignity:
-				this.reputationSliders[stat.type]!.refresh();
+	private onAlignmentChange(_: any, deity: Deity): void {
+		switch (deity) {
+			case Deity.Evil:
+			case Deity.Good:
+				this.alignmentSliders[deity]!.refresh();
 				break;
 		}
 	}
 
-	@Bound private onStatusChange(_: any, status: StatusType) {
+	@Bound private onStatusChange(_: any, status: StatusType): void {
 		this.statusCheckButtons[status]?.refresh();
 	}
 }

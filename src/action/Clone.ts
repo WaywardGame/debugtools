@@ -9,21 +9,21 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Doodad from "game/doodad/Doodad";
-import { Action } from "game/entity/action/Action";
-import { ActionArgument, anyOf } from "game/entity/action/IAction";
-import { EntityType } from "game/entity/IEntity";
+import Doodad from "@wayward/game/game/doodad/Doodad";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import Tile from "@wayward/game/game/tile/Tile";
 import { defaultUsability } from "../Actions";
 import { DebugToolsTranslation, translation } from "../IDebugTools";
 import CloneDoodad from "./helpers/CloneDoodad";
 import CloneEntity from "./helpers/CloneEntity";
-import Tile from "game/tile/Tile";
 import { getTile } from "./helpers/GetTile";
 
 /**
  * Clones an entity or doodad to a new location. If given a player, an NPC with the appearance, items, and stats of the player is cloned.
  */
-export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Doodad), ActionArgument.Tile)
+export default new Action(ActionArgument.ANY(ActionArgument.Entity, ActionArgument.Doodad), ActionArgument.Tile)
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, toClone, tile: Tile) => {

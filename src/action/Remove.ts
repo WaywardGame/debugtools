@@ -9,17 +9,17 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Action } from "game/entity/action/Action";
-import { ActionArgument, anyOf } from "game/entity/action/IAction";
-import { EntityType } from "game/entity/IEntity";
-import Player from "game/entity/player/Player";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import Player from "@wayward/game/game/entity/player/Player";
 import { defaultUsability } from "../Actions";
 import Remove from "./helpers/Remove";
 
 /**
  * Removes a creature, NPC, item, doodad, corpse, or tile event.
  */
-export default new Action(anyOf(ActionArgument.Entity, ActionArgument.Doodad, ActionArgument.Corpse, ActionArgument.TileEvent, ActionArgument.Item))
+export default new Action(ActionArgument.ANY(ActionArgument.Entity, ActionArgument.Doodad, ActionArgument.Corpse, ActionArgument.TileEvent, ActionArgument.Item))
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, toRemove) => {

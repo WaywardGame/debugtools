@@ -9,10 +9,10 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Action } from "game/entity/action/Action";
-import { ActionArgument } from "game/entity/action/IAction";
-import { EntityType } from "game/entity/IEntity";
-import { TerrainType } from "game/tile/ITerrain";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import { defaultUsability } from "../Actions";
 import SetTilled from "./helpers/SetTilled";
 

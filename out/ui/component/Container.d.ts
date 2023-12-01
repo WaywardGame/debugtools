@@ -8,12 +8,15 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import { IContainer } from "game/item/IItem";
-import Item from "game/item/Item";
-import ItemManager from "game/item/ItemManager";
-import Tile from "game/tile/Tile";
-import Component from "ui/component/Component";
-import Details from "ui/component/Details";
+import { Quality } from "@wayward/game/game/IObject";
+import { IContainer } from "@wayward/game/game/item/IItem";
+import Item from "@wayward/game/game/item/Item";
+import ItemManager from "@wayward/game/game/item/ItemManager";
+import Tile from "@wayward/game/game/tile/Tile";
+import Button from "@wayward/game/ui/component/Button";
+import Component from "@wayward/game/ui/component/Component";
+import Details from "@wayward/game/ui/component/Details";
+import Dropdown from "@wayward/game/ui/component/Dropdown";
 export declare enum ContainerClasses {
     ContainedItemDetails = "debug-tools-container-contained-item-details",
     ItemDetails = "debug-tools-container-contained-item-details-item",
@@ -32,11 +35,17 @@ export default class Container extends Component {
     private readonly wrapperContainedItems;
     private readonly rangeBulkDurability;
     private readonly rangeBulkDecay;
+    private readonly dropdownBulkQuality;
+    private readonly buttonBulkQualityApply;
     private containerSupplier?;
     private items;
     private page;
     constructor();
+    showItem(item?: Item): ContainerItemDetails | undefined;
     refreshItems(): void;
+    private getTotalPages;
+    private getPageOf;
+    private getItemsOfPage;
     private changeDisplayedItems;
     protected onContainerItemChange(itemManager: ItemManager, items: Item[], container?: IContainer, containerTile?: Tile): void;
     private willRemove;
@@ -44,11 +53,16 @@ export default class Container extends Component {
     private clear;
     private applyBulkDurability;
     private applyBulkDecay;
+    private applyBulkQuality;
 }
 export declare class ContainerItemDetails extends Details {
     private readonly itemRef;
     get item(): Item;
+    readonly container?: Container;
+    readonly dropdownQuality: Dropdown<Quality>;
+    readonly buttonQualityApply: Button;
     constructor(item: Item);
     private applyDurability;
     private applyDecay;
+    private applyQuality;
 }

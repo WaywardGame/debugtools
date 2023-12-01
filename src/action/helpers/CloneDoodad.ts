@@ -9,15 +9,15 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Doodad from "game/doodad/Doodad";
-import MagicalPropertyManager from "game/magic/MagicalPropertyManager";
-import Tile from "game/tile/Tile";
+import Doodad from "@wayward/game/game/doodad/Doodad";
+import MagicalPropertyManager from "@wayward/game/game/magic/MagicalPropertyManager";
+import Tile from "@wayward/game/game/tile/Tile";
 import CloneContainedItems from "./CloneContainedItems";
 
 /**
  * Clones a doodad to another position.
  */
-export default function (doodad: Doodad, tile: Tile) {
+export default function (doodad: Doodad, tile: Tile): void {
 	const clone = doodad.island.doodads.create(doodad.type, tile, {
 		quality: doodad.quality,
 		stillContainer: doodad.stillContainer,

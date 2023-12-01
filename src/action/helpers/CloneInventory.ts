@@ -9,13 +9,13 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Human from "game/entity/Human";
-import MagicalPropertyManager from "game/magic/MagicalPropertyManager";
+import Human from "@wayward/game/game/entity/Human";
+import MagicalPropertyManager from "@wayward/game/game/magic/MagicalPropertyManager";
 
 /**
  * Clones the inventory from one human entity to another.
  */
-export default function (from: Human, to: Human) {
+export default function (from: Human, to: Human): void {
 	for (const item of [...to.inventory.containedItems]) {
 		if (item.isContainer()) {
 			to.island.items.removeContainerItems(item);

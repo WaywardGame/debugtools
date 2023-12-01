@@ -9,41 +9,44 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { EventBus } from "event/EventBuses";
-import { Events, IEventEmitter } from "event/EventEmitter";
-import { EventHandler, OwnEventHandler } from "event/EventManager";
-import { TileUpdateType } from "game/IGame";
-import Entity from "game/entity/Entity";
-import Item from "game/item/Item";
-import { IOverlayInfo, TerrainType } from "game/tile/ITerrain";
-import Tile from "game/tile/Tile";
-import Translation from "language/Translation";
-import Mod from "mod/Mod";
-import { Registry } from "mod/ModRegistry";
-import { RenderSource } from "renderer/IRenderer";
-import Button from "ui/component/Button";
-import Component from "ui/component/Component";
-import ContextMenu from "ui/component/ContextMenu";
-import Text from "ui/component/Text";
-import Bind, { IBindHandlerApi } from "ui/input/Bind";
-import Bindable from "ui/input/Bindable";
-import InputManager from "ui/input/InputManager";
-import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
-import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
-import { Bound, Debounce } from "utilities/Decorators";
-import Log from "utilities/Log";
-import { Tuple } from "utilities/collection/Tuple";
-import Vector2 from "utilities/math/Vector2";
+import { EventBus } from "@wayward/game/event/EventBuses";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
+import { EventHandler } from "@wayward/game/event/EventManager";
+import { TileUpdateType } from "@wayward/game/game/IGame";
+import Entity from "@wayward/game/game/entity/Entity";
+import Item from "@wayward/game/game/item/Item";
+import { IOverlayInfo, TerrainType } from "@wayward/game/game/tile/ITerrain";
+import Tile from "@wayward/game/game/tile/Tile";
+import Translation from "@wayward/game/language/Translation";
+import Mod from "@wayward/game/mod/Mod";
+import { Registry } from "@wayward/game/mod/ModRegistry";
+import { RenderSource } from "@wayward/game/renderer/IRenderer";
+import Button from "@wayward/game/ui/component/Button";
+import Component from "@wayward/game/ui/component/Component";
+import ContextMenu from "@wayward/game/ui/component/ContextMenu";
+import Text from "@wayward/game/ui/component/Text";
+import Bind, { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
+import Bindable from "@wayward/game/ui/input/Bindable";
+import InputManager from "@wayward/game/ui/input/InputManager";
+import { DialogId, Edge, IDialogDescription } from "@wayward/game/ui/screen/screens/game/Dialogs";
+import TabDialog, { SubpanelInformation } from "@wayward/game/ui/screen/screens/game/component/TabDialog";
+import { Bound, Debounce } from "@wayward/utilities/Decorators";
+import Log from "@wayward/utilities/Log";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
-import { ContainerClasses } from "./component/Container";
+import Container from "./component/Container";
 import InspectInformationSection from "./component/InspectInformationSection";
 import CorpseInformation from "./inspect/CorpseInformation";
 import DoodadInformation from "./inspect/DoodadInformation";
+import VehicleInformation from "./inspect/VehicleInformation";
 import EntityInformation from "./inspect/EntityInformation";
 import ItemInformation from "./inspect/ItemInformation";
 import TerrainInformation from "./inspect/TerrainInformation";
 import TileEventInformation from "./inspect/TileEventInformation";
+import Island from "@wayward/game/game/island/Island";
 
 export type InspectDialogInformationSectionClass = new () => InspectInformationSection;
 
@@ -55,6 +58,7 @@ const informationSectionClasses: InspectDialogInformationSectionClass[] = [
 	EntityInformation,
 	CorpseInformation,
 	DoodadInformation,
+	VehicleInformation,
 	TileEventInformation,
 	ItemInformation,
 ];
@@ -72,7 +76,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 		size: new Vector2(29, 31),
 		edges: [
 			[Edge.Left, 50],
-			[Edge.Bottom, 38],
+			[Edge.Top, 7],
 		],
 		saveOpen: false,
 	};
@@ -167,41 +171,28 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * - Updates the dialog. (`update`)
 	 * - If the inspection is locked to an entity, it makes a note of needing to show the entity's subpanel (`willShowSubpanel`).
 	 */
-	public setInspection(what: Tile | Entity) {
+	public setInspection(what: Tile | Entity): this {
 		this.setInspectionTile(what);
 
-		let item: Item | undefined;
-		if (what instanceof Item) {
-			item = what;
+		const item = what instanceof Item ? what : undefined;
+		if (item)
 			this.LOG.info("Item:", item);
-			const human = what.getCurrentOwner();
-			if (human) {
-				what = human;
+
+		while (what instanceof Item) {
+			const containerEntity = what.island.items.resolveContainer(what.containedWithin);
+			if (containerEntity instanceof Entity) {
+				what = containerEntity;
 			}
 		}
 
-		this.inspectionLock = "entityType" in what ? what : undefined;
+		this.inspectionLock = what instanceof Entity ? what : undefined;
 
 		this.update();
 
 		if (item) {
 			this.event.waitFor("updateSubpanels").then(() => {
-				const itemElement = this.queryX<HTMLDetailsElement>(`.${ContainerClasses.ItemDetails}[@data-item-id="${item!.id}"]`);
-				if (itemElement) {
-					for (const itemDetailsElement of this.element.querySelectorAll(`.${ContainerClasses.ItemDetails}, .${ContainerClasses.ContainedItemDetails}`) as Iterable<HTMLDetailsElement>)
-						itemDetailsElement.open = false;
-
-					let detailsElement: HTMLDetailsElement | null | undefined = itemElement;
-					while (detailsElement = detailsElement.parentElement?.closest<HTMLDetailsElement>(`.${ContainerClasses.ContainedItemDetails}, .${ContainerClasses.ItemDetails}`))
-						detailsElement.open = true;
-
-					itemElement.open = true;
-					const summary = itemElement.querySelector("summary");
-					if (summary) {
-						this.panelWrapper.scrollTo(summary, 300);
-						summary?.focus();
-					}
-				}
+				const itemShowed = Container.INSTANCE?.showItem(item);
+				this.panelWrapper.scrollTo(itemShowed, 300);
 			});
 		}
 
@@ -217,7 +208,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * - After `300ms` (debounced), update the subpanel list.
 	 */
 	@Bound
-	public update() {
+	public update(): void {
 		if (this.inspectionLock) this.setInspectionTile(this.inspectionLock);
 
 		for (const section of this.subpanels) {
@@ -231,13 +222,13 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 
 	@EventHandler(EventBus.LocalPlayer, "preMoveToIsland")
 	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableCloseInspectDialog"))
-	public onCloseBind() {
+	public onCloseBind(): boolean {
 		this.close();
 		return true;
 	}
 
 	@Bind.onDown(Bindable.MenuContextMenu)
-	public onContextMenuBind(api: IBindHandlerApi) {
+	public onContextMenuBind(api: IBindHandlerApi): boolean {
 		for (let i = 0; i < this.entityButtons.length; i++) {
 			// the entity tabs can't use the `setContextMenu` functionality because they change so often. As a result, we have to
 			// catch the `MenuContextMenu` bind manually, and check whether it happened on one of them. If it did, we show the
@@ -252,7 +243,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	}
 
 	@EventHandler(EventBus.Game, "stoppingPlay")
-	public onGameEnd() {
+	public onGameEnd(): void {
 		this.close();
 	}
 
@@ -260,20 +251,22 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	// Event Handlers that trigger a dialog update
 	//
 
-	@EventHandler(EventBus.Game, "tickEnd")
+	@EventHandler(EventBus.Island, "tickEnd")
 	@Debounce(10)
-	public onGameTickEnd() {
-		this.update();
+	public onGameTickEnd(island: Island): void {
+		if (island.isLocalIsland) {
+			this.update();
+		}
 	}
 
 	@EventHandler(EventBus.Players, "moveComplete")
-	public onMoveComplete() {
+	public onMoveComplete(): void {
 		this.update();
 	}
 
 	@EventHandler(EventBus.Island, "tileUpdate")
 	@Debounce(10)
-	public onTileUpdate(island: any, tile: Tile, tileUpdateType: TileUpdateType) {
+	public onTileUpdate(island: any, tile: Tile, tileUpdateType: TileUpdateType): void {
 		this.update();
 	}
 
@@ -282,7 +275,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * - Forcibly removes any info sections.
 	 */
 	@OwnEventHandler(InspectDialog, "close")
-	protected onClose() {
+	protected onClose(): void {
 		if (this.inspectingTile) {
 			this.inspectingTile.tile.removeOverlay(this.inspectingTile.overlay);
 			delete this.inspectingTile;
@@ -299,19 +292,21 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * - Sets the `inspection-lock` class on the tab of the panel which inspection is locked to.
 	 */
 	@Bound
-	private updateSubpanels() {
+	private updateSubpanels(): void {
 		this.updateSubpanelList();
 
+		let lockedButton: Button | undefined;
 		if (this.willShowSubpanel && this.inspectionLock) {
-			this.showSubPanel(this.entityButtons[this.entityInfoSection.getEntityIndex(this.inspectionLock)]);
+			lockedButton = this.entityButtons[this.entityInfoSection.getEntityIndex(this.inspectionLock)]
+				?? (this.inspectionLock.asDoodad && this.subpanelInformations.find(info => `${info[0]}`.startsWith("Doodad: "))?.[4]);
+			this.showSubPanel(lockedButton);
 			this.willShowSubpanel = false;
 		}
 
 		if (this.inspectionLock) {
 			for (const entityButton of this.entityButtons) entityButton.classes.remove("inspection-lock");
 
-			this.entityButtons[this.entityInfoSection.getEntityIndex(this.inspectionLock)]
-				.classes.add("inspection-lock");
+			lockedButton?.classes.add("inspection-lock");
 		}
 
 		this.event.emit("updateSubpanels");
@@ -323,7 +318,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * - If there was an existing inspection overlay, removes it.
 	 * - Adds a new inspection overlay to the currently inspecting tile.
 	 */
-	private setInspectionTile(what: Tile | Entity) {
+	private setInspectionTile(what: Tile | Entity): void {
 		const tile = what instanceof Tile ? what : what.tile;;
 		if (!tile) {
 			return;
@@ -360,7 +355,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * Logs information from any section that changed.
 	 */
 	@Bound
-	private logUpdate() {
+	private logUpdate(): void {
 		if (this.shouldLog) {
 			const tileData = this.tile ? this.tile.getTileData() : undefined;
 			this.LOG.info("Tile:", this.tile, this.tile?.toString(), tileData?.map(data => TerrainType[data.type]).join(", "), tileData,);
@@ -380,7 +375,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * whether the section is currently the inspection lock.
 	 */
 	@Bound
-	private showInspectionLockMenu(index: number) {
+	private showInspectionLockMenu(index: number): void {
 		new ContextMenu(this.entityButtons[index].classes.hasEvery("inspection-lock") ?
 			["Unlock Inspection", {
 				translation: translation(DebugToolsTranslation.UnlockInspection),
@@ -399,7 +394,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * Removes the inspection lock.
 	 */
 	@Bound
-	private unlockInspection() {
+	private unlockInspection(): void {
 		delete this.inspectionLock;
 		for (const entityButton of this.entityButtons) entityButton.classes.remove("inspection-lock");
 	}
@@ -407,7 +402,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	/**
 	 * Sets the inspection lock. (As a side effect, the panel is shown)
 	 */
-	private lockInspection(index: number) {
+	private lockInspection(index: number): () => this {
 		return () => this.setInspection(this.entityInfoSection.getEntity(index));
 	}
 

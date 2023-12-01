@@ -9,14 +9,14 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import EntityWithStats from "game/entity/EntityWithStats";
-import { StatusEffectChangeReason } from "game/entity/IEntity";
-import { Stat } from "game/entity/IStats";
+import EntityWithStats from "@wayward/game/game/entity/EntityWithStats";
+import { StatusEffectChangeReason } from "@wayward/game/game/entity/IEntity";
+import { Stat } from "@wayward/game/game/entity/IStats";
 
 /**
  * Copies stats and status effects from one entity to another.
  */
-export default function (from: EntityWithStats, to: EntityWithStats) {
+export default function (from: EntityWithStats, to: EntityWithStats): void {
 	for (const statName of Object.keys(from.stats)) {
 		const stat = Stat[statName as keyof typeof Stat];
 		const statObject = from.stat.get(stat)!;

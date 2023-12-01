@@ -8,15 +8,17 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import Tile from "game/tile/Tile";
-import Log from "utilities/Log";
+import Doodad from "@wayward/game/game/doodad/Doodad";
+import Tile from "@wayward/game/game/tile/Tile";
+import Button from "@wayward/game/ui/component/Button";
+import Log from "@wayward/utilities/Log";
 import DebugTools from "../../DebugTools";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 export default class DoodadInformation extends InspectInformationSection {
     readonly DEBUG_TOOLS: DebugTools;
     readonly LOG: Log;
-    private doodad;
-    private readonly buttonGrowthStage;
+    protected doodad: Doodad | undefined;
+    protected readonly buttonGrowthStage: Button;
     constructor();
     protected onSwitchTo(): void;
     getTabs(): TabInformation[];

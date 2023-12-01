@@ -8,7 +8,7 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import Human from "game/entity/Human";
-import Tile from "game/tile/Tile";
-import { TranslationGenerator } from "ui/component/IComponent";
+import Human from "@wayward/game/game/entity/Human";
+import Tile from "@wayward/game/game/tile/Tile";
+import { TranslationGenerator } from "@wayward/game/ui/component/IComponent";
 export declare function getTile(human: Human, tile: Tile, actionName: TranslationGenerator): Tile | undefined;

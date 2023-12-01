@@ -8,12 +8,14 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import Entity from "game/entity/Entity";
-import Tile from "game/tile/Tile";
-import Log from "utilities/Log";
+import Entity from "@wayward/game/game/entity/Entity";
+import Tile from "@wayward/game/game/tile/Tile";
+import Log from "@wayward/utilities/Log";
 import DebugTools from "../../DebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 import InspectInformationSection from "../component/InspectInformationSection";
+import { IStringSection } from "@wayward/game/utilities/string/Interpolator";
+import { EntityReferenceTypes } from "@wayward/game/game/reference/IReferenceManager";
 export type InspectDialogEntityInformationSubsectionClass = new () => InspectEntityInformationSubsection;
 export default class EntityInformation extends InspectInformationSection {
     readonly DEBUG_TOOLS: DebugTools;
@@ -21,19 +23,21 @@ export default class EntityInformation extends InspectInformationSection {
     private readonly subsections;
     private readonly statWrapper;
     private readonly statComponents;
+    private readonly statMaxComponents;
     private readonly buttonHeal;
     private readonly buttonTeleport;
     private entities;
     private entity?;
     constructor();
-    getTabs(): [number, () => import("../../../node_modules/@wayward/types/definitions/game/utilities/string/Interpolator").IStringSection[]][];
+    getTabs(): [number, () => IStringSection[]][];
     setTab(entity: number): this;
     update(tile: Tile): void;
     getEntityIndex(entity: Entity): number;
-    getEntity(index: number): Entity<unknown, number, unknown, unknown>;
+    getEntity(index: number): Entity<unknown, number, EntityReferenceTypes, unknown>;
     logUpdate(): void;
     private initializeStats;
     private onStatChange;
+    private onStatMaxChanged;
     private openTeleportMenu;
     private createTeleportToPlayerMenu;
     private selectTeleportLocation;
@@ -42,4 +46,5 @@ export default class EntityInformation extends InspectInformationSection {
     private cloneEntity;
     private heal;
     private setStat;
+    private setStatMax;
 }

@@ -14,7 +14,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define(["require", "exports", "event/EventBuses", "event/EventManager", "language/Translation", "mod/Mod", "ui/component/ChoiceList", "ui/component/Divider", "ui/component/LabelledRow", "ui/component/Text", "../../IDebugTools", "../../overlay/TemperatureOverlay", "../component/DebugToolsPanel"], function (require, exports, EventBuses_1, EventManager_1, Translation_1, Mod_1, ChoiceList_1, Divider_1, LabelledRow_1, Text_1, IDebugTools_1, TemperatureOverlay_1, DebugToolsPanel_1) {
+define(["require", "exports", "@wayward/game/event/EventBuses", "@wayward/game/event/EventManager", "@wayward/game/language/Translation", "@wayward/game/mod/Mod", "@wayward/game/ui/component/ChoiceList", "@wayward/game/ui/component/Divider", "@wayward/game/ui/component/LabelledRow", "@wayward/game/ui/component/Text", "../../IDebugTools", "../../overlay/TemperatureOverlay", "../component/DebugToolsPanel"], function (require, exports, EventBuses_1, EventManager_1, Translation_1, Mod_1, ChoiceList_1, Divider_1, LabelledRow_1, Text_1, IDebugTools_1, TemperatureOverlay_1, DebugToolsPanel_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     class TemperaturePanel extends DebugToolsPanel_1.default {

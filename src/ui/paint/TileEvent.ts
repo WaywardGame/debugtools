@@ -9,13 +9,13 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Events, IEventEmitter } from "event/EventEmitter";
-import { TileEventType } from "game/tile/ITileEvent";
-import { CheckButton } from "ui/component/CheckButton";
-import Component from "ui/component/Component";
-import TileEventDropdown from "ui/component/dropdown/TileEventDropdown";
-import { LabelledRow } from "ui/component/LabelledRow";
-import { Bound } from "utilities/Decorators";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import { TileEventType } from "@wayward/game/game/tile/ITileEvent";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
+import Component from "@wayward/game/ui/component/Component";
+import TileEventDropdown from "@wayward/game/ui/component/dropdown/TileEventDropdown";
+import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
+import { Bound } from "@wayward/utilities/Decorators";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
@@ -47,7 +47,7 @@ export default class TileEventPaint extends Component implements IPaintSection {
 			.appendTo(this);
 	}
 
-	public getTilePaintData() {
+	public getTilePaintData(): { tileEvent: { type: TileEventType | "remove" | undefined; replaceExisting: boolean; }; } {
 		return {
 			tileEvent: {
 				type: this.tileEvent,
@@ -56,16 +56,16 @@ export default class TileEventPaint extends Component implements IPaintSection {
 		};
 	}
 
-	public isChanging() {
+	public isChanging(): boolean {
 		return this.tileEvent !== undefined;
 	}
 
-	public reset() {
+	public reset(): void {
 		this.dropdown.select("nochange");
 	}
 
 	@Bound
-	private changeEvent(_: any, event: TileEventType | "nochange" | "remove") {
+	private changeEvent(_: any, event: TileEventType | "nochange" | "remove"): void {
 		this.tileEvent = event === "nochange" ? undefined : event === "remove" ? "remove" : event;
 
 		const isReplaceable = this.tileEvent !== undefined && this.tileEvent !== "remove";

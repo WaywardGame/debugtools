@@ -113,7 +113,7 @@
 	grid-row: 1;
 }
 
-.debug-tools-selection-preview:not(.has-targets) {
+.debug-tools-selection-preview-wrapper:not(.has-targets) canvas {
 	filter: brightness(0);
 }
 
@@ -127,12 +127,9 @@
 	grid-template-columns: minmax(auto, calc(150px * max(1, var(--scale)))) 1fr auto;
 }
 
-.debug-tools-inspect-human-wrapper-set-durability-bulk {
+.debug-tools-inspect-human-wrapper-set-bulk {
 	grid-template-columns: auto 1fr auto !important;
-}
-
-.debug-tools-inspect-human-wrapper-set-decay-bulk {
-	grid-template-columns: auto 1fr auto !important;
+	display: grid;
 }
 
 .debug-tools-container-contained-item-details-paginator {

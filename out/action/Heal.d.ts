@@ -8,7 +8,7 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import { Action } from "game/entity/action/Action";
-import { ActionArgument } from "game/entity/action/IAction";
-declare const _default: Action<[ActionArgument.Entity, [ActionArgument.Undefined, ActionArgument.ItemArray], [ActionArgument.Undefined, ActionArgument.Object]], import("../../node_modules/@wayward/types/definitions/game/game/entity/Human").default<number>, void, import("game/entity/action/IAction").IActionUsable, [import("../../node_modules/@wayward/types/definitions/game/game/entity/Entity").default<unknown, number, unknown, unknown>, (import("../../node_modules/@wayward/types/definitions/game/game/item/Item").default[] | undefined)?, any?]>;
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+declare const _default: Action<[ActionArgument.Entity, [ActionArgument.Undefined, ActionArgument.ItemArray], [ActionArgument.Undefined, ActionArgument.Object]], import("@wayward/game/game/entity/Human").default<number, import("@wayward/game/game/reference/IReferenceManager").ReferenceType.NPC | import("@wayward/game/game/reference/IReferenceManager").ReferenceType.Player>, void, import("@wayward/game/game/entity/action/IAction").IActionUsable, [import("@wayward/game/game/entity/Entity").default<unknown, number, import("@wayward/game/game/reference/IReferenceManager").EntityReferenceTypes, unknown>, (import("@wayward/game/game/item/Item").default[] | undefined)?, any?]>;
 export default _default;

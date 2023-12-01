@@ -9,11 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Human from "game/entity/Human";
-import { EntityType } from "game/entity/IEntity";
-import { Action } from "game/entity/action/Action";
-import { ActionArgument, IActionHandlerApi } from "game/entity/action/IAction";
-import Item from "game/item/Item";
+import Human from "@wayward/game/game/entity/Human";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument, IActionHandlerApi } from "@wayward/game/game/entity/action/IAction";
+import Item from "@wayward/game/game/item/Item";
 import { defaultUsability } from "../Actions";
 import InspectDialog from "../ui/InspectDialog";
 
@@ -25,13 +25,11 @@ export default new Action(ActionArgument.Item, ActionArgument.Float64)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, item, durability) => setDurability(action, durability, item));
 
-export function setDurability(action: IActionHandlerApi<Human>, durability: number, ...items: Item[]) {
+export function setDurability(action: IActionHandlerApi<Human>, durability: number, ...items: Item[]): void {
 	let human: Human | undefined;
 	for (const item of items) {
 		human ??= item.getCurrentOwner();
 		item.durability = Number.isInteger(durability) || durability > 1 ? durability : Math.ceil((item.durabilityMax ?? 1) * durability);
-
-		oldui.updateItem(item, true);
 	}
 
 	if (human)

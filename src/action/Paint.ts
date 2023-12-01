@@ -9,14 +9,14 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Action } from "game/entity/action/Action";
-import { ActionArgument } from "game/entity/action/IAction";
-import { EntityType } from "game/entity/IEntity";
-import Tile from "game/tile/Tile";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
+import Tile from "@wayward/game/game/tile/Tile";
 import { defaultUsability } from "../Actions";
 import { IPaintData } from "../ui/panel/PaintPanel";
 import SetTilled from "./helpers/SetTilled";
-import { RenderSource } from "renderer/IRenderer";
+import { RenderSource } from "@wayward/game/renderer/IRenderer";
 
 /**
  * Places terrain, creatures, NPCs, doodads, corpses, and/or tile events on the given tiles.
@@ -55,7 +55,7 @@ export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 
 						const type = data.npc!.type;
 						if (type !== "remove") {
-							action.executor.island.npcs.spawn(type, tile, { allowEdgeSpawning: true, allowOverDooadsAndTileEvents: true, allowOnFire: true, allowOnBlockedTiles: true });
+							action.executor.island.npcs.create(type, tile, { allowEdgeSpawning: true, allowOverDooadsAndTileEvents: true, allowOnFire: true, allowOnBlockedTiles: true });
 						}
 
 						break;

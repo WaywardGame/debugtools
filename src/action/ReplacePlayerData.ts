@@ -9,11 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { EntityType } from "game/entity/IEntity";
-import { SkillType } from "game/entity/IHuman";
-import { Action } from "game/entity/action/Action";
-import { ActionArgument } from "game/entity/action/IAction";
-import Enums from "utilities/enum/Enums";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
+import { SkillType } from "@wayward/game/game/entity/IHuman";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import Enums from "@wayward/game/utilities/enum/Enums";
 import Actions, { defaultUsability } from "../Actions";
 import CloneInventory from "./helpers/CloneInventory";
 

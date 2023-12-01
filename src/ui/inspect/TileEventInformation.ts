@@ -9,16 +9,16 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Tile from "game/tile/Tile";
-import TileEvent from "game/tile/TileEvent";
-import Dictionary from "language/Dictionary";
-import { TextContext } from "language/ITranslation";
-import Translation, { Article } from "language/Translation";
-import Mod from "mod/Mod";
-import Button from "ui/component/Button";
-import { Bound } from "utilities/Decorators";
-import Log from "utilities/Log";
-import { Tuple } from "utilities/collection/Tuple";
+import Tile from "@wayward/game/game/tile/Tile";
+import TileEvent from "@wayward/game/game/tile/TileEvent";
+import Dictionary from "@wayward/game/language/Dictionary";
+import { TextContext } from "@wayward/game/language/ITranslation";
+import Translation, { Article } from "@wayward/game/language/Translation";
+import Mod from "@wayward/game/mod/Mod";
+import Button from "@wayward/game/ui/component/Button";
+import { Bound } from "@wayward/utilities/Decorators";
+import Log from "@wayward/utilities/Log";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Remove from "../../action/Remove";
 import { areArraysIdentical } from "../../util/Array";
@@ -50,12 +50,12 @@ export default class TileEventInformation extends InspectInformationSection {
 			.toArray();
 	}
 
-	public override setTab(tileEvent: number) {
+	public override setTab(tileEvent: number): this {
 		this.tileEvent = this.tileEvents[tileEvent];
 		return this;
 	}
 
-	public override update(tile: Tile) {
+	public override update(tile: Tile): void {
 		const tileEvents = [...tile.events || []];
 
 		if (areArraysIdentical(tileEvents, this.tileEvents)) return;
@@ -64,14 +64,14 @@ export default class TileEventInformation extends InspectInformationSection {
 		this.setShouldLog();
 	}
 
-	public override logUpdate() {
+	public override logUpdate(): void {
 		for (const tileEvent of this.tileEvents) {
 			this.LOG.info("Tile Event:", tileEvent);
 		}
 	}
 
 	@Bound
-	private removeTileEvent() {
+	private removeTileEvent(): void {
 		Remove.execute(localPlayer, this.tileEvent!);
 	}
 }

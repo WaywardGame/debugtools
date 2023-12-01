@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ActionUsability } from "game/entity/action/IAction";
-import Mod from "mod/Mod";
-import Log from "utilities/Log";
+import { ActionUsability } from "@wayward/game/game/entity/action/IAction";
+import Mod from "@wayward/game/mod/Mod";
+import Log from "@wayward/utilities/Log";
 import DebugTools from "./DebugTools";
 import { DEBUG_TOOLS_ID } from "./IDebugTools";
 

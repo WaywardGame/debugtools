@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Action } from "game/entity/action/Action";
-import { ActionArgument } from "game/entity/action/IAction";
-import { EntityType } from "game/entity/IEntity";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
 import Actions, { defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.Player, ActionArgument.Boolean)

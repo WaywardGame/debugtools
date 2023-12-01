@@ -8,15 +8,15 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import Creature from "game/entity/creature/Creature";
-import NPC from "game/entity/npc/NPC";
-import Player from "game/entity/player/Player";
+import Creature from "@wayward/game/game/entity/creature/Creature";
+import NPC from "@wayward/game/game/entity/npc/NPC";
+import Player from "@wayward/game/game/entity/player/Player";
 import DebugTools from "../../DebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 export default class PlayerInformation extends InspectEntityInformationSubsection {
     readonly DEBUG_TOOLS: DebugTools;
     private readonly rangeWeightBonus;
-    private readonly checkButtonInvulnerable;
+    private readonly checkButtonUnkillable;
     private readonly checkButtonNoClip;
     private readonly skillRangeRow;
     private readonly checkButtonPermissions?;
@@ -29,7 +29,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
     private refresh;
     private changeSkill;
     private setSkill;
-    private toggleInvulnerable;
+    private toggleUnkillable;
     private toggleNoClip;
     private togglePermissions;
     private setWeightBonus;

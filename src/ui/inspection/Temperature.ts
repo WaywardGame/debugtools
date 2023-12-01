@@ -9,23 +9,25 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { EventBus } from "event/EventBuses";
-import { EventHandler } from "event/EventManager";
-import { InfoClass, InfoDisplayLevel } from "game/inspection/IInfoProvider";
-import { InspectType, basicInspectionPriorities } from "game/inspection/IInspection";
-import { InfoProviderContext } from "game/inspection/InfoProviderContext";
-import Inspection from "game/inspection/Inspection";
-import LabelledValue from "game/inspection/infoProviders/LabelledValue";
-import MagicalPropertyValue from "game/inspection/infoProviders/MagicalPropertyValue";
-import { TempType } from "game/temperature/ITemperature";
-import { TEMPERATURE_INVALID } from "game/temperature/TemperatureManager";
-import Translation from "language/Translation";
-import { MiscTranslation } from "language/dictionary/Misc";
-import Mod from "mod/Mod";
-import { Heading, Paragraph } from "ui/component/Text";
+import { EventBus } from "@wayward/game/event/EventBuses";
+import { EventHandler } from "@wayward/game/event/EventManager";
+import { InfoClass, InfoDisplayLevel } from "@wayward/game/game/inspection/IInfoProvider";
+import { InspectType, basicInspectionPriorities } from "@wayward/game/game/inspection/IInspection";
+import { InfoProviderContext } from "@wayward/game/game/inspection/InfoProviderContext";
+import Inspection from "@wayward/game/game/inspection/Inspection";
+import LabelledValue from "@wayward/game/game/inspection/infoProviders/LabelledValue";
+import MagicalPropertyValue from "@wayward/game/game/inspection/infoProviders/MagicalPropertyValue";
+import { TempType } from "@wayward/game/game/temperature/ITemperature";
+import { TEMPERATURE_INVALID } from "@wayward/game/game/temperature/TemperatureManager";
+import Translation from "@wayward/game/language/Translation";
+import { MiscTranslation } from "@wayward/game/language/dictionary/Misc";
+import Mod from "@wayward/game/mod/Mod";
+import { Heading, Paragraph } from "@wayward/game/ui/component/Text";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
-import Tile from "game/tile/Tile";
+import Tile from "@wayward/game/game/tile/Tile";
+import Island from "@wayward/game/game/island/Island";
+import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 
 export default class TemperatureInspection extends Inspection<Tile> {
 
@@ -34,7 +36,7 @@ export default class TemperatureInspection extends Inspection<Tile> {
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
 	public static readonly DEBUG_TOOLS: DebugTools;
 
-	public static getFromTile(tile: Tile) {
+	public static getFromTile(tile: Tile): never[] | TemperatureInspection {
 		return TemperatureInspection.DEBUG_TOOLS ? new TemperatureInspection(tile) : [];
 	}
 
@@ -42,11 +44,11 @@ export default class TemperatureInspection extends Inspection<Tile> {
 		super(TemperatureInspection.DEBUG_TOOLS.inspectionTemperature, tile);
 	}
 
-	public override getId() {
+	public override getId(): string {
 		return this.createIdFromVector3(this.value);
 	}
 
-	public override getPriority() {
+	public override getPriority(): number {
 		return basicInspectionPriorities[InspectType.Tile] + 100;
 	}
 
@@ -54,11 +56,11 @@ export default class TemperatureInspection extends Inspection<Tile> {
 	// Content
 	//
 
-	public override hasContent() {
+	public override hasContent(): boolean {
 		return game.playing && this.getTileMod() !== "?";
 	}
 
-	public override get(context: InfoProviderContext) {
+	public override get(context: InfoProviderContext): LabelledValue[] {
 		this.tempValue = localIsland.temperature.get(this.value, undefined);
 		return [
 			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperature))
@@ -118,9 +120,9 @@ export default class TemperatureInspection extends Inspection<Tile> {
 	// Event Handlers
 	//
 
-	@EventHandler(EventBus.Game, "tickEnd")
-	public onTickEnd() {
-		if (localPlayer.isResting()) {
+	@EventHandler(EventBus.Island, "tickEnd")
+	public onTickEnd(island: Island): void {
+		if (!island.isLocalIsland || localPlayer.isResting) {
 			return;
 		}
 
@@ -134,12 +136,12 @@ export default class TemperatureInspection extends Inspection<Tile> {
 	// Internals
 	//
 
-	private getTemperature(tempType: TempType, calcOrProduce: "calculated" | "produced") {
+	private getTemperature(tempType: TempType, calcOrProduce: "calculated" | "produced"): number | "?" {
 		const temp = localIsland.temperature?.[calcOrProduce === "calculated" ? "getCachedCalculated" : "getCachedProduced"](this.value, tempType);
 		return temp === TEMPERATURE_INVALID || temp === undefined ? "?" : temp;
 	}
 
-	private getTileMod() {
+	private getTileMod(): TranslationImpl | "?" {
 		const heat = this.getTemperature(TempType.Heat, "calculated");
 		const cold = this.getTemperature(TempType.Cold, "calculated");
 		if (heat === "?" || cold === "?") return "?";

@@ -9,10 +9,10 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Action } from "game/entity/action/Action";
-import { ActionArgument } from "game/entity/action/IAction";
-import Human from "game/entity/Human";
-import { EntityType } from "game/entity/IEntity";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import Human from "@wayward/game/game/entity/Human";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { defaultUsability } from "../Actions";
 import InspectDialog from "../ui/InspectDialog";
 
@@ -23,7 +23,7 @@ export default new Action(ActionArgument.Container)
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, container) => {
-		action.executor.island.items.removeContainerItems(container, true);
+		action.executor.island.items.removeContainerItems(container, { removeContainedItems: true });
 
 		const containerObject = action.executor.island?.items.resolveContainer(container);
 		if (containerObject instanceof Human)

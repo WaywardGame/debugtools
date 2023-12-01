@@ -9,12 +9,12 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Action } from "game/entity/action/Action";
-import Ride from "game/entity/action/actions/Ride";
-import SailToCivilization from "game/entity/action/actions/SailToCivilization";
-import { EntityType } from "game/entity/IEntity";
-import { ItemType } from "game/item/IItem";
-import { TerrainType } from "game/tile/ITerrain";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import Ride from "@wayward/game/game/entity/action/actions/Ride";
+import SailToCivilization from "@wayward/game/game/entity/action/actions/SailToCivilization";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
+import { ItemType } from "@wayward/game/game/item/IItem";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import { defaultUsability } from "../Actions";
 
 export default new Action()
@@ -42,7 +42,7 @@ export default new Action()
 			action.executor.createItemInInventory(ItemType.GoldenSextant);
 		}
 
-		if (action.executor.isLocalPlayer()) {
+		if (action.executor.isLocalPlayer) {
 			Ride.execute(action.executor, sailboat);
 			SailToCivilization.execute(action, sailboat, true);
 		}

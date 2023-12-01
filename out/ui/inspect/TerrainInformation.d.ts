@@ -8,9 +8,10 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import Tile from "game/tile/Tile";
-import Log from "utilities/Log";
+import Tile from "@wayward/game/game/tile/Tile";
+import Log from "@wayward/utilities/Log";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
+import { IStringSection } from "@wayward/game/utilities/string/Interpolator";
 export default class TerrainInformation extends InspectInformationSection {
     readonly LOG: Log;
     private tile;
@@ -20,7 +21,7 @@ export default class TerrainInformation extends InspectInformationSection {
     private readonly checkButtonIncludeNeighbors;
     constructor();
     getTabs(): TabInformation[];
-    getTabTranslation(): import("../../../node_modules/@wayward/types/definitions/game/utilities/string/Interpolator").IStringSection[];
+    getTabTranslation(): IStringSection[];
     update(tile: Tile): this | undefined;
     logUpdate(): void;
     private toggleTilled;

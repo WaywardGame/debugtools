@@ -9,13 +9,13 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Events, IEventEmitter } from "event/EventEmitter";
-import { CreatureType } from "game/entity/creature/ICreature";
-import { CheckButton } from "ui/component/CheckButton";
-import Component from "ui/component/Component";
-import CreatureDropdown from "ui/component/dropdown/CreatureDropdown";
-import { LabelledRow } from "ui/component/LabelledRow";
-import { Bound } from "utilities/Decorators";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
+import Component from "@wayward/game/ui/component/Component";
+import CreatureDropdown from "@wayward/game/ui/component/dropdown/CreatureDropdown";
+import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
+import { Bound } from "@wayward/utilities/Decorators";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
@@ -47,7 +47,7 @@ export default class CreaturePaint extends Component implements IPaintSection {
 			.appendTo(this);
 	}
 
-	public getTilePaintData() {
+	public getTilePaintData(): { creature: { type: CreatureType | "remove"; aberrant: boolean; }; } | undefined {
 		return this.creature === undefined ? undefined : {
 			creature: {
 				type: this.creature,
@@ -56,16 +56,16 @@ export default class CreaturePaint extends Component implements IPaintSection {
 		};
 	}
 
-	public isChanging() {
+	public isChanging(): boolean {
 		return this.creature !== undefined;
 	}
 
-	public reset() {
+	public reset(): void {
 		this.dropdown.select("nochange");
 	}
 
 	@Bound
-	private changeCreature(_: any, creature: CreatureType | "nochange" | "remove") {
+	private changeCreature(_: any, creature: CreatureType | "nochange" | "remove"): void {
 		this.creature = creature === "nochange" ? undefined : creature === "remove" ? "remove" : creature;
 		this.aberrantCheckButton.toggle(this.creature !== undefined && this.creature !== "remove");
 

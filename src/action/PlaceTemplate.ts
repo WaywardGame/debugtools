@@ -9,11 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Action } from "game/entity/action/Action";
-import { ActionArgument } from "game/entity/action/IAction";
-import { EntityType } from "game/entity/IEntity";
-import MapGenHelpers from "game/mapgen/MapGenHelpers";
-import { TileTemplateType } from "game/tile/ITerrain";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
+import MapGenHelpers from "@wayward/game/game/mapgen/MapGenHelpers";
+import { TileTemplateType } from "@wayward/game/game/tile/ITerrain";
 import { defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.Integer32, ActionArgument.Vector2, ActionArgument.Object)

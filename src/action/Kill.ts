@@ -9,9 +9,9 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Action } from "game/entity/action/Action";
-import { ActionArgument } from "game/entity/action/IAction";
-import { DamageType, EntityType } from "game/entity/IEntity";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import { DamageType, EntityType } from "@wayward/game/game/entity/IEntity";
 import { defaultUsability } from "../Actions";
 import { DebugToolsTranslation, translation } from "../IDebugTools";
 
@@ -31,7 +31,7 @@ export default new Action(ActionArgument.Entity)
 		renderers.computeSpritesInViewport(entity);
 		action.setUpdateRender();
 
-		if (!multiplayer.isConnected() && entity.asPlayer?.isLocalPlayer()) {
+		if (!multiplayer.isConnected && entity.asPlayer?.isLocalPlayer) {
 			action.setPassTurn();
 		}
 	});

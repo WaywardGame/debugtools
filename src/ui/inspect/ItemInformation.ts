@@ -9,13 +9,14 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import Tile from "game/tile/Tile";
-import Mod from "mod/Mod";
-import { Bound } from "utilities/Decorators";
-import Log from "utilities/Log";
+import Tile from "@wayward/game/game/tile/Tile";
+import Mod from "@wayward/game/mod/Mod";
+import { Bound } from "@wayward/utilities/Decorators";
+import Log from "@wayward/utilities/Log";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
 import Container from "../component/Container";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
+import { ITileContainer } from "@wayward/game/game/tile/ITerrain";
 
 
 export default class ItemInformation extends InspectInformationSection {
@@ -31,12 +32,12 @@ export default class ItemInformation extends InspectInformationSection {
 		];
 	}
 
-	public override setTab() {
+	public override setTab(): this {
 		Container.appendTo(this, this, this.getTile);
 		return this;
 	}
 
-	public override update(tile: Tile) {
+	public override update(tile: Tile): void {
 		this.tile = tile;
 		Container.INSTANCE?.refreshItems();
 		if (tile.containedItems?.length) {
@@ -44,11 +45,11 @@ export default class ItemInformation extends InspectInformationSection {
 		}
 	}
 
-	public override logUpdate() {
+	public override logUpdate(): void {
 		this.LOG.info("Items:", this.tile?.containedItems);
 	}
 
-	@Bound private getTile() {
+	@Bound private getTile(): ITileContainer {
 		// todo: this might desync because it's creating a tile container?
 		return this.tile.tileContainer;
 	}

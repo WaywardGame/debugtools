@@ -9,37 +9,38 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Priority } from "event/EventEmitter";
-import { EventHandler, OwnEventHandler } from "event/EventManager";
-import MapGenHelpers from "game/mapgen/MapGenHelpers";
-import { TileTemplateType } from "game/tile/ITerrain";
-import { terrainTemplates } from "game/tile/TerrainTemplates";
-import TranslationImpl from "language/impl/TranslationImpl";
-import Mod from "mod/Mod";
-import { Registry } from "mod/ModRegistry";
-import { RenderSource } from "renderer/IRenderer";
-import Button from "ui/component/Button";
-import { CheckButton } from "ui/component/CheckButton";
-import Dropdown from "ui/component/Dropdown";
-import { LabelledRow } from "ui/component/LabelledRow";
-import { RangeRow } from "ui/component/RangeRow";
-import Text from "ui/component/Text";
-import Bind from "ui/input/Bind";
-import InputManager from "ui/input/InputManager";
-import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
-import Spacer from "ui/screen/screens/menu/component/Spacer";
-import { Tuple } from "utilities/collection/Tuple";
-import Enums from "utilities/enum/Enums";
-import Vector2 from "utilities/math/Vector2";
-import { Bound } from "utilities/Decorators";
+import { EventHandler } from "@wayward/game/event/EventManager";
+import MapGenHelpers from "@wayward/game/game/mapgen/MapGenHelpers";
+import { TileTemplateType } from "@wayward/game/game/tile/ITerrain";
+import { terrainTemplates } from "@wayward/game/game/tile/TerrainTemplates";
+import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
+import Mod from "@wayward/game/mod/Mod";
+import { Registry } from "@wayward/game/mod/ModRegistry";
+import { RenderSource } from "@wayward/game/renderer/IRenderer";
+import Button from "@wayward/game/ui/component/Button";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
+import Dropdown from "@wayward/game/ui/component/Dropdown";
+import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
+import { RangeRow } from "@wayward/game/ui/component/RangeRow";
+import Text from "@wayward/game/ui/component/Text";
+import Bind from "@wayward/game/ui/input/Bind";
+import InputManager from "@wayward/game/ui/input/InputManager";
+import MovementHandler from "@wayward/game/ui/screen/screens/game/util/movement/MovementHandler";
+import Spacer from "@wayward/game/ui/screen/screens/menu/component/Spacer";
+import Enums from "@wayward/game/utilities/enum/Enums";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
+import { Bound } from "@wayward/utilities/Decorators";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
+import { Priority } from "@wayward/utilities/event/EventEmitter";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 
-import PlaceTemplate from "../../action/PlaceTemplate";
+import Tile from "@wayward/game/game/tile/Tile";
+import Stream from "@wayward/goodstream/Stream";
 import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import PlaceTemplate from "../../action/PlaceTemplate";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
 import DebugToolsPanel from "../component/DebugToolsPanel";
-import Stream from "@wayward/goodstream/Stream";
-import Tile from "game/tile/Tile";
 
 export default class TemplatePanel extends DebugToolsPanel {
 
@@ -82,8 +83,8 @@ export default class TemplatePanel extends DebugToolsPanel {
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTemplate)))
 			.append(this.dropdownTemplate = new Dropdown<string>()
 				.setRefreshMethod(() => ({
-					defaultOption: Stream.keys<string>(terrainTemplates[this.dropdownType.selection]!).first()!,
-					options: Stream.keys<string>(terrainTemplates[this.dropdownType.selection]!)
+					defaultOption: Stream.keys<string>(terrainTemplates[this.dropdownType.selectedOption]!).first()!,
+					options: Stream.keys<string>(terrainTemplates[this.dropdownType.selectedOption]!)
 						.map(name => Tuple(name, TranslationImpl.generator(name)))
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
@@ -127,7 +128,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 			.appendTo(this);
 	}
 
-	public override getTranslation() {
+	public override getTranslation(): DebugToolsTranslation {
 		return DebugToolsTranslation.PanelTemplates;
 	}
 
@@ -136,7 +137,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 	//
 
 	@EventHandler(MovementHandler, "canMove")
-	protected canClientMove() {
+	protected canClientMove(): false | undefined {
 		if (this.place.checked || this.selectHeld)
 			return false;
 
@@ -144,7 +145,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 	}
 
 	@Bind.onUp(Registry<DebugTools>(DEBUG_TOOLS_ID).registry("selector").get("bindableSelectLocation"), Priority.High + 1)
-	protected onStopSelectLocation() {
+	protected onStopSelectLocation(): boolean {
 		this.selectHeld = false;
 		return false;
 	}
@@ -153,7 +154,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 	// Internals
 	//
 
-	@Bound private tick() {
+	@Bound private tick(): void {
 		let updateRender = false;
 
 		const isMouseWithin = gameScreen?.isMouseWithin();
@@ -176,7 +177,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 		}
 	}
 
-	private updateTemplate([terrain, doodads]: [string[], string[]?], options: MapGenHelpers.ITemplateOptions) {
+	private updateTemplate([terrain, doodads]: [string[], string[]?], options: MapGenHelpers.ITemplateOptions): boolean {
 		const center = renderer!.worldRenderer.screenToVector(...InputManager.mouse.position.xy);
 
 		const width = terrain[0].length;
@@ -222,8 +223,8 @@ export default class TemplatePanel extends DebugToolsPanel {
 		return true;
 	}
 
-	private getTemplate(options: MapGenHelpers.ITemplateOptions) {
-		const template = terrainTemplates[this.dropdownType.selection]?.[this.dropdownTemplate.selection];
+	private getTemplate(options: MapGenHelpers.ITemplateOptions): [string[], string[] | undefined] | undefined {
+		const template = terrainTemplates[this.dropdownType.selectedOption]?.[this.dropdownTemplate.selectedOption];
 		if (!template) {
 			return undefined;
 		}
@@ -231,7 +232,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 		return MapGenHelpers.manipulateTemplates(localIsland, options, [...template.terrain], template.doodad && [...template.doodad]);
 	}
 
-	private templateHasTile(templates: [string[], string[]?], x: number, y: number) {
+	private templateHasTile(templates: [string[], string[]?], x: number, y: number): boolean | undefined {
 		return templates[0][y][x] !== " " || (templates[1] && templates[1][y][x] !== " ");
 	}
 
@@ -242,11 +243,11 @@ export default class TemplatePanel extends DebugToolsPanel {
 			overlap: this.overlap.checked,
 			rotate: this.rotate.value as 0 | 90 | 180 | 270,
 			degrade: this.degrade.value / 100,
-			which: this.dropdownTemplate.selection,
+			which: this.dropdownTemplate.selectedOption,
 		};
 	}
 
-	private templateOptionsChanged(options: MapGenHelpers.ITemplateOptions) {
+	private templateOptionsChanged(options: MapGenHelpers.ITemplateOptions): boolean {
 		return !this.templateOptions
 			|| this.templateOptions.which !== options.which
 			|| this.templateOptions.mirrorHorizontally !== options.mirrorHorizontally
@@ -256,28 +257,28 @@ export default class TemplatePanel extends DebugToolsPanel {
 	}
 
 	@OwnEventHandler(TemplatePanel, "switchTo")
-	protected onSwitchTo() {
+	protected onSwitchTo(): void {
 		Bind.registerHandlers(this);
 	}
 
 	@OwnEventHandler(TemplatePanel, "switchAway")
-	protected onSwitchAway() {
+	protected onSwitchAway(): void {
 		Bind.deregisterHandlers(this);
 		this.place.setChecked(false);
 		this.clearPreview();
 	}
 
 	@Bound
-	private changeTemplateType() {
+	private changeTemplateType(): void {
 		this.dropdownTemplate.refresh();
 	}
 
-	private placeTemplate(topLeft: Vector2) {
+	private placeTemplate(topLeft: Vector2): void {
 		this.place.setChecked(false);
-		PlaceTemplate.execute(localPlayer, this.dropdownType.selection, topLeft.raw(), this.getTemplateOptions());
+		PlaceTemplate.execute(localPlayer, this.dropdownType.selectedOption, topLeft.raw(), this.getTemplateOptions());
 	}
 
-	private clearPreview() {
+	private clearPreview(): boolean {
 		if (!this.previewTiles.length)
 			return false;
 

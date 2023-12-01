@@ -8,12 +8,12 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import { TempType } from "game/temperature/ITemperature";
-import TemperatureManager from "game/temperature/TemperatureManager";
-import { IOverlayInfo } from "game/tile/ITerrain";
-import Tile from "game/tile/Tile";
-import UniversalOverlay from "renderer/overlay/UniversalOverlay";
-import Vector2 from "utilities/math/Vector2";
+import { TempType } from "@wayward/game/game/temperature/ITemperature";
+import TemperatureManager from "@wayward/game/game/temperature/TemperatureManager";
+import { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
+import Tile from "@wayward/game/game/tile/Tile";
+import UniversalOverlay from "@wayward/game/renderer/overlay/UniversalOverlay";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 export declare enum TemperatureOverlayMode {
     None = 0,
     Produced = 1,

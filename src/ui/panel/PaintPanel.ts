@@ -9,29 +9,29 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Events, IEventEmitter, Priority } from "event/EventEmitter";
-import { EventHandler, OwnEventHandler } from "event/EventManager";
-import { DoodadType } from "game/doodad/IDoodad";
-import { CreatureType } from "game/entity/creature/ICreature";
-import { NPCType } from "game/entity/npc/INPCs";
-import { TerrainType } from "game/tile/ITerrain";
-import { TileEventType } from "game/tile/ITileEvent";
-import Tile from "game/tile/Tile";
-import Mod from "mod/Mod";
-import { Registry } from "mod/ModRegistry";
-import { RenderSource } from "renderer/IRenderer";
-import { BlockRow } from "ui/component/BlockRow";
-import Button from "ui/component/Button";
-import { CheckButton } from "ui/component/CheckButton";
-import Component from "ui/component/Component";
-import ContextMenu from "ui/component/ContextMenu";
-import { RangeRow } from "ui/component/RangeRow";
-import Bind, { IBindHandlerApi } from "ui/input/Bind";
-import Bindable from "ui/input/Bindable";
-import InputManager from "ui/input/InputManager";
-import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
-import { Bound } from "utilities/Decorators";
-import Vector2 from "utilities/math/Vector2";
+import { Events, IEventEmitter, Priority } from "@wayward/utilities/event/EventEmitter";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
+import { DoodadType } from "@wayward/game/game/doodad/IDoodad";
+import { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
+import { NPCType } from "@wayward/game/game/entity/npc/INPCs";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import { TileEventType } from "@wayward/game/game/tile/ITileEvent";
+import Tile from "@wayward/game/game/tile/Tile";
+import Mod from "@wayward/game/mod/Mod";
+import { Registry } from "@wayward/game/mod/ModRegistry";
+import { RenderSource } from "@wayward/game/renderer/IRenderer";
+import { BlockRow } from "@wayward/game/ui/component/BlockRow";
+import Button from "@wayward/game/ui/component/Button";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
+import Component from "@wayward/game/ui/component/Component";
+import ContextMenu from "@wayward/game/ui/component/ContextMenu";
+import { RangeRow } from "@wayward/game/ui/component/RangeRow";
+import Bind, { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
+import Bindable from "@wayward/game/ui/input/Bindable";
+import InputManager from "@wayward/game/ui/input/InputManager";
+import MovementHandler from "@wayward/game/ui/screen/screens/game/util/movement/MovementHandler";
+import { Bound } from "@wayward/utilities/Decorators";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Paint from "../../action/Paint";
@@ -43,6 +43,7 @@ import DoodadPaint from "../paint/Doodad";
 import NPCPaint from "../paint/NPC";
 import TerrainPaint from "../paint/Terrain";
 import TileEventPaint from "../paint/TileEvent";
+import { EventHandler } from "@wayward/game/event/EventManager";
 
 export interface IPaintData {
 	terrain?: {
@@ -141,7 +142,7 @@ export default class PaintPanel extends DebugToolsPanel {
 					.event.subscribe("activate", this.completePaint)));
 	}
 
-	public override getTranslation() {
+	public override getTranslation(): DebugToolsTranslation {
 		return DebugToolsTranslation.PanelPaint;
 	}
 
@@ -157,7 +158,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	}
 
 	@Bind.onDown(Bindable.MenuContextMenu, Priority.High)
-	protected onContextMenuBind(api: IBindHandlerApi) {
+	protected onContextMenuBind(api: IBindHandlerApi): boolean {
 		for (const paintSection of this.paintSections) {
 			if (paintSection.isChanging() && api.mouse.isWithin(paintSection)) {
 				this.showPaintSectionResetMenu(paintSection);
@@ -170,12 +171,12 @@ export default class PaintPanel extends DebugToolsPanel {
 
 	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindablePaint"), Priority.High)
 	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableErasePaint"), Priority.High)
-	protected onStartPaintOrErasePaint(api: IBindHandlerApi) {
+	protected onStartPaintOrErasePaint(api: IBindHandlerApi): boolean {
 		return this.painting && !!gameScreen?.mouseStartWasWithin(api);
 	}
 
 	@Bind.onHolding(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindablePaint"), Priority.High)
-	protected onPaint(api: IBindHandlerApi) {
+	protected onPaint(api: IBindHandlerApi): boolean {
 		if (!this.painting || !gameScreen?.mouseStartWasWithin(api) || !renderer) {
 			return false;
 		}
@@ -222,7 +223,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	}
 
 	@Bind.onHolding(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableErasePaint"))
-	protected onErasePaint(api: IBindHandlerApi) {
+	protected onErasePaint(api: IBindHandlerApi): boolean {
 		if (!this.painting || !gameScreen?.mouseStartWasWithin(api) || !renderer) {
 			return false;
 		}
@@ -270,7 +271,7 @@ export default class PaintPanel extends DebugToolsPanel {
 
 	@Bind.onUp(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindablePaint"))
 	@Bind.onUp(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableErasePaint"))
-	protected onStopPaint(api: IBindHandlerApi) {
+	protected onStopPaint(api: IBindHandlerApi): boolean {
 		if (this.painting && !api.input.isHolding(this.DEBUG_TOOLS.bindablePaint) && !api.input.isHolding(this.DEBUG_TOOLS.bindableErasePaint))
 			delete this.lastPaintTile;
 
@@ -278,7 +279,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	}
 
 	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableCancelPaint"), Priority.High)
-	protected onCancelPaint() {
+	protected onCancelPaint(): boolean {
 		if (!this.painting)
 			return false;
 		this.painting = false;
@@ -287,7 +288,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	}
 
 	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableClearPaint"), Priority.High)
-	protected onClearPaint() {
+	protected onClearPaint(): boolean {
 		if (!this.painting)
 			return false;
 
@@ -296,7 +297,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	}
 
 	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableCompletePaint"), Priority.High)
-	protected onCompletePaint() {
+	protected onCompletePaint(): boolean {
 		if (!this.painting)
 			return false;
 
@@ -305,7 +306,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	}
 
 	@OwnEventHandler(PaintPanel, "switchTo")
-	protected onSwitchTo() {
+	protected onSwitchTo(): void {
 		this.getParent()!.classes.add("debug-tools-paint-panel");
 		this.paintRow.appendTo(this.getParent()!.getParent()!);
 
@@ -321,7 +322,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	}
 
 	@OwnEventHandler(PaintPanel, "switchAway")
-	protected onSwitchAway() {
+	protected onSwitchAway(): void {
 		Bind.deregisterHandlers(this);
 
 		this.clearPaint();
@@ -336,7 +337,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	}
 
 	@OwnEventHandler(PaintPanel, "willRemove")
-	protected onWillRemove() {
+	protected onWillRemove(): void {
 		this.paintSections.length = 0;
 	}
 
@@ -345,14 +346,14 @@ export default class PaintPanel extends DebugToolsPanel {
 	//
 
 	@Bound
-	private onPaintSectionChange(paintSection: IPaintSection) {
+	private onPaintSectionChange(paintSection: IPaintSection): void {
 		if (paintSection.isChanging() && !this.painting) {
 			this.paintButton.setChecked(true);
 		}
 	}
 
 	@Bound
-	private showPaintSectionResetMenu(paintSection: IPaintSection) {
+	private showPaintSectionResetMenu(paintSection: IPaintSection): void {
 		new ContextMenu(["Lock Inspection", {
 			translation: translation(DebugToolsTranslation.ResetPaintSection),
 			onActivate: () => paintSection.reset(),
@@ -363,7 +364,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	}
 
 	@Bound
-	private completePaint() {
+	private completePaint(): void {
 		const paintData: IPaintData = {};
 		for (const paintSection of this.paintSections) {
 			Object.assign(paintData, paintSection.getTilePaintData());
@@ -375,7 +376,7 @@ export default class PaintPanel extends DebugToolsPanel {
 	}
 
 	@Bound
-	private clearPaint() {
+	private clearPaint(): void {
 		for (const tile of this.paintTiles) {
 			SelectionOverlay.remove(tile);
 		}

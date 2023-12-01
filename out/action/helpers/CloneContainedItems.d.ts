@@ -8,6 +8,6 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import Island from "game/island/Island";
-import { IContainer } from "game/item/IItem";
+import Island from "@wayward/game/game/island/Island";
+import { IContainer } from "@wayward/game/game/item/IItem";
 export default function (island: Island, from: Partial<IContainer>, to: Partial<IContainer>): void;
