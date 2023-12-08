@@ -80,16 +80,12 @@ export default new Action(ActionArgument.Container, ActionArgument.ANY(ActionArg
 			})
 		}
 
+		const createdItems: Item[] = [];
 		function addItem(item: ItemType): void {
-			if (containerObject instanceof Human) {
-				const createdItem = containerObject.createItemInInventory(item, quality, false);
-				createdItems.push(createdItem);
-			} else {
-				action.executor.island.items.create(item, target, quality);
-			}
+			const createdItem = action.executor.island.items.create(item, undefined, quality);
+			createdItems.push(createdItem);
 		}
 
-		const createdItems: Item[] = [];
 		for (let i = 0; i < quantity; i++) {
 			if (item === ADD_ITEM_ALL || typeof item === "string") {
 				for (const item of items) {
@@ -101,6 +97,8 @@ export default new Action(ActionArgument.Container, ActionArgument.ANY(ActionArg
 				addItem(item);
 			}
 		}
+
+		action.executor.island.items.moveItemsToContainer(action.executor, createdItems, target);
 
 		if (containerObject instanceof Human) {
 			containerObject.updateTablesAndWeight("M");
