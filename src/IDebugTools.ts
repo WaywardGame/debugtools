@@ -10,6 +10,7 @@
  */
 
 import Translation from "@wayward/game/language/Translation";
+import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 import { RenderLayerFlag } from "@wayward/game/renderer/world/IWorldRenderer";
 import type DebugTools from "./DebugTools";
 import type { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
@@ -18,7 +19,6 @@ import type DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import type InspectEntityInformationSubsection from "./ui/component/InspectEntityInformationSubsection";
 import type InspectInformationSection from "./ui/component/InspectInformationSection";
 import type { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect/EntityInformation";
-import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 
 export const DEBUG_TOOLS_ID = "Debug Tools";
 
@@ -33,7 +33,7 @@ export function translation(debugToolsTranslation: DebugToolsTranslation | Trans
 		: typeof debugToolsTranslation !== "number" ? debugToolsTranslation : Translation.get(debugTools.dictionary, debugToolsTranslation);
 }
 
-export module translation {
+export namespace translation {
 	export function setDebugToolsInstance(instance: DebugTools): void {
 		debugTools = instance;
 	}
