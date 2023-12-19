@@ -54,6 +54,8 @@ export default class AccidentalDeathHelper {
 			this.buttonAdded = true;
 			new Button()
 				.event.subscribe("activate", () => {
+					this.buttonAdded = false;
+
 					Heal.execute(localPlayer, localPlayer, this.deathInventory?.slice(), this.equippedItems ? { ...this.equippedItems } : undefined);
 					delete this.deathInventory;
 					delete this.equippedItems;

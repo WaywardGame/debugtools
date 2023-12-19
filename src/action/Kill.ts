@@ -22,16 +22,15 @@ export default new Action(ActionArgument.Entity)
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setHandler((action, entity) => {
-		(entity?.asHuman ?? entity?.asCreature)?.damage({
-			type: DamageType.True,
-			amount: Infinity,
-			damageMessage: translation(DebugToolsTranslation.KillEntityDeathMessage),
-		});
+		if (!entity?.asHuman?.isGhost || entity?.isCreature()) {
+			(entity?.asHuman ?? entity?.asCreature)?.damage({
+				type: DamageType.True,
+				amount: Infinity,
+				damageMessage: translation(DebugToolsTranslation.KillEntityDeathMessage),
+			});
 
-		renderers.computeSpritesInViewport(entity);
-		action.setUpdateRender();
-
-		if (!multiplayer.isConnected && entity.asPlayer?.isLocalPlayer) {
+			renderers.computeSpritesInViewport(entity);
+			action.setUpdateRender();
 			action.setPassTurn();
 		}
 	});

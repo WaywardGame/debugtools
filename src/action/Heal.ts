@@ -20,6 +20,7 @@ import { PlayerState } from "@wayward/game/game/entity/player/IPlayer";
 import ItemReference, { IItemReference } from "@wayward/game/game/item/ItemReference";
 import Actions, { defaultUsability } from "../Actions";
 import ResurrectCorpse from "./helpers/ResurrectCorpse";
+import { RenderSource, UpdateRenderFlag } from "@wayward/game/renderer/IRenderer";
 
 /**
  * The core stats, namely, Health, Stamina, Hunger, and Thirst, are all set to their maximum values. Any status effects are removed.
@@ -66,6 +67,11 @@ export default new Action(ActionArgument.Entity, ActionArgument.OPTIONAL(ActionA
 			if (entity.asPlayer.state === PlayerState.Dead || entity.asPlayer.isGhost) {
 				entity.asPlayer.state = PlayerState.None;
 				entity.asPlayer.setMoveType(MoveType.Land);
+
+				if (entity.isLocalPlayer && renderer) {
+					renderer.fieldOfView.disabled = false;
+					renderer.updateRender(RenderSource.Mod, UpdateRenderFlag.FieldOfView | UpdateRenderFlag.FieldOfViewForced);
+				}
 			}
 
 			entity.asPlayer.updateStatsAndAttributes();
