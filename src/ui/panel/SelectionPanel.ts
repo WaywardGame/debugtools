@@ -405,8 +405,8 @@ export default class SelectionPanel extends DebugToolsPanel {
 			return;
 		}
 
-		this.canvas.element.width = box.width;
-		this.canvas.element.height = box.height;
+		this.canvas.element.width = Math.round(box.width);
+		this.canvas.element.height = Math.round(box.height);
 
 		this.renderer.setViewportSize(this.canvas.element.width, this.canvas.element.height);
 
