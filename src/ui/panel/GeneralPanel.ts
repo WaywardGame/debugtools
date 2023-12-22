@@ -12,6 +12,7 @@
 import { SfxType } from "@wayward/game/audio/IAudio";
 import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler } from "@wayward/game/event/EventManager";
+import { TickFlag } from "@wayward/game/game/IGame";
 import { BiomeType } from "@wayward/game/game/biome/IBiome";
 import { DEFAULT_ISLAND_ID, IslandId, IslandPosition } from "@wayward/game/game/island/IIsland";
 import Tile from "@wayward/game/game/tile/Tile";
@@ -42,6 +43,7 @@ import CancelablePromise from "@wayward/utilities/promise/CancelablePromise";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import ChangeLayer from "../../action/ChangeLayer";
+import FastForward from "../../action/FastForward";
 import ForceSailToCivilization from "../../action/ForceSailToCivilization";
 import MoveToIsland from "../../action/MoveToIsland";
 import RenameIsland from "../../action/RenameIsland";
@@ -133,6 +135,19 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.event.subscribe("change", (_, time) => {
 				SetTime.execute(localPlayer, time);
 			})
+			.appendTo(this);
+
+		const fastForwardRow: RangeRow = new RangeRow()
+			.classes.add("has-default-button")
+			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelFastForward)))
+			.editRange(range => range
+				.setStep(0.01)
+				.setMax(50))
+			.setDisplayValue(value => [{ content: `${Math.floor(1.3 ** value)}` }])
+			.append(new Button()
+				.setText(translation(DebugToolsTranslation.ButtonExecute))
+				.event.subscribe("activate", () =>
+					FastForward.execute(localPlayer, Math.floor(1.3 ** fastForwardRow.value), TickFlag.All)))
 			.appendTo(this);
 
 		////////////////////////////////////

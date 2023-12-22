@@ -110,6 +110,7 @@ export default class DebugTools extends Mod {
     readonly actionMoveToIsland: ActionType;
     readonly actionForceSailToCivilization: ActionType;
     readonly actionReplacePlayerData: ActionType;
+    readonly actionFastForward: ActionType;
     readonly dialogMain: DialogId;
     readonly dialogInspect: DialogId;
     readonly inspectionTemperature: InspectType;
@@ -134,7 +135,7 @@ export default class DebugTools extends Mod {
     setCameraUnlocked(unlocked: boolean): void;
     inspect(what: Tile | Creature | Player | NPC | Item): void;
     toggleDialog(): void;
-    hasPermission(): boolean | undefined;
+    hasPermission(player?: Player): boolean | undefined;
     toggleFog(fog: boolean): void;
     toggleLighting(lighting: boolean): void;
     debugToolsAccessCommand(_: any, player: Player, args: string): void;

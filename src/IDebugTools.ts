@@ -51,6 +51,7 @@ export enum DebugToolsTranslation {
 	// General
 	PanelGeneral,
 	LabelTime,
+	LabelFastForward,
 	ButtonInspect,
 	ButtonInspectLocalPlayer,
 	ButtonRemoveAllCreatures,

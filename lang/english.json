@@ -38,6 +38,7 @@
 			"dialogTitleMain": "Debug Tools",
 			"panelGeneral": "General",
 			"labelTime": "Time",
+			"labelFastForward": "Fast Forward",
 			"buttonInspect": "Inspect {BINDINGS:ModDebugToolsInspectTile}",
 			"buttonInspectLocalPlayer": "Inspect Local Player {BINDINGS:ModDebugToolsInspectLocalPlayer}",
 			"buttonRemoveAllCreatures": "Remove All Creatures",

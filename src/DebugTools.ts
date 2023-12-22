@@ -54,6 +54,7 @@ import ChangeLayer from "./action/ChangeLayer";
 import ChangeTerrain from "./action/ChangeTerrain";
 import ClearInventory from "./action/ClearInventory";
 import Clone from "./action/Clone";
+import FastForward from "./action/FastForward";
 import ForceSailToCivilization from "./action/ForceSailToCivilization";
 import Heal from "./action/Heal";
 import Kill from "./action/Kill";
@@ -327,6 +328,9 @@ export default class DebugTools extends Mod {
 	@Register.action("ReplacePlayerData", ReplacePlayerData)
 	public readonly actionReplacePlayerData: ActionType;
 
+	@Register.action("FastForward", FastForward)
+	public readonly actionFastForward: ActionType;
+
 	////////////////////////////////////
 	// UI
 	//
@@ -548,8 +552,8 @@ export default class DebugTools extends Mod {
 		gameScreen.dialogs.toggle(this.dialogMain);
 	}
 
-	public hasPermission(): boolean | undefined {
-		return !multiplayer.isConnected || multiplayer.isServer || this.getPlayerData(localPlayer, "permissions");
+	public hasPermission(player = localPlayer): boolean | undefined {
+		return !multiplayer.isConnected || multiplayer.isServer || this.getPlayerData(player, "permissions");
 	}
 
 	public toggleFog(fog: boolean): void {
