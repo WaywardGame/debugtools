@@ -17,7 +17,7 @@ import Player from "@wayward/game/game/entity/player/Player";
 import Island from "@wayward/game/game/island/Island";
 import { IVector3 } from "@wayward/game/utilities/math/IVector";
 import Vector3 from "@wayward/game/utilities/math/Vector3";
-import { defaultUsability } from "../Actions";
+import { defaultCanUseHandler, defaultUsability } from "../Actions";
 import { DebugToolsTranslation } from "../IDebugTools";
 import Remove from "./helpers/Remove";
 import { teleportEntity } from "./helpers/TeleportEntity";
@@ -35,6 +35,7 @@ import Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
 export default new Action(ActionArgument.Integer32, ActionArgument.Array, ActionArgument.OPTIONAL(ActionArgument.String))
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
+	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, executionType: DebugToolsTranslation, selection: [SelectionType, number][], alternativeTarget) => {
 		for (const [type, id] of selection) {
 			const target = getTarget(action.executor.island, type, id);

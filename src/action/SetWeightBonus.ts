@@ -12,11 +12,12 @@
 import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
 import { EntityType } from "@wayward/game/game/entity/IEntity";
-import Actions, { defaultUsability } from "../Actions";
+import Actions, { defaultCanUseHandler, defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.Player, ActionArgument.Float64)
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
+	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, player, weightBonus) => {
 		Actions.DEBUG_TOOLS.setPlayerData(player, "weightBonus", weightBonus);
 		player.updateStrength();

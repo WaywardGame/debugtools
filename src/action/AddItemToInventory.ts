@@ -23,7 +23,7 @@ import Enums from "@wayward/game/utilities/enum/Enums";
 import Arrays from "@wayward/utilities/collection/Arrays";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import StackMap from "@wayward/utilities/collection/map/StackMap";
-import { defaultUsability } from "../Actions";
+import { defaultCanUseHandler, defaultUsability } from "../Actions";
 import InspectDialog from "../ui/InspectDialog";
 
 export const ADD_ITEM_RANDOM = 1000000001;
@@ -66,6 +66,7 @@ function itemMatchesWord(word: string, item: ItemType, text: string): boolean {
 export default new Action(ActionArgument.Container, ActionArgument.ANY(ActionArgument.Integer32, ActionArgument.String), ActionArgument.ENUM(Quality), ActionArgument.Integer32)
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
+	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, target, item: ItemType | typeof ADD_ITEM_RANDOM | typeof ADD_ITEM_ALL | string, quality, quantity) => {
 		const containerObject = action.executor.island.items.resolveContainer(target);
 

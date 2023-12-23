@@ -15,11 +15,12 @@ import SailToCivilization from "@wayward/game/game/entity/action/actions/SailToC
 import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { ItemType } from "@wayward/game/game/item/IItem";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
-import { defaultUsability } from "../Actions";
+import { defaultCanUseHandler, defaultUsability } from "../Actions";
 
 export default new Action()
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
+	.setCanUse(defaultCanUseHandler)
 	.setHandler(action => {
 		const position = action.executor.tile.findMatchingTile((tile) => tile.type === TerrainType.DeepSeawater);
 		if (!position) {

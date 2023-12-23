@@ -9,14 +9,22 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { ActionUsability } from "@wayward/game/game/entity/action/IAction";
+import { ActionUsability, IActionHandlerApi } from "@wayward/game/game/entity/action/IAction";
 import Mod from "@wayward/game/mod/Mod";
 import Log from "@wayward/utilities/Log";
 import DebugTools from "./DebugTools";
 import { DEBUG_TOOLS_ID } from "./IDebugTools";
-
+import Human from "@wayward/game/game/entity/Human";
 
 export const defaultUsability: ActionUsability[] = [ActionUsability.Ghost, ActionUsability.Paused, ActionUsability.Delayed, ActionUsability.Moving];
+
+export const defaultCanUseHandler = (action: IActionHandlerApi<Human>) => {
+	if (!Actions.DEBUG_TOOLS.hasPermission(action.executor.asPlayer)) {
+		return { usable: false };
+	}
+
+	return { usable: true };
+};
 
 export default class Actions {
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)

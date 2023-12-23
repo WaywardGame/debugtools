@@ -13,11 +13,12 @@ import { Deity } from "@wayward/game/game/deity/Deity";
 import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
-import { defaultUsability } from "../Actions";
+import { defaultCanUseHandler, defaultUsability } from "../Actions";
 
 export default new Action(ActionArgument.Entity, ActionArgument.Integer32, ActionArgument.Integer32)
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
+	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, entity, deity: Deity, value) => {
 		entity?.asHuman?.alignment[deity === Deity.Good ? "setGood" : "setEvil"](value);
 	});

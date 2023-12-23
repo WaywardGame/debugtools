@@ -13,7 +13,7 @@ import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
 import { EntityType } from "@wayward/game/game/entity/IEntity";
 import Tile from "@wayward/game/game/tile/Tile";
-import { defaultUsability } from "../Actions";
+import { defaultCanUseHandler, defaultUsability } from "../Actions";
 import { IPaintData } from "../ui/panel/PaintPanel";
 import SetTilled from "./helpers/SetTilled";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
@@ -26,6 +26,7 @@ import { RenderSource } from "@wayward/game/renderer/IRenderer";
 export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
+	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, tiles: Tile[], data: IPaintData) => {
 		for (const tile of tiles) {
 			for (const k of Object.keys(data)) {

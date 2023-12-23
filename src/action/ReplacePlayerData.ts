@@ -14,12 +14,13 @@ import { SkillType } from "@wayward/game/game/entity/IHuman";
 import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
 import Enums from "@wayward/game/utilities/enum/Enums";
-import Actions, { defaultUsability } from "../Actions";
+import Actions, { defaultCanUseHandler, defaultUsability } from "../Actions";
 import CloneInventory from "./helpers/CloneInventory";
 
 export default new Action(ActionArgument.Player, ActionArgument.Player)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
+	.setCanUse(defaultCanUseHandler)
 	.setConfirmer((action, target, from) => {
 		return action.prompt(Actions.DEBUG_TOOLS.prompts.promptReplacePlayerData,
 			target.getName(),

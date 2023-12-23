@@ -13,7 +13,7 @@ import { Quality } from "@wayward/game/game/IObject";
 import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
-import { defaultUsability } from "../Actions";
+import { defaultCanUseHandler, defaultUsability } from "../Actions";
 import { setQuality } from "./SetQuality";
 
 /**
@@ -22,4 +22,5 @@ import { setQuality } from "./SetQuality";
 export default new Action(ActionArgument.Container, ActionArgument.ENUM(Quality))
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
+	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, target, quality) => setQuality(action, quality, ...target.containedItems));

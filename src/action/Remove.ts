@@ -13,7 +13,7 @@ import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
 import Player from "@wayward/game/game/entity/player/Player";
-import { defaultUsability } from "../Actions";
+import { defaultCanUseHandler, defaultUsability } from "../Actions";
 import Remove from "./helpers/Remove";
 
 /**
@@ -22,6 +22,7 @@ import Remove from "./helpers/Remove";
 export default new Action(ActionArgument.ANY(ActionArgument.Entity, ActionArgument.Doodad, ActionArgument.Corpse, ActionArgument.TileEvent, ActionArgument.Item))
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
+	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, toRemove) => {
 		if (toRemove instanceof Player) {
 			return;

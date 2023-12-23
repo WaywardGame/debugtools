@@ -18,6 +18,11 @@ import Tile from "@wayward/game/game/tile/Tile";
 import { MoveAnimation } from "@wayward/game/game/entity/IEntity";
 
 export function teleportEntity(action: ActionApi<any>, entity: Entity, tile: Tile): void {
+	const canUse = action.canUse();
+	if (!canUse.usable) {
+		return;
+	}
+
 	const targetTile = getTile(action.executor as Player, tile, () => translation(DebugToolsTranslation.ActionTeleport)
 		.get(entity.getName()));
 

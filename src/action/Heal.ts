@@ -18,7 +18,7 @@ import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
 import { PlayerState } from "@wayward/game/game/entity/player/IPlayer";
 import ItemReference, { IItemReference } from "@wayward/game/game/item/ItemReference";
-import Actions, { defaultUsability } from "../Actions";
+import Actions, { defaultCanUseHandler, defaultUsability } from "../Actions";
 import ResurrectCorpse from "./helpers/ResurrectCorpse";
 import { RenderSource, UpdateRenderFlag } from "@wayward/game/renderer/IRenderer";
 
@@ -28,6 +28,7 @@ import { RenderSource, UpdateRenderFlag } from "@wayward/game/renderer/IRenderer
 export default new Action(ActionArgument.Entity, ActionArgument.OPTIONAL(ActionArgument.ItemArray), ActionArgument.OPTIONAL(ActionArgument.Object))
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
+	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, entity, itemsToRestoreToInventory, equippedReferences: Record<EquipType, IItemReference>) => {
 		// resurrect corpses
 		const corpse = entity.asCorpse;
@@ -98,5 +99,5 @@ export default new Action(ActionArgument.Entity, ActionArgument.OPTIONAL(ActionA
 
 		action.setUpdateRender();
 		Actions.DEBUG_TOOLS.updateFog();
-		gameScreen?.onIslandTickEnd(entity.island, TickFlag.All);
+		gameScreen?.onIslandTickEnd(entity.island, { ticks: 1, tickFlags: TickFlag.All });
 	});

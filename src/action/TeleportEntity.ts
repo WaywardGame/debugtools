@@ -12,7 +12,7 @@
 import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
 import { EntityType } from "@wayward/game/game/entity/IEntity";
-import { defaultUsability } from "../Actions";
+import { defaultCanUseHandler, defaultUsability } from "../Actions";
 import { teleportEntity } from "./helpers/TeleportEntity";
 
 /**
@@ -21,4 +21,6 @@ import { teleportEntity } from "./helpers/TeleportEntity";
 export default new Action(ActionArgument.Entity, ActionArgument.Tile)
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
+	.setCanUse(defaultCanUseHandler)
 	.setHandler(teleportEntity);
+
