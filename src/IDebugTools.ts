@@ -148,6 +148,10 @@ export enum DebugToolsTranslation {
 	TemperatureOverlayModeProduced,
 	TemperatureOverlayModeCalculated,
 
+	// history
+	PanelHistory,
+	Tick,
+
 	////////////////////////////////////
 	// Inspect Dialog
 	//
@@ -205,6 +209,7 @@ export enum DebugToolsTranslation {
 	LabelReplaceData,
 	ButtonReplace,
 	LabelMax,
+	ButtonClearNotes,
 	////////////////////////////////////
 	// Inspection
 	//

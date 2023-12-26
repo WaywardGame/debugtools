@@ -9,12 +9,12 @@
  * https://github.com/WaywardGame/types/wiki
  */
 import Translation from "@wayward/game/language/Translation";
+import Bindable from "@wayward/game/ui/input/Bindable";
 import { DialogId, IDialogDescription } from "@wayward/game/ui/screen/screens/game/Dialogs";
 import TabDialog, { SubpanelInformation } from "@wayward/game/ui/screen/screens/game/component/TabDialog";
+import { MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
 import DebugTools from "../DebugTools";
 import DebugToolsPanel from "./component/DebugToolsPanel";
-import Bindable from "@wayward/game/ui/input/Bindable";
-import { MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
 export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
 export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
     static description: IDialogDescription;

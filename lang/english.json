@@ -190,11 +190,14 @@
 			"headingTemperatureOverlay": "Temperature Overlay",
 			"temperatureOverlayModeProduced": "Produced",
 			"temperatureOverlayModeCalculated": "Calculated",
+			"panelHistory": "History",
+			"tick": "Tick {0}",
 			"revertDeath": "Revert Death",
 			"statsPercentage": "{0}%",
 			"labelReplaceData": "Using",
 			"buttonReplace": "Replace Data For {0}",
-			"labelMax": "Max {0}"
+			"labelMax": "Max {0}",
+			"buttonClearNotes": "Clear Notes"
 		},
 		"item": {
 			"none": "none"

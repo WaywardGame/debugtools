@@ -150,3 +150,31 @@
 	background: none !important;
 	box-shadow: none !important;
 }
+
+.debug-tools-action-history-section {
+	margin-bottom: calc(20px * max(1, var(--scale)));
+}
+
+.debug-tools-action-history-section-counts {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+}
+
+.debug-tools-action-history-section-history-item,
+.debug-tools-action-history-section-history-tick-label,
+.debug-tools-action-history-section-counts-item {
+	padding: 0;
+}
+
+.debug-tools-action-history-section-history-item {
+	color: var(--color-text-secondary);
+}
+
+.debug-tools-action-history-section-history-item .reference-link {
+	color: var(--color-text-primary);
+}
+
+.debug-tools-action-history-section-history-tick-label {
+	color: var(--color-text-tertiary);
+	padding-bottom: calc(10px * max(1, var(--scale)));
+}

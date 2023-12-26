@@ -53,6 +53,7 @@ import AddItemToInventory from "./action/AddItemToInventory";
 import ChangeLayer from "./action/ChangeLayer";
 import ChangeTerrain from "./action/ChangeTerrain";
 import ClearInventory from "./action/ClearInventory";
+import ClearNotes from "./action/ClearNotes";
 import Clone from "./action/Clone";
 import FastForward from "./action/FastForward";
 import ForceSailToCivilization from "./action/ForceSailToCivilization";
@@ -330,6 +331,9 @@ export default class DebugTools extends Mod {
 
 	@Register.action("FastForward", FastForward)
 	public readonly actionFastForward: ActionType;
+
+	@Register.action("ClearNotes", ClearNotes)
+	public readonly actionClearNotes: ActionType;
 
 	////////////////////////////////////
 	// UI

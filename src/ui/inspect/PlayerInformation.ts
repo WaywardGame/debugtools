@@ -26,6 +26,7 @@ import SkillDropdown from "@wayward/game/ui/component/dropdown/SkillDropdown";
 import { Bound } from "@wayward/utilities/Decorators";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, translation } from "../../IDebugTools";
+import ClearNotes from "../../action/ClearNotes";
 import ReplacePlayerData from "../../action/ReplacePlayerData";
 import SetSkill from "../../action/SetSkill";
 import SetWeightBonus from "../../action/SetWeightBonus";
@@ -46,6 +47,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	private readonly checkButtonPermissions?: CheckButton;
 	private readonly playerToReplaceDataWithDropdown?: Dropdown<string>;
 	private readonly buttonExecuteDataReplace: Button;
+	private readonly clearNotesButton: Button;
 
 	private skill: SkillType | "all" | "none" = "none";
 	private player?: Player;
@@ -133,6 +135,12 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			})
 			.event.subscribe("selection", (_, selection) => this.buttonExecuteDataReplace.toggle(!!selection)))
 			.append(this.buttonExecuteDataReplace);
+
+		this.clearNotesButton = new Button()
+			.setText(translation(DebugToolsTranslation.ButtonClearNotes))
+			.event.subscribe("activate", () =>
+				this.player && ClearNotes.execute(localPlayer, this.player))
+			.appendTo(this);
 	}
 
 	public override update(entity: Creature | NPC | Player): void {
@@ -140,6 +148,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 		this.player = entity.asPlayer;
 		this.toggle(!!this.player);
+		this.clearNotesButton.toggle(!!this.player?.notes.notes.length);
 
 		if (!this.player) return;
 
@@ -149,6 +158,9 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 		this.DEBUG_TOOLS.event.until(this, "remove", "change")
 			.subscribe("playerDataChange", this.refresh);
+
+		const entityEvents = this.player?.event.until(this, "switchAway");
+		entityEvents.subscribe(["writtenNote", "clearNotes"], () => this.clearNotesButton.toggle(!!this.player?.notes.notes.length));
 	}
 
 	@Bound

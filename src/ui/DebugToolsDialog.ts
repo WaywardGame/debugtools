@@ -9,26 +9,27 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import Translation from "@wayward/game/language/Translation";
 import Mod from "@wayward/game/mod/Mod";
 import { Save, SaveLocation } from "@wayward/game/ui/IUi";
+import Bindable from "@wayward/game/ui/input/Bindable";
 import { DialogId, Edge, IDialogDescription } from "@wayward/game/ui/screen/screens/game/Dialogs";
 import TabDialog, { SubpanelInformation } from "@wayward/game/ui/screen/screens/game/component/TabDialog";
-import { Tuple } from "@wayward/utilities/collection/Tuple";
+import { MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import { sleep } from "@wayward/utilities/promise/Async";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import DebugToolsPanel from "./component/DebugToolsPanel";
 import DisplayPanel from "./panel/DisplayPanel";
 import GeneralPanel from "./panel/GeneralPanel";
+import HistoryPanel from "./panel/HistoryPanel";
 import PaintPanel from "./panel/PaintPanel";
 import SelectionPanel from "./panel/SelectionPanel";
 import TemperaturePanel from "./panel/TemperaturePanel";
 import TemplatePanel from "./panel/TemplatePanel";
-import Bindable from "@wayward/game/ui/input/Bindable";
-import { MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
 
 export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
 
@@ -42,6 +43,7 @@ const subpanelClasses: DebugToolsDialogPanelClass[] = [
 	SelectionPanel,
 	TemplatePanel,
 	TemperaturePanel,
+	HistoryPanel,
 ];
 
 export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {

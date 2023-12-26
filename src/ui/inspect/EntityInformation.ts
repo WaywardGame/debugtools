@@ -13,6 +13,7 @@ import Entity from "@wayward/game/game/entity/Entity";
 import EntityWithStats from "@wayward/game/game/entity/EntityWithStats";
 import { EntityType, IStatChangeInfo } from "@wayward/game/game/entity/IEntity";
 import { IStat, Stat } from "@wayward/game/game/entity/IStats";
+import { EntityReferenceTypes } from "@wayward/game/game/reference/IReferenceManager";
 import Tile from "@wayward/game/game/tile/Tile";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
@@ -22,15 +23,17 @@ import { BlockRow } from "@wayward/game/ui/component/BlockRow";
 import Button from "@wayward/game/ui/component/Button";
 import Component from "@wayward/game/ui/component/Component";
 import ContextMenu from "@wayward/game/ui/component/ContextMenu";
+import Details from "@wayward/game/ui/component/Details";
 import Input from "@wayward/game/ui/component/Input";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import { RangeRow } from "@wayward/game/ui/component/RangeRow";
 import Text from "@wayward/game/ui/component/Text";
 import InputManager from "@wayward/game/ui/input/InputManager";
+import Enums from "@wayward/game/utilities/enum/Enums";
+import { IStringSection } from "@wayward/game/utilities/string/Interpolator";
 import { Bound } from "@wayward/utilities/Decorators";
 import Log from "@wayward/utilities/Log";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
-import Enums from "@wayward/game/utilities/enum/Enums";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Clone from "../../action/Clone";
@@ -40,14 +43,13 @@ import SetStat from "../../action/SetStat";
 import SetStatMax from "../../action/SetStatMax";
 import TeleportEntity from "../../action/TeleportEntity";
 import { areArraysIdentical } from "../../util/Array";
+import ActionHistory from "../ActionHistory";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 import InspectInformationSection from "../component/InspectInformationSection";
 import CreatureInformation from "./CreatureInformation";
 import HumanInformation from "./HumanInformation";
 import NpcInformation from "./NpcInformation";
 import PlayerInformation from "./PlayerInformation";
-import { IStringSection } from "@wayward/game/utilities/string/Interpolator";
-import { EntityReferenceTypes } from "@wayward/game/game/reference/IReferenceManager";
 
 export type InspectDialogEntityInformationSubsectionClass = new () => InspectEntityInformationSubsection;
 
@@ -71,6 +73,7 @@ export default class EntityInformation extends InspectInformationSection {
 	private readonly statMaxComponents = new Map<Stat, RangeRow>();
 	private readonly buttonHeal: Button;
 	private readonly buttonTeleport: Button;
+	private readonly actionHistory: Details;
 
 	private entities: Entity[] = [];
 	private entity?: Entity;
@@ -108,6 +111,10 @@ export default class EntityInformation extends InspectInformationSection {
 			.classes.add("debug-tools-inspect-entity-sub-section")
 			.appendTo(this);
 
+		this.actionHistory = new Details()
+			.setSummary(summary => summary.setText(translation(DebugToolsTranslation.PanelHistory)))
+			.appendTo(this);
+
 		this.event.subscribe("switchTo", () => this.subsections
 			.forEach(subsection => subsection.event.emit("switchTo")));
 		this.event.subscribe("switchAway", () => this.subsections
@@ -132,6 +139,9 @@ export default class EntityInformation extends InspectInformationSection {
 		}
 
 		this.initializeStats();
+
+		this.actionHistory.dump()
+			.append(new ActionHistory(this.entity));
 
 		return this;
 	}

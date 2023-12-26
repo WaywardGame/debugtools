@@ -111,6 +111,7 @@ export default class DebugTools extends Mod {
     readonly actionForceSailToCivilization: ActionType;
     readonly actionReplacePlayerData: ActionType;
     readonly actionFastForward: ActionType;
+    readonly actionClearNotes: ActionType;
     readonly dialogMain: DialogId;
     readonly dialogInspect: DialogId;
     readonly inspectionTemperature: InspectType;

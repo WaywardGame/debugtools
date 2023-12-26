@@ -22,6 +22,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
     private readonly checkButtonPermissions?;
     private readonly playerToReplaceDataWithDropdown?;
     private readonly buttonExecuteDataReplace;
+    private readonly clearNotesButton;
     private skill;
     private player?;
     constructor();

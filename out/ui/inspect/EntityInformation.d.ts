@@ -9,13 +9,13 @@
  * https://github.com/WaywardGame/types/wiki
  */
 import Entity from "@wayward/game/game/entity/Entity";
+import { EntityReferenceTypes } from "@wayward/game/game/reference/IReferenceManager";
 import Tile from "@wayward/game/game/tile/Tile";
+import { IStringSection } from "@wayward/game/utilities/string/Interpolator";
 import Log from "@wayward/utilities/Log";
 import DebugTools from "../../DebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 import InspectInformationSection from "../component/InspectInformationSection";
-import { IStringSection } from "@wayward/game/utilities/string/Interpolator";
-import { EntityReferenceTypes } from "@wayward/game/game/reference/IReferenceManager";
 export type InspectDialogEntityInformationSubsectionClass = new () => InspectEntityInformationSubsection;
 export default class EntityInformation extends InspectInformationSection {
     readonly DEBUG_TOOLS: DebugTools;
@@ -26,6 +26,7 @@ export default class EntityInformation extends InspectInformationSection {
     private readonly statMaxComponents;
     private readonly buttonHeal;
     private readonly buttonTeleport;
+    private readonly actionHistory;
     private entities;
     private entity?;
     constructor();
