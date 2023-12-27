@@ -73,7 +73,8 @@ export default class EntityInformation extends InspectInformationSection {
 	private readonly statMaxComponents = new Map<Stat, RangeRow>();
 	private readonly buttonHeal: Button;
 	private readonly buttonTeleport: Button;
-	private readonly actionHistory: Details;
+	private readonly actionHistoryWrapper: Details;
+	private actionHistory?: ActionHistory;
 
 	private entities: Entity[] = [];
 	private entity?: Entity;
@@ -111,8 +112,13 @@ export default class EntityInformation extends InspectInformationSection {
 			.classes.add("debug-tools-inspect-entity-sub-section")
 			.appendTo(this);
 
-		this.actionHistory = new Details()
+		this.actionHistoryWrapper = new Details()
 			.setSummary(summary => summary.setText(translation(DebugToolsTranslation.PanelHistory)))
+			.event.subscribe("open", actionHistory => actionHistory.append(this.actionHistory = new ActionHistory(this.entity)))
+			.event.subscribe("close", actionHistory => {
+				actionHistory.dump();
+				delete this.actionHistory;
+			})
 			.appendTo(this);
 
 		this.event.subscribe("switchTo", () => this.subsections
@@ -139,9 +145,7 @@ export default class EntityInformation extends InspectInformationSection {
 		}
 
 		this.initializeStats();
-
-		this.actionHistory.dump()
-			.append(new ActionHistory(this.entity));
+		this.actionHistoryWrapper.close();
 
 		return this;
 	}

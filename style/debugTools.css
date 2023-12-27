@@ -168,6 +168,8 @@
 
 .debug-tools-action-history-section-history-item {
 	color: var(--color-text-secondary);
+	contain-intrinsic-height: var(--text-line-height);
+	content-visibility: auto;
 }
 
 .debug-tools-action-history-section-history-item .reference-link {

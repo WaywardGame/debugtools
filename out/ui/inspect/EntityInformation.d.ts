@@ -26,7 +26,8 @@ export default class EntityInformation extends InspectInformationSection {
     private readonly statMaxComponents;
     private readonly buttonHeal;
     private readonly buttonTeleport;
-    private readonly actionHistory;
+    private readonly actionHistoryWrapper;
+    private actionHistory?;
     private entities;
     private entity?;
     constructor();
