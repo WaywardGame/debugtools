@@ -153,6 +153,7 @@
 
 .debug-tools-action-history-section {
 	margin-bottom: calc(20px * max(1, var(--scale)));
+	transition: opacity .3s ease-in-out;
 }
 
 .debug-tools-action-history-section-counts {
@@ -179,4 +180,26 @@
 .debug-tools-action-history-section-history-tick-label {
 	color: var(--color-text-tertiary);
 	padding-bottom: calc(10px * max(1, var(--scale)));
+}
+
+.debug-tools-action-history {
+	position: relative;
+}
+
+.debug-tools-action-history .loading {
+	position: absolute;
+	top: calc(100px * max(1, var(--scale)));
+	left: 50%;
+	transform: translate(-50%);
+	z-index: 1;
+	opacity: 0;
+	transition: opacity .3s ease-in-out;
+}
+
+.debug-tools-action-history-loading .debug-tools-action-history-section {
+	display: none;
+}
+
+.debug-tools-action-history-loading .loading {
+	opacity: 1;
 }

@@ -210,6 +210,7 @@ export enum DebugToolsTranslation {
 	ButtonReplace,
 	LabelMax,
 	ButtonClearNotes,
+	ButtonLoadMore,
 	////////////////////////////////////
 	// Inspection
 	//

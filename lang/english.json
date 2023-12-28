@@ -197,7 +197,8 @@
 			"labelReplaceData": "Using",
 			"buttonReplace": "Replace Data For {0}",
 			"labelMax": "Max {0}",
-			"buttonClearNotes": "Clear Notes"
+			"buttonClearNotes": "Clear Notes",
+			"buttonLoadMore": "Load More"
 		},
 		"item": {
 			"none": "none"

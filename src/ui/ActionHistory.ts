@@ -19,7 +19,9 @@ import { TextContext } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
 import { MiscTranslation } from "@wayward/game/language/dictionary/Misc";
 import UiTranslation from "@wayward/game/language/dictionary/UiTranslation";
+import Button from "@wayward/game/ui/component/Button";
 import Component from "@wayward/game/ui/component/Component";
+import LoadingAnimation from "@wayward/game/ui/component/Loading";
 import Text, { Paragraph } from "@wayward/game/ui/component/Text";
 import { Bound } from "@wayward/utilities/Decorators";
 import { DebugToolsTranslation, translation } from "../IDebugTools";
@@ -32,6 +34,7 @@ export enum ActionHistoryClasses {
 	SectionHistory = "debug-tools-action-history-section-history",
 	HistoryItem = "debug-tools-action-history-section-history-item",
 	HistoryTickLabel = "debug-tools-action-history-section-history-tick-label",
+	Loading = "debug-tools-action-history-loading",
 }
 
 export default class ActionHistory extends Component {
@@ -39,10 +42,13 @@ export default class ActionHistory extends Component {
 	public readonly counts?: Component;
 	public readonly history: Component;
 	public readonly countMap: PartialRecord<ActionType, Text> = {};
+	public readonly loader: LoadingAnimation;
 
 	public constructor(public readonly entity?: Entity) {
 		super();
 		this.classes.add(ActionHistoryClasses.Main);
+
+		this.loader = new LoadingAnimation().appendTo(this);
 
 		if (entity) {
 			this.counts = new Component()
@@ -59,14 +65,37 @@ export default class ActionHistory extends Component {
 
 		this.history = new Component()
 			.classes.add(ActionHistoryClasses.Section, ActionHistoryClasses.SectionHistory)
+			.append(new Button()
+				.setText(translation(DebugToolsTranslation.ButtonLoadMore))
+				.event.subscribe("activate", async button => {
+					button.remove();
+					this.history.dump();
+					await this.rendering;
+					this.rendering = this.render();
+				}))
 			.appendTo(this);
 
 		this.registerEventBusSubscriber();
+		this.rendering = this.render(100);
+	}
 
-		for (const context of game.history) {
+	private rendering?: Promise<void>;
+	private async render(count = Infinity) {
+		this.classes.add(ActionHistoryClasses.Loading);
+		this.history.store(this);
+		this.lastTick = 0;
+		let lastSleep = Date.now();
+		for (const context of game.history.slice(-count)) {
 			const executor = game.references.resolve(context.executorReference) as Entity | undefined;
 			this.renderHistoryItem(executor, context);
+			if (Date.now() - lastSleep > 2) {
+				await this.sleep(10);
+				lastSleep = Date.now();
+			}
 		}
+
+		this.history.appendTo(this);
+		this.classes.remove(ActionHistoryClasses.Loading);
 	}
 
 	@Bound protected onUpdateHistoricalActionCount(executor: Entity, action: ActionType, count: number, oldCount: number) {
@@ -80,7 +109,8 @@ export default class ActionHistory extends Component {
 	}
 
 	@EventHandler(EventBus.Game, "addHistoricalAction")
-	protected onAddHistoricalAction(game: Game, executor: Entity, context: IActionContext) {
+	protected async onAddHistoricalAction(game: Game, executor: Entity, context: IActionContext) {
+		await this.rendering;
 		this.renderHistoryItem(executor, context);
 	}
 
