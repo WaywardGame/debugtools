@@ -79,13 +79,9 @@ import SetStat from "./action/SetStat";
 import SetStatMax from "./action/SetStatMax";
 import SetTamed from "./action/SetTamed";
 import SetTime from "./action/SetTime";
-import SetWeightBonus from "./action/SetWeightBonus";
 import TeleportEntity from "./action/TeleportEntity";
 import ToggleNoClip from "./action/ToggleNoClip";
-import TogglePermissions from "./action/TogglePermissions";
 import ToggleTilled from "./action/ToggleTilled";
-import ToggleUnkillable from "./action/ToggleUnkillable";
-import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
 import { TemperatureOverlay, TemperatureOverlayMode } from "./overlay/TemperatureOverlay";
 import AccidentalDeathHelper from "./ui/AccidentalDeathHelper";
 import MainDialog, { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
@@ -95,6 +91,7 @@ import Container from "./ui/component/Container";
 import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import TemperatureInspection from "./ui/inspection/Temperature";
 import Version from "./util/Version";
+import SetPlayerData from "./action/SetPlayerData";
 
 /**
  * An enum representing the possible states of the camera
@@ -260,9 +257,6 @@ export default class DebugTools extends Mod {
 	@Register.action("Remove", Remove)
 	public readonly actionRemove: ActionType;
 
-	@Register.action("SetWeightBonus", SetWeightBonus)
-	public readonly actionSetWeightBonus: ActionType;
-
 	@Register.action("ChangeLayer", ChangeLayer)
 	public readonly actionChangeLayer: ActionType;
 
@@ -271,9 +265,6 @@ export default class DebugTools extends Mod {
 
 	@Register.action("ToggleTilled", ToggleTilled)
 	public readonly actionToggleTilled: ActionType;
-
-	@Register.action("UpdateStatsAndAttributes", UpdateStatsAndAttributes)
-	public readonly actionUpdateStatsAndAttributes: ActionType;
 
 	@Register.action("AddItemToInventory", AddItemToInventory)
 	public readonly actionAddItemToInventory: ActionType;
@@ -284,10 +275,10 @@ export default class DebugTools extends Mod {
 	@Register.action("SetDecay", SetDecay)
 	public readonly actionSetDecay: ActionType;
 
-	@Register.action("setQuality", SetQuality)
+	@Register.action("SetQuality", SetQuality)
 	public readonly actionSetQuality: ActionType;
 
-	@Register.action("setQualityBulk", SetQualityBulk)
+	@Register.action("SetQualityBulk", SetQualityBulk)
 	public readonly actionSetQualityBulk: ActionType;
 
 	@Register.action("SetDurabilityBulk", SetDurabilityBulk)
@@ -302,9 +293,6 @@ export default class DebugTools extends Mod {
 	@Register.action("Paint", Paint)
 	public readonly actionPaint: ActionType;
 
-	@Register.action("ToggleUnkillable", ToggleUnkillable)
-	public readonly actionToggleUnkillable: ActionType;
-
 	@Register.action("SetSkill", SetSkill)
 	public readonly actionSetSkill: ActionType;
 
@@ -313,9 +301,6 @@ export default class DebugTools extends Mod {
 
 	@Register.action("ToggleNoclip", ToggleNoClip)
 	public readonly actionToggleNoclip: ActionType;
-
-	@Register.action("TogglePermissions", TogglePermissions)
-	public readonly actionTogglePermissions: ActionType;
 
 	@Register.action("RenameIsland", RenameIsland)
 	public readonly actionRenameIsland: ActionType;
@@ -334,6 +319,9 @@ export default class DebugTools extends Mod {
 
 	@Register.action("ClearNotes", ClearNotes)
 	public readonly actionClearNotes: ActionType;
+
+	@Register.action("SetPlayerData", SetPlayerData)
+	public readonly actionSetPlayerData: ActionType;
 
 	////////////////////////////////////
 	// UI
@@ -427,6 +415,34 @@ export default class DebugTools extends Mod {
 		this.getPlayerData(player, key); // initializes it if it doesn't exist
 		this.data.playerData[player.identifier][key] = value;
 		this.event.emit("playerDataChange", player.id, key, value);
+
+		switch (key) {
+			case "permissions":
+				DebugTools.LOG.info(`Updating permissions for ${player.getName().toString()} to ${value}`);
+				break;
+
+			case "weightBonus":
+				player.updateStrength();
+				player.updateTablesAndWeight("M");
+
+				break;
+
+			case "lighting":
+				player.updateStatsAndAttributes();
+
+				if (player.isLocalPlayer) {
+					player.updateView(RenderSource.Mod, true);
+				}
+
+				break;
+
+			case "fog":
+				if (player.isLocalPlayer) {
+					this.updateFog();
+				}
+
+				break;
+		}
 
 		if (!this.hasPermission() && gameScreen) {
 			gameScreen.dialogs.close(this.dialogMain);
@@ -557,18 +573,15 @@ export default class DebugTools extends Mod {
 	}
 
 	public hasPermission(player = localPlayer): boolean | undefined {
-		return !multiplayer.isConnected || multiplayer.isServer || this.getPlayerData(player, "permissions");
+		return player.isHost || this.getPlayerData(player, "permissions");
 	}
 
 	public toggleFog(fog: boolean): void {
-		this.setPlayerData(localPlayer, "fog", fog);
-		this.updateFog();
+		SetPlayerData.execute(localPlayer, localPlayer, "fog", fog);
 	}
 
 	public toggleLighting(lighting: boolean): void {
-		this.setPlayerData(localPlayer, "lighting", lighting);
-		UpdateStatsAndAttributes.execute(localPlayer, localPlayer);
-		localPlayer.updateView(RenderSource.Mod, true);
+		SetPlayerData.execute(localPlayer, localPlayer, "lighting", lighting);
 	}
 
 	////////////////////////////////////
@@ -584,8 +597,7 @@ export default class DebugTools extends Mod {
 		const targetPlayer = game.playerManager.getByName(args);
 		if (targetPlayer !== undefined && !targetPlayer.isLocalPlayer) {
 			const newPermissions = !this.getPlayerData(targetPlayer, "permissions");
-			TogglePermissions.execute(localPlayer, targetPlayer, newPermissions);
-			DebugTools.LOG.info(`Updating permissions for ${targetPlayer.getName().toString()} to ${newPermissions}`);
+			SetPlayerData.execute(localPlayer, targetPlayer, "permissions", newPermissions);
 		}
 	}
 

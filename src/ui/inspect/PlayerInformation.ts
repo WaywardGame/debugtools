@@ -29,11 +29,9 @@ import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, translation } from 
 import ClearNotes from "../../action/ClearNotes";
 import ReplacePlayerData from "../../action/ReplacePlayerData";
 import SetSkill from "../../action/SetSkill";
-import SetWeightBonus from "../../action/SetWeightBonus";
 import ToggleNoClip from "../../action/ToggleNoClip";
-import TogglePermissions from "../../action/TogglePermissions";
-import ToggleUnkillable from "../../action/ToggleUnkillable";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
+import SetPlayerData from "../../action/SetPlayerData";
 
 export default class PlayerInformation extends InspectEntityInformationSubsection {
 
@@ -194,7 +192,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	private toggleUnkillable(_: any, unkillable: boolean): void {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "unkillable") === unkillable) return;
 
-		ToggleUnkillable.execute(localPlayer, this.player!, unkillable);
+		SetPlayerData.execute(localPlayer, this.player!, "unkillable", unkillable);
 	}
 
 	@Bound
@@ -208,14 +206,14 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	private togglePermissions(_: any, permissions: boolean): void {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "permissions") === permissions) return;
 
-		TogglePermissions.execute(localPlayer, this.player!, permissions);
+		SetPlayerData.execute(localPlayer, this.player!, "permissions", permissions);
 	}
 
 	@Bound
 	private setWeightBonus(_: any, weightBonus: number): void {
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "weightBonus") === weightBonus) return;
 
-		SetWeightBonus.execute(localPlayer, this.player!, weightBonus);
+		SetPlayerData.execute(localPlayer, this.player!, "weightBonus", weightBonus);
 	}
 
 	@Bound

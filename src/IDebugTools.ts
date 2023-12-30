@@ -252,18 +252,22 @@ export interface IPlayerData {
 	 * Added to the player's strength
 	 */
 	weightBonus: number;
+
 	/**
 	 * Whether the player cannot die from negative damage
 	 */
 	unkillable?: boolean;
+
 	/**
 	 * Whether lighting is enabled
 	 */
 	lighting?: boolean;
+
 	/**
 	 * Whether the fog/field of view/fog of war is enabled
 	 */
 	fog?: boolean;
+
 	/**
 	 * Whether the player can use Debug Tools.
 	 */
