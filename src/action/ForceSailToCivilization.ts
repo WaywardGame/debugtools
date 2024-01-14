@@ -39,7 +39,7 @@ export default new Action()
 			action.executor.createItemInInventory(ItemType.GoldenChalice);
 			action.executor.createItemInInventory(ItemType.GoldenKey);
 			action.executor.createItemInInventory(ItemType.GoldenRing);
-			action.executor.createItemInInventory(ItemType.GoldSword);
+			action.executor.createItemInInventory(ItemType.GoldShortSword);
 			action.executor.createItemInInventory(ItemType.GoldenSextant);
 		}
 
