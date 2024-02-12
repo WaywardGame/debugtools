@@ -17,8 +17,10 @@ import Button from "@wayward/game/ui/component/Button";
 import Component from "@wayward/game/ui/component/Component";
 import Details from "@wayward/game/ui/component/Details";
 import Dropdown from "@wayward/game/ui/component/Dropdown";
+import MagicalPropertiesEditor from "./MagicalPropertiesEditor";
 export declare enum ContainerClasses {
     ContainedItemDetails = "debug-tools-container-contained-item-details",
+    BulkItemActions = "debug-tools-container-contained-item-details-bulk-item-actions",
     ItemDetails = "debug-tools-container-contained-item-details-item",
     Paginator = "debug-tools-container-contained-item-details-paginator",
     PaginatorButton = "debug-tools-container-contained-item-details-paginator-button",
@@ -61,6 +63,7 @@ export declare class ContainerItemDetails extends Details {
     readonly container?: Container;
     readonly dropdownQuality: Dropdown<Quality>;
     readonly buttonQualityApply: Button;
+    readonly magicalPropertiesEditor?: MagicalPropertiesEditor;
     constructor(item: Item);
     private applyDurability;
     private applyDecay;

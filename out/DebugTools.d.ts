@@ -109,6 +109,9 @@ export default class DebugTools extends Mod {
     readonly actionFastForward: ActionType;
     readonly actionClearNotes: ActionType;
     readonly actionSetPlayerData: ActionType;
+    readonly actionMagicalPropertyRemove: ActionType;
+    readonly actionMagicalPropertyChange: ActionType;
+    readonly actionMagicalPropertyClearAll: ActionType;
     readonly dialogMain: DialogId;
     readonly dialogInspect: DialogId;
     readonly inspectionTemperature: InspectType;

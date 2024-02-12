@@ -45,9 +45,11 @@ import SetQualityBulk from "../../action/SetQualityBulk";
 import { areArraysIdentical } from "../../util/Array";
 import AddItemToInventory from "./AddItemToInventory";
 import { IInspectInformationSectionEvents } from "./InspectInformationSection";
+import MagicalPropertiesEditor from "./MagicalPropertiesEditor";
 
 export enum ContainerClasses {
 	ContainedItemDetails = "debug-tools-container-contained-item-details",
+	BulkItemActions = "debug-tools-container-contained-item-details-bulk-item-actions",
 	ItemDetails = "debug-tools-container-contained-item-details-item",
 	Paginator = "debug-tools-container-contained-item-details-paginator",
 	PaginatorButton = "debug-tools-container-contained-item-details-paginator-button",
@@ -117,6 +119,7 @@ export default class Container extends Component {
 			.appendTo(this);
 
 		new Details()
+			.classes.add(ContainerClasses.BulkItemActions)
 			.setSummary(summary => summary.setText(translation(DebugToolsTranslation.LabelBulkItemOperations)))
 			.append(this.rangeBulkDurability = new RangeRow()
 				.classes.add("debug-tools-inspect-human-wrapper-set-bulk")
@@ -246,6 +249,8 @@ export default class Container extends Component {
 				.appendTo(this.wrapperContainedItems);
 		}
 
+		result?.magicalPropertiesEditor?.open();
+
 		new BlockRow()
 			.classes.add(ContainerClasses.Paginator)
 			.append(new Button()
@@ -319,6 +324,7 @@ export class ContainerItemDetails extends Details {
 	public readonly container?: Container;
 	public readonly dropdownQuality: Dropdown<Quality>;
 	public readonly buttonQualityApply: Button;
+	public readonly magicalPropertiesEditor?: MagicalPropertiesEditor;
 
 	public constructor(item: Item) {
 		super();
@@ -370,15 +376,21 @@ export class ContainerItemDetails extends Details {
 				.event.subscribe("finish", this.applyDecay)
 				.appendTo(this);
 
-		new Button()
-			.setText(translation(DebugToolsTranslation.ActionRemove))
-			.event.subscribe("activate", () => Remove.execute(localPlayer, item))
-			.appendTo(this);
+		if (this.item.getValidMagicalProperties().length)
+			this.magicalPropertiesEditor = new MagicalPropertiesEditor(item)
+				.appendTo(this);
 
 		if (this.item.isContainer())
 			this.container = new Container()
 				.schedule(container => container
 					.appendToHost(this, this, () => this.item.isContainer() ? this.item : undefined));
+
+		new Button()
+			.setText(translation(DebugToolsTranslation.ActionRemove)
+				.addArgs(this.item.getName().inContext(TextContext.Title))
+				.addArgs(this.item.island.items.getContainerName(this.item.containedWithin)?.inContext(TextContext.Title)))
+			.event.subscribe("activate", () => Remove.execute(localPlayer, item))
+			.appendTo(this);
 	}
 
 	@Bound private applyDurability(_: any, value: number): void {

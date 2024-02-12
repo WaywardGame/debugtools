@@ -59,6 +59,7 @@ import FastForward from "./action/FastForward";
 import ForceSailToCivilization from "./action/ForceSailToCivilization";
 import Heal from "./action/Heal";
 import Kill from "./action/Kill";
+import MagicalPropertyActions from "./action/MagicalPropertyActions";
 import MoveToIsland from "./action/MoveToIsland";
 import Paint from "./action/Paint";
 import PlaceTemplate from "./action/PlaceTemplate";
@@ -72,6 +73,7 @@ import SetDecayBulk from "./action/SetDecayBulk";
 import SetDurability from "./action/SetDurability";
 import SetDurabilityBulk from "./action/SetDurabilityBulk";
 import SetGrowingStage from "./action/SetGrowingStage";
+import SetPlayerData from "./action/SetPlayerData";
 import SetQuality from "./action/SetQuality";
 import SetQualityBulk from "./action/SetQualityBulk";
 import SetSkill from "./action/SetSkill";
@@ -91,7 +93,6 @@ import Container from "./ui/component/Container";
 import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import TemperatureInspection from "./ui/inspection/Temperature";
 import Version from "./util/Version";
-import SetPlayerData from "./action/SetPlayerData";
 
 /**
  * An enum representing the possible states of the camera
@@ -322,6 +323,15 @@ export default class DebugTools extends Mod {
 
 	@Register.action("SetPlayerData", SetPlayerData)
 	public readonly actionSetPlayerData: ActionType;
+
+	@Register.action("MagicalPropertyRemove", MagicalPropertyActions.Remove)
+	public readonly actionMagicalPropertyRemove: ActionType;
+
+	@Register.action("MagicalPropertyChange", MagicalPropertyActions.Change)
+	public readonly actionMagicalPropertyChange: ActionType;
+
+	@Register.action("MagicalPropertyClearAll", MagicalPropertyActions.Clear)
+	public readonly actionMagicalPropertyClearAll: ActionType;
 
 	////////////////////////////////////
 	// UI

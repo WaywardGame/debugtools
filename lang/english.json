@@ -103,7 +103,7 @@
 			"filterCorpses": "Corpses",
 			"filterPlayers": "Players",
 			"filterTreasure": "Treasure",
-			"actionRemove": "Remove",
+			"actionRemove": "Remove{ 0??}{1? from {1}}",
 			"actionSelect": "Select",
 			"to": "{#--text-secondary:to}",
 			"buttonExecute": "Execute",
@@ -198,7 +198,10 @@
 			"buttonReplace": "Replace Data For {0}",
 			"labelMax": "Max {0}",
 			"buttonClearNotes": "Clear Notes",
-			"buttonLoadMore": "Load More"
+			"buttonLoadMore": "Load More",
+			"labelValue": "Value",
+			"labelMagicalPropertyAdd": "Add",
+			"buttonRemoveAllMagicalProperties": "Remove All Magical Properties"
 		},
 		"item": {
 			"none": "none"

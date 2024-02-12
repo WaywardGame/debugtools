@@ -211,6 +211,9 @@ export enum DebugToolsTranslation {
 	LabelMax,
 	ButtonClearNotes,
 	ButtonLoadMore,
+	LabelValue,
+	LabelMagicalPropertyAdd,
+	ButtonRemoveAllMagicalProperties,
 	////////////////////////////////////
 	// Inspection
 	//

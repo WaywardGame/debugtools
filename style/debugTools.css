@@ -135,6 +135,7 @@
 .debug-tools-container-contained-item-details-paginator {
 	display: grid;
 	grid-template-columns: auto 1fr auto;
+	margin-top: 3px;
 }
 
 .debug-tools-container-contained-item-details-paginator-info {
@@ -202,4 +203,10 @@
 
 .debug-tools-action-history-loading .loading {
 	opacity: 1;
+}
+
+.debug-tools-magical-properties-editor-details,
+.debug-tools-container-contained-item-details-bulk-item-actions,
+.debug-tools-magical-properties-editor-property-list {
+	margin-bottom: 3px;
 }
