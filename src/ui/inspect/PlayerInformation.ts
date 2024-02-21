@@ -32,6 +32,7 @@ import SetSkill from "../../action/SetSkill";
 import ToggleNoClip from "../../action/ToggleNoClip";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 import SetPlayerData from "../../action/SetPlayerData";
+import { RenderSource } from "@wayward/game/renderer/IRenderer";
 
 export default class PlayerInformation extends InspectEntityInformationSubsection {
 
@@ -40,6 +41,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 	private readonly rangeWeightBonus: RangeRow;
 	private readonly checkButtonUnkillable: CheckButton;
+	private readonly checkButtonNoRender: CheckButton;
 	private readonly checkButtonNoClip: CheckButton;
 	private readonly skillRangeRow: RangeRow;
 	private readonly checkButtonPermissions?: CheckButton;
@@ -71,6 +73,10 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				.setText(translation(DebugToolsTranslation.ButtonToggleUnkillable))
 				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "unkillable") === true : false)
 				.event.subscribe("toggle", this.toggleUnkillable))
+			.append(this.checkButtonNoRender = new CheckButton()
+				.setText(translation(DebugToolsTranslation.ButtonToggleNoRender))
+				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "noRender") === true : false)
+				.event.subscribe("toggle", this.toggleNoRender))
 			.appendTo(this);
 
 		this.rangeWeightBonus = new RangeRow()
@@ -170,6 +176,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 		this.checkButtonNoClip.refresh();
 		this.checkButtonUnkillable.refresh();
+		this.checkButtonNoRender.refresh();
 		this.rangeWeightBonus.refresh();
 		this.playerToReplaceDataWithDropdown?.refresh();
 		this.buttonExecuteDataReplace.refreshText();
@@ -193,6 +200,14 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "unkillable") === unkillable) return;
 
 		SetPlayerData.execute(localPlayer, this.player!, "unkillable", unkillable);
+	}
+
+	@Bound
+	private toggleNoRender(_: any, noRender: boolean): void {
+		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "noRender") === noRender) return;
+
+		SetPlayerData.execute(localPlayer, this.player!, "noRender", noRender);
+		localPlayer.updateView(RenderSource.Mod, false);
 	}
 
 	@Bound
@@ -226,6 +241,9 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				break;
 			case "unkillable":
 				this.checkButtonUnkillable.refresh();
+				break;
+			case "noRender":
+				this.checkButtonNoRender.refresh();
 				break;
 			case "permissions":
 				if (this.checkButtonPermissions) this.checkButtonPermissions.refresh();

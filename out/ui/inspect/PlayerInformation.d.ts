@@ -17,6 +17,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
     readonly DEBUG_TOOLS: DebugTools;
     private readonly rangeWeightBonus;
     private readonly checkButtonUnkillable;
+    private readonly checkButtonNoRender;
     private readonly checkButtonNoClip;
     private readonly skillRangeRow;
     private readonly checkButtonPermissions?;
@@ -31,6 +32,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
     private changeSkill;
     private setSkill;
     private toggleUnkillable;
+    private toggleNoRender;
     private toggleNoClip;
     private togglePermissions;
     private setWeightBonus;

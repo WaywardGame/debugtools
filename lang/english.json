@@ -160,6 +160,7 @@
 			"optionTeleportToHost": "To Host",
 			"optionTeleportToPlayer": "To Player",
 			"buttonToggleUnkillable": "Unkillable",
+			"buttonToggleNoRender": "No Render",
 			"buttonToggleNoClip": "Noclip {BINDINGS:ModDebugToolsToggleNoClip}",
 			"labelSkill": "{#--text-secondary:Set Skill(s)}",
 			"none": "None",

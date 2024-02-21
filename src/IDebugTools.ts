@@ -184,6 +184,7 @@ export enum DebugToolsTranslation {
 	OptionTeleportToHost,
 	OptionTeleportToPlayer,
 	ButtonToggleUnkillable,
+	ButtonToggleNoRender,
 	ButtonToggleNoClip,
 	LabelSkill,
 	None,
@@ -275,6 +276,11 @@ export interface IPlayerData {
 	 * Whether the player can use Debug Tools.
 	 */
 	permissions?: boolean;
+
+	/**
+	 * Whether the player has no render enabled
+	 */
+	noRender?: boolean;
 }
 
 export interface IGlobalData {

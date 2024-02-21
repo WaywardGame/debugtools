@@ -148,6 +148,7 @@ export default class DebugTools extends Mod {
     getZoomLevel(_renderer: any, zoomLevel: number): number | undefined;
     protected getCameraPosition(_: any, position: IVector2): IVector2 | undefined;
     onPlayerDie(player: Player): false | void;
+    onPlayerRender(player: Player): false | void;
     protected getPlayerMaxWeight(player: Player, weight: number): number;
     onToggleCameraLock(): boolean;
     onToggleFullVisibility(): boolean;

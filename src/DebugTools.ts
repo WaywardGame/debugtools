@@ -405,6 +405,7 @@ export default class DebugTools extends Mod {
 		return (playerData[player.identifier] = {
 			weightBonus: 0,
 			unkillable: false,
+			noRender: false,
 			permissions: player.isServer,
 			fog: undefined,
 			lighting: true,
@@ -706,6 +707,12 @@ export default class DebugTools extends Mod {
 	@EventHandler(EventBus.Players, "shouldDie")
 	public onPlayerDie(player: Player): false | void {
 		if (this.getPlayerData(player, "unkillable"))
+			return false;
+	}
+
+	@EventHandler(EventBus.Players, "shouldRender")
+	public onPlayerRender(player: Player): false | void {
+		if (this.getPlayerData(player, "noRender"))
 			return false;
 	}
 
