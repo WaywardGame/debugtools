@@ -116,6 +116,7 @@ export default class Container extends Component {
 		this.wrapperContainedItems = new Details()
 			.classes.add(ContainerClasses.ContainedItemDetails)
 			.setSummary(summary => summary.setText(translation(DebugToolsTranslation.LabelItemDetails)))
+			.event.subscribe("open", this.refreshItems)
 			.appendTo(this);
 
 		new Details()
@@ -228,6 +229,10 @@ export default class Container extends Component {
 
 	private changeDisplayedItems(itemChain: Item[] = []): ContainerItemDetails | undefined {
 		this.wrapperContainedItems.dump();
+
+		if (!this.wrapperContainedItems.isOpen) {
+			return;
+		}
 
 		const container = this.containerSupplier?.();
 		if (!container)
