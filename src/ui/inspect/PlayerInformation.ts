@@ -79,6 +79,12 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				.event.subscribe("toggle", this.toggleNoRender))
 			.appendTo(this);
 
+		this.clearNotesButton = new Button()
+			.setText(translation(DebugToolsTranslation.ButtonClearNotes))
+			.event.subscribe("activate", () =>
+				this.player && ClearNotes.execute(localPlayer, this.player))
+			.appendTo(this);
+
 		this.rangeWeightBonus = new RangeRow()
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelWeightBonus)))
 			.editRange(range => range
@@ -139,12 +145,6 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			})
 			.event.subscribe("selection", (_, selection) => this.buttonExecuteDataReplace.toggle(!!selection)))
 			.append(this.buttonExecuteDataReplace);
-
-		this.clearNotesButton = new Button()
-			.setText(translation(DebugToolsTranslation.ButtonClearNotes))
-			.event.subscribe("activate", () =>
-				this.player && ClearNotes.execute(localPlayer, this.player))
-			.appendTo(this);
 	}
 
 	public override update(entity: Creature | NPC | Player): void {

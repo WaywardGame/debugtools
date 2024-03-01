@@ -33,7 +33,6 @@ import Bind, { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
 import Bindable from "@wayward/game/ui/input/Bindable";
 import { IInput } from "@wayward/game/ui/input/IInput";
 import InputManager from "@wayward/game/ui/input/InputManager";
-import GameScreen from "@wayward/game/ui/screen/screens/GameScreen";
 import { DialogId } from "@wayward/game/ui/screen/screens/game/Dialogs";
 import ItemComponent, { ItemClasses } from "@wayward/game/ui/screen/screens/game/component/ItemComponent";
 import { MenuBarButtonGroup, MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
@@ -89,7 +88,6 @@ import AccidentalDeathHelper from "./ui/AccidentalDeathHelper";
 import MainDialog, { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import DebugToolsPrompts from "./ui/DebugToolsPrompts";
 import InspectDialog from "./ui/InspectDialog";
-import Container from "./ui/component/Container";
 import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import TemperatureInspection from "./ui/inspection/Temperature";
 import Version from "./util/Version";
@@ -506,7 +504,6 @@ export default class DebugTools extends Mod {
 	 * - Removes the `AddItemToInventory` UI Component.
 	 */
 	public override onUnload(): void {
-		Container.releaseAndRemove();
 		eventManager.deregisterEventBusSubscriber(this.selector);
 		Bind.deregisterHandlers(this.selector);
 		this.unlockedCameraMovementHandler.end();
@@ -622,16 +619,6 @@ export default class DebugTools extends Mod {
 	@EventHandler(EventBus.Game, "postFieldOfView")
 	public postFieldOfView(): void {
 		this.updateFog();
-	}
-
-	/**
-	 * Called when the game screen becomes visible
-	 * - Initializes the `AddItemToInventory` UI Component (it takes a second or two to be created, and there are multiple places in
-	 * the UI that use it. We initialize it only once so the slow initialization only happens once.)
-	 */
-	@EventHandler(GameScreen, "show")
-	public onGameScreenVisible(): void {
-		Container.init();
 	}
 
 	@EventHandler(EventBus.Game, "play")

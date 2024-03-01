@@ -53,6 +53,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 	@OwnEventHandler(HumanInformation, "switchTo")
 	protected onSwitchTo(): void {
+		this.addItemContainer.dump();
 		Container.appendTo(this.addItemContainer, this, () => this.human);
 	}
 

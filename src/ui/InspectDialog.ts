@@ -10,11 +10,10 @@
  */
 
 import { EventBus } from "@wayward/game/event/EventBuses";
-import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
-import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import { EventHandler } from "@wayward/game/event/EventManager";
 import { TileUpdateType } from "@wayward/game/game/IGame";
 import Entity from "@wayward/game/game/entity/Entity";
+import Island from "@wayward/game/game/island/Island";
 import Item from "@wayward/game/game/item/Item";
 import { IOverlayInfo, TerrainType } from "@wayward/game/game/tile/ITerrain";
 import Tile from "@wayward/game/game/tile/Tile";
@@ -31,22 +30,23 @@ import Bindable from "@wayward/game/ui/input/Bindable";
 import InputManager from "@wayward/game/ui/input/InputManager";
 import { DialogId, Edge, IDialogDescription } from "@wayward/game/ui/screen/screens/game/Dialogs";
 import TabDialog, { SubpanelInformation } from "@wayward/game/ui/screen/screens/game/component/TabDialog";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
 import { Bound, Debounce } from "@wayward/utilities/Decorators";
 import Log from "@wayward/utilities/Log";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
-import Vector2 from "@wayward/game/utilities/math/Vector2";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import Container from "./component/Container";
 import InspectInformationSection from "./component/InspectInformationSection";
 import CorpseInformation from "./inspect/CorpseInformation";
 import DoodadInformation from "./inspect/DoodadInformation";
-import VehicleInformation from "./inspect/VehicleInformation";
 import EntityInformation from "./inspect/EntityInformation";
 import ItemInformation from "./inspect/ItemInformation";
 import TerrainInformation from "./inspect/TerrainInformation";
 import TileEventInformation from "./inspect/TileEventInformation";
-import Island from "@wayward/game/game/island/Island";
+import VehicleInformation from "./inspect/VehicleInformation";
 
 export type InspectDialogInformationSectionClass = new () => InspectInformationSection;
 
@@ -191,7 +191,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 
 		if (item) {
 			this.event.waitFor("updateSubpanels").then(() => {
-				const itemShowed = Container.INSTANCE?.showItem(item);
+				const itemShowed = Container.getFirst()?.showItem(item);
 				this.panelWrapper.scrollTo(itemShowed, 300);
 			});
 		}

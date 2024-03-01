@@ -48,6 +48,7 @@ import { IInspectInformationSectionEvents } from "./InspectInformationSection";
 import MagicalPropertiesEditor from "./MagicalPropertiesEditor";
 
 export enum ContainerClasses {
+	Main = "debug-tools-container",
 	ContainedItemDetails = "debug-tools-container-contained-item-details",
 	BulkItemActions = "debug-tools-container-contained-item-details-bulk-item-actions",
 	ItemDetails = "debug-tools-container-contained-item-details-item",
@@ -62,29 +63,14 @@ const CONTAINER_PAGE_LENGTH = 15;
 
 export default class Container extends Component {
 
-	public static INSTANCE: Container | undefined;
+	public static getFirst() {
+		return Component.get<Container>(ContainerClasses.Main);
+	}
 
-	public static init(): Container {
-		if (Container.INSTANCE)
-			return Container.INSTANCE;
-
-		const container = Container.INSTANCE = new Container();
-
-		container.event.subscribe("willRemove", container.willRemove);
+	public static async appendTo(component: Component, host: Component, containerSupplier: () => IContainer | undefined): Promise<Container> {
+		const container = new Container();
+		await container.appendToHost(component, host, containerSupplier);
 		return container;
-	}
-
-	public static appendTo(component: Component, host: Component, containerSupplier: () => IContainer | undefined): Promise<void> {
-		return Container.init().appendToHost(component, host, containerSupplier);
-	}
-
-	public static releaseAndRemove(): void {
-		if (!Container.INSTANCE)
-			return;
-
-		Container.INSTANCE.event.unsubscribe("willRemove", Container.INSTANCE.willRemove);
-		Container.INSTANCE.remove();
-		delete Container.INSTANCE;
 	}
 
 	public async appendToHost(component: Component, host: Component, containerSupplier: () => IContainer | undefined): Promise<void> {
@@ -111,6 +97,7 @@ export default class Container extends Component {
 
 	public constructor() {
 		super();
+		this.classes.add(ContainerClasses.Main);
 
 		new AddItemToInventory(this.getContainer).appendTo(this);
 		this.wrapperContainedItems = new Details()
@@ -283,11 +270,6 @@ export default class Container extends Component {
 	protected onContainerItemChange(itemManager: ItemManager, items: Item[], container?: IContainer, containerTile?: Tile): void {
 		if (container === this.containerSupplier?.())
 			debounce(100, true, this.refreshItems);
-	}
-
-	@Bound private willRemove(): boolean {
-		this.store(this.getScreen()!);
-		return false;
 	}
 
 	@Bound private getContainer(): IContainer | undefined {

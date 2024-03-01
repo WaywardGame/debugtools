@@ -9,14 +9,14 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
+import { ITileContainer } from "@wayward/game/game/tile/ITerrain";
 import Tile from "@wayward/game/game/tile/Tile";
 import Mod from "@wayward/game/mod/Mod";
 import { Bound } from "@wayward/utilities/Decorators";
 import Log from "@wayward/utilities/Log";
-import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Container from "../component/Container";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
-import { ITileContainer } from "@wayward/game/game/tile/ITerrain";
 
 
 export default class ItemInformation extends InspectInformationSection {
@@ -25,6 +25,7 @@ export default class ItemInformation extends InspectInformationSection {
 	public readonly LOG: Log;
 
 	private tile: Tile;
+	private container?: Container;
 
 	public override getTabs(): TabInformation[] {
 		return [
@@ -33,13 +34,14 @@ export default class ItemInformation extends InspectInformationSection {
 	}
 
 	public override setTab(): this {
-		Container.appendTo(this, this, this.getTile);
+		this.container?.remove();
+		Container.appendTo(this, this, this.getTile).then(container => this.container = container);
 		return this;
 	}
 
 	public override update(tile: Tile): void {
 		this.tile = tile;
-		Container.INSTANCE?.refreshItems();
+		this.container?.refreshItems();
 		if (tile.containedItems?.length) {
 			this.setShouldLog();
 		}

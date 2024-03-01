@@ -14,6 +14,7 @@ import InspectInformationSection, { TabInformation } from "../component/InspectI
 export default class ItemInformation extends InspectInformationSection {
     readonly LOG: Log;
     private tile;
+    private container?;
     getTabs(): TabInformation[];
     setTab(): this;
     update(tile: Tile): void;

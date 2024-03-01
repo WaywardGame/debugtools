@@ -9,7 +9,6 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import Doodad from "@wayward/game/game/doodad/Doodad";
 import { GrowingStage } from "@wayward/game/game/doodad/IDoodad";
 import { IContainer } from "@wayward/game/game/item/IItem";
@@ -21,6 +20,7 @@ import Button from "@wayward/game/ui/component/Button";
 import EnumContextMenu, { EnumSort } from "@wayward/game/ui/component/EnumContextMenu";
 import { Bound } from "@wayward/utilities/Decorators";
 import Log from "@wayward/utilities/Log";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Clone from "../../action/Clone";
@@ -38,6 +38,7 @@ export default class DoodadInformation extends InspectInformationSection {
 
 	protected doodad: Doodad | undefined;
 	protected readonly buttonGrowthStage: Button;
+	protected container?: Container;
 
 	public constructor() {
 		super();
@@ -59,11 +60,12 @@ export default class DoodadInformation extends InspectInformationSection {
 	}
 
 	@OwnEventHandler(DoodadInformation, "switchTo")
-	protected onSwitchTo(): void {
+	protected async onSwitchTo(): Promise<void> {
 		if (!this.doodad!.containedItems)
 			return;
 
-		Container.appendTo(this, this, () => this.doodad as IContainer);
+		this.container?.remove();
+		this.container = await Container.appendTo(this, this, () => this.doodad as IContainer);
 	}
 
 	public override getTabs(): TabInformation[] {

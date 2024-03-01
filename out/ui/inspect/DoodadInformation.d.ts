@@ -13,14 +13,16 @@ import Tile from "@wayward/game/game/tile/Tile";
 import Button from "@wayward/game/ui/component/Button";
 import Log from "@wayward/utilities/Log";
 import DebugTools from "../../DebugTools";
+import Container from "../component/Container";
 import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
 export default class DoodadInformation extends InspectInformationSection {
     readonly DEBUG_TOOLS: DebugTools;
     readonly LOG: Log;
     protected doodad: Doodad | undefined;
     protected readonly buttonGrowthStage: Button;
+    protected container?: Container;
     constructor();
-    protected onSwitchTo(): void;
+    protected onSwitchTo(): Promise<void>;
     getTabs(): TabInformation[];
     update(tile: Tile): void;
     logUpdate(): void;

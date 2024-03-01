@@ -8,18 +8,18 @@
  * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
  * https://github.com/WaywardGame/types/wiki
  */
-import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import { TileUpdateType } from "@wayward/game/game/IGame";
 import Entity from "@wayward/game/game/entity/Entity";
+import Island from "@wayward/game/game/island/Island";
 import Tile from "@wayward/game/game/tile/Tile";
 import Translation from "@wayward/game/language/Translation";
 import { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
 import { DialogId, IDialogDescription } from "@wayward/game/ui/screen/screens/game/Dialogs";
 import TabDialog, { SubpanelInformation } from "@wayward/game/ui/screen/screens/game/component/TabDialog";
 import Log from "@wayward/utilities/Log";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import DebugTools from "../DebugTools";
 import InspectInformationSection from "./component/InspectInformationSection";
-import Island from "@wayward/game/game/island/Island";
 export type InspectDialogInformationSectionClass = new () => InspectInformationSection;
 export interface IInspectDialogEvents extends Events<TabDialog<InspectInformationSection>> {
     updateSubpanels(): any;

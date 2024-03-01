@@ -141,7 +141,6 @@ export default class DebugTools extends Mod {
     toggleLighting(lighting: boolean): void;
     debugToolsAccessCommand(_: any, player: Player, args: string): void;
     postFieldOfView(): void;
-    onGameScreenVisible(): void;
     protected onGamePlay(): void;
     protected onRendererCreated(_: any, renderer: Renderer): void;
     getMaxZoomLevel(): number | undefined;

@@ -19,6 +19,7 @@ import Details from "@wayward/game/ui/component/Details";
 import Dropdown from "@wayward/game/ui/component/Dropdown";
 import MagicalPropertiesEditor from "./MagicalPropertiesEditor";
 export declare enum ContainerClasses {
+    Main = "debug-tools-container",
     ContainedItemDetails = "debug-tools-container-contained-item-details",
     BulkItemActions = "debug-tools-container-contained-item-details-bulk-item-actions",
     ItemDetails = "debug-tools-container-contained-item-details-item",
@@ -29,10 +30,8 @@ export declare enum ContainerClasses {
     PaginatorInfo = "debug-tools-container-contained-item-details-paginator-info"
 }
 export default class Container extends Component {
-    static INSTANCE: Container | undefined;
-    static init(): Container;
-    static appendTo(component: Component, host: Component, containerSupplier: () => IContainer | undefined): Promise<void>;
-    static releaseAndRemove(): void;
+    static getFirst(): Container | undefined;
+    static appendTo(component: Component, host: Component, containerSupplier: () => IContainer | undefined): Promise<Container>;
     appendToHost(component: Component, host: Component, containerSupplier: () => IContainer | undefined): Promise<void>;
     private readonly wrapperContainedItems;
     private readonly rangeBulkDurability;
@@ -50,7 +49,6 @@ export default class Container extends Component {
     private getItemsOfPage;
     private changeDisplayedItems;
     protected onContainerItemChange(itemManager: ItemManager, items: Item[], container?: IContainer, containerTile?: Tile): void;
-    private willRemove;
     private getContainer;
     private clear;
     private applyBulkDurability;
