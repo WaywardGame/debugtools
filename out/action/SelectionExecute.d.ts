@@ -10,7 +10,7 @@
  */
 import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
-declare const _default: Action<[ActionArgument.Integer32, ActionArgument.Array, [ActionArgument.Undefined, ActionArgument.String]], import("@wayward/game/game/entity/Human").default<number, import("@wayward/game/game/reference/IReferenceManager").ReferenceType.NPC | import("@wayward/game/game/reference/IReferenceManager").ReferenceType.Player>, void, import("@wayward/game/game/entity/action/IAction").IActionUsable, [number, any[], (string | undefined)?]>;
+declare const _default: Action<[ActionArgument.Integer32, ActionArgument.Array, [arg1: ActionArgument.Undefined, ActionArgument.String]], import("@wayward/game/game/entity/Human").default<number, import("@wayward/game/game/reference/IReferenceManager").ReferenceType.NPC | import("@wayward/game/game/reference/IReferenceManager").ReferenceType.Player>, void, import("@wayward/game/game/entity/action/IAction").IActionUsable, [number, any[], (string | undefined)?]>;
 export default _default;
 export declare enum SelectionType {
     Creature = 0,
