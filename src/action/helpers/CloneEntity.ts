@@ -34,7 +34,7 @@ export default function (entity: Entity, tile: Tile): void {
 
 		if (creature.isTamed) clone.tame(creature.getOwner()!);
 		clone.renamed = entity.renamed;
-		clone.ai = creature.ai;
+		clone.setAi(creature.ai);
 		clone.enemy = creature.enemy;
 
 	} else if (human) {

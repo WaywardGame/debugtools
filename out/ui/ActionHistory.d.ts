@@ -26,12 +26,12 @@ export declare enum ActionHistoryClasses {
     Loading = "debug-tools-action-history-loading"
 }
 export default class ActionHistory extends Component {
-    readonly entity?: Entity<unknown, number, import("@wayward/game/game/reference/IReferenceManager").EntityReferenceTypes, unknown> | undefined;
+    readonly entity?: Entity | undefined;
     readonly counts?: Component;
     readonly history: Component;
     readonly countMap: PartialRecord<ActionType, Text>;
     readonly loader: LoadingAnimation;
-    constructor(entity?: Entity<unknown, number, import("@wayward/game/game/reference/IReferenceManager").EntityReferenceTypes, unknown> | undefined);
+    constructor(entity?: Entity | undefined);
     private rendering?;
     private render;
     protected onUpdateHistoricalActionCount(executor: Entity, action: ActionType, count: number, oldCount: number): void;
