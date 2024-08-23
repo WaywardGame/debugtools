@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -12,25 +12,27 @@
 import { Deity } from "@wayward/game/game/deity/Deity";
 import Entity from "@wayward/game/game/entity/Entity";
 import Human from "@wayward/game/game/entity/Human";
-import { StatusEffectChangeReason, StatusType } from "@wayward/game/game/entity/IEntity";
+import { StatusChangeReason } from "@wayward/game/game/entity/IEntity";
 import { Stat } from "@wayward/game/game/entity/IStats";
+import { BleedLevel } from "@wayward/game/game/entity/status/handler/IBleeding";
+import { StatusType } from "@wayward/game/game/entity/status/IStatus";
+import { UiStatusType } from "@wayward/game/game/entity/status/Status";
 import Dictionary from "@wayward/game/language/Dictionary";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
 import { CheckButton } from "@wayward/game/ui/component/CheckButton";
 import Component from "@wayward/game/ui/component/Component";
 import { RangeRow } from "@wayward/game/ui/component/RangeRow";
+import _ from "@wayward/utilities/_";
 import { Bound } from "@wayward/utilities/Decorators";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
-import { DebugToolsTranslation, translation } from "../../IDebugTools";
-import SetAlignment from "../../action/SetAlignment";
 import Container from "../component/Container";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
 export default class HumanInformation extends InspectEntityInformationSubsection {
 	private readonly addItemContainer: Component;
 	private readonly alignmentSliders: { [key in Deity.Evil | Deity.Good]?: RangeRow } = {};
-	private readonly statusCheckButtons: PartialRecord<StatusType, CheckButton> = {};
+	private readonly statusCheckButtons: PartialRecord<UiStatusType | StatusType, CheckButton> = {};
 
 	private human: Human | undefined;
 
@@ -39,14 +41,22 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 		this.addItemContainer = new Component().appendTo(this);
 
-		this.addAlignmentSlider(DebugToolsTranslation.LabelEvilAlignment, Deity.Evil);
-		this.addAlignmentSlider(DebugToolsTranslation.LabelGoodAlignment, Deity.Good);
-
-		for (const status of [StatusType.Bleeding, StatusType.Burned, StatusType.Poisoned, StatusType.Frostbitten]) {
+		for (const status of [UiStatusType.Cut, StatusType.Bleeding, StatusType.Burned, StatusType.Poisoned, StatusType.Frostbitten]) {
 			this.statusCheckButtons[status] = new CheckButton()
-				.setText(Translation.get(Dictionary.StatusEffect, status).inContext(TextContext.Title))
-				.setRefreshMethod(() => !!this.human?.hasStatus(status))
-				.event.subscribe("toggle", (_: any, state: boolean) => this.human?.setStatus(status, state, state ? StatusEffectChangeReason.Gained : StatusEffectChangeReason.Treated))
+				.setText((_
+					?? (status === UiStatusType.Cut ? Translation.get(Dictionary.BleedLevel, BleedLevel.Minor) : undefined)
+					?? Translation.get(Dictionary.Status, status as StatusType))
+					.inContext(TextContext.Title))
+				.setRefreshMethod(() => _
+					?? (status === UiStatusType.Cut ? this.human?.getStatusLevel(StatusType.Bleeding) === BleedLevel.Minor : undefined)
+					?? (status === StatusType.Bleeding ? this.human?.getStatusLevel(StatusType.Bleeding) === BleedLevel.Major : undefined)
+					?? !!this.human?.hasStatus(status as StatusType))
+				.event.subscribe("toggle", (_: any, state: boolean) =>
+					this.human?.setStatus(
+						status === UiStatusType.Cut ? StatusType.Bleeding : status,
+						state && status === StatusType.Bleeding ? BleedLevel.Major : state,
+						state ? StatusChangeReason.Gained : StatusChangeReason.Treated,
+						true))
 				.appendTo(this);
 		}
 	}
@@ -61,7 +71,6 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 		return this.human ? [
 			Stat.Attack,
 			Stat.Defense,
-			Stat.Ferocity,
 			Stat.Weight,
 			Stat.InsulationHeat,
 			Stat.InsulationCold,
@@ -87,40 +96,11 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 		}
 
 		const entityEvents = entity?.asHuman?.event.until(this, "switchAway");
-		entityEvents?.subscribe("alignmentChange", this.onAlignmentChange);
 		entityEvents?.subscribe("statusChange", this.onStatusChange);
 	}
 
-	private addAlignmentSlider(labelTranslation: DebugToolsTranslation, type: Deity.Good | Deity.Evil): void {
-		this.alignmentSliders[type] = new RangeRow()
-			.setLabel(label => label.setText(translation(labelTranslation)))
-			.editRange(range => range
-				.setMin(0)
-				.setMax(game.getGameOptions().player.alignment[type === Deity.Good ? "goodCap" : "evilCap"])
-				.setRefreshMethod(() => this.human ? this.human.alignment[type === Deity.Good ? "good" : "evil"] : 0))
-			.setDisplayValue(true)
-			.event.subscribe("finish", this.setAlignment(type))
-			.appendTo(this);
-	}
-
-	private setAlignment(type: Deity.Evil | Deity.Good): (_: any, value: number) => void {
-		return (_: any, value: number) => {
-			if (this.human!.alignment[type === Deity.Good ? "good" : "evil"] === value) return;
-			SetAlignment.execute(localPlayer, this.human!, type, value);
-		};
-	}
-
-	@Bound
-	private onAlignmentChange(_: any, deity: Deity): void {
-		switch (deity) {
-			case Deity.Evil:
-			case Deity.Good:
-				this.alignmentSliders[deity]!.refresh();
-				break;
-		}
-	}
-
 	@Bound private onStatusChange(_: any, status: StatusType): void {
-		this.statusCheckButtons[status]?.refresh();
+		this.statusCheckButtons[status]?.refresh(false);
+		this.statusCheckButtons[status === StatusType.Bleeding ? UiStatusType.Cut : -1 as StatusType]?.refresh(false);
 	}
 }

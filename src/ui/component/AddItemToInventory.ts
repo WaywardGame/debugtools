@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -37,7 +37,7 @@ export default class AddItemToInventory extends Component {
 			["All", option => option.setText(translation(DebugToolsTranslation.MethodAll))],
 		]);
 
-		game.event.subscribeNext("stoppingPlay", () => {
+		game.event.subscribeNext("stoppingPlayPostSave", () => {
 			itemDropdown.remove();
 			delete AddItemToInventory.itemDropdown;
 		});

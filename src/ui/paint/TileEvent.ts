@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -9,19 +9,19 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import { TileEventType } from "@wayward/game/game/tile/ITileEvent";
 import { CheckButton } from "@wayward/game/ui/component/CheckButton";
 import Component from "@wayward/game/ui/component/Component";
 import TileEventDropdown from "@wayward/game/ui/component/dropdown/TileEventDropdown";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import { Bound } from "@wayward/utilities/Decorators";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
 
 export default class TileEventPaint extends Component implements IPaintSection {
-	public override event: IEventEmitter<this, Events<IPaintSection>>;
+	declare public event: IEventEmitter<this, Events<IPaintSection>>;
 
 	private readonly dropdown: TileEventDropdown<"nochange" | "remove">;
 	private readonly replaceExisting: CheckButton;

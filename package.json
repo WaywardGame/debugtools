@@ -1,0 +1,14 @@
+{
+	"name": "@wayward/debugtools",
+	"version": "1.0.0",
+	"main": "./out/DebugTools.js",
+	"types": "./out/DebugTools.d.ts",
+	"scripts": {
+		"clean": "rimraf ./out ./tsconfig.*tsbuildinfo",
+		"build": "tsc --build --pretty",
+		"watch": "tsc --build --watch --pretty --preserveWatchOutput"
+	},
+	"devDependencies": {
+		"@wayward/types": "^2.14.0-beta.dev.20240823.7"
+	}
+}

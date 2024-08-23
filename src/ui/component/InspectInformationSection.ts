@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -9,11 +9,11 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import Tile from "@wayward/game/game/tile/Tile";
 import Component from "@wayward/game/ui/component/Component";
 import { TranslationGenerator } from "@wayward/game/ui/component/IComponent";
 import TabDialogPanel from "@wayward/game/ui/screen/screens/game/component/TabDialogPanel";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 
 export type TabInformation = [number, TranslationGenerator];
 
@@ -25,7 +25,7 @@ export interface IInspectInformationSectionEvents extends Events<Component> {
 }
 
 export default abstract class InspectInformationSection extends TabDialogPanel {
-	public override event: IEventEmitter<this, IInspectInformationSectionEvents>;
+	declare public event: IEventEmitter<this, IInspectInformationSectionEvents>;
 
 	private shouldLog = false;
 	public get willLog() { return this.shouldLog; }

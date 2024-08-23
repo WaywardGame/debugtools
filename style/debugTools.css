@@ -210,3 +210,33 @@
 .debug-tools-magical-properties-editor-property-list {
 	margin-bottom: 3px;
 }
+
+.debug-tools-wander-intent {
+	border-radius: 100%;
+	display: block;
+	width: 50px;
+	height: 50px;
+	flex-grow: 0;
+	flex-basis: auto;
+	background: #444;
+	position: relative;
+}
+
+.debug-tools-wander-intent::before {
+	content: "";
+	position: absolute;
+	top: calc(50% - 1px);
+	left: calc(50% - 1px);
+	width: 50%;
+	height: 2px;
+	background: #aaa;
+	rotate: calc(var(--direction, 0rad));
+	transform-origin: top left;
+}
+
+.debug-tools-wander-intent-none::before {
+	width: 4px;
+	height: 4px;
+	top: calc(50% - 2px);
+	left: calc(50% - 2px);
+}

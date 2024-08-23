@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -64,7 +64,7 @@ const CONTAINER_PAGE_LENGTH = 15;
 export default class Container extends Component {
 
 	public static getFirst() {
-		return Component.get<Container>(ContainerClasses.Main);
+		return Component.get<Container>(`.${ContainerClasses.Main}`);
 	}
 
 	public static async appendTo(component: Component, host: Component, containerSupplier: () => IContainer | undefined): Promise<Container> {

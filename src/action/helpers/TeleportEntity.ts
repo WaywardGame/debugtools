@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -11,11 +11,11 @@
 
 import { ActionApi } from "@wayward/game/game/entity/action/IAction";
 import Entity from "@wayward/game/game/entity/Entity";
+import { MoveAnimation } from "@wayward/game/game/entity/IEntity";
 import Player from "@wayward/game/game/entity/player/Player";
+import Tile from "@wayward/game/game/tile/Tile";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { getTile } from "./GetTile";
-import Tile from "@wayward/game/game/tile/Tile";
-import { MoveAnimation } from "@wayward/game/game/entity/IEntity";
 
 export function teleportEntity(action: ActionApi<any>, entity: Entity, tile: Tile): void {
 	const canUse = action.canUse();
@@ -45,7 +45,7 @@ export function teleportEntity(action: ActionApi<any>, entity: Entity, tile: Til
 	}
 
 	if (entity.asPlayer?.isLocalPlayer) {
-		gameScreen!.movementHandler.walkToTileHandler.reset();
+		gameScreen?.interactionManager.pathing.reset();
 	}
 
 	action.setUpdateView(true);

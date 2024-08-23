@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -13,21 +13,23 @@ import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler } from "@wayward/game/event/EventManager";
 import { InfoClass, InfoDisplayLevel } from "@wayward/game/game/inspection/IInfoProvider";
 import { InspectType, basicInspectionPriorities } from "@wayward/game/game/inspection/IInspection";
+import { InfoProvider, SimpleInfoProvider } from "@wayward/game/game/inspection/InfoProvider";
 import { InfoProviderContext } from "@wayward/game/game/inspection/InfoProviderContext";
 import Inspection from "@wayward/game/game/inspection/Inspection";
 import LabelledValue from "@wayward/game/game/inspection/infoProviders/LabelledValue";
 import MagicalPropertyValue from "@wayward/game/game/inspection/infoProviders/MagicalPropertyValue";
+import Island from "@wayward/game/game/island/Island";
 import { TempType } from "@wayward/game/game/temperature/ITemperature";
 import { TEMPERATURE_INVALID } from "@wayward/game/game/temperature/TemperatureManager";
+import Tile from "@wayward/game/game/tile/Tile";
 import Translation from "@wayward/game/language/Translation";
 import { MiscTranslation } from "@wayward/game/language/dictionary/Misc";
+import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 import Mod from "@wayward/game/mod/Mod";
+import { TranslationGenerator } from "@wayward/game/ui/component/IComponent";
 import { Heading, Paragraph } from "@wayward/game/ui/component/Text";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
-import Tile from "@wayward/game/game/tile/Tile";
-import Island from "@wayward/game/game/island/Island";
-import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 
 export default class TemperatureInspection extends Inspection<Tile> {
 
@@ -36,12 +38,12 @@ export default class TemperatureInspection extends Inspection<Tile> {
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
 	public static readonly DEBUG_TOOLS: DebugTools;
 
-	public static getFromTile(tile: Tile): never[] | TemperatureInspection {
-		return TemperatureInspection.DEBUG_TOOLS ? new TemperatureInspection(tile) : [];
+	public static getFromTile(tile: Tile, context?: InfoProviderContext): never[] | TemperatureInspection {
+		return TemperatureInspection.DEBUG_TOOLS ? new TemperatureInspection(tile, context) : [];
 	}
 
-	public constructor(tile: Tile) {
-		super(TemperatureInspection.DEBUG_TOOLS.inspectionTemperature, tile);
+	public constructor(tile: Tile, context?: InfoProviderContext) {
+		super(TemperatureInspection.DEBUG_TOOLS.inspectionTemperature, tile, context);
 	}
 
 	public override getId(): string {
@@ -60,7 +62,15 @@ export default class TemperatureInspection extends Inspection<Tile> {
 		return game.playing && this.getTileMod() !== "?";
 	}
 
-	public override get(context: InfoProviderContext): LabelledValue[] {
+	protected override getTitle(context: InfoProviderContext): Translation | SimpleInfoProvider | undefined {
+		return undefined;
+	}
+
+	protected override getSubtitle(context: InfoProviderContext): Translation | SimpleInfoProvider | undefined {
+		return undefined;
+	}
+
+	protected override getContent(context: InfoProviderContext): ArrayOr<TranslationGenerator | InfoProvider | undefined> {
 		this.tempValue = localIsland.temperature.get(this.value, undefined);
 		return [
 			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperature))

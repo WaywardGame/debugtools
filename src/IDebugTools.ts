@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -81,6 +81,9 @@ export enum DebugToolsTranslation {
 	ButtonReloadTextures,
 	HeadingLayers,
 	ButtonToggleLayer,
+	CreatureZoneOverlayModeActive,
+	CreatureZoneOverlayModeAll,
+	CreatureZoneOverlayModeFollowingEntity,
 	// Manipulation
 	PanelPaint,
 	ButtonPaint,
@@ -152,6 +155,10 @@ export enum DebugToolsTranslation {
 	PanelHistory,
 	Tick,
 
+	// zones
+	PanelZones,
+	HeadingZonesOverlay,
+
 	////////////////////////////////////
 	// Inspect Dialog
 	//
@@ -177,8 +184,6 @@ export enum DebugToolsTranslation {
 	ButtonTameCreature,
 	LabelWeightBonus,
 	LabelItem,
-	LabelEvilAlignment,
-	LabelGoodAlignment,
 	OptionTeleportSelectLocation,
 	OptionTeleportToLocalPlayer,
 	OptionTeleportToHost,
@@ -215,6 +220,17 @@ export enum DebugToolsTranslation {
 	LabelValue,
 	LabelMagicalPropertyAdd,
 	ButtonRemoveAllMagicalProperties,
+	LabelAi,
+	LabelBaseAi,
+	LabelAiMasks,
+	LabelIncludes,
+	LabelExcludes,
+	LabelCondition,
+	ConditionMet,
+	ConditionUnmet,
+	ConditionAlwaysActive,
+	LabelWanderIntent,
+	ButtonCreatureZone,
 	////////////////////////////////////
 	// Inspection
 	//

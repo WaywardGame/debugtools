@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -30,6 +30,7 @@ import PaintPanel from "./panel/PaintPanel";
 import SelectionPanel from "./panel/SelectionPanel";
 import TemperaturePanel from "./panel/TemperaturePanel";
 import TemplatePanel from "./panel/TemplatePanel";
+import ZonesPanel from "./panel/ZonesPanel";
 
 export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
 
@@ -42,6 +43,7 @@ const subpanelClasses: DebugToolsDialogPanelClass[] = [
 	PaintPanel,
 	SelectionPanel,
 	TemplatePanel,
+	ZonesPanel,
 	TemperaturePanel,
 	HistoryPanel,
 ];

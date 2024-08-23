@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -9,10 +9,10 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
+import { AiType } from "@wayward/game/game/entity/AI";
 import Creature from "@wayward/game/game/entity/creature/Creature";
 import Entity from "@wayward/game/game/entity/Entity";
 import EntityWithStats from "@wayward/game/game/entity/EntityWithStats";
-import { AiType } from "@wayward/game/game/entity/IEntity";
 import { NPCType } from "@wayward/game/game/entity/npc/INPCs";
 import NPC from "@wayward/game/game/entity/npc/NPC";
 import Tile from "@wayward/game/game/tile/Tile";
@@ -34,7 +34,7 @@ export default function (entity: Entity, tile: Tile): void {
 
 		if (creature.isTamed) clone.tame(creature.getOwner()!);
 		clone.renamed = entity.renamed;
-		clone.setAi(creature.ai);
+		clone.setAiType(creature.ai);
 		clone.enemy = creature.enemy;
 
 	} else if (human) {

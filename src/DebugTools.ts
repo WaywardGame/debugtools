@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -11,14 +11,12 @@
 
 import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler, eventManager } from "@wayward/game/event/EventManager";
+import Entity from "@wayward/game/game/entity/Entity";
 import { ActionType } from "@wayward/game/game/entity/action/IAction";
-import Creature from "@wayward/game/game/entity/creature/Creature";
-import NPC from "@wayward/game/game/entity/npc/NPC";
 import { Source } from "@wayward/game/game/entity/player/IMessageManager";
 import Player from "@wayward/game/game/entity/player/Player";
 import { InspectType } from "@wayward/game/game/inspection/IInspection";
 import Island from "@wayward/game/game/island/Island";
-import Item from "@wayward/game/game/item/Item";
 import { OverlayType } from "@wayward/game/game/tile/ITerrain";
 import Tile from "@wayward/game/game/tile/Tile";
 import Dictionary from "@wayward/game/language/Dictionary";
@@ -42,6 +40,7 @@ import Vector2 from "@wayward/game/utilities/math/Vector2";
 import Vector3 from "@wayward/game/utilities/math/Vector3";
 import { Bound } from "@wayward/utilities/Decorators";
 import Log from "@wayward/utilities/Log";
+import _ from "@wayward/utilities/_";
 import { IInjectionApi, Inject, InjectionPosition } from "@wayward/utilities/class/Inject";
 import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import Actions from "./Actions";
@@ -66,7 +65,6 @@ import Remove from "./action/Remove";
 import RenameIsland from "./action/RenameIsland";
 import ReplacePlayerData from "./action/ReplacePlayerData";
 import SelectionExecute from "./action/SelectionExecute";
-import SetAlignment from "./action/SetAlignment";
 import SetDecay from "./action/SetDecay";
 import SetDecayBulk from "./action/SetDecayBulk";
 import SetDurability from "./action/SetDurability";
@@ -81,8 +79,11 @@ import SetStatMax from "./action/SetStatMax";
 import SetTamed from "./action/SetTamed";
 import SetTime from "./action/SetTime";
 import TeleportEntity from "./action/TeleportEntity";
+import ToggleAiMask from "./action/ToggleAiMask";
+import ToggleAiType from "./action/ToggleAiType";
 import ToggleNoClip from "./action/ToggleNoClip";
 import ToggleTilled from "./action/ToggleTilled";
+import { CreatureZoneOverlay, CreatureZoneOverlayMode } from "./overlay/CreatureZoneOverlay";
 import { TemperatureOverlay, TemperatureOverlayMode } from "./overlay/TemperatureOverlay";
 import AccidentalDeathHelper from "./ui/AccidentalDeathHelper";
 import MainDialog, { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
@@ -129,7 +130,7 @@ interface IDebugToolsEvents extends Events<Mod> {
 }
 
 export default class DebugTools extends Mod {
-	public override event: IEventEmitter<this, IDebugToolsEvents>;
+	declare public event: IEventEmitter<this, IDebugToolsEvents>;
 
 	////////////////////////////////////
 	// Static
@@ -247,9 +248,6 @@ export default class DebugTools extends Mod {
 	@Register.action("SetStatMax", SetStatMax)
 	public readonly actionSetStatMax: ActionType;
 
-	@Register.action("setAlignment", SetAlignment)
-	public readonly actionSetAlignment: ActionType;
-
 	@Register.action("SetTamed", SetTamed)
 	public readonly actionSetTamed: ActionType;
 
@@ -331,6 +329,12 @@ export default class DebugTools extends Mod {
 	@Register.action("MagicalPropertyClearAll", MagicalPropertyActions.Clear)
 	public readonly actionMagicalPropertyClearAll: ActionType;
 
+	@Register.action("ToggleAiType", ToggleAiType)
+	public readonly actionToggleAiType: ActionType;
+
+	@Register.action("ToggleAiMask", ToggleAiMask)
+	public readonly actionToggleAiMask: ActionType;
+
 	////////////////////////////////////
 	// UI
 	//
@@ -376,6 +380,7 @@ export default class DebugTools extends Mod {
 	// 
 
 	public temperatureOverlay = new TemperatureOverlay();
+	public creatureZoneOverlay = new CreatureZoneOverlay();
 	public accidentalDeathHelper = new AccidentalDeathHelper();
 	private cameraState = CameraState.Locked;
 
@@ -496,6 +501,8 @@ export default class DebugTools extends Mod {
 		eventManager.registerEventBusSubscriber(this.accidentalDeathHelper);
 		this.temperatureOverlay.register();
 		this.temperatureOverlay.hide();
+		this.creatureZoneOverlay.register();
+		this.creatureZoneOverlay.hide();
 	}
 
 	/**
@@ -509,6 +516,8 @@ export default class DebugTools extends Mod {
 		this.unlockedCameraMovementHandler.end();
 		this.temperatureOverlay.deregister();
 		this.temperatureOverlay.setMode(TemperatureOverlayMode.None);
+		this.creatureZoneOverlay.deregister();
+		this.creatureZoneOverlay.setMode(CreatureZoneOverlayMode.None);
 		this.accidentalDeathHelper.deregister();
 	}
 
@@ -560,7 +569,7 @@ export default class DebugTools extends Mod {
 	 * - Opens the `InspectDialog`.
 	 * - Emits `DebugToolsEvent.Inspect`
 	 */
-	public inspect(what: Tile | Creature | Player | NPC | Item): void {
+	public inspect(what: Tile | Entity): void {
 		if (!gameScreen) {
 			return;
 		}
@@ -740,7 +749,13 @@ export default class DebugTools extends Mod {
 		if (!tile)
 			return false;
 
-		this.inspect(tile);
+		this.inspect(_
+			?? tile.getPlayersOnTile().first()
+			?? tile.npc
+			?? tile.creature
+			?? tile.doodad
+			?? (tile.events?.length === 1 ? tile.events.first() : undefined)
+			?? tile);
 		return true;
 	}
 

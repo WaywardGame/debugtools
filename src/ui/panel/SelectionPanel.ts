@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -465,7 +465,7 @@ interface ISelectionSourceEvents extends Events<BlockRow> {
 }
 
 class SelectionSource<T, F> extends BlockRow {
-	public override readonly event: IEventEmitter<this, ISelectionSourceEvents>;
+	declare public event: IEventEmitter<this, ISelectionSourceEvents>;
 
 	public readonly checkButton = new CheckButton()
 		.event.subscribe("toggle", (_, checked) => { this.filter.toggle(checked); this.event.emit("change"); })

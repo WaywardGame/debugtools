@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -21,6 +21,7 @@ import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 import Mod from "@wayward/game/mod/Mod";
 import { BlockRow } from "@wayward/game/ui/component/BlockRow";
 import Button from "@wayward/game/ui/component/Button";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
 import Component from "@wayward/game/ui/component/Component";
 import ContextMenu from "@wayward/game/ui/component/ContextMenu";
 import Details from "@wayward/game/ui/component/Details";
@@ -34,6 +35,7 @@ import { IStringSection } from "@wayward/game/utilities/string/Interpolator";
 import { Bound } from "@wayward/utilities/Decorators";
 import Log from "@wayward/utilities/Log";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
+import { weakRefify } from "@wayward/utilities/object/Objects";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Clone from "../../action/Clone";
@@ -42,6 +44,7 @@ import Kill from "../../action/Kill";
 import SetStat from "../../action/SetStat";
 import SetStatMax from "../../action/SetStatMax";
 import TeleportEntity from "../../action/TeleportEntity";
+import { CreatureZoneOverlayMode } from "../../overlay/CreatureZoneOverlay";
 import { areArraysIdentical } from "../../util/Array";
 import ActionHistory from "../ActionHistory";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
@@ -75,6 +78,7 @@ export default class EntityInformation extends InspectInformationSection {
 	private readonly buttonTeleport: Button;
 	private readonly actionHistoryWrapper: Details;
 	private actionHistory?: ActionHistory;
+	private readonly highlightZone: CheckButton;
 
 	private entities: Entity[] = [];
 	private entity?: Entity;
@@ -100,6 +104,20 @@ export default class EntityInformation extends InspectInformationSection {
 				.setText(translation(DebugToolsTranslation.ButtonCloneEntity))
 				.event.subscribe("activate", this.cloneEntity))
 			.appendTo(this);
+
+		this.highlightZone = new CheckButton()
+			.setText(translation(DebugToolsTranslation.ButtonCreatureZone))
+			.setRefreshMethod(() => true
+				&& this.DEBUG_TOOLS.creatureZoneOverlay.followingEntity?.deref() === this.entity
+				&& this.DEBUG_TOOLS.creatureZoneOverlay.getMode() === CreatureZoneOverlayMode.FollowingEntity)
+			.event.subscribe("toggle", (_, checked) => {
+				this.DEBUG_TOOLS.creatureZoneOverlay.followingEntity = checked ? weakRefify(this.entity) : undefined;
+				this.DEBUG_TOOLS.creatureZoneOverlay.setMode(checked ? CreatureZoneOverlayMode.FollowingEntity : CreatureZoneOverlayMode.None);
+			})
+			.appendTo(this);
+
+		this.DEBUG_TOOLS.creatureZoneOverlay.event.until(this, "remove")
+			.subscribe("changeMode", () => this.highlightZone.refresh(false));
 
 		this.subsections = entitySubsectionClasses.stream()
 			.merge(this.DEBUG_TOOLS.modRegistryInspectDialogEntityInformationSubsections.getRegistrations()
@@ -136,6 +154,7 @@ export default class EntityInformation extends InspectInformationSection {
 
 	public override setTab(entity: number): this {
 		this.entity = this.entities[entity];
+		this.highlightZone.refresh(false);
 
 		this.buttonHeal.refreshText();
 		this.buttonTeleport.refreshText();
@@ -258,7 +277,7 @@ export default class EntityInformation extends InspectInformationSection {
 	private onStatMaxChanged(_: any, stat: IStat): void {
 		const statComponent = this.statComponents.get(stat.type);
 		if (statComponent) {
-			statComponent.getAs(RangeRow)?.editRange(range => range.setMax(stat.max!))
+			statComponent.getAs(RangeRow)?.editRange(range => range.setMax(stat.max!, undefined, false))
 			statComponent.refresh();
 		}
 		const statMaxComponent = this.statMaxComponents.get(stat.type);

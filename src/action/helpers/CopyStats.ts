@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -10,7 +10,7 @@
  */
 
 import EntityWithStats from "@wayward/game/game/entity/EntityWithStats";
-import { StatusEffectChangeReason } from "@wayward/game/game/entity/IEntity";
+import { StatusChangeReason } from "@wayward/game/game/entity/IEntity";
 import { Stat } from "@wayward/game/game/entity/IStats";
 
 /**
@@ -31,7 +31,7 @@ export default function (from: EntityWithStats, to: EntityWithStats): void {
 		}
 	}
 
-	for (const statusEffect of from.getStatuses()) {
-		to.setStatus(statusEffect.type, true, StatusEffectChangeReason.Gained);
+	for (const status of from.getStatuses()) {
+		to.setStatus(status.type, true, StatusChangeReason.Gained);
 	}
 }

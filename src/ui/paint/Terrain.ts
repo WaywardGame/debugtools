@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -9,7 +9,6 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import { terrainDescriptions } from "@wayward/game/game/tile/Terrains";
 import { CheckButton } from "@wayward/game/ui/component/CheckButton";
@@ -17,11 +16,12 @@ import Component from "@wayward/game/ui/component/Component";
 import TerrainDropdown from "@wayward/game/ui/component/dropdown/TerrainDropdown";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import { Bound } from "@wayward/utilities/Decorators";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
 export default class TerrainPaint extends Component implements IPaintSection {
-	public override event: IEventEmitter<this, Events<IPaintSection>>;
+	declare public event: IEventEmitter<this, Events<IPaintSection>>;
 
 	private readonly tilledCheckButton: CheckButton;
 	private terrain: TerrainType | undefined;

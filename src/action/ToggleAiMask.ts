@@ -9,26 +9,16 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { TickFlag } from "@wayward/game/game/IGame";
-import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import { AiMaskType } from "@wayward/game/game/entity/AI";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { defaultCanUseHandler, defaultUsability } from "../Actions";
 
-export default new Action(ActionArgument.Integer32, ActionArgument.OPTIONAL(ActionArgument.FLAGS(TickFlag)))
-	.setUsableBy(EntityType.Player)
+export default new Action(ActionArgument.Creature, ActionArgument.ENUM(AiMaskType), ActionArgument.Boolean)
+	.setUsableBy(EntityType.Human)
 	.setUsableWhen(...defaultUsability)
 	.setCanUse(defaultCanUseHandler)
-	.setHandler((action, ticks, tickFlags) => {
-		multiplayer.runSafely(
-			() =>
-				action.executor.island.fastForward({
-					ticks,
-					tickFlags,
-					playingHumans: action.executor.island.getPlayers(true),
-				}),
-			{
-				isSynced: true,
-				pauseIncomingPacketProcessing: true,
-			});
+	.setHandler((action, creature, ai, present) => {
+		creature.toggleAiMask(ai, present);
 	});

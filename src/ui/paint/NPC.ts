@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -9,17 +9,17 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import { NPCType } from "@wayward/game/game/entity/npc/INPCs";
 import Component from "@wayward/game/ui/component/Component";
 import NPCTypeDropdown from "@wayward/game/ui/component/dropdown/NPCTypeDropdown";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import { Bound } from "@wayward/utilities/Decorators";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { IPaintSection } from "../panel/PaintPanel";
 
 export default class NPCPaint extends Component implements IPaintSection {
-	public override event: IEventEmitter<this, Events<IPaintSection>>;
+	declare public event: IEventEmitter<this, Events<IPaintSection>>;
 
 	private readonly dropdown: NPCTypeDropdown<"nochange" | "remove">;
 

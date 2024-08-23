@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -11,16 +11,17 @@
 
 import { TickFlag } from "@wayward/game/game/IGame";
 import EntityWithStats from "@wayward/game/game/entity/EntityWithStats";
-import { EntityType, MoveType, StatusEffectChangeReason, StatusType } from "@wayward/game/game/entity/IEntity";
+import { EntityType, MoveType, StatusChangeReason } from "@wayward/game/game/entity/IEntity";
 import { EquipType } from "@wayward/game/game/entity/IHuman";
 import { IStatMax, Stat } from "@wayward/game/game/entity/IStats";
 import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
 import { PlayerState } from "@wayward/game/game/entity/player/IPlayer";
+import { StatusType } from "@wayward/game/game/entity/status/IStatus";
 import ItemReference, { IItemReference } from "@wayward/game/game/item/ItemReference";
+import { RenderSource, UpdateRenderFlag } from "@wayward/game/renderer/IRenderer";
 import Actions, { defaultCanUseHandler, defaultUsability } from "../Actions";
 import ResurrectCorpse from "./helpers/ResurrectCorpse";
-import { RenderSource, UpdateRenderFlag } from "@wayward/game/renderer/IRenderer";
 
 /**
  * The core stats, namely, Health, Stamina, Hunger, and Thirst, are all set to their maximum values. Any status effects are removed.
@@ -54,10 +55,10 @@ export default new Action(ActionArgument.Entity, ActionArgument.OPTIONAL(ActionA
 		if (hunger) entity.stat.set(hunger, hunger.max);
 		if (thirst) entity.stat.set(thirst, thirst.max);
 
-		entity.setStatus(StatusType.Bleeding, false, StatusEffectChangeReason.Passed);
-		entity.setStatus(StatusType.Burned, false, StatusEffectChangeReason.Passed);
-		entity.setStatus(StatusType.Poisoned, false, StatusEffectChangeReason.Passed);
-		entity.setStatus(StatusType.Frostbitten, false, StatusEffectChangeReason.Passed);
+		entity.setStatus(StatusType.Bleeding, false, StatusChangeReason.Passed);
+		entity.setStatus(StatusType.Burned, false, StatusChangeReason.Passed);
+		entity.setStatus(StatusType.Poisoned, false, StatusChangeReason.Passed);
+		entity.setStatus(StatusType.Frostbitten, false, StatusChangeReason.Passed);
 
 		if (entity.asPlayer) {
 			// i know you wanted to make it so noclip persisted after death but you're going to have to make noclip an option instead

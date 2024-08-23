@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -9,10 +9,10 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import Entity from "@wayward/game/game/entity/Entity";
 import { Stat } from "@wayward/game/game/entity/IStats";
 import Component from "@wayward/game/ui/component/Component";
+import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 
 interface IInspectEntityInformationSubsectionEvents extends Events<Component> {
 	change(): any;
@@ -21,7 +21,7 @@ interface IInspectEntityInformationSubsectionEvents extends Events<Component> {
 }
 
 export default abstract class InspectEntityInformationSubsection extends Component {
-	public override event: IEventEmitter<this, IInspectEntityInformationSubsectionEvents>;
+	declare public event: IEventEmitter<this, IInspectEntityInformationSubsectionEvents>;
 
 	public constructor() {
 		super();

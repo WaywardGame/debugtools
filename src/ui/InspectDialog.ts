@@ -1,5 +1,5 @@
 /*!
- * Copyright 2011-2023 Unlok
+ * Copyright 2011-2024 Unlok
  * https://www.unlok.ca
  *
  * Credits & Thanks:
@@ -88,7 +88,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	@Mod.log(DEBUG_TOOLS_ID)
 	public readonly LOG: Log;
 
-	public override readonly event: IEventEmitter<this, IInspectDialogEvents>;
+	declare public event: IEventEmitter<this, IInspectDialogEvents>;
 
 	private entityButtons: Button[];
 	private entityInfoSection: EntityInformation;
@@ -242,10 +242,10 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 		return false;
 	}
 
-	@EventHandler(EventBus.Game, "stoppingPlay")
-	public onGameEnd(): void {
-		this.close();
-	}
+	// @EventHandler(EventBus.Game, "stoppingPlayPreSave")
+	// public onGameEnd(): void {
+	// 	this.close();
+	// }
 
 	////////////////////////////////////
 	// Event Handlers that trigger a dialog update
