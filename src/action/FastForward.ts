@@ -15,7 +15,7 @@ import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
 import { defaultCanUseHandler, defaultUsability } from "../Actions";
 
-export default new Action(ActionArgument.Integer32, ActionArgument.OPTIONAL(ActionArgument.FLAGS(TickFlag)))
+export default new Action(ActionArgument.Integer32, ActionArgument.OPTIONAL(ActionArgument.ENUM(TickFlag)))
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(...defaultUsability)
 	.setCanUse(defaultCanUseHandler)

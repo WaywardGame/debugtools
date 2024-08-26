@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { AiMaskType, AiType, aiMaskDescriptions } from "@wayward/game/game/entity/AI";
+import { AiMaskType, AiType, aiMaskDescriptions } from "@wayward/game/game/entity/ai/AI";
 import Creature from "@wayward/game/game/entity/creature/Creature";
 import Entity from "@wayward/game/game/entity/Entity";
 import Translation from "@wayward/game/language/Translation";
@@ -64,24 +64,24 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 		const registerAiRefreshable = (refreshable: Button | Text) => this.aiRefreshables.push(refreshable);
 		new Text()
 			.setText(Translation.labelled(translation(DebugToolsTranslation.LabelAi))
-				.addArgs(() => translateAi(this.creature?.lastCalculatedAiClientSide)))
+				.addArgs(() => translateAi(this.creature?.ai.lastCalculatedAiClientSide)))
 			.schedule(registerAiRefreshable)
 			.appendTo(this);
 
 		new Details()
 			.setSummary(summary => summary
 				.setText(Translation.labelled(translation(DebugToolsTranslation.LabelAiMasks))
-					.addArgs(() => this.creature?.aiMasks
+					.addArgs(() => this.creature?.ai.aiMasks
 						.sort(maskType => aiMaskDescriptions[maskType]?.priority ?? 0)
-						.map(mask => Translation.colorizeImportance(this.creature?.hasAiMask(mask) ? "primary" : "secondary")
+						.map(mask => Translation.colorizeImportance(this.creature?.ai.hasMask(mask) ? "primary" : "secondary")
 							.addArgs(AiMaskType[mask]))
 						.collect(Translation.formatList)))
 				.setTooltip(tooltip => {
 					let includes = 0;
 					let excludes = 0;
-					for (const mask of this.creature?.aiMasks ?? []) {
+					for (const mask of this.creature?.ai.aiMasks ?? []) {
 						const description = aiMaskDescriptions[mask];
-						if (!description || !this.creature || !this.creature.hasAiMask(mask))
+						if (!description || !this.creature || !this.creature.ai.hasMask(mask))
 							// mask not active
 							continue;
 
@@ -111,7 +111,7 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 							.addArgs(translation(!aiMaskDescriptions[maskType]?.condition || !this.creature ? DebugToolsTranslation.ConditionAlwaysActive
 								: aiMaskDescriptions[maskType].condition(this.creature) ? DebugToolsTranslation.ConditionMet
 									: DebugToolsTranslation.ConditionUnmet))))))
-					.setRefreshMethod(() => !!this.creature?.aiMasks.includes(maskType))
+					.setRefreshMethod(() => !!this.creature?.ai.aiMasks.includes(maskType))
 					.event.subscribe("toggle", (_, checked) =>
 						this.creature && ToggleAiMask.execute(localPlayer, this.creature, maskType, checked))
 					.schedule(registerAiRefreshable)))
@@ -120,13 +120,13 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 		new Details()
 			.setSummary(summary => summary
 				.setText(Translation.labelled(translation(DebugToolsTranslation.LabelBaseAi))
-					.addArgs(() => translateAi(this.creature?.ai)))
+					.addArgs(() => translateAi(this.creature?.ai.ai)))
 				.schedule(registerAiRefreshable))
 			.append(...Enums.values(AiType)
 				.filter(type => Math2.bits(type).size === 1)
 				.map(aiType => new CheckButton()
 					.setText(Translation.merge(AiType[aiType]))
-					.setRefreshMethod(() => !!((this.creature?.ai ?? 0) & aiType))
+					.setRefreshMethod(() => !!((this.creature?.ai.ai ?? 0) & aiType))
 					.event.subscribe("toggle", (_, checked) =>
 						this.creature && ToggleAiType.execute(localPlayer, this.creature, aiType, checked))
 					.schedule(registerAiRefreshable)))
@@ -152,7 +152,7 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 		untilChangeOrRemove?.subscribe(["changeAi", "changeAiMask"], this.onChangeAi);
 		untilChangeOrRemove?.subscribe(["changeWanderIntent"], this.onChangeWanderIntent);
 		this.onChangeAi();
-		this.onChangeWanderIntent(this.creature, this.creature?.["wanderIntent"], this.creature?.["getDirectionToZoneCenter"]()?.toRadians());
+		this.onChangeWanderIntent(this.creature, this.creature?.ai?.["wanderIntent"], this.creature?.ai.getDirectionToHomePoint()?.toRadians());
 	}
 
 	@Bound

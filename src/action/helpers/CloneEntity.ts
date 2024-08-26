@@ -9,7 +9,7 @@
  * https://github.com/WaywardGame/types/wiki
  */
 
-import { AiType } from "@wayward/game/game/entity/AI";
+import { AiType } from "@wayward/game/game/entity/ai/AI";
 import Creature from "@wayward/game/game/entity/creature/Creature";
 import Entity from "@wayward/game/game/entity/Entity";
 import EntityWithStats from "@wayward/game/game/entity/EntityWithStats";
@@ -34,7 +34,10 @@ export default function (entity: Entity, tile: Tile): void {
 
 		if (creature.isTamed) clone.tame(creature.getOwner()!);
 		clone.renamed = entity.renamed;
-		clone.setAiType(creature.ai);
+		clone.ai.calculate();
+		clone.ai.ai = creature.ai.ai;
+		clone.ai.aiMasks = creature.ai.aiMasks.slice();
+		clone.ai.calculate();
 		clone.enemy = creature.enemy;
 
 	} else if (human) {
@@ -58,6 +61,6 @@ export default function (entity: Entity, tile: Tile): void {
 	}
 
 	if (clone.asNPC) {
-		clone.ai = AiType.Neutral;
+		clone.ai.setBase(AiType.Neutral);
 	}
 }
