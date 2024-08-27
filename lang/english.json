@@ -218,7 +218,16 @@
 			"conditionUnmet": "Unmet",
 			"conditionAlwaysActive": "Always Active",
 			"labelWanderIntent": "Wander Intent:",
-			"buttonCreatureZone": "Highlight Zone"
+			"buttonCreatureZone": "Highlight Zone",
+			"panelNPCs": "NPCs",
+			"headingNPCInterval": "{0} Spawn Interval",
+			"labelNPCIntervalTimeUntil": "Ends In",
+			"labelNPCIntervalLength": "Length",
+			"labelNPCIntervalSpawned": "Spawned",
+			"labelNPCIntervalChancesWere": "Chances Were",
+			"nPCIntervalInactive": "Inactive",
+			"resetSpawnInterval": "Reset Interval",
+			"labelNPCCount": "Current Count"
 		},
 		"item": {
 			"none": "none"

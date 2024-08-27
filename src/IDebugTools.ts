@@ -159,6 +159,17 @@ export enum DebugToolsTranslation {
 	PanelZones,
 	HeadingZonesOverlay,
 
+	// npcs
+	PanelNPCs,
+	HeadingNPCInterval,
+	LabelNPCIntervalTimeUntil,
+	LabelNPCIntervalLength,
+	LabelNPCIntervalSpawned,
+	LabelNPCIntervalChancesWere,
+	NPCIntervalInactive,
+	ResetSpawnInterval,
+	LabelNPCCount,
+
 	////////////////////////////////////
 	// Inspect Dialog
 	//

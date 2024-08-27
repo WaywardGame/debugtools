@@ -26,6 +26,7 @@ import DebugToolsPanel from "./component/DebugToolsPanel";
 import DisplayPanel from "./panel/DisplayPanel";
 import GeneralPanel from "./panel/GeneralPanel";
 import HistoryPanel from "./panel/HistoryPanel";
+import NPCPanel from "./panel/NPCPanel";
 import PaintPanel from "./panel/PaintPanel";
 import SelectionPanel from "./panel/SelectionPanel";
 import TemperaturePanel from "./panel/TemperaturePanel";
@@ -44,6 +45,7 @@ const subpanelClasses: DebugToolsDialogPanelClass[] = [
 	SelectionPanel,
 	TemplatePanel,
 	ZonesPanel,
+	NPCPanel,
 	TemperaturePanel,
 	HistoryPanel,
 ];

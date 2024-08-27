@@ -64,6 +64,7 @@ import PlaceTemplate from "./action/PlaceTemplate";
 import Remove from "./action/Remove";
 import RenameIsland from "./action/RenameIsland";
 import ReplacePlayerData from "./action/ReplacePlayerData";
+import ResetNPCSpawnInterval from "./action/ResetNPCSpawnInterval";
 import SelectionExecute from "./action/SelectionExecute";
 import SetDecay from "./action/SetDecay";
 import SetDecayBulk from "./action/SetDecayBulk";
@@ -334,6 +335,9 @@ export default class DebugTools extends Mod {
 
 	@Register.action("ToggleAiMask", ToggleAiMask)
 	public readonly actionToggleAiMask: ActionType;
+
+	@Register.action("ResetNPCSpawnInterval", ResetNPCSpawnInterval)
+	public readonly actionResetNPCSpawnInterval: ActionType;
 
 	////////////////////////////////////
 	// UI
