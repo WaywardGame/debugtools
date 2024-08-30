@@ -100,7 +100,9 @@ export default class NPCPanel extends DebugToolsPanel {
 				.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelNPCCount)
 					.passTo(Translation.colorizeImportance("secondary"))))
 				.append(new Text().setText(Translation.colorizeImportance("primary")
-					.addArgs(() => localIsland.npcs["getNPCTypeCount"](type)))
+					.addArgs(() => Translation.misc(MiscTranslation.ASlashB)
+						.addArgs(localIsland.npcs["getNPCTypeCount"](type))
+						.addArgs(localIsland.npcs["getNPCTypeTargetCount"](type))))
 					.schedule(Arrays.pushTo(this.refreshables)))
 				.appendTo(this);
 		}
@@ -122,6 +124,9 @@ export default class NPCPanel extends DebugToolsPanel {
 
 	@OwnEventHandler(NPCPanel, "switchTo")
 	protected onSwitchTo(): void {
+		for (const refreshable of this.refreshables) {
+			refreshable.refresh();
+		}
 	}
 
 	private getSpawnInterval(type: NPCType): INPCManagerSpawnTracker | undefined {
