@@ -94,7 +94,7 @@ export default class ActionHistory extends Component {
 				Translation.ui(UiTranslation.GameTooltipSharedLabel),
 				count))
 			.data.set("count", `${count}`)
-			.appendTo(this.counts!, { sorted: (a, b) => +b.data.get("count") - +a.data.get("count") });
+			.appendTo(this.counts!, { sorted: countItem => -countItem.component?.data.get("count")! || 0 });
 	}
 
 	@EventHandler(EventBus.Game, "addHistoricalAction")

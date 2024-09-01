@@ -60,7 +60,7 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 		new Details()
 			.setSummary(summary => summary
 				.setText(Translation.labelled(translation(DebugToolsTranslation.LabelAiMasks))
-					.addArgs(() => this.creature?.ai.aiMasks
+					.addArgs(() => this.creature?.ai.aiMasks.slice()
 						.sort(maskType => aiMaskDescriptions[maskType]?.priority ?? 0)
 						.map(mask => Translation.colorizeImportance(this.creature?.ai.hasMask(mask) ? "primary" : "secondary")
 							.addArgs(AiMaskType[mask]))
