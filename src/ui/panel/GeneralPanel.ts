@@ -27,7 +27,7 @@ import Enums from "@wayward/game/utilities/enum/Enums";
 import { Bound, Debounce } from "@wayward/utilities/Decorators";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
-import { WorldZ } from "@wayward/utilities/game/WorldZ";
+import WorldZ from "@wayward/utilities/game/WorldZ";
 import CancelablePromise from "@wayward/utilities/promise/CancelablePromise";
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
