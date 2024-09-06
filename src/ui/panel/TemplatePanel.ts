@@ -146,7 +146,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 	@Bound private tick(): void {
 		let updateRender = false;
 
-		const isMouseWithin = gameScreen?.isMouseWithin();
+		const isMouseWithin = gameScreen?.isMouseWithin;
 		if (!this.place.checked || !isMouseWithin)
 			updateRender = this.clearPreview();
 

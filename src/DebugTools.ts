@@ -735,7 +735,7 @@ export default class DebugTools extends Mod {
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableInspectTile"))
 	public onInspectTile(): boolean {
-		if (!this.hasPermission() || !gameScreen?.isMouseWithin() || !renderer)
+		if (!this.hasPermission() || !gameScreen?.isMouseWithin || !renderer)
 			return false;
 
 		const tile = renderer.worldRenderer.screenToTile(...InputManager.mouse.position.xy);
