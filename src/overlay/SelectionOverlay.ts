@@ -1,4 +1,3 @@
-import Stream from "@wayward/goodstream/Stream";
 import Tile from "@wayward/game/game/tile/Tile";
 import Mod from "@wayward/game/mod/Mod";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
@@ -9,6 +8,7 @@ import Vector3 from "@wayward/game/utilities/math/Vector3";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID } from "../IDebugTools";
 import { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
+import Objects from "@wayward/utilities/object/Objects";
 
 export default class SelectionOverlay {
 
@@ -131,9 +131,8 @@ export default class SelectionOverlay {
 	 * Returns an array of neighbor positions that are painted/selected
 	 */
 	private static getPaintOverlayConnections(neighbors: INeighborTiles): NeighborPosition[] {
-		return Stream.keys(neighbors)
-			.filter(neighborPosition => this.overlays.has(neighbors[neighborPosition]))
-			.toArray();
+		return Objects.keys(neighbors)
+			.filter(neighborPosition => this.overlays.has(neighbors[neighborPosition]));
 	}
 
 }

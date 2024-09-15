@@ -94,11 +94,10 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 	 * This will only be called once
 	 */
 	protected override getSubpanels(): DebugToolsPanel[] {
-		return subpanelClasses.stream()
-			.merge(this.DEBUG_TOOLS.modRegistryMainDialogPanels.getRegistrations()
+		return subpanelClasses
+			.concat(this.DEBUG_TOOLS.modRegistryMainDialogPanels.getRegistrations()
 				.map(registration => registration.data(DebugToolsPanel)))
-			.map(cls => new cls())
-			.toArray();
+			.map(cls => new cls());
 	}
 
 	/**

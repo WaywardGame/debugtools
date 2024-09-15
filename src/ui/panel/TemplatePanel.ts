@@ -22,9 +22,8 @@ import { Bound } from "@wayward/utilities/Decorators";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { Priority } from "@wayward/utilities/event/EventEmitter";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
-
 import Tile from "@wayward/game/game/tile/Tile";
-import Stream from "@wayward/goodstream/Stream";
+
 import DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import PlaceTemplate from "../../action/PlaceTemplate";
@@ -72,8 +71,8 @@ export default class TemplatePanel extends DebugToolsPanel {
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTemplate)))
 			.append(this.dropdownTemplate = new Dropdown<string>()
 				.setRefreshMethod(() => ({
-					defaultOption: Stream.keys<string>(terrainTemplates[this.dropdownType.selectedOption]!).first()!,
-					options: Stream.keys<string>(terrainTemplates[this.dropdownType.selectedOption]!)
+					defaultOption: Object.keys(terrainTemplates[this.dropdownType.selectedOption]!).at(0)!,
+					options: Object.keys(terrainTemplates[this.dropdownType.selectedOption]!)
 						.map(name => Tuple(name, TranslationImpl.generator(name)))
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),

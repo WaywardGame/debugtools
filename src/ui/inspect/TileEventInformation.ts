@@ -33,7 +33,7 @@ export default class TileEventInformation extends InspectInformationSection {
 	}
 
 	public override getTabs(): TabInformation[] {
-		return this.tileEvents.entries().stream()
+		return this.tileEvents.entries()
 			.map(([i, tileEvent]) => Tuple(i, () => translation(DebugToolsTranslation.TileEventName)
 				.get(Translation.nameOf(Dictionary.TileEvent, tileEvent, Article.None).inContext(TextContext.Title))))
 			.toArray();

@@ -101,12 +101,11 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 * This will only be called once
 	 */
 	protected override getSubpanels(): InspectInformationSection[] {
-		const subpanels = informationSectionClasses.stream()
-			.merge(this.DEBUG_TOOLS.modRegistryInspectDialogPanels.getRegistrations()
+		const subpanels = informationSectionClasses
+			.concat(this.DEBUG_TOOLS.modRegistryInspectDialogPanels.getRegistrations()
 				.map(registration => registration.data(InspectInformationSection)))
 			.map(cls => new cls()
-				.event.subscribe("update", this.update))
-			.toArray();
+				.event.subscribe("update", this.update));
 
 		// we're going to need the entity information section for some other stuff
 		this.entityInfoSection = subpanels
@@ -126,13 +125,13 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	protected override getSubpanelInformation(subpanels: InspectInformationSection[]): SubpanelInformation[] {
 		this.entityButtons = [];
 
-		return this.subpanels.stream()
+		return this.subpanels
 			// add the tabs of the section to the tuple
 			.map(section => Tuple(section, section.getTabs()))
 			// if there are no tabs from the section, remove it
 			.filter(([, tabs]) => !!tabs.length)
 			// map each of the section/tab tuples with an array of tuples representing all the subpanels (tabs) provided by that section
-			.map(([section, tabs]) => tabs
+			.flatMap(([section, tabs]) => tabs
 				// map each tab to the subpanel information for it
 				.map(([index, getTabTranslation]) => Tuple(
 					Text.toString(getTabTranslation),
@@ -142,11 +141,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 						.schedule(section => this.onShowSubpanel(section)(component)),
 					// we cache all of the entity buttons
 					(button: Button) => !(section instanceof EntityInformation) ? undefined : this.entityButtons[index] = button,
-				)))
-			// currently we have an array of `SubpanelInformation` arrays, because each tab provided an array of them, fix with `flat`
-			.flatMap<SubpanelInformation>()
-			// and now return an array
-			.toArray();
+				)));
 	}
 
 	public override getName(): Translation {

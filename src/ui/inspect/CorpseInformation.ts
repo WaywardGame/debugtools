@@ -36,7 +36,7 @@ export default class CorpseInformation extends InspectInformationSection {
 	}
 
 	public override getTabs(): TabInformation[] {
-		return this.corpses.entries().stream()
+		return this.corpses.entries()
 			.map(([i, corpse]) => Tuple(i, () => translation(DebugToolsTranslation.CorpseName)
 				.get(localIsland.corpses.getName(corpse, Article.None).inContext(TextContext.Title))))
 			.toArray();

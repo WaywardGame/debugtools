@@ -108,12 +108,11 @@ export default class EntityInformation extends InspectInformationSection {
 		this.DEBUG_TOOLS.creatureZoneOverlay.event.until(this, "remove")
 			.subscribe("changeMode", () => this.highlightZone.refresh(false));
 
-		this.subsections = entitySubsectionClasses.stream()
-			.merge(this.DEBUG_TOOLS.modRegistryInspectDialogEntityInformationSubsections.getRegistrations()
+		this.subsections = entitySubsectionClasses
+			.concat(this.DEBUG_TOOLS.modRegistryInspectDialogEntityInformationSubsections.getRegistrations()
 				.map(registration => registration.data(InspectEntityInformationSubsection)))
 			.map(cls => new cls()
-				.appendTo(this))
-			.toArray();
+				.appendTo(this));
 
 		this.statWrapper = new Component()
 			.classes.add("debug-tools-inspect-entity-sub-section")
@@ -135,7 +134,7 @@ export default class EntityInformation extends InspectInformationSection {
 	}
 
 	public override getTabs(): [number, () => IStringSection[]][] {
-		return this.entities.entries().stream()
+		return this.entities.entries()
 			.map(([i, entity]) => Tuple(i, () => translation(DebugToolsTranslation.EntityName)
 				.get(EntityType[entity.entityType], entity.getName()/*.inContext(TextContext.Title)*/)))
 			.toArray();
@@ -314,14 +313,13 @@ export default class EntityInformation extends InspectInformationSection {
 
 	@Bound
 	private createTeleportToPlayerMenu(): ContextMenu<string | number | symbol> {
-		return game.playerManager.getAll(true, true).stream()
+		return game.playerManager.getAll(true, true)
 			.filter(player => player !== this.entity)
 			.map(player => Tuple(player.name, {
 				translation: TranslationImpl.generator(player.name),
 				onActivate: () => this.teleport(player.tile),
 			}))
 			.sort(([, t1], [, t2]) => Text.toString(t1.translation).localeCompare(Text.toString(t2.translation)))
-			// create the context menu from them
 			.collect<ContextMenu>(options => new ContextMenu(...options))
 			.addAllDescribedOptions();
 	}
