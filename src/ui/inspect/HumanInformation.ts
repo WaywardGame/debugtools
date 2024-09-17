@@ -1,4 +1,4 @@
-import { Deity } from "@wayward/game/game/deity/Deity";
+import Deity from "@wayward/game/game/deity/Deity";
 import Entity from "@wayward/game/game/entity/Entity";
 import Human from "@wayward/game/game/entity/Human";
 import { StatusChangeReason } from "@wayward/game/game/entity/IEntity";
