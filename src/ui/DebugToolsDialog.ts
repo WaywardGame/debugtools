@@ -8,7 +8,6 @@ import { MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/m
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
-import { yieldTask } from "@wayward/utilities/promise/Async";
 import DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import DebugToolsPanel from "./component/DebugToolsPanel";
@@ -21,6 +20,7 @@ import SelectionPanel from "./panel/SelectionPanel";
 import TemperaturePanel from "./panel/TemperaturePanel";
 import TemplatePanel from "./panel/TemplatePanel";
 import ZonesPanel from "./panel/ZonesPanel";
+import Task from "@wayward/utilities/promise/Task";
 
 export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
 
@@ -63,7 +63,7 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 		this.classes.add("debug-tools-dialog");
 
 		if (!this.DEBUG_TOOLS.hasPermission()) {
-			yieldTask().then(() => gameScreen?.dialogs.close(id));
+			Task.yield().then(() => gameScreen?.dialogs.close(id));
 		}
 	}
 
