@@ -4,7 +4,7 @@ import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
 import { ActionArgumentCustom } from "@wayward/game/game/entity/action/argument/ActionArgumentCustom";
 import { MagicalPropertyIdentity, MagicalPropertyIdentityHash } from "@wayward/game/game/magic/MagicalPropertyManager";
-import { MagicalPropertyType, magicalPropertyDescriptions } from "@wayward/game/game/magic/MagicalPropertyType";
+import MagicalPropertyType, { magicalPropertyDescriptions } from "@wayward/game/game/magic/MagicalPropertyType";
 import Enums from "@wayward/game/utilities/enum/Enums";
 import { defaultCanUseHandler, defaultUsability } from "../Actions";
 
