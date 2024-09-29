@@ -21,7 +21,6 @@ import Enums from "@wayward/game/utilities/enum/Enums";
 import { Bound } from "@wayward/utilities/Decorators";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import EventEmitter from "@wayward/utilities/event/EventEmitter";
-import { debounce } from "@wayward/utilities/promise/Async";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import ClearInventory from "../../action/ClearInventory";
 import Remove from "../../action/Remove";
@@ -257,8 +256,9 @@ export default class Container extends Component {
 	@EventHandler(EventBus.ItemManager, "containerItemAdd")
 	@EventHandler(EventBus.ItemManager, "containerItemRemove")
 	protected onContainerItemChange(itemManager: ItemManager, items: Item[], container?: IContainer, containerTile?: Tile): void {
-		if (container === this.containerSupplier?.())
-			debounce(100, true, this.refreshItems);
+		if (container === this.containerSupplier?.()) {
+			this.schedule(100, 1, this.refreshItems);
+		}
 	}
 
 	@Bound private getContainer(): IContainer | undefined {
