@@ -240,3 +240,7 @@
 	top: calc(50% - 2px);
 	left: calc(50% - 2px);
 }
+
+.debug-tools-hidden {
+	display: none !important;
+}

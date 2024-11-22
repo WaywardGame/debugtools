@@ -16,8 +16,9 @@ import Enums from "@wayward/game/utilities/enum/Enums";
 import { Bound } from "@wayward/utilities/Decorators";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import { sleep } from "@wayward/utilities/promise/Async";
-import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, ISaveData, translation } from "../../IDebugTools";
+import type DebugTools from "../../DebugTools";
+import type { ISaveData } from "../../IDebugTools";
+import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 // import Component from "@wayward/game/ui/component/Component";
 // import Renderer from "@wayward/game/renderer/Renderer";
@@ -112,6 +113,12 @@ export default class DisplayPanel extends DebugToolsPanel {
 			})
 			.appendTo(this);
 
+		new CheckButton()
+			.setText(translation(DebugToolsTranslation.ButtonHideExtraneousUI))
+			.setRefreshMethod(() => this.saveData.hideExtraneousUI ?? false)
+			.event.subscribe("toggle", (_, checked) => this.DEBUG_TOOLS.toggleExtraneousUI(checked))
+			.appendTo(this);
+
 		new Divider()
 			.appendTo(this);
 
@@ -199,5 +206,4 @@ export default class DisplayPanel extends DebugToolsPanel {
 	protected getRenderFlags(): RenderLayerFlag {
 		return this.saveData.renderLayerFlags ?? RenderLayerFlag.All;
 	}
-
 }

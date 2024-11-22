@@ -1,6 +1,6 @@
 import Translation from "@wayward/game/language/Translation";
-import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
-import { RenderLayerFlag } from "@wayward/game/renderer/world/IWorldRenderer";
+import type TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
+import type { RenderLayerFlag } from "@wayward/game/renderer/world/IWorldRenderer";
 import type DebugTools from "./DebugTools";
 import type { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import type { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
@@ -73,6 +73,8 @@ export enum DebugToolsTranslation {
 	CreatureZoneOverlayModeActive,
 	CreatureZoneOverlayModeAll,
 	CreatureZoneOverlayModeFollowingEntity,
+	ButtonHideExtraneousUI,
+
 	// Manipulation
 	PanelPaint,
 	ButtonPaint,
@@ -260,11 +262,15 @@ export interface ISaveData {
 	/**
 	 * Data for each player in this save, indexed by their IDs.
 	 */
-	playerData: { [key: string]: IPlayerData };
+	playerData: Record<string, IPlayerData>;
 	/**
 	 * Layers to render
 	 */
 	renderLayerFlags?: RenderLayerFlag;
+	/**
+	 * Hide extraneous UI
+	 */
+	hideExtraneousUI?: boolean;
 }
 
 export interface IPlayerData {

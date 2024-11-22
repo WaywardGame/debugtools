@@ -1,39 +1,43 @@
 import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler, eventManager } from "@wayward/game/event/EventManager";
-import Entity from "@wayward/game/game/entity/Entity";
-import { ActionType } from "@wayward/game/game/entity/action/IAction";
-import { Source } from "@wayward/game/game/entity/player/IMessageManager";
-import Player from "@wayward/game/game/entity/player/Player";
-import { InspectType } from "@wayward/game/game/inspection/IInspection";
+import type Entity from "@wayward/game/game/entity/Entity";
+import type { ActionType } from "@wayward/game/game/entity/action/IAction";
+import type { Source } from "@wayward/game/game/entity/player/IMessageManager";
+import type Player from "@wayward/game/game/entity/player/Player";
+import type { InspectType } from "@wayward/game/game/inspection/IInspection";
 import Island from "@wayward/game/game/island/Island";
-import { OverlayType } from "@wayward/game/game/tile/ITerrain";
-import Tile from "@wayward/game/game/tile/Tile";
-import Dictionary from "@wayward/game/language/Dictionary";
-import Message from "@wayward/game/language/dictionary/Message";
-import InterModRegistry from "@wayward/game/mod/InterModRegistry";
+import type { OverlayType } from "@wayward/game/game/tile/ITerrain";
+import type Tile from "@wayward/game/game/tile/Tile";
+import type Dictionary from "@wayward/game/language/Dictionary";
+import type Message from "@wayward/game/language/dictionary/Message";
+import type InterModRegistry from "@wayward/game/mod/InterModRegistry";
 import Mod from "@wayward/game/mod/Mod";
 import Register, { Registry } from "@wayward/game/mod/ModRegistry";
 import { RenderSource, UpdateRenderFlag, ZOOM_LEVEL_MAX } from "@wayward/game/renderer/IRenderer";
-import { Renderer } from "@wayward/game/renderer/Renderer";
+import type { Renderer } from "@wayward/game/renderer/Renderer";
 import { WorldRenderer } from "@wayward/game/renderer/world/WorldRenderer";
-import Bind, { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
-import Bindable from "@wayward/game/ui/input/Bindable";
+import type { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
+import Bind from "@wayward/game/ui/input/Bind";
+import type Bindable from "@wayward/game/ui/input/Bindable";
 import { IInput } from "@wayward/game/ui/input/IInput";
 import InputManager from "@wayward/game/ui/input/InputManager";
-import { DialogId } from "@wayward/game/ui/screen/screens/game/Dialogs";
+import type { DialogId } from "@wayward/game/ui/screen/screens/game/Dialogs";
 import ItemComponent, { ItemClasses } from "@wayward/game/ui/screen/screens/game/component/ItemComponent";
-import { MenuBarButtonGroup, MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
+import type { MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
+import { MenuBarButtonGroup } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
 import Draggable from "@wayward/game/ui/util/Draggable";
-import { IVector2 } from "@wayward/game/utilities/math/IVector";
+import type { IVector2 } from "@wayward/game/utilities/math/IVector";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 import Vector3 from "@wayward/game/utilities/math/Vector3";
 import { Bound } from "@wayward/utilities/Decorators";
-import Log from "@wayward/utilities/Log";
+import type Log from "@wayward/utilities/Log";
 import _ from "@wayward/utilities/_";
-import { IInjectionApi, Inject, InjectionPosition } from "@wayward/utilities/class/Inject";
-import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import type { IInjectionApi } from "@wayward/utilities/class/Inject";
+import { Inject, InjectionPosition } from "@wayward/utilities/class/Inject";
+import type { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import Actions from "./Actions";
-import { DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
+import type { IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection } from "./IDebugTools";
+import { DebugToolsTranslation, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
 import AddItemToInventory from "./action/AddItemToInventory";
@@ -380,7 +384,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * Retruns true if the camera state is `CameraState.Unlocked`. `CameraState.Transition` is considered "locked"
 	 */
-	public get isCameraUnlocked() {
+	public get isCameraUnlocked(): boolean {
 		return this.cameraState === CameraState.Unlocked;
 	}
 
@@ -577,7 +581,9 @@ export default class DebugTools extends Mod {
 	 * Toggles the main dialog.
 	 */
 	public toggleDialog(): void {
-		if (!this.hasPermission() || !gameScreen) return;
+		if (!this.hasPermission() || !gameScreen) {
+			return;
+		}
 
 		gameScreen.dialogs.toggle(this.dialogMain);
 	}
@@ -626,6 +632,7 @@ export default class DebugTools extends Mod {
 	@EventHandler(EventBus.Game, "play")
 	protected onGamePlay(): void {
 		this.unlockedCameraMovementHandler.begin();
+		this.toggleExtraneousUI(this.data.hideExtraneousUI ?? false);
 	}
 
 	@EventHandler(EventBus.Game, "rendererCreated")
@@ -695,14 +702,16 @@ export default class DebugTools extends Mod {
 
 	@EventHandler(EventBus.Players, "shouldDie")
 	public onPlayerDie(player: Player): false | void {
-		if (this.getPlayerData(player, "unkillable"))
+		if (this.getPlayerData(player, "unkillable")) {
 			return false;
+		}
 	}
 
 	@EventHandler(EventBus.Players, "shouldRender")
 	public onPlayerRender(player: Player): false | void {
-		if (this.getPlayerData(player, "noRender"))
+		if (this.getPlayerData(player, "noRender")) {
 			return false;
+		}
 	}
 
 	/**
@@ -715,8 +724,9 @@ export default class DebugTools extends Mod {
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableToggleCameraLock"))
 	public onToggleCameraLock(): boolean {
-		if (!this.hasPermission())
+		if (!this.hasPermission()) {
 			return false;
+		}
 
 		this.setCameraUnlocked(this.cameraState !== CameraState.Unlocked);
 		return true;
@@ -724,8 +734,9 @@ export default class DebugTools extends Mod {
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableToggleFullVisibility"))
 	public onToggleFullVisibility(): boolean {
-		if (!this.hasPermission())
+		if (!this.hasPermission()) {
 			return false;
+		}
 
 		const visibility = !(this.getPlayerData(localPlayer, "fog") || this.getPlayerData(localPlayer, "lighting"));
 		this.toggleFog(visibility);
@@ -735,12 +746,14 @@ export default class DebugTools extends Mod {
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableInspectTile"))
 	public onInspectTile(): boolean {
-		if (!this.hasPermission() || !gameScreen?.isMouseWithin || !renderer)
+		if (!this.hasPermission() || !gameScreen?.isMouseWithin || !renderer) {
 			return false;
+		}
 
 		const tile = renderer.worldRenderer.screenToTile(...InputManager.mouse.position.xy);
-		if (!tile)
+		if (!tile) {
 			return false;
+		}
 
 		this.inspect(_
 			?? tile.getPlayersOnTile().first()
@@ -755,8 +768,9 @@ export default class DebugTools extends Mod {
 	@Bind.onDown(Registry<DebugTools>().get("bindableInspectItem"))
 	public onInspectItem(api: IBindHandlerApi): boolean {
 		const item = api.mouse.isWithin(`.${ItemClasses.Main}`)?.component?.getAs(ItemComponent)?.handler.getItem?.();
-		if (!this.hasPermission() || !item)
+		if (!this.hasPermission() || !item) {
 			return false;
+		}
 
 		this.inspect(item);
 		return true;
@@ -764,8 +778,9 @@ export default class DebugTools extends Mod {
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableInspectLocalPlayer"))
 	public onInspectLocalPlayer(): boolean {
-		if (!this.hasPermission())
+		if (!this.hasPermission()) {
 			return false;
+		}
 
 		this.inspect(localPlayer);
 		return true;
@@ -773,8 +788,9 @@ export default class DebugTools extends Mod {
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableHealLocalPlayer"))
 	public onHealLocalPlayer(): boolean {
-		if (!this.hasPermission())
+		if (!this.hasPermission()) {
 			return false;
+		}
 
 		Heal.execute(localPlayer, localPlayer);
 		return true;
@@ -782,12 +798,14 @@ export default class DebugTools extends Mod {
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableTeleportLocalPlayer"))
 	public onTeleportLocalPlayer(api: IBindHandlerApi): boolean {
-		if (!this.hasPermission() || !renderer || Draggable.isDragging)
+		if (!this.hasPermission() || !renderer || Draggable.isDragging) {
 			return false;
+		}
 
 		const tile = renderer.worldRenderer.screenToTile(...api.mouse.position.xy);
-		if (!tile)
+		if (!tile) {
 			return false;
+		}
 
 		TeleportEntity.execute(localPlayer, localPlayer, tile);
 		return true;
@@ -795,8 +813,9 @@ export default class DebugTools extends Mod {
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableToggleNoClipOnLocalPlayer"))
 	public onToggleNoClipOnLocalPlayer(): boolean {
-		if (!this.hasPermission())
+		if (!this.hasPermission()) {
 			return false;
+		}
 
 		ToggleNoClip.execute(localPlayer, localPlayer);
 		return true;
@@ -841,7 +860,7 @@ export default class DebugTools extends Mod {
 		}
 
 		const versionString = this.mod.version;
-		const lastLoadVersionString = (data && data.lastVersion) || "0.0.0";
+		const lastLoadVersionString = (data?.lastVersion) || "0.0.0";
 
 		if (versionString === lastLoadVersionString) {
 			return false;
@@ -851,6 +870,15 @@ export default class DebugTools extends Mod {
 		const lastLoadVersion = new Version(lastLoadVersionString);
 
 		return lastLoadVersion.isOlderThan(version);
+	}
+
+	public toggleExtraneousUI(checked: boolean): void {
+		for (const placeholder of document.getElementsByClassName("game-quadrant-placeholder")) {
+			placeholder.classList.toggle("debug-tools-hidden", checked);
+		}
+
+		document.getElementById("window-title-text")?.classList.toggle("debug-tools-hidden", checked);
+		this.data.hideExtraneousUI = checked;
 	}
 }
 

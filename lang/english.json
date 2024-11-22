@@ -65,6 +65,7 @@
 			"buttonRefreshTiles": "Refresh Tiles",
 			"buttonReloadShaders": "Reload Shaders",
 			"buttonReloadTextures": "Reload Textures",
+			"buttonHideExtraneousUI": "Hide Extraneous UI",
 			"headingLayers": "Layers",
 			"buttonToggleLayer": "{0}",
 			"panelPaint": "Tile Paint",
