@@ -1,8 +1,8 @@
-import { IActionApi } from "@wayward/game/game/entity/action/IAction";
-import Entity from "@wayward/game/game/entity/Entity";
-import Item from "@wayward/game/game/item/Item";
+import type { IActionApi } from "@wayward/game/game/entity/action/IAction";
+import type Entity from "@wayward/game/game/entity/Entity";
+import type Item from "@wayward/game/game/item/Item";
 import InspectDialog from "../../ui/InspectDialog";
-import Human from "@wayward/game/game/entity/Human";
+import type Human from "@wayward/game/game/entity/Human";
 
 export default function (action: IActionApi<Human>, item: Item): void {
 	const container = item.containedWithin;
@@ -14,7 +14,7 @@ export default function (action: IActionApi<Human>, item: Item): void {
 
 		} else if ("entityType" in container) {
 			const entity = container as any as Entity;
-			entity.asPlayer?.updateTablesAndWeight("M");
+			entity.asHuman?.updateTablesAndWeight("M");
 		}
 	}
 
