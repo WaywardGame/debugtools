@@ -1,24 +1,27 @@
-import { SkillType } from "@wayward/game/game/entity/IHuman";
-import Creature from "@wayward/game/game/entity/creature/Creature";
-import NPC from "@wayward/game/game/entity/npc/NPC";
-import Player from "@wayward/game/game/entity/player/Player";
+import type { SkillType } from "@wayward/game/game/entity/IHuman";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import type NPC from "@wayward/game/game/entity/npc/NPC";
+import type Player from "@wayward/game/game/entity/player/Player";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
 import Mod from "@wayward/game/mod/Mod";
 import { BlockRow } from "@wayward/game/ui/component/BlockRow";
 import Button from "@wayward/game/ui/component/Button";
 import { CheckButton } from "@wayward/game/ui/component/CheckButton";
-import Dropdown, { IDropdownOption } from "@wayward/game/ui/component/Dropdown";
+import type { IDropdownOption } from "@wayward/game/ui/component/Dropdown";
+import Dropdown from "@wayward/game/ui/component/Dropdown";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import { RangeRow } from "@wayward/game/ui/component/RangeRow";
 import SkillDropdown from "@wayward/game/ui/component/dropdown/SkillDropdown";
 import { Bound } from "@wayward/utilities/Decorators";
-import DebugTools from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, translation } from "../../IDebugTools";
+import type DebugTools from "../../DebugTools";
+import type { IPlayerData } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import ClearNotes from "../../action/ClearNotes";
 import ReplacePlayerData from "../../action/ReplacePlayerData";
 import SetSkill from "../../action/SetSkill";
 import ToggleNoClip from "../../action/ToggleNoClip";
+import ToggleFastMovement from "../../action/ToggleFastMovement";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 import SetPlayerData from "../../action/SetPlayerData";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
@@ -32,6 +35,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	private readonly checkButtonUnkillable: CheckButton;
 	private readonly checkButtonNoRender: CheckButton;
 	private readonly checkButtonNoClip: CheckButton;
+	private readonly checkButtonFastMovement: CheckButton;
 	private readonly skillRangeRow: RangeRow;
 	private readonly checkButtonPermissions?: CheckButton;
 	private readonly playerToReplaceDataWithDropdown?: Dropdown<string>;
@@ -58,6 +62,13 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				.setText(translation(DebugToolsTranslation.ButtonToggleNoClip))
 				.setRefreshMethod(() => this.player?.isFlying ?? false)
 				.event.subscribe("toggle", this.toggleNoClip))
+			.append(this.checkButtonFastMovement = new CheckButton()
+				.setText(translation(DebugToolsTranslation.ButtonToggleFastMovement))
+				.setRefreshMethod(() => this.player?.isFastMoving ?? false)
+				.event.subscribe("toggle", this.toggleFastMovement))
+			.appendTo(this);
+
+		new BlockRow()
 			.append(this.checkButtonUnkillable = new CheckButton()
 				.setText(translation(DebugToolsTranslation.ButtonToggleUnkillable))
 				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "unkillable") === true : false)
@@ -137,13 +148,17 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	}
 
 	public override update(entity: Creature | NPC | Player): void {
-		if (this.player === entity) return;
+		if (this.player === entity) {
+			return;
+		}
 
 		this.player = entity.asPlayer;
 		this.toggle(!!this.player);
 		this.clearNotesButton.toggle(!!this.player?.notes.notes.length);
 
-		if (!this.player) return;
+		if (!this.player) {
+			return;
+		}
 
 		this.event.emit("change");
 
@@ -164,6 +179,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 		}
 
 		this.checkButtonNoClip.refresh();
+		this.checkButtonFastMovement.refresh();
 		this.checkButtonUnkillable.refresh();
 		this.checkButtonNoRender.refresh();
 		this.rangeWeightBonus.refresh();
@@ -186,14 +202,18 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 	@Bound
 	private toggleUnkillable(_: any, unkillable: boolean): void {
-		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "unkillable") === unkillable) return;
+		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "unkillable") === unkillable) {
+			return;
+		}
 
 		SetPlayerData.execute(localPlayer, this.player!, "unkillable", unkillable);
 	}
 
 	@Bound
 	private toggleNoRender(_: any, noRender: boolean): void {
-		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "noRender") === noRender) return;
+		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "noRender") === noRender) {
+			return;
+		}
 
 		SetPlayerData.execute(localPlayer, this.player!, "noRender", noRender);
 		localPlayer.updateView(RenderSource.Mod, false);
@@ -201,28 +221,45 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 	@Bound
 	private toggleNoClip(_: any, noclip: boolean): void {
-		if (this.player?.isFlying === noclip) return;
+		if (this.player?.isFlying === noclip) {
+			return;
+		}
 
 		ToggleNoClip.execute(localPlayer, this.player!);
 	}
 
 	@Bound
+	private toggleFastMovement(_: any, fastMovement: boolean): void {
+		if (this.player?.isFastMoving === fastMovement) {
+			return;
+		}
+
+		ToggleFastMovement.execute(localPlayer, this.player!);
+	}
+
+	@Bound
 	private togglePermissions(_: any, permissions: boolean): void {
-		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "permissions") === permissions) return;
+		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "permissions") === permissions) {
+			return;
+		}
 
 		SetPlayerData.execute(localPlayer, this.player!, "permissions", permissions);
 	}
 
 	@Bound
 	private setWeightBonus(_: any, weightBonus: number): void {
-		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "weightBonus") === weightBonus) return;
+		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "weightBonus") === weightBonus) {
+			return;
+		}
 
 		SetPlayerData.execute(localPlayer, this.player!, "weightBonus", weightBonus);
 	}
 
 	@Bound
 	private onPlayerDataChange<K extends keyof IPlayerData>(_: any, playerId: number, key: K, value: IPlayerData[K]): void {
-		if (!this.player || playerId !== this.player.id) return;
+		if (!this.player || playerId !== this.player.id) {
+			return;
+		}
 
 		switch (key) {
 			case "weightBonus":
@@ -235,7 +272,10 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				this.checkButtonNoRender.refresh();
 				break;
 			case "permissions":
-				if (this.checkButtonPermissions) this.checkButtonPermissions.refresh();
+				if (this.checkButtonPermissions) {
+					this.checkButtonPermissions.refresh();
+				}
+
 				break;
 		}
 	}

@@ -31,6 +31,7 @@
 			"modDebugToolsTeleportLocalPlayer": "Teleport Local Player",
 			"modDebugToolsHealLocalPlayer": "Heal Local Player",
 			"modDebugToolsToggleNoClip": "Toggle No-clip",
+			"modDebugToolsToggleFastMovement": "Toggle Fast Movement",
 			"modDebugToolsCloseInspectDialog": "Cancel Inspection"
 		},
 		"modDebugToolsDebugTools": {
@@ -163,6 +164,7 @@
 			"buttonToggleUnkillable": "Unkillable",
 			"buttonToggleNoRender": "No Render",
 			"buttonToggleNoClip": "Noclip {BINDINGS:ModDebugToolsToggleNoClip}",
+			"buttonToggleFastMovement": "Fast Movement {BINDINGS:ModDebugToolsToggleFastMovement}",
 			"labelSkill": "{#--text-secondary:Set Skill(s)}",
 			"none": "None",
 			"addToInventory": "Add to Container",

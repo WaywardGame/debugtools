@@ -193,6 +193,7 @@ export enum DebugToolsTranslation {
 	ButtonToggleUnkillable,
 	ButtonToggleNoRender,
 	ButtonToggleNoClip,
+	ButtonToggleFastMovement,
 	LabelSkill,
 	None,
 	LabelQuality,

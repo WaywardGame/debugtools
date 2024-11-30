@@ -76,6 +76,7 @@ import TeleportEntity from "./action/TeleportEntity";
 import ToggleAiMask from "./action/ToggleAiMask";
 import ToggleAiType from "./action/ToggleAiType";
 import ToggleNoClip from "./action/ToggleNoClip";
+import ToggleFastMovement from "./action/ToggleFastMovement";
 import ToggleTilled from "./action/ToggleTilled";
 import { CreatureZoneOverlay, CreatureZoneOverlayMode } from "./overlay/CreatureZoneOverlay";
 import { TemperatureOverlay, TemperatureOverlayMode } from "./overlay/TemperatureOverlay";
@@ -181,6 +182,8 @@ export default class DebugTools extends Mod {
 	public readonly bindableTeleportLocalPlayer: Bindable;
 	@Register.bindable("ToggleNoClip", IInput.key("KeyN", "Alt"))
 	public readonly bindableToggleNoClipOnLocalPlayer: Bindable;
+	@Register.bindable("ToggleFastMovement", IInput.key("KeyN", "Shift"))
+	public readonly bindableToggleFastMovementOnLocalPlayer: Bindable;
 
 	@Register.bindable("ToggleCameraLock", IInput.key("KeyC", "Alt"))
 	public readonly bindableToggleCameraLock: Bindable;
@@ -292,6 +295,9 @@ export default class DebugTools extends Mod {
 
 	@Register.action("ToggleNoclip", ToggleNoClip)
 	public readonly actionToggleNoclip: ActionType;
+
+	@Register.action("ToggleFastMovement", ToggleFastMovement)
+	public readonly actionToggleFastMovement: ActionType;
 
 	@Register.action("RenameIsland", RenameIsland)
 	public readonly actionRenameIsland: ActionType;
@@ -818,6 +824,16 @@ export default class DebugTools extends Mod {
 		}
 
 		ToggleNoClip.execute(localPlayer, localPlayer);
+		return true;
+	}
+
+	@Bind.onDown(Registry<DebugTools>().get("bindableToggleFastMovementOnLocalPlayer"))
+	public onToggleFastMovementOnLocalPlayer(): boolean {
+		if (!this.hasPermission()) {
+			return false;
+		}
+
+		ToggleFastMovement.execute(localPlayer, localPlayer);
 		return true;
 	}
 
