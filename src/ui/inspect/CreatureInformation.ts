@@ -1,6 +1,6 @@
 import { AiMaskType, AiType, aiMaskDescriptions } from "@wayward/game/game/entity/ai/AI";
-import Creature from "@wayward/game/game/entity/creature/Creature";
-import Entity from "@wayward/game/game/entity/Entity";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import type Entity from "@wayward/game/game/entity/Entity";
 import Translation from "@wayward/game/language/Translation";
 import Button from "@wayward/game/ui/component/Button";
 import { CheckButton } from "@wayward/game/ui/component/CheckButton";
@@ -26,10 +26,10 @@ interface IAiRefreshable {
 export default class CreatureInformation extends InspectEntityInformationSubsection {
 
 	private creature: Creature | undefined;
-	private tamedButton: CheckButton;
-	private aiRefreshables: IAiRefreshable[] = [];
-	private wanderIntent: Component;
-	private towardsZoneCenter: Component;
+	private readonly tamedButton: CheckButton;
+	private readonly aiRefreshables: IAiRefreshable[] = [];
+	private readonly wanderIntent: Component;
+	private readonly towardsZoneCenter: Component;
 
 	public constructor() {
 		super();
@@ -70,9 +70,11 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 					let excludes = 0;
 					for (const mask of this.creature?.ai.aiMasks ?? []) {
 						const description = aiMaskDescriptions[mask];
-						if (!description || !this.creature || !this.creature.ai.hasMask(mask))
-							// mask not active
+
+						// mask not active
+						if (!description || !this.creature?.ai.hasMask(mask)) {
 							continue;
+						}
 
 						includes |= description.include ?? 0;
 						includes &= ~(description.exclude ?? 0);
@@ -129,7 +131,9 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 	}
 
 	public override update(entity: Entity): void {
-		if (this.creature === entity) return;
+		if (this.creature === entity) {
+			return;
+		}
 
 		this.creature = entity.asCreature;
 		this.event.emit("change");
@@ -146,12 +150,12 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 
 	@Bound
 	private setTamed(_: any, tamed: boolean): void {
-		SetTamed.execute(localPlayer, this.creature!, tamed);
+		void SetTamed.execute(localPlayer, this.creature!, tamed);
 	}
 
 	@Bound
 	private removeCreature(): void {
-		Remove.execute(localPlayer, this.creature!);
+		void Remove.execute(localPlayer, this.creature!);
 	}
 
 	@Bound

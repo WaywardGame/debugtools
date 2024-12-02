@@ -1,14 +1,14 @@
 import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler } from "@wayward/game/event/EventManager";
-import Doodad from "@wayward/game/game/doodad/Doodad";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
 import { EntityType } from "@wayward/game/game/entity/IEntity";
-import Creature from "@wayward/game/game/entity/creature/Creature";
-import Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
-import NPC from "@wayward/game/game/entity/npc/NPC";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import type Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
+import type NPC from "@wayward/game/game/entity/npc/NPC";
 import Player from "@wayward/game/game/entity/player/Player";
-import { IslandId } from "@wayward/game/game/island/IIsland";
-import Island from "@wayward/game/game/island/Island";
-import TileEvent from "@wayward/game/game/tile/TileEvent";
+import type { IslandId } from "@wayward/game/game/island/IIsland";
+import type Island from "@wayward/game/game/island/Island";
+import type TileEvent from "@wayward/game/game/tile/TileEvent";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import Mod from "@wayward/game/mod/Mod";
 import { RenderSource, ZOOM_LEVEL_MAX, ZOOM_LEVEL_MIN } from "@wayward/game/renderer/IRenderer";
@@ -18,7 +18,8 @@ import { BlockRow } from "@wayward/game/ui/component/BlockRow";
 import Button, { ButtonClasses } from "@wayward/game/ui/component/Button";
 import { CheckButton } from "@wayward/game/ui/component/CheckButton";
 import Component from "@wayward/game/ui/component/Component";
-import Dropdown, { IDropdownOption } from "@wayward/game/ui/component/Dropdown";
+import type { IDropdownOption } from "@wayward/game/ui/component/Dropdown";
+import Dropdown from "@wayward/game/ui/component/Dropdown";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import { RangeRow } from "@wayward/game/ui/component/RangeRow";
 import Text from "@wayward/game/ui/component/Text";
@@ -27,21 +28,23 @@ import CreatureDropdown from "@wayward/game/ui/component/dropdown/CreatureDropdo
 import DoodadDropdown from "@wayward/game/ui/component/dropdown/DoodadDropdown";
 import NPCTypeDropdown from "@wayward/game/ui/component/dropdown/NPCTypeDropdown";
 import TileEventDropdown from "@wayward/game/ui/component/dropdown/TileEventDropdown";
-import Bind, { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
+import type { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
+import Bind from "@wayward/game/ui/input/Bind";
 import Bindable from "@wayward/game/ui/input/Bindable";
 import Spacer from "@wayward/game/ui/screen/screens/menu/component/Spacer";
-import { IVector3 } from "@wayward/game/utilities/math/IVector";
+import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 import Vector3 from "@wayward/game/utilities/math/Vector3";
 import Stream from "@wayward/goodstream/Stream";
 import { Bound, Debounce } from "@wayward/utilities/Decorators";
 import Arrays from "@wayward/utilities/collection/Arrays";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
-import { Events, IEventEmitter, Priority } from "@wayward/utilities/event/EventEmitter";
+import type { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import { Priority } from "@wayward/utilities/event/EventEmitter";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import Math2 from "@wayward/utilities/math/Math2";
 import { generalRandom } from "@wayward/utilities/random/RandomUtilities";
-import DebugTools from "../../DebugTools";
+import type DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import SelectionExecute, { SelectionType } from "../../action/SelectionExecute";
 import DebugToolsPanel from "../component/DebugToolsPanel";
@@ -80,12 +83,16 @@ export default class SelectionPanel extends DebugToolsPanel {
 	private readonly buttonPreviewPrevious = new Button()
 		.setDisplayMode(ButtonClasses.DisplayModeIcon)
 		.classes.add("has-icon-before", "icon-center", "icon-left")
-		.event.subscribe("activate", () => { this.previewCursor--; this.updatePreview() });
+		.event.subscribe("activate", () => {
+			this.previewCursor--; this.updatePreview();
+		});
 
 	private readonly buttonPreviewNext = new Button()
 		.setDisplayMode(ButtonClasses.DisplayModeIcon)
 		.classes.add("has-icon-before", "icon-center", "icon-right")
-		.event.subscribe("activate", () => { this.previewCursor++; this.updatePreview() });
+		.event.subscribe("activate", () => {
+			this.previewCursor++; this.updatePreview();
+		});
 
 	private readonly previewWrapper = new Component()
 		.classes.add("debug-tools-selection-preview-wrapper")
@@ -93,7 +100,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 	private canvas: Component<HTMLCanvasElement> | undefined;
 
-	private zoomLevel: number = 2;
+	private zoomLevel = 2;
 
 	private readonly buttonExecute = new Button()
 		.classes.add("has-icon-before", "icon-arrow-right", "icon-no-scale")
@@ -209,7 +216,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 			new Dropdown()
 				.setRefreshMethod(() => ({
 					defaultOption: "all",
-					options: Stream.of<IDropdownOption<string>[]>(["all", option => option.setText(translation(DebugToolsTranslation.SelectionAllPlayers))])
+					options: Stream.of<Array<IDropdownOption<string>>>(["all", option => option.setText(translation(DebugToolsTranslation.SelectionAllPlayers))])
 						.merge(game.playerManager.getAll(true, true).map(player => Tuple(player.identifier, option => option.setText(player.getName())))),
 				})),
 			(player, filter) => (this.dropdownAlternativeTarget.classes.has("hidden") || player.identifier !== this.dropdownAlternativeTarget.selection)
@@ -229,10 +236,11 @@ export default class SelectionPanel extends DebugToolsPanel {
 
 	@Bound
 	public execute(): void {
-		if (!this.targets.length)
+		if (!this.targets.length) {
 			return;
+		}
 
-		SelectionExecute.execute(localPlayer,
+		void SelectionExecute.execute(localPlayer,
 			this.dropdownAction.selectedOption,
 			this.targets.map(target => Tuple(
 				getSelectionType(target),
@@ -286,7 +294,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 	}
 
 	private disposeRenderer(): void {
-		this.renderer?.delete();
+		void this.renderer?.delete();
 		this.renderer = undefined;
 	}
 
@@ -342,7 +350,7 @@ export default class SelectionPanel extends DebugToolsPanel {
 			this.setupSelectionSources();
 		}
 
-		let targets = Stream.of<(Target | undefined)[][]>(
+		let targets = Stream.of<Array<Array<Target | undefined>>>(
 			this.creatures?.getTargetable() ?? [],
 			this.npcs?.getTargetable() ?? [],
 			this.tileEvents?.getTargetable() ?? [],
@@ -457,7 +465,9 @@ class SelectionSource<T, F> extends BlockRow {
 	declare public event: IEventEmitter<this, ISelectionSourceEvents>;
 
 	public readonly checkButton = new CheckButton()
-		.event.subscribe("toggle", (_, checked) => { this.filter.toggle(checked); this.event.emit("change"); })
+		.event.subscribe("toggle", (_, checked) => {
+			this.filter.toggle(checked); this.event.emit("change");
+		})
 		.appendTo(this);
 
 	private readonly filter = new LabelledRow()
@@ -471,7 +481,7 @@ class SelectionSource<T, F> extends BlockRow {
 		this.checkButton.setText(translation(dTranslation));
 
 		if (dropdown) {
-			this.filter.appendTo(this)
+			this.filter.appendTo(this);
 		}
 
 		this.filter.append(dropdown);
@@ -483,8 +493,9 @@ class SelectionSource<T, F> extends BlockRow {
 	}
 
 	public getTargetable(): T[] {
-		if (!this.checkButton.checked)
+		if (!this.checkButton.checked) {
 			return [];
+		}
 
 		return this.objectArray.filter(value => this.filterPredicate?.(value, this.dropdown?.selectedOption) ?? true);
 	}

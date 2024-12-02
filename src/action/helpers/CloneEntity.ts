@@ -1,10 +1,10 @@
 import { AiType } from "@wayward/game/game/entity/ai/AI";
-import Creature from "@wayward/game/game/entity/creature/Creature";
-import Entity from "@wayward/game/game/entity/Entity";
-import EntityWithStats from "@wayward/game/game/entity/EntityWithStats";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import type Entity from "@wayward/game/game/entity/Entity";
+import type EntityWithStats from "@wayward/game/game/entity/EntityWithStats";
 import { NPCType } from "@wayward/game/game/entity/npc/INPCs";
-import NPC from "@wayward/game/game/entity/npc/NPC";
-import Tile from "@wayward/game/game/tile/Tile";
+import type NPC from "@wayward/game/game/entity/npc/NPC";
+import type Tile from "@wayward/game/game/tile/Tile";
 import { Direction } from "@wayward/game/utilities/math/Direction";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 import CloneInventory from "./CloneInventory";
@@ -21,7 +21,10 @@ export default function (entity: Entity, tile: Tile): void {
 	if (creature) {
 		clone = entity.island.creatures.spawn(creature.type, tile, true, creature.aberrant, undefined, true)!;
 
-		if (creature.isTamed) clone.tame(creature.getOwner()!);
+		if (creature.isTamed) {
+			clone.tame(creature.getOwner()!);
+		}
+
 		clone.renamed = entity.renamed;
 		clone.ai.calculate();
 		clone.ai.ai = creature.ai.ai;
@@ -36,8 +39,9 @@ export default function (entity: Entity, tile: Tile): void {
 		CloneInventory(human, clone);
 	}
 
-	if (!clone)
+	if (!clone) {
 		return;
+	}
 
 	const entityMovable = entity.asEntityMovable;
 	if (entityMovable) {

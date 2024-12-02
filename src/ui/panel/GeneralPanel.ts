@@ -3,8 +3,9 @@ import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler } from "@wayward/game/event/EventManager";
 import { TickFlag } from "@wayward/game/game/IGame";
 import { BiomeType } from "@wayward/game/game/biome/IBiome";
-import { DEFAULT_ISLAND_ID, IslandId, IslandPosition } from "@wayward/game/game/island/IIsland";
-import Tile from "@wayward/game/game/tile/Tile";
+import type { IslandId } from "@wayward/game/game/island/IIsland";
+import { DEFAULT_ISLAND_ID, IslandPosition } from "@wayward/game/game/island/IIsland";
+import type Tile from "@wayward/game/game/tile/Tile";
 import Dictionary from "@wayward/game/language/Dictionary";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
@@ -16,7 +17,8 @@ import { BlockRow } from "@wayward/game/ui/component/BlockRow";
 import Button from "@wayward/game/ui/component/Button";
 import { CheckButton } from "@wayward/game/ui/component/CheckButton";
 import Divider from "@wayward/game/ui/component/Divider";
-import Dropdown, { IDropdownOption } from "@wayward/game/ui/component/Dropdown";
+import type { IDropdownOption } from "@wayward/game/ui/component/Dropdown";
+import Dropdown from "@wayward/game/ui/component/Dropdown";
 import Input from "@wayward/game/ui/component/Input";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import { RangeRow } from "@wayward/game/ui/component/RangeRow";
@@ -28,8 +30,8 @@ import { Bound, Debounce } from "@wayward/utilities/Decorators";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import WorldZ from "@wayward/utilities/game/WorldZ";
-import CancelablePromise from "@wayward/utilities/promise/CancelablePromise";
-import DebugTools from "../../DebugTools";
+import type CancelablePromise from "@wayward/utilities/promise/CancelablePromise";
+import type DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import ChangeLayer from "../../action/ChangeLayer";
 import FastForward from "../../action/FastForward";
@@ -38,7 +40,6 @@ import MoveToIsland from "../../action/MoveToIsland";
 import RenameIsland from "../../action/RenameIsland";
 import SetTime from "../../action/SetTime";
 import DebugToolsPanel from "../component/DebugToolsPanel";
-
 
 const TRAVEL_DROPDOWN_NEW_ISLAND_PREFIX = "new_island_";
 
@@ -72,7 +73,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 				this.checkButtonAudio.setChecked(false, false);
 				this.checkButtonParticle.setChecked(false, false);
 
-				return this.selectionLogic(checked, (tile) => {
+				return this.selectionLogic(checked, tile => {
 					this.inspectButton.setChecked(false, false);
 
 					if (tile) {
@@ -122,7 +123,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 				.setRefreshMethod(() => game.time.getTime()))
 			.setDisplayValue(time => game.time.getTranslation(time))
 			.event.subscribe("change", (_, time) => {
-				SetTime.execute(localPlayer, time);
+				void SetTime.execute(localPlayer, time);
 			})
 			.appendTo(this);
 
@@ -190,7 +191,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 					this.inspectButton.setChecked(false, false);
 					this.checkButtonParticle.setChecked(false, false);
 
-					return this.selectionLogic(checked, (tile) => tile?.queueSoundEffect(this.dropdownAudio.selectedOption), () => this.checkButtonAudio.checked);
+					return this.selectionLogic(checked, tile => tile?.queueSoundEffect(this.dropdownAudio.selectedOption), () => this.checkButtonAudio.checked);
 				}))
 			.append(this.dropdownAudio = new Dropdown<SfxType>()
 				.setRefreshMethod(() => ({
@@ -210,7 +211,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 					this.inspectButton.setChecked(false, false);
 					this.checkButtonAudio.setChecked(false, false);
 
-					return this.selectionLogic(checked, (tile) => tile?.createParticles(particles[this.dropdownParticle.selectedOption]), () => this.checkButtonParticle.checked);
+					return this.selectionLogic(checked, tile => tile?.createParticles(particles[this.dropdownParticle.selectedOption]), () => this.checkButtonParticle.checked);
 				}))
 			.append(this.dropdownParticle = new Dropdown<ParticleType>()
 				.setRefreshMethod(() => ({
@@ -229,15 +230,18 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 	@EventHandler(MovementHandler, "canMove")
 	public canClientMove(): false | undefined {
-		if (this.selectionPromise || this.checkButtonAudio.checked || this.checkButtonParticle.checked) return false;
+		if (this.selectionPromise || this.checkButtonAudio.checked || this.checkButtonParticle.checked) {
+			return false;
+		}
 
 		return undefined;
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "changeZ")
 	protected onChangeZ(_: any, z: WorldZ): void {
-		if (this.dropdownLayer.selection === z)
+		if (this.dropdownLayer.selection === z) {
 			return;
+		}
 
 		this.dropdownLayer.refresh();
 	}
@@ -259,7 +263,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 		if (checked) {
 			this.selectionPromise = this.DEBUG_TOOLS.selector.select();
-			this.selectionPromise.then((tile) => {
+			void this.selectionPromise.then(tile => {
 				delete this.selectionPromise;
 
 				onSelection(tile);
@@ -282,7 +286,9 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 		this.DEBUG_TOOLS.event.until(this, "switchAway")
 			.subscribe("inspect", () => {
-				if (this.selectionPromise) this.selectionPromise.cancel();
+				if (this.selectionPromise) {
+					this.selectionPromise.cancel();
+				}
 			});
 	}
 
@@ -298,13 +304,13 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 	@Bound private changeLayer(_: any, layer: WorldZ): void {
 		if (localPlayer.z !== layer) {
-			ChangeLayer.execute(localPlayer, layer);
+			void ChangeLayer.execute(localPlayer, layer);
 		}
 	}
 
 	@Bound private travel(): void {
 		if (this.dropdownTravel.selectedOption === "civilization") {
-			this.sailToCivilization();
+			void this.sailToCivilization();
 			return;
 		}
 
@@ -335,16 +341,19 @@ export default class GeneralPanel extends DebugToolsPanel {
 					.random()!;
 		}
 
-		MoveToIsland.execute(localPlayer, islandId, biome);
+		void MoveToIsland.execute(localPlayer, islandId, biome);
 	}
 
 	private async sailToCivilization(): Promise<void> {
-		if (multiplayer.isConnected && !game.isChallenge) return;
-		ForceSailToCivilization.execute(localPlayer);
+		if (multiplayer.isConnected && !game.isChallenge) {
+			return;
+		}
+
+		void ForceSailToCivilization.execute(localPlayer);
 	}
 
 	@Bound private renameIsland(input: Input): void {
-		RenameIsland.execute(localPlayer, input.text);
+		void RenameIsland.execute(localPlayer, input.text);
 		this.dropdownTravel.refresh();
 	}
 }
@@ -356,8 +365,9 @@ class IslandDropdown<OTHER_OPTIONS extends string = never> extends BaseIslandDro
 	}
 
 	protected override isInGroup(islandId: IslandId, biome: BiomeType): boolean {
-		if (islandId.startsWith(TRAVEL_DROPDOWN_NEW_ISLAND_PREFIX))
+		if (islandId.startsWith(TRAVEL_DROPDOWN_NEW_ISLAND_PREFIX)) {
 			return islandId === getTravelDropdownNewIslandOptionId(biome);
+		}
 
 		return super.isInGroup(islandId, biome);
 	}

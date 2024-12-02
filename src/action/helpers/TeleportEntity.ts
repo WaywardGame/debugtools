@@ -1,8 +1,8 @@
-import { ActionApi } from "@wayward/game/game/entity/action/IAction";
-import Entity from "@wayward/game/game/entity/Entity";
+import type { ActionApi } from "@wayward/game/game/entity/action/IAction";
+import type Entity from "@wayward/game/game/entity/Entity";
 import { MoveAnimation } from "@wayward/game/game/entity/IEntity";
-import Player from "@wayward/game/game/entity/player/Player";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Player from "@wayward/game/game/entity/player/Player";
+import type Tile from "@wayward/game/game/tile/Tile";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { getTile } from "./GetTile";
 
@@ -15,7 +15,9 @@ export function teleportEntity(action: ActionApi<any>, entity: Entity, tile: Til
 	const targetTile = getTile(action.executor as Player, tile, () => translation(DebugToolsTranslation.ActionTeleport)
 		.get(entity.getName()));
 
-	if (!entity || !targetTile) return;
+	if (!entity || !targetTile) {
+		return;
+	}
 
 	if (entity.asPlayer) {
 		entity.asPlayer.setPosition(targetTile);

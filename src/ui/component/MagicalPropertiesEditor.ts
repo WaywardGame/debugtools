@@ -1,7 +1,9 @@
-import Doodad from "@wayward/game/game/doodad/Doodad";
-import Item from "@wayward/game/game/item/Item";
-import { MagicalPropertyIdentity, MagicalPropertyIdentityHash } from "@wayward/game/game/magic/MagicalPropertyManager";
-import MagicalPropertyType, { magicalPropertyDescriptions } from "@wayward/game/game/magic/MagicalPropertyType";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import type Item from "@wayward/game/game/item/Item";
+import type { MagicalPropertyIdentityHash } from "@wayward/game/game/magic/MagicalPropertyManager";
+import { MagicalPropertyIdentity } from "@wayward/game/game/magic/MagicalPropertyManager";
+import type MagicalPropertyType from "@wayward/game/game/magic/MagicalPropertyType";
+import { magicalPropertyDescriptions } from "@wayward/game/game/magic/MagicalPropertyType";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import UiTranslation from "@wayward/game/language/dictionary/UiTranslation";
 import Button from "@wayward/game/ui/component/Button";
@@ -83,8 +85,9 @@ class MagicalPropertiesEditor extends SingletonEditor<[Item | Doodad]> {
 	}
 
 	public override apply(itemOrDoodad: Item | Doodad) {
-		if (itemOrDoodad === this.itemOrDoodad)
+		if (itemOrDoodad === this.itemOrDoodad) {
 			return;
+		}
 
 		this.itemOrDoodadRef = new WeakRef(itemOrDoodad);
 		this.refresh();
@@ -118,8 +121,9 @@ class MagicalPropertiesEditor extends SingletonEditor<[Item | Doodad]> {
 
 		this.propertyList.dump();
 
-		if (!this.itemOrDoodadRef)
+		if (!this.itemOrDoodadRef) {
 			return;
+		}
 
 		for (const identity of this.itemOrDoodad?.magic?.identities() ?? []) {
 			new MagicalPropertyEditor(identity, this.itemOrDoodadRef)
@@ -129,20 +133,24 @@ class MagicalPropertiesEditor extends SingletonEditor<[Item | Doodad]> {
 
 	@Bound private onChooseMagicalProperty(_: any, id: MagicalPropertyType | MagicalPropertyIdentityHash | "none") {
 		this.addMagicalPropertyWrapper.toggle(id !== "none");
-		if (id === "none")
+		if (id === "none") {
 			return;
+		}
 
 		const hash = `${id}` as MagicalPropertyIdentityHash;
 		const identity = MagicalPropertyIdentity.unhash(hash);
-		if (!identity)
+		if (!identity) {
 			throw new Error(`Unable to choose magical property: ${id}`);
+		}
 
-		if (!this.item?.description)
+		if (!this.item?.description) {
 			return;
+		}
 
 		const info = magicalPropertyDescriptions[identity[0]]?.getInfo(this.item, this.item.description);
-		if (!info)
+		if (!info) {
 			return;
+		}
 
 		this.addMagicalPropertyValue.editRange(range => range
 			.setMin(info.min)
@@ -155,22 +163,25 @@ class MagicalPropertiesEditor extends SingletonEditor<[Item | Doodad]> {
 		const selected = this.addMagicalPropertyDropdown.selectedOption;
 		this.addMagicalPropertyDropdown.select("none");
 
-		if (selected === "none" || !this.itemOrDoodad)
+		if (selected === "none" || !this.itemOrDoodad) {
 			return;
+		}
 
 		const hash = `${selected}` as MagicalPropertyIdentityHash;
 		const identity = MagicalPropertyIdentity.unhash(hash);
-		if (!identity)
+		if (!identity) {
 			throw new Error(`Unable to choose magical property: ${selected}`);
+		}
 
-		MagicalPropertyActions.Change.execute(localPlayer, this.itemOrDoodad, identity, this.addMagicalPropertyValue.value);
+		void MagicalPropertyActions.Change.execute(localPlayer, this.itemOrDoodad, identity, this.addMagicalPropertyValue.value);
 	}
 
 	@Bound private onClearMagicalProperties() {
-		if (!this.itemOrDoodad)
+		if (!this.itemOrDoodad) {
 			return;
+		}
 
-		MagicalPropertyActions.Clear.execute(localPlayer, this.itemOrDoodad);
+		void MagicalPropertyActions.Clear.execute(localPlayer, this.itemOrDoodad);
 	}
 }
 
@@ -225,17 +236,19 @@ class MagicalPropertyEditor extends Details {
 	}
 
 	@Bound private onRemove() {
-		if (!this.itemOrDoodad)
+		if (!this.itemOrDoodad) {
 			return;
+		}
 
-		MagicalPropertyActions.Remove.execute(localPlayer, this.itemOrDoodad, this.identity);
+		void MagicalPropertyActions.Remove.execute(localPlayer, this.itemOrDoodad, this.identity);
 	}
 
 	@Bound private onChangeValue(_: any, value: number) {
-		if (!this.itemOrDoodad)
+		if (!this.itemOrDoodad) {
 			return;
+		}
 
-		MagicalPropertyActions.Change.execute(localPlayer, this.itemOrDoodad, this.identity, value);
+		void MagicalPropertyActions.Change.execute(localPlayer, this.itemOrDoodad, this.identity, value);
 	}
 
 	@Bound private translate() {

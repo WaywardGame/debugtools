@@ -1,9 +1,10 @@
-import Human from "@wayward/game/game/entity/Human";
+import type Human from "@wayward/game/game/entity/Human";
 import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { Action } from "@wayward/game/game/entity/action/Action";
-import { ActionArgument, IActionHandlerApi } from "@wayward/game/game/entity/action/IAction";
-import Item from "@wayward/game/game/item/Item";
-import { defaultCanUseHandler, defaultUsability } from "../Actions";
+import type { IActionHandlerApi } from "@wayward/game/game/entity/action/IAction";
+import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
+import type Item from "@wayward/game/game/item/Item";
+import { defaultCanUseHandler } from "../Actions";
 import InspectDialog from "../ui/InspectDialog";
 
 /**
@@ -11,7 +12,7 @@ import InspectDialog from "../ui/InspectDialog";
  */
 export default new Action(ActionArgument.Item, ActionArgument.Float64)
 	.setUsableBy(EntityType.Human)
-	.setUsableWhen(...defaultUsability)
+	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, item, durability) => setDurability(action, durability, item));
 
@@ -27,10 +28,11 @@ export function setDurability(action: IActionHandlerApi<Human>, durability: numb
 		item.durability = Number.isInteger(durability) || durability > 1 ? durability : Math.ceil((item.durabilityMax ?? 1) * durability);
 	}
 
-	if (human)
+	if (human) {
 		human.updateTablesAndWeight("M");
-	else
+	} else {
 		action.setUpdateView();
+	}
 
 	InspectDialog.INSTANCE?.update();
 }

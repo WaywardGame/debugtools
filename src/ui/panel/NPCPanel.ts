@@ -1,7 +1,7 @@
 import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler } from "@wayward/game/event/EventManager";
 import { NPCType } from "@wayward/game/game/entity/npc/INPCs";
-import { INPCManagerSpawnTracker } from "@wayward/game/game/entity/npc/NPCManager";
+import type { INPCManagerSpawnTracker } from "@wayward/game/game/entity/npc/NPCManager";
 import Dictionary from "@wayward/game/language/Dictionary";
 import { MiscTranslation } from "@wayward/game/language/dictionary/Misc";
 import { TextContext } from "@wayward/game/language/ITranslation";
@@ -15,8 +15,9 @@ import Arrays from "@wayward/utilities/collection/Arrays";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import Time, { days } from "@wayward/utilities/Time";
 import ResetNPCSpawnInterval from "../../action/ResetNPCSpawnInterval";
-import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, ISaveData, translation } from "../../IDebugTools";
+import type DebugTools from "../../DebugTools";
+import type { ISaveData } from "../../IDebugTools";
+import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 
 export default class NPCPanel extends DebugToolsPanel {
@@ -105,7 +106,7 @@ export default class NPCPanel extends DebugToolsPanel {
 	@EventHandler(EventBus.NPCManager, "endInterval")
 	@EventHandler(EventBus.NPCManager, "startInterval")
 	@EventHandler(EventBus.NPCManager, "intervalSpawn")
-	protected onTickEnd() {
+	protected onTickEnd(): void {
 		for (const refreshable of this.refreshables) {
 			refreshable.refresh();
 		}

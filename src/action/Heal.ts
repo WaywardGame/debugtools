@@ -1,15 +1,17 @@
 import { TickFlag } from "@wayward/game/game/IGame";
 import EntityWithStats from "@wayward/game/game/entity/EntityWithStats";
 import { EntityType, MoveType, StatusChangeReason } from "@wayward/game/game/entity/IEntity";
-import { EquipType } from "@wayward/game/game/entity/IHuman";
-import { IStatMax, Stat } from "@wayward/game/game/entity/IStats";
+import type { EquipType } from "@wayward/game/game/entity/IHuman";
+import type { IStatMax } from "@wayward/game/game/entity/IStats";
+import { Stat } from "@wayward/game/game/entity/IStats";
 import { Action } from "@wayward/game/game/entity/action/Action";
-import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
 import { PlayerState } from "@wayward/game/game/entity/player/IPlayer";
 import { StatusType } from "@wayward/game/game/entity/status/IStatus";
-import ItemReference, { IItemReference } from "@wayward/game/game/item/ItemReference";
+import type { IItemReference } from "@wayward/game/game/item/ItemReference";
+import ItemReference from "@wayward/game/game/item/ItemReference";
 import { RenderSource, UpdateRenderFlag } from "@wayward/game/renderer/IRenderer";
-import Actions, { defaultCanUseHandler, defaultUsability } from "../Actions";
+import Actions, { defaultCanUseHandler } from "../Actions";
 import ResurrectCorpse from "./helpers/ResurrectCorpse";
 
 /**
@@ -17,7 +19,7 @@ import ResurrectCorpse from "./helpers/ResurrectCorpse";
  */
 export default new Action(ActionArgument.Entity, ActionArgument.OPTIONAL(ActionArgument.ItemArray), ActionArgument.OPTIONAL(ActionArgument.Object))
 	.setUsableBy(EntityType.Human)
-	.setUsableWhen(...defaultUsability)
+	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, entity, itemsToRestoreToInventory, equippedReferences: Record<EquipType, IItemReference>) => {
 		// resurrect corpses
@@ -40,9 +42,17 @@ export default new Action(ActionArgument.Entity, ActionArgument.OPTIONAL(ActionA
 		const thirst = entity.stat.get<IStatMax>(Stat.Thirst);
 
 		entity.stat.set(health, entity.asHuman?.getMaxHealth() ?? health.max);
-		if (stamina) entity.stat.set(stamina, stamina.max);
-		if (hunger) entity.stat.set(hunger, hunger.max);
-		if (thirst) entity.stat.set(thirst, thirst.max);
+		if (stamina) {
+			entity.stat.set(stamina, stamina.max);
+		}
+
+		if (hunger) {
+			entity.stat.set(hunger, hunger.max);
+		}
+
+		if (thirst) {
+			entity.stat.set(thirst, thirst.max);
+		}
 
 		entity.setStatus(StatusType.Bleeding, false, StatusChangeReason.Passed);
 		entity.setStatus(StatusType.Burned, false, StatusChangeReason.Passed);

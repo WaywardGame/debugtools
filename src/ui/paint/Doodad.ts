@@ -1,11 +1,11 @@
-import { DoodadType } from "@wayward/game/game/doodad/IDoodad";
+import type { DoodadType } from "@wayward/game/game/doodad/IDoodad";
 import Component from "@wayward/game/ui/component/Component";
 import DoodadDropdown from "@wayward/game/ui/component/dropdown/DoodadDropdown";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import { Bound } from "@wayward/utilities/Decorators";
-import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import type { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
-import { IPaintSection } from "../panel/PaintPanel";
+import type { IPaintSection } from "../panel/PaintPanel";
 
 export default class DoodadPaint extends Component implements IPaintSection {
 	declare public event: IEventEmitter<this, Events<IPaintSection>>;
@@ -28,7 +28,7 @@ export default class DoodadPaint extends Component implements IPaintSection {
 			.appendTo(this);
 	}
 
-	public getTilePaintData(): { doodad: { type: DoodadType | "remove"; }; } | undefined {
+	public getTilePaintData(): { doodad: { type: DoodadType | "remove" } } | undefined {
 		return this.doodad === undefined ? undefined : {
 			doodad: {
 				type: this.doodad,

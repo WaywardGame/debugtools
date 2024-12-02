@@ -1,10 +1,10 @@
 import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler, eventManager } from "@wayward/game/event/EventManager";
 import { Quality } from "@wayward/game/game/IObject";
-import { IContainable, IContainer } from "@wayward/game/game/item/IItem";
+import type { IContainable, IContainer } from "@wayward/game/game/item/IItem";
 import Item from "@wayward/game/game/item/Item";
-import ItemManager from "@wayward/game/game/item/ItemManager";
-import Tile from "@wayward/game/game/tile/Tile";
+import type ItemManager from "@wayward/game/game/item/ItemManager";
+import type Tile from "@wayward/game/game/tile/Tile";
 import Dictionary from "@wayward/game/language/Dictionary";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
@@ -20,7 +20,7 @@ import Text from "@wayward/game/ui/component/Text";
 import Enums from "@wayward/game/utilities/enum/Enums";
 import { Bound } from "@wayward/utilities/Decorators";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
-import EventEmitter from "@wayward/utilities/event/EventEmitter";
+import type EventEmitter from "@wayward/utilities/event/EventEmitter";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import ClearInventory from "../../action/ClearInventory";
 import Remove from "../../action/Remove";
@@ -32,7 +32,7 @@ import SetQuality from "../../action/SetQuality";
 import SetQualityBulk from "../../action/SetQualityBulk";
 import { areArraysIdentical } from "../../util/Array";
 import AddItemToInventory from "./AddItemToInventory";
-import { IInspectInformationSectionEvents } from "./InspectInformationSection";
+import type { IInspectInformationSectionEvents } from "./InspectInformationSection";
 import MagicalPropertiesEditor from "./MagicalPropertiesEditor";
 
 export enum ContainerClasses {
@@ -51,7 +51,7 @@ const CONTAINER_PAGE_LENGTH = 15;
 
 export default class Container extends Component {
 
-	public static getFirst() {
+	public static getFirst(): Container | undefined {
 		return Component.get<Container>(`.${ContainerClasses.Main}`);
 	}
 
@@ -69,8 +69,9 @@ export default class Container extends Component {
 		eventManager.registerEventBusSubscriber(this);
 		await (host as EventEmitter.Host<IInspectInformationSectionEvents>).event.waitFor(["remove", "switchAway"]);
 		eventManager.deregisterEventBusSubscriber(this);
-		if (this.containerSupplier === containerSupplier)
+		if (this.containerSupplier === containerSupplier) {
 			delete this.containerSupplier;
+		}
 	}
 
 	private readonly wrapperContainedItems: Details;
@@ -148,8 +149,9 @@ export default class Container extends Component {
 		this.wrapperContainedItems.open();
 
 		const container = this.containerSupplier?.();
-		if (!container)
+		if (!container) {
 			return undefined;
+		}
 
 		const itemChain: Item[] = [];
 		let searchContainer: IContainable | undefined = item;
@@ -170,8 +172,9 @@ export default class Container extends Component {
 	@Bound public refreshItems(): void {
 		const container = this.containerSupplier?.();
 		const itemIds = container?.containedItems.map(item => item.id) ?? [];
-		if (areArraysIdentical(itemIds, this.items))
+		if (areArraysIdentical(itemIds, this.items)) {
 			return;
+		}
 
 		this.changeDisplayedItems();
 	}
@@ -183,8 +186,9 @@ export default class Container extends Component {
 
 	private getPageOf(item: Item): number {
 		const container = this.containerSupplier?.();
-		if (!container)
+		if (!container) {
 			return -1;
+		}
 
 		const index = container.containedItems.indexOf(item);
 		if (index === -1) {
@@ -196,8 +200,9 @@ export default class Container extends Component {
 
 	private getItemsOfPage(page: number): Item[] {
 		const container = this.containerSupplier?.();
-		if (!container)
+		if (!container) {
 			return [];
+		}
 
 		return container.containedItems.slice(page * CONTAINER_PAGE_LENGTH, page * CONTAINER_PAGE_LENGTH + CONTAINER_PAGE_LENGTH);
 	}
@@ -210,8 +215,9 @@ export default class Container extends Component {
 		}
 
 		const container = this.containerSupplier?.();
-		if (!container)
+		if (!container) {
 			return;
+		}
 
 		this.items = container.containedItems.map(item => item.id) ?? [];
 
@@ -236,7 +242,9 @@ export default class Container extends Component {
 			.append(new Button()
 				.classes.add(ContainerClasses.PaginatorButton, ContainerClasses.PaginatorPrev)
 				.setText(translation(DebugToolsTranslation.ButtonPreviousItems))
-				.event.subscribe("activate", () => { this.page--; this.changeDisplayedItems() }))
+				.event.subscribe("activate", () => {
+					this.page--; this.changeDisplayedItems();
+				}))
 			.append(new Text()
 				.classes.add(ContainerClasses.PaginatorButton, ContainerClasses.PaginatorInfo)
 				.classes.add("debug-tools-")
@@ -247,7 +255,9 @@ export default class Container extends Component {
 			.append(new Button()
 				.classes.add(ContainerClasses.PaginatorButton, ContainerClasses.PaginatorNext)
 				.setText(translation(DebugToolsTranslation.ButtonNextItems))
-				.event.subscribe("activate", () => { this.page++; this.changeDisplayedItems() }))
+				.event.subscribe("activate", () => {
+					this.page++; this.changeDisplayedItems();
+				}))
 			.appendTo(this.wrapperContainedItems);
 
 		return result;
@@ -267,25 +277,33 @@ export default class Container extends Component {
 
 	@Bound private clear(): void {
 		const container = this.getContainer();
-		if (container) ClearInventory.execute(localPlayer, container);
+		if (container) {
+			void ClearInventory.execute(localPlayer, container);
+		}
 	}
 
 	@Bound private applyBulkDurability(): void {
 		const container = this.getContainer();
-		if (container) SetDurabilityBulk.execute(localPlayer, container, this.rangeBulkDurability.rangeInput.value <= -10 ? 0 : this.rangeBulkDurability.rangeInput.value <= 0 ? 1
-			: this.rangeBulkDurability.rangeInput.value === 100 ? 0.99999 : this.rangeBulkDurability.rangeInput.value / 100);
+		if (container) {
+			void SetDurabilityBulk.execute(localPlayer, container, this.rangeBulkDurability.rangeInput.value <= -10 ? 0 : this.rangeBulkDurability.rangeInput.value <= 0 ? 1
+				: this.rangeBulkDurability.rangeInput.value === 100 ? 0.99999 : this.rangeBulkDurability.rangeInput.value / 100);
+		}
 	}
 
 	@Bound private applyBulkDecay(): void {
 		const container = this.getContainer();
-		if (container) SetDecayBulk.execute(localPlayer, container, this.rangeBulkDecay.rangeInput.value <= -10 ? 0 : this.rangeBulkDecay.rangeInput.value <= 0 ? 1
-			: this.rangeBulkDurability.rangeInput.value === 100 ? 0.99999 : this.rangeBulkDecay.rangeInput.value / 100);
+		if (container) {
+			void SetDecayBulk.execute(localPlayer, container, this.rangeBulkDecay.rangeInput.value <= -10 ? 0 : this.rangeBulkDecay.rangeInput.value <= 0 ? 1
+				: this.rangeBulkDurability.rangeInput.value === 100 ? 0.99999 : this.rangeBulkDecay.rangeInput.value / 100);
+		}
 	}
 
 	@Bound private applyBulkQuality(): void {
 		this.buttonBulkQualityApply.toggle(this.dropdownBulkQuality.selectedOption === Quality.Random);
 		const container = this.getContainer();
-		if (container && this.dropdownBulkQuality.selectedOption !== undefined) SetQualityBulk.execute(localPlayer, container, this.dropdownBulkQuality.selectedOption);
+		if (container && this.dropdownBulkQuality.selectedOption !== undefined) {
+			void SetQualityBulk.execute(localPlayer, container, this.dropdownBulkQuality.selectedOption);
+		}
 	}
 }
 
@@ -341,7 +359,7 @@ export class ContainerItemDetails extends Details {
 			.event.subscribe("finish", this.applyDurability)
 			.appendTo(this);
 
-		if (this.item.canDecay())
+		if (this.item.canDecay()) {
 			new RangeRow()
 				.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDecay)))
 				.editRange(range => range
@@ -351,15 +369,18 @@ export class ContainerItemDetails extends Details {
 				.setDisplayValue(value => [{ content: `${scale(value)}` }])
 				.event.subscribe("finish", this.applyDecay)
 				.appendTo(this);
+		}
 
-		if (this.item.getValidMagicalProperties().length)
+		if (this.item.getValidMagicalProperties().length) {
 			this.magicalPropertiesEditor = new MagicalPropertiesEditor(item)
 				.appendTo(this);
+		}
 
-		if (this.item.isContainer())
+		if (this.item.isContainer()) {
 			this.container = new Container()
 				.schedule(container => container
 					.appendToHost(this, this, () => this.item.isContainer() ? this.item : undefined));
+		}
 
 		new Button()
 			.setText(translation(DebugToolsTranslation.ActionRemove)
@@ -370,16 +391,16 @@ export class ContainerItemDetails extends Details {
 	}
 
 	@Bound private applyDurability(_: any, value: number): void {
-		SetDurability.execute(localPlayer, this.item, scale(value));
+		void SetDurability.execute(localPlayer, this.item, scale(value));
 	}
 
 	@Bound private applyDecay(_: any, value: number): void {
-		SetDecay.execute(localPlayer, this.item, scale(value));
+		void SetDecay.execute(localPlayer, this.item, scale(value));
 	}
 
 	@Bound private applyQuality(): void {
 		this.buttonQualityApply.toggle(this.dropdownQuality.selectedOption === Quality.Random);
-		SetQuality.execute(localPlayer, this.item, this.dropdownQuality.selectedOption);
+		void SetQuality.execute(localPlayer, this.item, this.dropdownQuality.selectedOption);
 	}
 }
 

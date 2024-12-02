@@ -1,9 +1,9 @@
 import { Action } from "@wayward/game/game/entity/action/Action";
-import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
 import { EntityType } from "@wayward/game/game/entity/IEntity";
-import Tile from "@wayward/game/game/tile/Tile";
-import { defaultCanUseHandler, defaultUsability } from "../Actions";
-import { IPaintData } from "../ui/panel/PaintPanel";
+import type Tile from "@wayward/game/game/tile/Tile";
+import { defaultCanUseHandler } from "../Actions";
+import type { IPaintData } from "../ui/panel/PaintPanel";
 import SetTilled from "./helpers/SetTilled";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
 
@@ -14,7 +14,7 @@ import { RenderSource } from "@wayward/game/renderer/IRenderer";
  */
 export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 	.setUsableBy(EntityType.Human)
-	.setUsableWhen(...defaultUsability)
+	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, tiles: Tile[], data: IPaintData) => {
 		for (const tile of tiles) {
@@ -26,11 +26,15 @@ export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 						if (data.terrain!.tilled !== undefined && data.terrain!.tilled !== tile.isTilled) {
 							SetTilled(action.executor.island, tile, data.terrain!.tilled);
 						}
+
 						break;
 					}
+
 					case "creature": {
 						const creature = tile.creature;
-						if (creature) action.executor.island.creatures.remove(creature);
+						if (creature) {
+							action.executor.island.creatures.remove(creature);
+						}
 
 						const type = data.creature!.type;
 						if (type !== "remove") {
@@ -39,9 +43,12 @@ export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 
 						break;
 					}
+
 					case "npc": {
 						const npc = tile.npc;
-						if (npc) action.executor.island.npcs.remove(npc);
+						if (npc) {
+							action.executor.island.npcs.remove(npc);
+						}
 
 						const type = data.npc!.type;
 						if (type !== "remove") {
@@ -50,9 +57,12 @@ export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 
 						break;
 					}
+
 					case "doodad": {
 						const doodad = tile.doodad;
-						if (doodad) action.executor.island.doodads.remove(doodad);
+						if (doodad) {
+							action.executor.island.doodads.remove(doodad);
+						}
 
 						const type = data.doodad!.type;
 						if (type !== "remove") {
@@ -61,6 +71,7 @@ export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 
 						break;
 					}
+
 					case "corpse": {
 						if (data.corpse!.replaceExisting || data.corpse!.type === "remove") {
 							const corpses = tile.corpses;
@@ -78,6 +89,7 @@ export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 
 						break;
 					}
+
 					case "tileEvent": {
 						if (data.tileEvent!.replaceExisting || data.tileEvent!.type === "remove") {
 							const tileEvents = tile.events;

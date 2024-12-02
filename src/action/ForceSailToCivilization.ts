@@ -4,14 +4,15 @@ import SailToCivilization from "@wayward/game/game/entity/action/actions/SailToC
 import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { ItemType } from "@wayward/game/game/item/IItem";
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
-import { defaultCanUseHandler, defaultUsability } from "../Actions";
+import { defaultCanUseHandler } from "../Actions";
+import { ActionUsability } from "@wayward/game/game/entity/action/IAction";
 
 export default new Action()
 	.setUsableBy(EntityType.Player)
-	.setUsableWhen(...defaultUsability)
+	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
 	.setHandler(action => {
-		const position = action.executor.tile.findMatchingTile((tile) => tile.type === TerrainType.DeepSeawater);
+		const position = action.executor.tile.findMatchingTile(tile => tile.type === TerrainType.DeepSeawater);
 		if (!position) {
 			return;
 		}
@@ -33,7 +34,7 @@ export default new Action()
 		}
 
 		if (action.executor.isLocalPlayer) {
-			Ride.execute(action.executor, sailboat);
-			SailToCivilization.execute(action, sailboat, true);
+			void Ride.execute(action.executor, sailboat);
+			void SailToCivilization.execute(action, sailboat, true);
 		}
 	});

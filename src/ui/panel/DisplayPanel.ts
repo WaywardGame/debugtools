@@ -164,7 +164,7 @@ export default class DisplayPanel extends DebugToolsPanel {
 
 	@Bound
 	private resetRenderer(): void {
-		game.initializeRenderer();
+		void game.initializeRenderer();
 	}
 
 	@Bound

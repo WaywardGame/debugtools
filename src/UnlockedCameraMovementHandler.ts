@@ -1,7 +1,7 @@
 import Mod from "@wayward/game/mod/Mod";
 import Register from "@wayward/game/mod/ModRegistry";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
-import Bindable from "@wayward/game/ui/input/Bindable";
+import type Bindable from "@wayward/game/ui/input/Bindable";
 import { IInput } from "@wayward/game/ui/input/IInput";
 import InputManager from "@wayward/game/ui/input/InputManager";
 import Vector2 from "@wayward/game/utilities/math/Vector2";

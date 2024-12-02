@@ -1,14 +1,16 @@
-import Translation from "@wayward/game/language/Translation";
+import type Translation from "@wayward/game/language/Translation";
 import Mod from "@wayward/game/mod/Mod";
 import { Save, SaveLocation } from "@wayward/game/ui/IUi";
-import Bindable from "@wayward/game/ui/input/Bindable";
-import { DialogId, Edge, IDialogDescription } from "@wayward/game/ui/screen/screens/game/Dialogs";
-import TabDialog, { SubpanelInformation } from "@wayward/game/ui/screen/screens/game/component/TabDialog";
-import { MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
+import type Bindable from "@wayward/game/ui/input/Bindable";
+import type { DialogId, IDialogDescription } from "@wayward/game/ui/screen/screens/game/Dialogs";
+import { Edge } from "@wayward/game/ui/screen/screens/game/Dialogs";
+import type { SubpanelInformation } from "@wayward/game/ui/screen/screens/game/component/TabDialog";
+import TabDialog from "@wayward/game/ui/screen/screens/game/component/TabDialog";
+import type { MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
-import DebugTools from "../DebugTools";
+import type DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import DebugToolsPanel from "./component/DebugToolsPanel";
 import DisplayPanel from "./panel/DisplayPanel";
@@ -63,7 +65,7 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 		this.classes.add("debug-tools-dialog");
 
 		if (!this.DEBUG_TOOLS.hasPermission()) {
-			Task.yield().then(() => gameScreen?.dialogs.close(id));
+			void Task.yield().then(() => gameScreen?.dialogs.close(id));
 		}
 	}
 
@@ -75,10 +77,9 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 		return this.DEBUG_TOOLS.bindableToggleDialog;
 	}
 
-	override getIcon(): MenuBarButtonType {
+	public override getIcon(): MenuBarButtonType {
 		return this.DEBUG_TOOLS.menuBarButton;
 	}
-
 
 	protected override getDefaultSubpanelInformation(): SubpanelInformation | undefined {
 		return this.subpanelInformations.find(spi => spi[0] === this.current) ?? super.getDefaultSubpanelInformation();

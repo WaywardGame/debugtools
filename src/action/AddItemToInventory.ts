@@ -2,9 +2,9 @@ import { Quality } from "@wayward/game/game/IObject";
 import Human from "@wayward/game/game/entity/Human";
 import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { Action } from "@wayward/game/game/entity/action/Action";
-import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
 import { ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
-import Item from "@wayward/game/game/item/Item";
+import type Item from "@wayward/game/game/item/Item";
 import ItemManager from "@wayward/game/game/item/ItemManager";
 import Dictionary from "@wayward/game/language/Dictionary";
 import Translation from "@wayward/game/language/Translation";
@@ -12,7 +12,7 @@ import Enums from "@wayward/game/utilities/enum/Enums";
 import Arrays from "@wayward/utilities/collection/Arrays";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import StackMap from "@wayward/utilities/collection/map/StackMap";
-import { defaultCanUseHandler, defaultUsability } from "../Actions";
+import { defaultCanUseHandler } from "../Actions";
 import InspectDialog from "../ui/InspectDialog";
 
 export const ADD_ITEM_RANDOM = 1000000001;
@@ -20,7 +20,7 @@ export const ADD_ITEM_ALL = 1000000002;
 
 const FILTER_REGEX_CACHE = new StackMap<string, RegExp>(undefined, 500);
 const WORD_TO_GROUPS_MAP = new StackMap<string, ItemTypeGroup[]>(undefined, 100);
-const GROUP_REGEX = new RegExp(`^group:(.*)$`);
+const GROUP_REGEX = new RegExp("^group:(.*)$");
 let GROUP_MAP: Map<string, ItemTypeGroup> | undefined;
 
 function itemMatchesWord(word: string, item: ItemType, text: string): boolean {
@@ -54,7 +54,7 @@ function itemMatchesWord(word: string, item: ItemType, text: string): boolean {
  */
 export default new Action(ActionArgument.Container, ActionArgument.ANY(ActionArgument.Integer32, ActionArgument.String), ActionArgument.ENUM(Quality), ActionArgument.Integer32)
 	.setUsableBy(EntityType.Human)
-	.setUsableWhen(...defaultUsability)
+	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, target, item: ItemType | typeof ADD_ITEM_RANDOM | typeof ADD_ITEM_ALL | string, quality, quantity) => {
 		const containerObject = action.executor.island.items.resolveContainer(target);
@@ -67,7 +67,7 @@ export default new Action(ActionArgument.Container, ActionArgument.ANY(ActionArg
 				const text = Translation.get(Dictionary.Item, item).getString();
 				return text.includes(filterBy) || filterWords.every(word =>
 					itemMatchesWord(word, item, text));
-			})
+			});
 		}
 
 		const createdItems: Item[] = [];

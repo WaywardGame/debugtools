@@ -1,12 +1,11 @@
-import { ActionUsability, IActionHandlerApi } from "@wayward/game/game/entity/action/IAction";
+import type { IActionHandlerApi } from "@wayward/game/game/entity/action/IAction";
 import Mod from "@wayward/game/mod/Mod";
-import Log from "@wayward/utilities/Log";
-import DebugTools from "./DebugTools";
+import type Log from "@wayward/utilities/Log";
+import type DebugTools from "./DebugTools";
 import { DEBUG_TOOLS_ID } from "./IDebugTools";
-import Human from "@wayward/game/game/entity/Human";
+import type Human from "@wayward/game/game/entity/Human";
 
-export const defaultUsability: ActionUsability[] = [ActionUsability.Ghost, ActionUsability.Paused, ActionUsability.Delayed, ActionUsability.Moving];
-
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const defaultCanUseHandler = (action: IActionHandlerApi<Human>) => {
 	if (!Actions.DEBUG_TOOLS.hasPermission(action.executor.asPlayer)) {
 		return { usable: false };
@@ -15,6 +14,7 @@ export const defaultCanUseHandler = (action: IActionHandlerApi<Human>) => {
 	return { usable: true };
 };
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export default class Actions {
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
 	public static readonly DEBUG_TOOLS: DebugTools;

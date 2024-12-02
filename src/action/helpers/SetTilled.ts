@@ -1,6 +1,6 @@
 import { TileUpdateType } from "@wayward/game/game/IGame";
-import Island from "@wayward/game/game/island/Island";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Island from "@wayward/game/game/island/Island";
+import type Tile from "@wayward/game/game/tile/Tile";
 
 export default function (island: Island, tile: Tile, tilled: boolean): void {
 	const tileType = tile.type;

@@ -1,13 +1,12 @@
-import { TileEventType } from "@wayward/game/game/tile/ITileEvent";
+import type { TileEventType } from "@wayward/game/game/tile/ITileEvent";
 import { CheckButton } from "@wayward/game/ui/component/CheckButton";
 import Component from "@wayward/game/ui/component/Component";
 import TileEventDropdown from "@wayward/game/ui/component/dropdown/TileEventDropdown";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import { Bound } from "@wayward/utilities/Decorators";
-import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import type { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
-import { IPaintSection } from "../panel/PaintPanel";
-
+import type { IPaintSection } from "../panel/PaintPanel";
 
 export default class TileEventPaint extends Component implements IPaintSection {
 	declare public event: IEventEmitter<this, Events<IPaintSection>>;
@@ -36,7 +35,7 @@ export default class TileEventPaint extends Component implements IPaintSection {
 			.appendTo(this);
 	}
 
-	public getTilePaintData(): { tileEvent: { type: TileEventType | "remove" | undefined; replaceExisting: boolean; }; } {
+	public getTilePaintData(): { tileEvent: { type: TileEventType | "remove" | undefined; replaceExisting: boolean } } {
 		return {
 			tileEvent: {
 				type: this.tileEvent,
@@ -59,7 +58,9 @@ export default class TileEventPaint extends Component implements IPaintSection {
 
 		const isReplaceable = this.tileEvent !== undefined && this.tileEvent !== "remove";
 		this.replaceExisting.toggle(isReplaceable);
-		if (!isReplaceable) this.replaceExisting.setChecked(false);
+		if (!isReplaceable) {
+			this.replaceExisting.setChecked(false);
+		}
 
 		this.event.emit("change");
 	}

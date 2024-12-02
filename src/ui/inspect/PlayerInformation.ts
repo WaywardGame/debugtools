@@ -197,7 +197,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 	@Bound
 	private setSkill(_: any, value: number): void {
-		SetSkill.execute(localPlayer, this.player!, typeof this.skill === "string" ? -1 : this.skill, value);
+		void SetSkill.execute(localPlayer, this.player!, typeof this.skill === "string" ? -1 : this.skill, value);
 	}
 
 	@Bound
@@ -206,7 +206,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			return;
 		}
 
-		SetPlayerData.execute(localPlayer, this.player!, "unkillable", unkillable);
+		void SetPlayerData.execute(localPlayer, this.player!, "unkillable", unkillable);
 	}
 
 	@Bound
@@ -215,7 +215,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			return;
 		}
 
-		SetPlayerData.execute(localPlayer, this.player!, "noRender", noRender);
+		void SetPlayerData.execute(localPlayer, this.player!, "noRender", noRender);
 		localPlayer.updateView(RenderSource.Mod, false);
 	}
 
@@ -225,7 +225,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			return;
 		}
 
-		ToggleNoClip.execute(localPlayer, this.player!);
+		void ToggleNoClip.execute(localPlayer, this.player!);
 	}
 
 	@Bound
@@ -234,7 +234,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			return;
 		}
 
-		ToggleFastMovement.execute(localPlayer, this.player!);
+		void ToggleFastMovement.execute(localPlayer, this.player!);
 	}
 
 	@Bound
@@ -243,7 +243,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			return;
 		}
 
-		SetPlayerData.execute(localPlayer, this.player!, "permissions", permissions);
+		void SetPlayerData.execute(localPlayer, this.player!, "permissions", permissions);
 	}
 
 	@Bound
@@ -252,7 +252,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			return;
 		}
 
-		SetPlayerData.execute(localPlayer, this.player!, "weightBonus", weightBonus);
+		void SetPlayerData.execute(localPlayer, this.player!, "weightBonus", weightBonus);
 	}
 
 	@Bound
@@ -287,6 +287,6 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			return;
 		}
 
-		ReplacePlayerData.execute(localPlayer, this.player, replaceFrom);
+		void ReplacePlayerData.execute(localPlayer, this.player, replaceFrom);
 	}
 }

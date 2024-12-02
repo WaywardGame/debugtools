@@ -1,11 +1,11 @@
-import { NPCType } from "@wayward/game/game/entity/npc/INPCs";
+import type { NPCType } from "@wayward/game/game/entity/npc/INPCs";
 import Component from "@wayward/game/ui/component/Component";
 import NPCTypeDropdown from "@wayward/game/ui/component/dropdown/NPCTypeDropdown";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import { Bound } from "@wayward/utilities/Decorators";
-import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import type { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
-import { IPaintSection } from "../panel/PaintPanel";
+import type { IPaintSection } from "../panel/PaintPanel";
 
 export default class NPCPaint extends Component implements IPaintSection {
 	declare public event: IEventEmitter<this, Events<IPaintSection>>;
@@ -28,7 +28,7 @@ export default class NPCPaint extends Component implements IPaintSection {
 			.appendTo(this);
 	}
 
-	public getTilePaintData(): { npc: { type: NPCType | "remove"; }; } | undefined {
+	public getTilePaintData(): { npc: { type: NPCType | "remove" } } | undefined {
 		return this.npc === undefined ? undefined : {
 			npc: {
 				type: this.npc,

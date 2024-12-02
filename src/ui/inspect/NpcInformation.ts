@@ -1,6 +1,6 @@
-import Creature from "@wayward/game/game/entity/creature/Creature";
-import NPC from "@wayward/game/game/entity/npc/NPC";
-import Player from "@wayward/game/game/entity/player/Player";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import type NPC from "@wayward/game/game/entity/npc/NPC";
+import type Player from "@wayward/game/game/entity/player/Player";
 import Button from "@wayward/game/ui/component/Button";
 import { Bound } from "@wayward/utilities/Decorators";
 import Remove from "../../action/Remove";
@@ -26,6 +26,6 @@ export default class NpcInformation extends InspectEntityInformationSubsection {
 
 	@Bound
 	private removeNPC(): void {
-		Remove.execute(localPlayer, this.npc!);
+		void Remove.execute(localPlayer, this.npc!);
 	}
 }

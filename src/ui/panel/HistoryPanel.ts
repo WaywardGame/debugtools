@@ -1,4 +1,4 @@
-import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
+import type TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import { DebugToolsTranslation } from "../../IDebugTools";
 import ActionHistory from "../ActionHistory";
@@ -13,13 +13,13 @@ export default class HistoryPanel extends DebugToolsPanel {
 	}
 
 	@OwnEventHandler(HistoryPanel, "switchTo")
-	protected onSwitchTo() {
+	protected onSwitchTo(): void {
 		this.actionHistory?.remove();
 		this.actionHistory = new ActionHistory().appendTo(this);
 	}
 
 	@OwnEventHandler(HistoryPanel, "switchAway")
-	protected onSwitchAway() {
+	protected onSwitchAway(): void {
 		this.actionHistory?.remove();
 		delete this.actionHistory;
 	}

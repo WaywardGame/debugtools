@@ -1,5 +1,5 @@
 import { Quality } from "@wayward/game/game/IObject";
-import { IContainer, ItemType } from "@wayward/game/game/item/IItem";
+import type { IContainer, ItemType } from "@wayward/game/game/item/IItem";
 import Dictionary from "@wayward/game/language/Dictionary";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
@@ -98,10 +98,11 @@ export default class AddItemToInventory extends Component {
 	private addItem(): void {
 		const selection = this.dropdownItemType.selection;
 		const container = this.containerSupplier();
-		if (!container)
+		if (!container) {
 			return;
+		}
 
-		AddItemToInventoryAction.execute(localPlayer, container,
+		void AddItemToInventoryAction.execute(localPlayer, container,
 			selection === "Random" ? ADD_ITEM_RANDOM : selection === "All" ? ADD_ITEM_ALL : typeof selection === "object" ? selection.matching : selection,
 			this.dropdownItemQuality.selectedOption,
 			Math.floor(1.2 ** this.rangeItemQuantity.value));

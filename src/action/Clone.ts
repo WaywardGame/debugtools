@@ -1,9 +1,9 @@
 import Doodad from "@wayward/game/game/doodad/Doodad";
 import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { Action } from "@wayward/game/game/entity/action/Action";
-import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
-import Tile from "@wayward/game/game/tile/Tile";
-import { defaultCanUseHandler, defaultUsability } from "../Actions";
+import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
+import type Tile from "@wayward/game/game/tile/Tile";
+import { defaultCanUseHandler } from "../Actions";
 import { DebugToolsTranslation, translation } from "../IDebugTools";
 import CloneDoodad from "./helpers/CloneDoodad";
 import CloneEntity from "./helpers/CloneEntity";
@@ -14,7 +14,7 @@ import { getTile } from "./helpers/GetTile";
  */
 export default new Action(ActionArgument.ANY(ActionArgument.Entity, ActionArgument.Doodad), ActionArgument.Tile)
 	.setUsableBy(EntityType.Human)
-	.setUsableWhen(...defaultUsability)
+	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, toClone, tile: Tile) => {
 		const targetTile = getTile(action.executor, tile, () => translation(DebugToolsTranslation.ActionClone)

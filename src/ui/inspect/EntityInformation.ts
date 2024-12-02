@@ -1,9 +1,10 @@
-import Entity from "@wayward/game/game/entity/Entity";
+import type Entity from "@wayward/game/game/entity/Entity";
 import EntityWithStats from "@wayward/game/game/entity/EntityWithStats";
-import { EntityType, IStatChangeInfo } from "@wayward/game/game/entity/IEntity";
-import { IStat, Stat } from "@wayward/game/game/entity/IStats";
-import { EntityReferenceTypes } from "@wayward/game/game/reference/IReferenceManager";
-import Tile from "@wayward/game/game/tile/Tile";
+import type { IStatChangeInfo } from "@wayward/game/game/entity/IEntity";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
+import type { IStat } from "@wayward/game/game/entity/IStats";
+import { Stat } from "@wayward/game/game/entity/IStats";
+import type Tile from "@wayward/game/game/tile/Tile";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
 import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
@@ -20,12 +21,12 @@ import { RangeRow } from "@wayward/game/ui/component/RangeRow";
 import Text from "@wayward/game/ui/component/Text";
 import InputManager from "@wayward/game/ui/input/InputManager";
 import Enums from "@wayward/game/utilities/enum/Enums";
-import { IStringSection } from "@wayward/game/utilities/string/Interpolator";
+import type { IStringSection } from "@wayward/game/utilities/string/Interpolator";
 import { Bound } from "@wayward/utilities/Decorators";
-import Log from "@wayward/utilities/Log";
+import type Log from "@wayward/utilities/Log";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { weakRefify } from "@wayward/utilities/object/Objects";
-import DebugTools from "../../DebugTools";
+import type DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Clone from "../../action/Clone";
 import Heal from "../../action/Heal";
@@ -133,7 +134,7 @@ export default class EntityInformation extends InspectInformationSection {
 			.forEach(subsection => subsection.event.emit("switchAway")));
 	}
 
-	public override getTabs(): [number, () => IStringSection[]][] {
+	public override getTabs(): Array<[number, () => IStringSection[]]> {
 		return this.entities.entries()
 			.map(([i, entity]) => Tuple(i, () => translation(DebugToolsTranslation.EntityName)
 				.get(EntityType[entity.entityType], entity.getName()/*.inContext(TextContext.Title)*/)))
@@ -160,15 +161,25 @@ export default class EntityInformation extends InspectInformationSection {
 	public override update(tile: Tile): void {
 		const entities: Entity[] = tile.getPlayersOnTile(true);
 
-		if (tile.creature) entities.push(tile.creature);
-		if (tile.npc) entities.push(tile.npc);
+		if (tile.creature) {
+			entities.push(tile.creature);
+		}
 
-		if (areArraysIdentical(entities, this.entities)) return;
+		if (tile.npc) {
+			entities.push(tile.npc);
+		}
+
+		if (areArraysIdentical(entities, this.entities)) {
+			return;
+		}
+
 		this.entities = entities;
 
 		this.event.emit("change");
 
-		if (!this.entities.length) return;
+		if (!this.entities.length) {
+			return;
+		}
 
 		this.setShouldLog();
 
@@ -185,7 +196,7 @@ export default class EntityInformation extends InspectInformationSection {
 		return this.entities.indexOf(entity);
 	}
 
-	public getEntity(index: number): Entity<unknown, number, EntityReferenceTypes, unknown> {
+	public getEntity(index: number): Entity {
 		return this.entities[index];
 	}
 
@@ -265,9 +276,10 @@ export default class EntityInformation extends InspectInformationSection {
 	private onStatMaxChanged(_: any, stat: IStat): void {
 		const statComponent = this.statComponents.get(stat.type);
 		if (statComponent) {
-			statComponent.getAs(RangeRow)?.editRange(range => range.setMax(stat.max!, undefined, false))
+			statComponent.getAs(RangeRow)?.editRange(range => range.setMax(stat.max!, undefined, false));
 			statComponent.refresh();
 		}
+
 		const statMaxComponent = this.statMaxComponents.get(stat.type);
 		if (statMaxComponent) {
 			statMaxComponent.refresh(false);
@@ -282,7 +294,7 @@ export default class EntityInformation extends InspectInformationSection {
 		}
 
 		if (this.entity?.asLocalPlayer && !multiplayer.isConnected) {
-			this.selectTeleportLocation();
+			void this.selectTeleportLocation();
 			return;
 		}
 
@@ -312,7 +324,7 @@ export default class EntityInformation extends InspectInformationSection {
 	}
 
 	@Bound
-	private createTeleportToPlayerMenu(): ContextMenu<string | number | symbol> {
+	private createTeleportToPlayerMenu(): ContextMenu {
 		return game.playerManager.getAll(true, true)
 			.filter(player => player !== this.entity)
 			.map(player => Tuple(player.name, {
@@ -327,53 +339,61 @@ export default class EntityInformation extends InspectInformationSection {
 	@Bound
 	private async selectTeleportLocation(): Promise<void> {
 		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
-		if (!teleportLocation) return;
+		if (!teleportLocation) {
+			return;
+		}
 
 		this.teleport(teleportLocation);
 	}
 
 	@Bound
 	private teleport(tile: Tile): void {
-		TeleportEntity.execute(localPlayer, this.entity!, tile);
+		void TeleportEntity.execute(localPlayer, this.entity!, tile);
 
 		this.event.emit("update");
 	}
 
 	@Bound
 	private kill(): void {
-		Kill.execute(localPlayer, this.entity!);
+		void Kill.execute(localPlayer, this.entity!);
 		this.event.emit("update");
 	}
 
 	@Bound
 	private async cloneEntity(): Promise<void> {
 		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
-		if (!teleportLocation) return;
+		if (!teleportLocation) {
+			return;
+		}
 
-		Clone.execute(localPlayer, this.entity!, teleportLocation);
+		void Clone.execute(localPlayer, this.entity!, teleportLocation);
 	}
 
 	@Bound
 	private heal(): void {
-		Heal.execute(localPlayer, this.entity!);
+		void Heal.execute(localPlayer, this.entity!);
 		this.event.emit("update");
 	}
 
 	@Bound
 	private setStat(stat: Stat): (_: any, value: number) => void {
 		return (_: any, value: number) => {
-			if (this.entity?.asEntityWithStats?.stat.getValue(stat) === value) return;
+			if (this.entity?.asEntityWithStats?.stat.getValue(stat) === value) {
+				return;
+			}
 
-			SetStat.execute(localPlayer, this.entity!, stat, value);
+			void SetStat.execute(localPlayer, this.entity!, stat, value);
 		};
 	}
 
 	@Bound
 	private setStatMax(stat: Stat): (_: any, value: number) => void {
 		return (_: any, value: number) => {
-			if (this.entity?.asEntityWithStats?.stat.getValue(stat) === value) return;
+			if (this.entity?.asEntityWithStats?.stat.getValue(stat) === value) {
+				return;
+			}
 
-			SetStatMax.execute(localPlayer, this.entity!, stat, value);
+			void SetStatMax.execute(localPlayer, this.entity!, stat, value);
 		};
 	}
 }

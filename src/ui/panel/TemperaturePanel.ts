@@ -6,8 +6,9 @@ import ChoiceList, { Choice } from "@wayward/game/ui/component/ChoiceList";
 import Divider from "@wayward/game/ui/component/Divider";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import Text, { Heading } from "@wayward/game/ui/component/Text";
-import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, ISaveData, translation } from "../../IDebugTools";
+import type DebugTools from "../../DebugTools";
+import type { ISaveData } from "../../IDebugTools";
+import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { TemperatureOverlayMode } from "../../overlay/TemperatureOverlay";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 // import Component from "@wayward/game/ui/component/Component";
@@ -21,8 +22,8 @@ export default class TemperaturePanel extends DebugToolsPanel {
 	@Mod.saveData<DebugTools>("Debug Tools")
 	public saveData: ISaveData;
 
-	private biomeTimeModifier: Text;
-	private layerTimeModifier: Text;
+	private readonly biomeTimeModifier: Text;
+	private readonly layerTimeModifier: Text;
 
 	public constructor() {
 		super();

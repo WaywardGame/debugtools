@@ -1,4 +1,4 @@
-import Human from "@wayward/game/game/entity/Human";
+import type Human from "@wayward/game/game/entity/Human";
 
 /**
  * Clones the inventory from one human entity to another.
@@ -18,6 +18,8 @@ export default function (from: Human, to: Human): void {
 
 	for (const item of from.inventory.containedItems) {
 		const clone = to.cloneItemIntoInventory(item);
-		if (item.isEquipped()) to.equip(clone, item.getEquipSlot()!);
+		if (item.isEquipped()) {
+			to.equip(clone, item.getEquipSlot()!);
+		}
 	}
 }

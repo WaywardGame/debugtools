@@ -2,8 +2,9 @@ import Mod from "@wayward/game/mod/Mod";
 import ChoiceList, { Choice } from "@wayward/game/ui/component/ChoiceList";
 import { Heading } from "@wayward/game/ui/component/Text";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
-import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, ISaveData, translation } from "../../IDebugTools";
+import type DebugTools from "../../DebugTools";
+import type { ISaveData } from "../../IDebugTools";
+import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { CreatureZoneOverlayMode } from "../../overlay/CreatureZoneOverlay";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 

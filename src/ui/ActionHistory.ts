@@ -1,8 +1,8 @@
 import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler } from "@wayward/game/event/EventManager";
-import { Game } from "@wayward/game/game/Game";
-import Entity from "@wayward/game/game/entity/Entity";
-import { ActionType } from "@wayward/game/game/entity/action/IAction";
+import type { Game } from "@wayward/game/game/Game";
+import type Entity from "@wayward/game/game/entity/Entity";
+import type { ActionType } from "@wayward/game/game/entity/action/IAction";
 import IActionContext from "@wayward/game/game/entity/action/IActionContext";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
@@ -11,7 +11,8 @@ import UiTranslation from "@wayward/game/language/dictionary/UiTranslation";
 import Button from "@wayward/game/ui/component/Button";
 import Component from "@wayward/game/ui/component/Component";
 import LoadingAnimation from "@wayward/game/ui/component/Loading";
-import Text, { Paragraph } from "@wayward/game/ui/component/Text";
+import type Text from "@wayward/game/ui/component/Text";
+import { Paragraph } from "@wayward/game/ui/component/Text";
 import { Bound } from "@wayward/utilities/Decorators";
 import { DebugToolsTranslation, translation } from "../IDebugTools";
 
@@ -87,7 +88,7 @@ export default class ActionHistory extends Component {
 		this.classes.remove(ActionHistoryClasses.Loading);
 	}
 
-	@Bound protected onUpdateHistoricalActionCount(executor: Entity, action: ActionType, count: number, oldCount: number) {
+	@Bound protected onUpdateHistoricalActionCount(executor: Entity, action: ActionType, count: number, oldCount: number): void {
 		(this.countMap[action] ??= new Paragraph().classes.add(ActionHistoryClasses.CountItem))
 			.setText(Translation.merge(
 				Translation.action(action),
@@ -98,7 +99,7 @@ export default class ActionHistory extends Component {
 	}
 
 	@EventHandler(EventBus.Game, "addHistoricalAction")
-	protected async onAddHistoricalAction(game: Game, executor: Entity, context: IActionContext) {
+	protected async onAddHistoricalAction(game: Game, executor: Entity, context: IActionContext): Promise<void> {
 		await this.rendering;
 		this.renderHistoryItem(executor, context);
 	}

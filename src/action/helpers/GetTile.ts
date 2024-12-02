@@ -1,8 +1,8 @@
-import Human from "@wayward/game/game/entity/Human";
+import type Human from "@wayward/game/game/entity/Human";
 import { MoveType } from "@wayward/game/game/entity/IEntity";
 import { MessageType } from "@wayward/game/game/entity/player/IMessageManager";
-import Tile from "@wayward/game/game/tile/Tile";
-import { TranslationGenerator } from "@wayward/game/ui/component/IComponent";
+import type Tile from "@wayward/game/game/tile/Tile";
+import type { TranslationGenerator } from "@wayward/game/ui/component/IComponent";
 import Text from "@wayward/game/ui/component/Text";
 import Actions from "../../Actions";
 
@@ -17,7 +17,7 @@ export function getTile(human: Human, tile: Tile, actionName: TranslationGenerat
 		return tile;
 	}
 
-	const openTile = tile?.findMatchingTile((tile) => !tile.isBlocked);
+	const openTile = tile?.findMatchingTile(tile => !tile.isBlocked);
 	if (!openTile) {
 		human.messages.source(Actions.DEBUG_TOOLS.source)
 			.type(MessageType.Bad)

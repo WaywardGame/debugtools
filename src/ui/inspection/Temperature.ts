@@ -2,22 +2,22 @@ import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler } from "@wayward/game/event/EventManager";
 import { InfoClass, InfoDisplayLevel } from "@wayward/game/game/inspection/IInfoProvider";
 import { InspectType, basicInspectionPriorities } from "@wayward/game/game/inspection/IInspection";
-import { InfoProvider, SimpleInfoProvider } from "@wayward/game/game/inspection/InfoProvider";
-import { InfoProviderContext } from "@wayward/game/game/inspection/InfoProviderContext";
+import type { InfoProvider, SimpleInfoProvider } from "@wayward/game/game/inspection/InfoProvider";
+import type { InfoProviderContext } from "@wayward/game/game/inspection/InfoProviderContext";
 import Inspection from "@wayward/game/game/inspection/Inspection";
 import LabelledValue from "@wayward/game/game/inspection/infoProviders/LabelledValue";
 import MagicalPropertyValue from "@wayward/game/game/inspection/infoProviders/MagicalPropertyValue";
-import Island from "@wayward/game/game/island/Island";
+import type Island from "@wayward/game/game/island/Island";
 import { TempType } from "@wayward/game/game/temperature/ITemperature";
 import { TEMPERATURE_INVALID } from "@wayward/game/game/temperature/TemperatureManager";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 import Translation from "@wayward/game/language/Translation";
 import { MiscTranslation } from "@wayward/game/language/dictionary/Misc";
-import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
+import type TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 import Mod from "@wayward/game/mod/Mod";
-import { TranslationGenerator } from "@wayward/game/ui/component/IComponent";
+import type { TranslationGenerator } from "@wayward/game/ui/component/IComponent";
 import { Heading, Paragraph } from "@wayward/game/ui/component/Text";
-import DebugTools from "../../DebugTools";
+import type DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 
 export default class TemperatureInspection extends Inspection<Tile> {
@@ -143,7 +143,10 @@ export default class TemperatureInspection extends Inspection<Tile> {
 	private getTileMod(): TranslationImpl | "?" {
 		const heat = this.getTemperature(TempType.Heat, "calculated");
 		const cold = this.getTemperature(TempType.Cold, "calculated");
-		if (heat === "?" || cold === "?") return "?";
+		if (heat === "?" || cold === "?") {
+			return "?";
+		}
+
 		return Translation.misc(MiscTranslation.Difference)
 			.addArgs(heat - cold);
 	}

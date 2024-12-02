@@ -1,10 +1,11 @@
 import { EventHandler } from "@wayward/game/event/EventManager";
 import CreatureZoneManager from "@wayward/game/game/entity/creature/zone/CreatureZoneManager";
-import Entity from "@wayward/game/game/entity/Entity";
-import { IOverlayInfo, OverlayType } from "@wayward/game/game/tile/ITerrain";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Entity from "@wayward/game/game/entity/Entity";
+import type { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
+import { OverlayType } from "@wayward/game/game/tile/ITerrain";
+import type Tile from "@wayward/game/game/tile/Tile";
 import UniversalOverlay from "@wayward/game/renderer/overlay/UniversalOverlay";
-import { IVector3 } from "@wayward/game/utilities/math/IVector";
+import type { IVector3 } from "@wayward/game/utilities/math/IVector";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 import Vector3 from "@wayward/game/utilities/math/Vector3";
 import Color from "@wayward/utilities/Color";
@@ -51,8 +52,9 @@ export class CreatureZoneOverlay extends UniversalOverlay {
 	private getEntityZone() {
 		const entity = this.followingEntity?.deref();
 		const entityZone = entity?.asCreature?.zone ?? entity?.tile?.zone;
-		if (Vector3.equals(entityZone?.zonePoint, this.entityZone))
+		if (Vector3.equals(entityZone?.zonePoint, this.entityZone)) {
 			return this.entityZone;
+		}
 
 		return this.entityZone = entityZone?.zonePoint;
 	}
@@ -91,34 +93,40 @@ export class CreatureZoneOverlay extends UniversalOverlay {
 	}
 
 	protected override shouldRefresh(): boolean {
-		if (this.mode === CreatureZoneOverlayMode.FollowingEntity && Vector3.equals(this.entityZone, this.getEntityZone()))
+		if (this.mode === CreatureZoneOverlayMode.FollowingEntity && Vector3.equals(this.entityZone, this.getEntityZone())) {
 			return false;
+		}
 
 		return true;
 	}
 
 	protected override generateOverlayInfo(tile: Tile, previousOverlay?: IOverlayInfo): IOverlayInfo | undefined {
 		const zone = tile.zone;
-		if (this.mode === CreatureZoneOverlayMode.FollowingEntity && !Vector3.equals(zone.zonePoint, this.entityZone))
+		if (this.mode === CreatureZoneOverlayMode.FollowingEntity && !Vector3.equals(zone.zonePoint, this.entityZone)) {
 			return undefined;
+		}
 
-		let tier = zone?.getTier();
-		if (tier === undefined)
+		const tier = zone?.getTier();
+		if (tier === undefined) {
 			return undefined;
+		}
 
-		if (this.mode === CreatureZoneOverlayMode.Active && !tile.island.zones.getActiveZones().includes(zone!))
+		if (this.mode === CreatureZoneOverlayMode.Active && !tile.island.zones.getActiveZones().includes(zone!)) {
 			return undefined;
+		}
 
 		// const baseTier = localIsland.zones.getMinTier();
 		// tier -= baseTier;
 		// tier = Math.max(0, tier);
 
 		const color = TIER_COLORS[tier] ?? TIER_COLORS.last();
-		if (!color)
+		if (!color) {
 			return undefined;
+		}
 
-		if (color.r === previousOverlay?.red && color.g === previousOverlay.green && color.b === previousOverlay.blue)
+		if (color.r === previousOverlay?.red && color.g === previousOverlay.green && color.b === previousOverlay.blue) {
 			return previousOverlay;
+		}
 
 		return {
 			type: OverlayType.Full,
@@ -143,7 +151,7 @@ export class CreatureZoneOverlay extends UniversalOverlay {
 	}
 
 	@EventHandler(CreatureZoneManager, "activeZonesChange")
-	protected onActiveZonesChange() {
+	protected onActiveZonesChange(): void {
 		if (this.mode === CreatureZoneOverlayMode.Active) {
 			this.refresh();
 		}

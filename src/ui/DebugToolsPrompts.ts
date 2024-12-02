@@ -1,8 +1,8 @@
-import { IPromptConfirmDescription } from "@wayward/game/game/meta/prompt/IPrompt";
-import Translation from "@wayward/game/language/Translation";
+import type { IPromptConfirmDescription } from "@wayward/game/game/meta/prompt/IPrompt";
+import type Translation from "@wayward/game/language/Translation";
 import Mod from "@wayward/game/mod/Mod";
 import Register from "@wayward/game/mod/ModRegistry";
-import DebugTools from "../DebugTools";
+import type DebugTools from "../DebugTools";
 
 export default class DebugToolsPrompts {
 

@@ -1,5 +1,5 @@
 import { TerrainType } from "@wayward/game/game/tile/ITerrain";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 import Dictionary from "@wayward/game/language/Dictionary";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
@@ -14,13 +14,14 @@ import Text from "@wayward/game/ui/component/Text";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { Bound } from "@wayward/utilities/Decorators";
 import Enums from "@wayward/game/utilities/enum/Enums";
-import Log from "@wayward/utilities/Log";
+import type Log from "@wayward/utilities/Log";
 import ChangeTerrain from "../../action/ChangeTerrain";
 import ToggleTilled from "../../action/ToggleTilled";
 import { DebugToolsTranslation, DEBUG_TOOLS_ID, translation } from "../../IDebugTools";
-import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
+import type { TabInformation } from "../component/InspectInformationSection";
+import InspectInformationSection from "../component/InspectInformationSection";
 import { TileUpdateType } from "@wayward/game/game/IGame";
-import { IStringSection } from "@wayward/game/utilities/string/Interpolator";
+import type { IStringSection } from "@wayward/game/utilities/string/Interpolator";
 
 export default class TerrainInformation extends InspectInformationSection {
 
@@ -85,8 +86,9 @@ export default class TerrainInformation extends InspectInformationSection {
 
 		const terrainType = TerrainType[this.tile.type];
 		const tillable = this.isTillable();
-		if (terrainType === this.terrainType && (!tillable || this.checkButtonTilled.checked === this.isTilled()))
+		if (terrainType === this.terrainType && (!tillable || this.checkButtonTilled.checked === this.isTilled())) {
 			return;
+		}
 
 		this.terrainType = terrainType;
 		this.dropdownTerrainType.refresh();
@@ -105,7 +107,7 @@ export default class TerrainInformation extends InspectInformationSection {
 	@Bound
 	private toggleTilled(_: any, tilled: boolean): void {
 		if (this.isTilled() !== tilled) {
-			ToggleTilled.execute(localPlayer, this.tile, tilled);
+			void ToggleTilled.execute(localPlayer, this.tile, tilled);
 		}
 	}
 
@@ -115,7 +117,7 @@ export default class TerrainInformation extends InspectInformationSection {
 
 	@Bound
 	private isTilled(): boolean {
-		return this.tile && this.tile.isTilled;
+		return this.tile?.isTilled;
 	}
 
 	@Bound
@@ -124,7 +126,7 @@ export default class TerrainInformation extends InspectInformationSection {
 			return;
 		}
 
-		ChangeTerrain.execute(localPlayer, terrain, this.tile);
+		void ChangeTerrain.execute(localPlayer, terrain, this.tile);
 		this.update(this.tile);
 	}
 

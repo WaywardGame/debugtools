@@ -1,7 +1,7 @@
-import Entity from "@wayward/game/game/entity/Entity";
-import { Stat } from "@wayward/game/game/entity/IStats";
+import type Entity from "@wayward/game/game/entity/Entity";
+import type { Stat } from "@wayward/game/game/entity/IStats";
 import Component from "@wayward/game/ui/component/Component";
-import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import type { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 
 interface IInspectEntityInformationSubsectionEvents extends Events<Component> {
 	change(): any;
@@ -19,5 +19,7 @@ export default abstract class InspectEntityInformationSubsection extends Compone
 
 	public abstract update(entity: Entity): void;
 
-	public getImmutableStats(): Stat[] { return []; }
+	public getImmutableStats(): Stat[] {
+		return [];
+	}
 }

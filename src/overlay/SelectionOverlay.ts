@@ -1,26 +1,27 @@
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 import Mod from "@wayward/game/mod/Mod";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import Enums from "@wayward/game/utilities/enum/Enums";
-import { IVector2 } from "@wayward/game/utilities/math/IVector";
+import type { IVector2 } from "@wayward/game/utilities/math/IVector";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 import Vector3 from "@wayward/game/utilities/math/Vector3";
-import DebugTools from "../DebugTools";
+import type DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID } from "../IDebugTools";
-import { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
+import type { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
 import Objects from "@wayward/utilities/object/Objects";
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export default class SelectionOverlay {
 
 	/**
 	 * Tiles that have a selection overlay
 	 */
-	private static readonly overlays: Set<Tile> = new Set();
+	private static readonly overlays = new Set<Tile>();
 
 	/**
 	 * List of overlays being rendered for each tile
 	 */
-	private static readonly subTileOverlays: Map<Tile, Set<IOverlayInfo>> = new Map();
+	private static readonly subTileOverlays = new Map<Tile, Set<IOverlayInfo>>();
 
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
 	public static readonly debugTools: DebugTools;
@@ -117,7 +118,9 @@ export default class SelectionOverlay {
 			}
 		}
 
-		if (!updateNeighbors) return;
+		if (!updateNeighbors) {
+			return;
+		}
 
 		neighborTiles = neighborTiles || getNeighborTiles(tile);
 		connections = connections || this.getPaintOverlayConnections(neighborTiles);
@@ -150,7 +153,7 @@ function getNeighborTiles(tilePosition: IVector2): INeighborTiles {
 /**
  * Returns a map of neighbor positions to their corresponding tile position.
  */
-function getNeighborVectors(tilePosition: IVector2): { T: Vector3; O: Vector3; P: Vector3; R: Vector3; B: Vector3; M: Vector3; L: Vector3; E: Vector3; } {
+function getNeighborVectors(tilePosition: IVector2): { T: Vector3; O: Vector3; P: Vector3; R: Vector3; B: Vector3; M: Vector3; L: Vector3; E: Vector3 } {
 	return {
 		[NeighborPosition.TopLeft]: new Vector3(tilePosition.x - 1, tilePosition.y - 1, localPlayer.z),
 		[NeighborPosition.Top]: new Vector3(tilePosition.x, tilePosition.y - 1, localPlayer.z),
@@ -234,7 +237,7 @@ const paintTileMap = {
 /**
  * Returns an ID from a list of neighbor positions, fitlered by ones that are actually relevant to the sub tile position (quadrant of a tile)
  */
-function getId(relevantFor: SubTilePosition, ...positions: (NeighborPosition | undefined)[]): string {
+function getId(relevantFor: SubTilePosition, ...positions: Array<NeighborPosition | undefined>): string {
 	return positions.filter((p): p is NeighborPosition => p !== undefined && isRelevant(relevantFor, p))
 		.sort((a, b) => a.localeCompare(b))
 		.join("");

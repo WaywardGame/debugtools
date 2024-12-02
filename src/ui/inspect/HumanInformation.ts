@@ -1,6 +1,6 @@
-import Deity from "@wayward/game/game/deity/Deity";
-import Entity from "@wayward/game/game/entity/Entity";
-import Human from "@wayward/game/game/entity/Human";
+import type Deity from "@wayward/game/game/deity/Deity";
+import type Entity from "@wayward/game/game/entity/Entity";
+import type Human from "@wayward/game/game/entity/Human";
 import { StatusChangeReason } from "@wayward/game/game/entity/IEntity";
 import { Stat } from "@wayward/game/game/entity/IStats";
 import { BleedLevel } from "@wayward/game/game/entity/status/handler/IBleeding";
@@ -11,7 +11,7 @@ import { TextContext } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
 import { CheckButton } from "@wayward/game/ui/component/CheckButton";
 import Component from "@wayward/game/ui/component/Component";
-import { RangeRow } from "@wayward/game/ui/component/RangeRow";
+import type { RangeRow } from "@wayward/game/ui/component/RangeRow";
 import _ from "@wayward/utilities/_";
 import { Bound } from "@wayward/utilities/Decorators";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
@@ -20,7 +20,7 @@ import InspectEntityInformationSubsection from "../component/InspectEntityInform
 
 export default class HumanInformation extends InspectEntityInformationSubsection {
 	private readonly addItemContainer: Component;
-	private readonly alignmentSliders: { [key in Deity.Evil | Deity.Good]?: RangeRow } = {};
+	private readonly alignmentSliders: Partial<Record<Deity.Evil | Deity.Good, RangeRow>> = {};
 	private readonly statusCheckButtons: PartialRecord<UiStatusType | StatusType, CheckButton> = {};
 
 	private human: Human | undefined;
@@ -53,7 +53,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 	@OwnEventHandler(HumanInformation, "switchTo")
 	protected onSwitchTo(): void {
 		this.addItemContainer.dump();
-		Container.appendTo(this.addItemContainer, this, () => this.human);
+		void Container.appendTo(this.addItemContainer, this, () => this.human);
 	}
 
 	public override getImmutableStats(): Stat[] {
@@ -67,14 +67,18 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 	}
 
 	public override update(entity: Entity): void {
-		if (this.human === entity) return;
+		if (this.human === entity) {
+			return;
+		}
 
 		this.human = entity.asHuman;
 		this.toggle(!!this.human);
 
 		this.event.emit("change");
 
-		if (!this.human) return;
+		if (!this.human) {
+			return;
+		}
 
 		for (const slider of Object.values(this.alignmentSliders)) {
 			slider.refresh();

@@ -599,11 +599,11 @@ export default class DebugTools extends Mod {
 	}
 
 	public toggleFog(fog: boolean): void {
-		SetPlayerData.execute(localPlayer, localPlayer, "fog", fog);
+		void SetPlayerData.execute(localPlayer, localPlayer, "fog", fog);
 	}
 
 	public toggleLighting(lighting: boolean): void {
-		SetPlayerData.execute(localPlayer, localPlayer, "lighting", lighting);
+		void SetPlayerData.execute(localPlayer, localPlayer, "lighting", lighting);
 	}
 
 	////////////////////////////////////
@@ -619,7 +619,7 @@ export default class DebugTools extends Mod {
 		const targetPlayer = game.playerManager.getByName(args);
 		if (targetPlayer !== undefined && !targetPlayer.isLocalPlayer) {
 			const newPermissions = !this.getPlayerData(targetPlayer, "permissions");
-			SetPlayerData.execute(localPlayer, targetPlayer, "permissions", newPermissions);
+			void SetPlayerData.execute(localPlayer, targetPlayer, "permissions", newPermissions);
 		}
 	}
 
@@ -798,7 +798,7 @@ export default class DebugTools extends Mod {
 			return false;
 		}
 
-		Heal.execute(localPlayer, localPlayer);
+		void Heal.execute(localPlayer, localPlayer);
 		return true;
 	}
 
@@ -813,7 +813,7 @@ export default class DebugTools extends Mod {
 			return false;
 		}
 
-		TeleportEntity.execute(localPlayer, localPlayer, tile);
+		void TeleportEntity.execute(localPlayer, localPlayer, tile);
 		return true;
 	}
 
@@ -823,7 +823,7 @@ export default class DebugTools extends Mod {
 			return false;
 		}
 
-		ToggleNoClip.execute(localPlayer, localPlayer);
+		void ToggleNoClip.execute(localPlayer, localPlayer);
 		return true;
 	}
 
@@ -833,7 +833,7 @@ export default class DebugTools extends Mod {
 			return false;
 		}
 
-		ToggleFastMovement.execute(localPlayer, localPlayer);
+		void ToggleFastMovement.execute(localPlayer, localPlayer);
 		return true;
 	}
 

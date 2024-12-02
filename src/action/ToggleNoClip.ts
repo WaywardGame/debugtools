@@ -1,15 +1,17 @@
 import { Action } from "@wayward/game/game/entity/action/Action";
-import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
 import { EntityType, MoveType } from "@wayward/game/game/entity/IEntity";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
-import { defaultCanUseHandler, defaultUsability } from "../Actions";
+import { defaultCanUseHandler } from "../Actions";
 
 export default new Action(ActionArgument.Player)
 	.setUsableBy(EntityType.Human)
-	.setUsableWhen(...defaultUsability)
+	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, player) => {
-		if (!player) return;
+		if (!player) {
+			return;
+		}
 
 		player.setMoveType(player.isFlying ? MoveType.Land : MoveType.Flying);
 

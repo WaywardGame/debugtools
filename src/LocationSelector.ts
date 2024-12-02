@@ -1,19 +1,19 @@
 import { Priority } from "@wayward/utilities/event/EventEmitter";
 import { EventHandler } from "@wayward/game/event/EventManager";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 import Mod from "@wayward/game/mod/Mod";
 import Register, { Registry } from "@wayward/game/mod/ModRegistry";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
 import Bind from "@wayward/game/ui/input/Bind";
-import Bindable from "@wayward/game/ui/input/Bindable";
+import type Bindable from "@wayward/game/ui/input/Bindable";
 import { IInput } from "@wayward/game/ui/input/IInput";
 import InputManager from "@wayward/game/ui/input/InputManager";
 import MovementHandler from "@wayward/game/ui/screen/screens/game/util/movement/MovementHandler";
 import { Bound } from "@wayward/utilities/Decorators";
-import DebugTools from "./DebugTools";
+import type DebugTools from "./DebugTools";
 import { DEBUG_TOOLS_ID } from "./IDebugTools";
 import CancelablePromise from "@wayward/utilities/promise/CancelablePromise";
-import { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
+import type { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
 
 export default class SelectLocation {
 
@@ -33,7 +33,9 @@ export default class SelectLocation {
 	// Fields
 	//
 
-	public get selecting() { return this.selectionPromise !== undefined; }
+	public get selecting(): boolean {
+		return this.selectionPromise !== undefined;
+	}
 
 	private hoverTile?: { tile: Tile; overlay: IOverlayInfo };
 	private selectTileHeld = false;
@@ -55,7 +57,7 @@ export default class SelectLocation {
 
 		setTimeout(this.selectionTick, game.interval);
 
-		return this.selectionPromise
+		return this.selectionPromise;
 	}
 
 	////////////////////////////////////

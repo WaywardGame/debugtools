@@ -1,10 +1,11 @@
 import { Quality } from "@wayward/game/game/IObject";
-import Human from "@wayward/game/game/entity/Human";
+import type Human from "@wayward/game/game/entity/Human";
 import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { Action } from "@wayward/game/game/entity/action/Action";
-import { ActionArgument, IActionHandlerApi } from "@wayward/game/game/entity/action/IAction";
-import Item from "@wayward/game/game/item/Item";
-import { defaultCanUseHandler, defaultUsability } from "../Actions";
+import type { IActionHandlerApi } from "@wayward/game/game/entity/action/IAction";
+import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
+import type Item from "@wayward/game/game/item/Item";
+import { defaultCanUseHandler } from "../Actions";
 import InspectDialog from "../ui/InspectDialog";
 
 /**
@@ -12,7 +13,7 @@ import InspectDialog from "../ui/InspectDialog";
  */
 export default new Action(ActionArgument.Item, ActionArgument.ENUM(Quality))
 	.setUsableBy(EntityType.Human)
-	.setUsableWhen(...defaultUsability)
+	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, item, quality) => setQuality(action, quality, item));
 
@@ -28,10 +29,11 @@ export function setQuality(action: IActionHandlerApi<Human>, quality: Quality, .
 		item.setQuality(human, quality);
 	}
 
-	if (human)
+	if (human) {
 		human.updateTablesAndWeight("M");
-	else
+	} else {
 		action.setUpdateView();
+	}
 
 	InspectDialog.INSTANCE?.update();
 }

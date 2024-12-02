@@ -1,9 +1,9 @@
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import { Article } from "@wayward/game/language/Translation";
 import DoodadInformation from "./DoodadInformation";
 import { translation, DebugToolsTranslation } from "../../IDebugTools";
-import { TabInformation } from "../component/InspectInformationSection";
+import type { TabInformation } from "../component/InspectInformationSection";
 
 export default class VehicleInformation extends DoodadInformation {
 
@@ -15,10 +15,15 @@ export default class VehicleInformation extends DoodadInformation {
 	}
 
 	public override update(tile: Tile): void {
-		if (tile.vehicle === this.doodad) return;
+		if (tile.vehicle === this.doodad) {
+			return;
+		}
+
 		this.doodad = tile.vehicle;
 
-		if (!this.doodad) return;
+		if (!this.doodad) {
+			return;
+		}
 
 		this.buttonGrowthStage.hide();
 

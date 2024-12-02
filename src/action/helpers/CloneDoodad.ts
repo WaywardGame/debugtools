@@ -1,6 +1,6 @@
-import Doodad from "@wayward/game/game/doodad/Doodad";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
 import MagicalPropertyManager from "@wayward/game/game/magic/MagicalPropertyManager";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 import CloneContainedItems from "./CloneContainedItems";
 
 /**
@@ -21,7 +21,9 @@ export default function (doodad: Doodad, tile: Tile): void {
 		step: doodad.step,
 	});
 
-	if (!clone) return;
+	if (!clone) {
+		return;
+	}
 
 	MagicalPropertyManager.inherit(doodad, clone);
 

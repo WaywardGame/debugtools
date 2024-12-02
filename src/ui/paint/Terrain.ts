@@ -1,13 +1,13 @@
-import { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import type { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import { terrainDescriptions } from "@wayward/game/game/tile/Terrains";
 import { CheckButton } from "@wayward/game/ui/component/CheckButton";
 import Component from "@wayward/game/ui/component/Component";
 import TerrainDropdown from "@wayward/game/ui/component/dropdown/TerrainDropdown";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import { Bound } from "@wayward/utilities/Decorators";
-import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import type { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
-import { IPaintSection } from "../panel/PaintPanel";
+import type { IPaintSection } from "../panel/PaintPanel";
 
 export default class TerrainPaint extends Component implements IPaintSection {
 	declare public event: IEventEmitter<this, Events<IPaintSection>>;
@@ -34,7 +34,7 @@ export default class TerrainPaint extends Component implements IPaintSection {
 			.appendTo(this);
 	}
 
-	public getTilePaintData(): { terrain: { type: TerrainType; tilled: boolean; }; } | undefined {
+	public getTilePaintData(): { terrain: { type: TerrainType; tilled: boolean } } | undefined {
 		return this.terrain === undefined ? undefined : {
 			terrain: {
 				type: this.terrain,
@@ -57,7 +57,9 @@ export default class TerrainPaint extends Component implements IPaintSection {
 
 		const tillable = terrain !== "nochange" && terrainDescriptions[terrain]!.tillable === true;
 		this.tilledCheckButton.toggle(tillable);
-		if (!tillable) this.tilledCheckButton.setChecked(false);
+		if (!tillable) {
+			this.tilledCheckButton.setChecked(false);
+		}
 
 		this.event.emit("change");
 	}

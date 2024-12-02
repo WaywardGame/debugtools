@@ -1,8 +1,8 @@
 import { Action } from "@wayward/game/game/entity/action/Action";
-import { ActionArgument } from "@wayward/game/game/entity/action/IAction";
+import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
 import Human from "@wayward/game/game/entity/Human";
 import { EntityType } from "@wayward/game/game/entity/IEntity";
-import { defaultCanUseHandler, defaultUsability } from "../Actions";
+import { defaultCanUseHandler } from "../Actions";
 import InspectDialog from "../ui/InspectDialog";
 
 /**
@@ -10,16 +10,17 @@ import InspectDialog from "../ui/InspectDialog";
  */
 export default new Action(ActionArgument.Container)
 	.setUsableBy(EntityType.Human)
-	.setUsableWhen(...defaultUsability)
+	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, container) => {
 		action.executor.island.items.removeContainerItems(container, { removeContainedItems: true });
 
 		const containerObject = action.executor.island?.items.resolveContainer(container);
-		if (containerObject instanceof Human)
+		if (containerObject instanceof Human) {
 			containerObject.updateTablesAndWeight("M");
-		else
+		} else {
 			action.setUpdateView();
+		}
 
 		InspectDialog.INSTANCE?.update();
 	});

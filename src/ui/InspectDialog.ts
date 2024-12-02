@@ -1,31 +1,35 @@
 import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler } from "@wayward/game/event/EventManager";
-import { TileUpdateType } from "@wayward/game/game/IGame";
+import type { TileUpdateType } from "@wayward/game/game/IGame";
 import Entity from "@wayward/game/game/entity/Entity";
-import Island from "@wayward/game/game/island/Island";
+import type Island from "@wayward/game/game/island/Island";
 import Item from "@wayward/game/game/item/Item";
-import { IOverlayInfo, TerrainType } from "@wayward/game/game/tile/ITerrain";
+import type { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
+import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import Tile from "@wayward/game/game/tile/Tile";
-import Translation from "@wayward/game/language/Translation";
+import type Translation from "@wayward/game/language/Translation";
 import Mod from "@wayward/game/mod/Mod";
 import { Registry } from "@wayward/game/mod/ModRegistry";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
-import Button from "@wayward/game/ui/component/Button";
-import Component from "@wayward/game/ui/component/Component";
+import type Button from "@wayward/game/ui/component/Button";
+import type Component from "@wayward/game/ui/component/Component";
 import ContextMenu from "@wayward/game/ui/component/ContextMenu";
 import Text from "@wayward/game/ui/component/Text";
-import Bind, { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
+import type { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
+import Bind from "@wayward/game/ui/input/Bind";
 import Bindable from "@wayward/game/ui/input/Bindable";
 import InputManager from "@wayward/game/ui/input/InputManager";
-import { DialogId, Edge, IDialogDescription } from "@wayward/game/ui/screen/screens/game/Dialogs";
-import TabDialog, { SubpanelInformation } from "@wayward/game/ui/screen/screens/game/component/TabDialog";
+import type { DialogId, IDialogDescription } from "@wayward/game/ui/screen/screens/game/Dialogs";
+import { Edge } from "@wayward/game/ui/screen/screens/game/Dialogs";
+import type { SubpanelInformation } from "@wayward/game/ui/screen/screens/game/component/TabDialog";
+import TabDialog from "@wayward/game/ui/screen/screens/game/component/TabDialog";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 import { Bound, Debounce } from "@wayward/utilities/Decorators";
-import Log from "@wayward/utilities/Log";
+import type Log from "@wayward/utilities/Log";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
-import { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
+import type { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
-import DebugTools from "../DebugTools";
+import type DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import Container from "./component/Container";
 import InspectInformationSection from "./component/InspectInformationSection";
@@ -159,8 +163,9 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 		this.setInspectionTile(what);
 
 		const item = what instanceof Item ? what : undefined;
-		if (item)
+		if (item) {
 			this.LOG.info("Item:", item);
+		}
 
 		while (what instanceof Item) {
 			const containerEntity = what.island.items.resolveContainer(what.containedWithin);
@@ -174,13 +179,15 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 		this.update();
 
 		if (item) {
-			this.event.waitFor("updateSubpanels").then(() => {
+			void this.event.waitFor("updateSubpanels").then(() => {
 				const itemShowed = Container.getFirst()?.showItem(item);
 				this.panelWrapper.scrollTo(itemShowed, 300);
 			});
 		}
 
-		if (this.inspectionLock) this.willShowSubpanel = true;
+		if (this.inspectionLock) {
+			this.willShowSubpanel = true;
+		}
 
 		return this;
 	}
@@ -193,7 +200,9 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 */
 	@Bound
 	public update(): void {
-		if (this.inspectionLock) this.setInspectionTile(this.inspectionLock);
+		if (this.inspectionLock) {
+			this.setInspectionTile(this.inspectionLock);
+		}
 
 		for (const section of this.subpanels) {
 			section.resetWillLog();
@@ -207,7 +216,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	@EventHandler(EventBus.LocalPlayer, "preMoveToIsland")
 	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableCloseInspectDialog"))
 	public onCloseBind(): boolean {
-		this.close();
+		void this.close();
 		return true;
 	}
 
@@ -288,7 +297,9 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 		}
 
 		if (this.inspectionLock) {
-			for (const entityButton of this.entityButtons) entityButton.classes.remove("inspection-lock");
+			for (const entityButton of this.entityButtons) {
+				entityButton.classes.remove("inspection-lock");
+			}
 
 			lockedButton?.classes.add("inspection-lock");
 		}
@@ -342,7 +353,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	private logUpdate(): void {
 		if (this.shouldLog) {
 			const tileData = this.tile ? this.tile.getTileData() : undefined;
-			this.LOG.info("Tile:", this.tile, this.tile?.toString(), tileData?.map(data => TerrainType[data.type]).join(", "), tileData,);
+			this.LOG.info("Tile:", this.tile, this.tile?.toString(), tileData?.map(data => TerrainType[data.type]).join(", "), tileData);
 			this.shouldLog = false;
 		}
 
@@ -380,7 +391,9 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	@Bound
 	private unlockInspection(): void {
 		delete this.inspectionLock;
-		for (const entityButton of this.entityButtons) entityButton.classes.remove("inspection-lock");
+		for (const entityButton of this.entityButtons) {
+			entityButton.classes.remove("inspection-lock");
+		}
 	}
 
 	/**

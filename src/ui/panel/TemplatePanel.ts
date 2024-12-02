@@ -6,7 +6,7 @@ import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 import Mod from "@wayward/game/mod/Mod";
 import { Registry } from "@wayward/game/mod/ModRegistry";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
-import Button from "@wayward/game/ui/component/Button";
+import type Button from "@wayward/game/ui/component/Button";
 import { CheckButton } from "@wayward/game/ui/component/CheckButton";
 import Dropdown from "@wayward/game/ui/component/Dropdown";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
@@ -22,9 +22,9 @@ import { Bound } from "@wayward/utilities/Decorators";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { Priority } from "@wayward/utilities/event/EventEmitter";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
-import Tile from "@wayward/game/game/tile/Tile";
+import type Tile from "@wayward/game/game/tile/Tile";
 
-import DebugTools from "../../DebugTools";
+import type DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import PlaceTemplate from "../../action/PlaceTemplate";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
@@ -126,8 +126,9 @@ export default class TemplatePanel extends DebugToolsPanel {
 
 	@EventHandler(MovementHandler, "canMove")
 	protected canClientMove(): false | undefined {
-		if (this.place.checked || this.selectHeld)
+		if (this.place.checked || this.selectHeld) {
 			return false;
+		}
 
 		return undefined;
 	}
@@ -146,8 +147,9 @@ export default class TemplatePanel extends DebugToolsPanel {
 		let updateRender = false;
 
 		const isMouseWithin = gameScreen?.isMouseWithin;
-		if (!this.place.checked || !isMouseWithin)
+		if (!this.place.checked || !isMouseWithin) {
 			updateRender = this.clearPreview();
+		}
 
 		if (this.place.checked) {
 			setTimeout(this.tick, game.interval);
@@ -155,8 +157,9 @@ export default class TemplatePanel extends DebugToolsPanel {
 			if (isMouseWithin) {
 				const options = this.getTemplateOptions();
 				const template = this.getTemplate(options);
-				if (template)
+				if (template) {
 					updateRender = this.updateTemplate(template, options);
+				}
 			}
 		}
 
@@ -187,8 +190,9 @@ export default class TemplatePanel extends DebugToolsPanel {
 			return true;
 		}
 
-		if (center.equals(this.center) && !this.templateOptionsChanged(options))
+		if (center.equals(this.center) && !this.templateOptionsChanged(options)) {
 			return false;
+		}
 
 		this.center = center;
 		this.templateOptions = options;
@@ -263,12 +267,13 @@ export default class TemplatePanel extends DebugToolsPanel {
 
 	private placeTemplate(topLeft: Vector2): void {
 		this.place.setChecked(false);
-		PlaceTemplate.execute(localPlayer, this.dropdownType.selectedOption, topLeft.raw(), this.getTemplateOptions());
+		void PlaceTemplate.execute(localPlayer, this.dropdownType.selectedOption, topLeft.raw(), this.getTemplateOptions());
 	}
 
 	private clearPreview(): boolean {
-		if (!this.previewTiles.length)
+		if (!this.previewTiles.length) {
 			return false;
+		}
 
 		for (const previewTile of this.previewTiles) {
 			SelectionOverlay.remove(previewTile);
