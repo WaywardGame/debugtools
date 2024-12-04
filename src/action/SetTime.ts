@@ -9,5 +9,6 @@ export default new Action(ActionArgument.Float64)
 	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, time) => {
 		action.executor.island.game.time.setTime(time);
+		action.executor.computeLights();
 		action.setUpdateView(true);
 	});
