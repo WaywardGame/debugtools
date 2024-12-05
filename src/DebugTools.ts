@@ -87,6 +87,7 @@ import InspectDialog from "./ui/InspectDialog";
 import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import TemperatureInspection from "./ui/inspection/Temperature";
 import Version from "./util/Version";
+import { RendererConstants } from "@wayward/game/renderer/RendererConstants";
 
 /**
  * An enum representing the possible states of the camera
@@ -556,14 +557,16 @@ export default class DebugTools extends Mod {
 	public setCameraUnlocked(unlocked: boolean): void {
 		if (unlocked) {
 			this.cameraState = CameraState.Unlocked;
-			this.unlockedCameraMovementHandler.position = new Vector2(localPlayer);
+			this.unlockedCameraMovementHandler.position = new Vector2(localPlayer)
+				.add(RendererConstants.cameraPositionOffset);
 			this.unlockedCameraMovementHandler.velocity = Vector2.ZERO;
 			this.unlockedCameraMovementHandler.transition = undefined;
 			this.unlockedCameraMovementHandler.homingVelocity = 0;
 
 		} else {
 			this.cameraState = CameraState.Transition;
-			this.unlockedCameraMovementHandler.transition = new Vector2(localPlayer);
+			this.unlockedCameraMovementHandler.transition = new Vector2(localPlayer)
+				.add(RendererConstants.cameraPositionOffset);;
 		}
 	}
 
@@ -696,7 +699,8 @@ export default class DebugTools extends Mod {
 		}
 
 		if (this.cameraState === CameraState.Transition) {
-			this.unlockedCameraMovementHandler.transition = new Vector2(localPlayer);
+			this.unlockedCameraMovementHandler.transition = new Vector2(localPlayer)
+				.add(RendererConstants.cameraPositionOffset);;
 			if (Vector2.isDistanceWithin(this.unlockedCameraMovementHandler.position, localPlayer, 0.5)) {
 				this.cameraState = CameraState.Locked;
 				return undefined;
