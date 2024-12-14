@@ -1,33 +1,23 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { OwnEventHandler } from "event/EventManager";
-import Doodad from "game/doodad/Doodad";
-import { GrowingStage } from "game/doodad/IDoodad";
-import { IContainer } from "game/item/IItem";
-import Tile from "game/tile/Tile";
-import { TextContext } from "language/ITranslation";
-import Translation, { Article } from "language/Translation";
-import Mod from "mod/Mod";
-import Button from "ui/component/Button";
-import EnumContextMenu, { EnumSort } from "ui/component/EnumContextMenu";
-import { Bound } from "utilities/Decorators";
-import Log from "utilities/Log";
-import DebugTools from "../../DebugTools";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import { GrowingStage } from "@wayward/game/game/doodad/IDoodad";
+import type { IContainer } from "@wayward/game/game/item/IItem";
+import type Tile from "@wayward/game/game/tile/Tile";
+import { TextContext } from "@wayward/game/language/ITranslation";
+import Translation, { Article } from "@wayward/game/language/Translation";
+import Mod from "@wayward/game/mod/Mod";
+import Button from "@wayward/game/ui/component/Button";
+import EnumContextMenu, { EnumSort } from "@wayward/game/ui/component/EnumContextMenu";
+import { Bound } from "@wayward/utilities/Decorators";
+import type Log from "@wayward/utilities/Log";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
+import type DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Clone from "../../action/Clone";
 import Remove from "../../action/Remove";
 import SetGrowingStage from "../../action/SetGrowingStage";
 import Container from "../component/Container";
-import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
+import type { TabInformation } from "../component/InspectInformationSection";
+import InspectInformationSection from "../component/InspectInformationSection";
 
 export default class DoodadInformation extends InspectInformationSection {
 
@@ -36,8 +26,9 @@ export default class DoodadInformation extends InspectInformationSection {
 	@Mod.log(DEBUG_TOOLS_ID)
 	public readonly LOG: Log;
 
-	private doodad: Doodad | undefined;
-	private readonly buttonGrowthStage: Button;
+	protected doodad: Doodad | undefined;
+	protected readonly buttonGrowthStage: Button;
+	protected container?: Container;
 
 	public constructor() {
 		super();
@@ -59,11 +50,13 @@ export default class DoodadInformation extends InspectInformationSection {
 	}
 
 	@OwnEventHandler(DoodadInformation, "switchTo")
-	protected onSwitchTo() {
-		if (!this.doodad!.containedItems)
+	protected async onSwitchTo(): Promise<void> {
+		if (!this.doodad!.containedItems) {
 			return;
+		}
 
-		Container.appendTo(this, this, () => this.doodad as IContainer);
+		this.container?.remove();
+		this.container = await Container.appendTo(this, this, () => this.doodad as IContainer);
 	}
 
 	public override getTabs(): TabInformation[] {
@@ -73,36 +66,43 @@ export default class DoodadInformation extends InspectInformationSection {
 		] : [];
 	}
 
-	public override update(tile: Tile) {
-		if (tile.doodad === this.doodad) return;
+	public override update(tile: Tile): void {
+		if (tile.doodad === this.doodad) {
+			return;
+		}
+
 		this.doodad = tile.doodad;
 
-		if (!this.doodad) return;
+		if (!this.doodad) {
+			return;
+		}
 
 		this.buttonGrowthStage.toggle(this.doodad.growth !== undefined);
 
 		this.setShouldLog();
 	}
 
-	public override logUpdate() {
+	public override logUpdate(): void {
 		this.LOG.info("Doodad:", this.doodad);
 	}
 
 	@Bound
-	private removeDoodad() {
-		Remove.execute(localPlayer, this.doodad!);
+	private removeDoodad(): void {
+		void Remove.execute(localPlayer, this.doodad!);
 	}
 
 	@Bound
-	private async cloneDoodad() {
+	private async cloneDoodad(): Promise<void> {
 		const teleportLocation = await this.DEBUG_TOOLS.selector.select();
-		if (!teleportLocation) return;
+		if (!teleportLocation) {
+			return;
+		}
 
-		Clone.execute(localPlayer, this.doodad!, teleportLocation);
+		void Clone.execute(localPlayer, this.doodad!, teleportLocation);
 	}
 
 	@Bound
-	private async setGrowthStage() {
+	private async setGrowthStage(): Promise<void> {
 		const growthStage = await new EnumContextMenu(GrowingStage)
 			.setTranslator(stage => Translation.growthStage(stage, this.doodad!.description?.usesSpores)!.inContext(TextContext.Title))
 			.setSort(EnumSort.Id)
@@ -112,6 +112,6 @@ export default class DoodadInformation extends InspectInformationSection {
 			return;
 		}
 
-		SetGrowingStage.execute(localPlayer, this.doodad!, growthStage);
+		void SetGrowingStage.execute(localPlayer, this.doodad!, growthStage);
 	}
 }

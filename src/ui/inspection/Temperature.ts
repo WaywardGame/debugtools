@@ -1,31 +1,24 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { EventBus } from "event/EventBuses";
-import { EventHandler } from "event/EventManager";
-import { InfoClass, InfoDisplayLevel } from "game/inspection/IInfoProvider";
-import { InspectType, basicInspectionPriorities } from "game/inspection/IInspection";
-import { InfoProviderContext } from "game/inspection/InfoProviderContext";
-import Inspection from "game/inspection/Inspection";
-import LabelledValue from "game/inspection/infoProviders/LabelledValue";
-import MagicalPropertyValue from "game/inspection/infoProviders/MagicalPropertyValue";
-import { TempType } from "game/temperature/ITemperature";
-import { TEMPERATURE_INVALID } from "game/temperature/TemperatureManager";
-import Translation from "language/Translation";
-import { MiscTranslation } from "language/dictionary/Misc";
-import Mod from "mod/Mod";
-import { Heading, Paragraph } from "ui/component/Text";
-import DebugTools from "../../DebugTools";
+import { EventBus } from "@wayward/game/event/EventBuses";
+import { EventHandler } from "@wayward/game/event/EventManager";
+import { InfoClass, InfoDisplayLevel } from "@wayward/game/game/inspection/IInfoProvider";
+import { InspectType, basicInspectionPriorities } from "@wayward/game/game/inspection/IInspection";
+import type { InfoProvider, SimpleInfoProvider } from "@wayward/game/game/inspection/InfoProvider";
+import type { InfoProviderContext } from "@wayward/game/game/inspection/InfoProviderContext";
+import Inspection from "@wayward/game/game/inspection/Inspection";
+import LabelledValue from "@wayward/game/game/inspection/infoProviders/LabelledValue";
+import MagicalPropertyValue from "@wayward/game/game/inspection/infoProviders/MagicalPropertyValue";
+import type Island from "@wayward/game/game/island/Island";
+import { TempType } from "@wayward/game/game/temperature/ITemperature";
+import { TEMPERATURE_INVALID } from "@wayward/game/game/temperature/TemperatureManager";
+import type Tile from "@wayward/game/game/tile/Tile";
+import Translation from "@wayward/game/language/Translation";
+import { MiscTranslation } from "@wayward/game/language/dictionary/Misc";
+import type TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
+import Mod from "@wayward/game/mod/Mod";
+import type { TranslationGenerator } from "@wayward/game/ui/component/IComponent";
+import { Heading, Paragraph } from "@wayward/game/ui/component/Text";
+import type DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
-import Tile from "game/tile/Tile";
 
 export default class TemperatureInspection extends Inspection<Tile> {
 
@@ -34,19 +27,19 @@ export default class TemperatureInspection extends Inspection<Tile> {
 	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
 	public static readonly DEBUG_TOOLS: DebugTools;
 
-	public static getFromTile(tile: Tile) {
-		return TemperatureInspection.DEBUG_TOOLS ? new TemperatureInspection(tile) : [];
+	public static getFromTile(tile: Tile, context?: InfoProviderContext): never[] | TemperatureInspection {
+		return TemperatureInspection.DEBUG_TOOLS ? new TemperatureInspection(tile, context) : [];
 	}
 
-	public constructor(tile: Tile) {
-		super(TemperatureInspection.DEBUG_TOOLS.inspectionTemperature, tile);
+	public constructor(tile: Tile, context?: InfoProviderContext) {
+		super(TemperatureInspection.DEBUG_TOOLS.inspectionTemperature, tile, context);
 	}
 
-	public override getId() {
+	public override getId(): string {
 		return this.createIdFromVector3(this.value);
 	}
 
-	public override getPriority() {
+	public override getPriority(): number {
 		return basicInspectionPriorities[InspectType.Tile] + 100;
 	}
 
@@ -54,11 +47,19 @@ export default class TemperatureInspection extends Inspection<Tile> {
 	// Content
 	//
 
-	public override hasContent() {
+	public override hasContent(): boolean {
 		return game.playing && this.getTileMod() !== "?";
 	}
 
-	public override get(context: InfoProviderContext) {
+	protected override getTitle(context: InfoProviderContext): Translation | SimpleInfoProvider | undefined {
+		return undefined;
+	}
+
+	protected override getSubtitle(context: InfoProviderContext): Translation | SimpleInfoProvider | undefined {
+		return undefined;
+	}
+
+	protected override getContent(context: InfoProviderContext): ArrayOr<TranslationGenerator | InfoProvider | undefined> {
 		this.tempValue = localIsland.temperature.get(this.value, undefined);
 		return [
 			LabelledValue.label(translation(DebugToolsTranslation.InspectionTemperature))
@@ -118,9 +119,9 @@ export default class TemperatureInspection extends Inspection<Tile> {
 	// Event Handlers
 	//
 
-	@EventHandler(EventBus.Game, "tickEnd")
-	public onTickEnd() {
-		if (localPlayer.isResting()) {
+	@EventHandler(EventBus.Island, "tickEnd")
+	public onTickEnd(island: Island): void {
+		if (!island.isLocalIsland || localPlayer.isResting) {
 			return;
 		}
 
@@ -134,15 +135,18 @@ export default class TemperatureInspection extends Inspection<Tile> {
 	// Internals
 	//
 
-	private getTemperature(tempType: TempType, calcOrProduce: "calculated" | "produced") {
+	private getTemperature(tempType: TempType, calcOrProduce: "calculated" | "produced"): number | "?" {
 		const temp = localIsland.temperature?.[calcOrProduce === "calculated" ? "getCachedCalculated" : "getCachedProduced"](this.value, tempType);
 		return temp === TEMPERATURE_INVALID || temp === undefined ? "?" : temp;
 	}
 
-	private getTileMod() {
+	private getTileMod(): TranslationImpl | "?" {
 		const heat = this.getTemperature(TempType.Heat, "calculated");
 		const cold = this.getTemperature(TempType.Cold, "calculated");
-		if (heat === "?" || cold === "?") return "?";
+		if (heat === "?" || cold === "?") {
+			return "?";
+		}
+
 		return Translation.misc(MiscTranslation.Difference)
 			.addArgs(heat - cold);
 	}

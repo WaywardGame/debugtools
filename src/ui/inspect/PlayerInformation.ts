@@ -1,38 +1,30 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { SkillType } from "game/entity/IHuman";
-import Creature from "game/entity/creature/Creature";
-import NPC from "game/entity/npc/NPC";
-import Player from "game/entity/player/Player";
-import { TextContext } from "language/ITranslation";
-import Translation from "language/Translation";
-import Mod from "mod/Mod";
-import { BlockRow } from "ui/component/BlockRow";
-import Button from "ui/component/Button";
-import { CheckButton } from "ui/component/CheckButton";
-import Dropdown, { IDropdownOption } from "ui/component/Dropdown";
-import { LabelledRow } from "ui/component/LabelledRow";
-import { RangeRow } from "ui/component/RangeRow";
-import SkillDropdown from "ui/component/dropdown/SkillDropdown";
-import { Bound } from "utilities/Decorators";
-import DebugTools from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, IPlayerData, translation } from "../../IDebugTools";
+import type { SkillType } from "@wayward/game/game/entity/IHuman";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import type NPC from "@wayward/game/game/entity/npc/NPC";
+import type Player from "@wayward/game/game/entity/player/Player";
+import { TextContext } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
+import Mod from "@wayward/game/mod/Mod";
+import { BlockRow } from "@wayward/game/ui/component/BlockRow";
+import Button from "@wayward/game/ui/component/Button";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
+import type { IDropdownOption } from "@wayward/game/ui/component/Dropdown";
+import Dropdown from "@wayward/game/ui/component/Dropdown";
+import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
+import { RangeRow } from "@wayward/game/ui/component/RangeRow";
+import SkillDropdown from "@wayward/game/ui/component/dropdown/SkillDropdown";
+import { Bound } from "@wayward/utilities/Decorators";
+import type DebugTools from "../../DebugTools";
+import type { IPlayerData } from "../../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import ClearNotes from "../../action/ClearNotes";
 import ReplacePlayerData from "../../action/ReplacePlayerData";
 import SetSkill from "../../action/SetSkill";
-import SetWeightBonus from "../../action/SetWeightBonus";
-import ToggleInvulnerable from "../../action/ToggleInvulnerable";
 import ToggleNoClip from "../../action/ToggleNoClip";
-import TogglePermissions from "../../action/TogglePermissions";
+import ToggleFastMovement from "../../action/ToggleFastMovement";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
+import SetPlayerData from "../../action/SetPlayerData";
+import { RenderSource } from "@wayward/game/renderer/IRenderer";
 
 export default class PlayerInformation extends InspectEntityInformationSubsection {
 
@@ -40,12 +32,15 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	public readonly DEBUG_TOOLS: DebugTools;
 
 	private readonly rangeWeightBonus: RangeRow;
-	private readonly checkButtonInvulnerable: CheckButton;
+	private readonly checkButtonUnkillable: CheckButton;
+	private readonly checkButtonNoRender: CheckButton;
 	private readonly checkButtonNoClip: CheckButton;
+	private readonly checkButtonFastMovement: CheckButton;
 	private readonly skillRangeRow: RangeRow;
 	private readonly checkButtonPermissions?: CheckButton;
 	private readonly playerToReplaceDataWithDropdown?: Dropdown<string>;
 	private readonly buttonExecuteDataReplace: Button;
+	private readonly clearNotesButton: Button;
 
 	private skill: SkillType | "all" | "none" = "none";
 	private player?: Player;
@@ -67,10 +62,27 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 				.setText(translation(DebugToolsTranslation.ButtonToggleNoClip))
 				.setRefreshMethod(() => this.player?.isFlying ?? false)
 				.event.subscribe("toggle", this.toggleNoClip))
-			.append(this.checkButtonInvulnerable = new CheckButton()
-				.setText(translation(DebugToolsTranslation.ButtonToggleInvulnerable))
-				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "invulnerable") === true : false)
-				.event.subscribe("toggle", this.toggleInvulnerable))
+			.append(this.checkButtonFastMovement = new CheckButton()
+				.setText(translation(DebugToolsTranslation.ButtonToggleFastMovement))
+				.setRefreshMethod(() => this.player?.isFastMoving ?? false)
+				.event.subscribe("toggle", this.toggleFastMovement))
+			.appendTo(this);
+
+		new BlockRow()
+			.append(this.checkButtonUnkillable = new CheckButton()
+				.setText(translation(DebugToolsTranslation.ButtonToggleUnkillable))
+				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "unkillable") === true : false)
+				.event.subscribe("toggle", this.toggleUnkillable))
+			.append(this.checkButtonNoRender = new CheckButton()
+				.setText(translation(DebugToolsTranslation.ButtonToggleNoRender))
+				.setRefreshMethod(() => this.player ? this.DEBUG_TOOLS.getPlayerData(this.player, "noRender") === true : false)
+				.event.subscribe("toggle", this.toggleNoRender))
+			.appendTo(this);
+
+		this.clearNotesButton = new Button()
+			.setText(translation(DebugToolsTranslation.ButtonClearNotes))
+			.event.subscribe("activate", () =>
+				this.player && ClearNotes.execute(localPlayer, this.player))
 			.appendTo(this);
 
 		this.rangeWeightBonus = new RangeRow()
@@ -135,13 +147,18 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.append(this.buttonExecuteDataReplace);
 	}
 
-	public override update(entity: Creature | NPC | Player) {
-		if (this.player === entity) return;
+	public override update(entity: Creature | NPC | Player): void {
+		if (this.player === entity) {
+			return;
+		}
 
 		this.player = entity.asPlayer;
 		this.toggle(!!this.player);
+		this.clearNotesButton.toggle(!!this.player?.notes.notes.length);
 
-		if (!this.player) return;
+		if (!this.player) {
+			return;
+		}
 
 		this.event.emit("change");
 
@@ -149,24 +166,29 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 		this.DEBUG_TOOLS.event.until(this, "remove", "change")
 			.subscribe("playerDataChange", this.refresh);
+
+		const entityEvents = this.player?.event.until(this, "switchAway");
+		entityEvents.subscribe(["writtenNote", "clearNotes"], () => this.clearNotesButton.toggle(!!this.player?.notes.notes.length));
 	}
 
 	@Bound
-	private refresh() {
+	private refresh(): void {
 		if (this.checkButtonPermissions) {
-			this.checkButtonPermissions.toggle(multiplayer.isServer() && this.player && !this.player.isLocalPlayer())
+			this.checkButtonPermissions.toggle(multiplayer.isServer && this.player && !this.player.isLocalPlayer)
 				.refresh();
 		}
 
 		this.checkButtonNoClip.refresh();
-		this.checkButtonInvulnerable.refresh();
+		this.checkButtonFastMovement.refresh();
+		this.checkButtonUnkillable.refresh();
+		this.checkButtonNoRender.refresh();
 		this.rangeWeightBonus.refresh();
 		this.playerToReplaceDataWithDropdown?.refresh();
 		this.buttonExecuteDataReplace.refreshText();
 	}
 
 	@Bound
-	private changeSkill(_: any, skill: SkillType | "none" | "all") {
+	private changeSkill(_: any, skill: SkillType | "none" | "all"): void {
 		this.skill = skill;
 		this.skillRangeRow.refresh();
 
@@ -174,62 +196,97 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	}
 
 	@Bound
-	private setSkill(_: any, value: number) {
-		SetSkill.execute(localPlayer, this.player!, typeof this.skill === "string" ? -1 : this.skill, value);
+	private setSkill(_: any, value: number): void {
+		void SetSkill.execute(localPlayer, this.player!, typeof this.skill === "string" ? -1 : this.skill, value);
 	}
 
 	@Bound
-	private toggleInvulnerable(_: any, invulnerable: boolean) {
-		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "invulnerable") === invulnerable) return;
+	private toggleUnkillable(_: any, unkillable: boolean): void {
+		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "unkillable") === unkillable) {
+			return;
+		}
 
-		ToggleInvulnerable.execute(localPlayer, this.player!, invulnerable);
+		void SetPlayerData.execute(localPlayer, this.player!, "unkillable", unkillable);
 	}
 
 	@Bound
-	private toggleNoClip(_: any, noclip: boolean) {
-		if (this.player?.isFlying === noclip) return;
+	private toggleNoRender(_: any, noRender: boolean): void {
+		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "noRender") === noRender) {
+			return;
+		}
 
-		ToggleNoClip.execute(localPlayer, this.player!);
+		void SetPlayerData.execute(localPlayer, this.player!, "noRender", noRender);
+		localPlayer.updateView(RenderSource.Mod, false);
 	}
 
 	@Bound
-	private togglePermissions(_: any, permissions: boolean) {
-		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "permissions") === permissions) return;
+	private toggleNoClip(_: any, noclip: boolean): void {
+		if (this.player?.isFlying === noclip) {
+			return;
+		}
 
-		TogglePermissions.execute(localPlayer, this.player!, permissions);
+		void ToggleNoClip.execute(localPlayer, this.player!);
 	}
 
 	@Bound
-	private setWeightBonus(_: any, weightBonus: number) {
-		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "weightBonus") === weightBonus) return;
+	private toggleFastMovement(_: any, fastMovement: boolean): void {
+		if (this.player?.isFastMoving === fastMovement) {
+			return;
+		}
 
-		SetWeightBonus.execute(localPlayer, this.player!, weightBonus);
+		void ToggleFastMovement.execute(localPlayer, this.player!);
 	}
 
 	@Bound
-	private onPlayerDataChange<K extends keyof IPlayerData>(_: any, playerId: number, key: K, value: IPlayerData[K]) {
-		if (!this.player || playerId !== this.player.id) return;
+	private togglePermissions(_: any, permissions: boolean): void {
+		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "permissions") === permissions) {
+			return;
+		}
+
+		void SetPlayerData.execute(localPlayer, this.player!, "permissions", permissions);
+	}
+
+	@Bound
+	private setWeightBonus(_: any, weightBonus: number): void {
+		if (this.DEBUG_TOOLS.getPlayerData(this.player!, "weightBonus") === weightBonus) {
+			return;
+		}
+
+		void SetPlayerData.execute(localPlayer, this.player!, "weightBonus", weightBonus);
+	}
+
+	@Bound
+	private onPlayerDataChange<K extends keyof IPlayerData>(_: any, playerId: number, key: K, value: IPlayerData[K]): void {
+		if (!this.player || playerId !== this.player.id) {
+			return;
+		}
 
 		switch (key) {
 			case "weightBonus":
 				this.rangeWeightBonus.refresh();
 				break;
-			case "invulnerable":
-				this.checkButtonInvulnerable.refresh();
+			case "unkillable":
+				this.checkButtonUnkillable.refresh();
+				break;
+			case "noRender":
+				this.checkButtonNoRender.refresh();
 				break;
 			case "permissions":
-				if (this.checkButtonPermissions) this.checkButtonPermissions.refresh();
+				if (this.checkButtonPermissions) {
+					this.checkButtonPermissions.refresh();
+				}
+
 				break;
 		}
 	}
 
-	@Bound private replaceData() {
-		const playerId = this.playerToReplaceDataWithDropdown?.selection;
+	@Bound private replaceData(): void {
+		const playerId = this.playerToReplaceDataWithDropdown?.selectedOption;
 		const replaceFrom = playerId && game.playerManager.getByIdentifier(playerId, true);
 		if (!playerId || !this.player || !replaceFrom) {
 			return;
 		}
 
-		ReplacePlayerData.execute(localPlayer, this.player, replaceFrom);
+		void ReplacePlayerData.execute(localPlayer, this.player, replaceFrom);
 	}
 }

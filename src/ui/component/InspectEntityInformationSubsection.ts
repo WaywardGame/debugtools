@@ -1,18 +1,7 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { Events, IEventEmitter } from "event/EventEmitter";
-import Entity from "game/entity/Entity";
-import { Stat } from "game/entity/IStats";
-import Component from "ui/component/Component";
+import type Entity from "@wayward/game/game/entity/Entity";
+import type { Stat } from "@wayward/game/game/entity/IStats";
+import Component from "@wayward/game/ui/component/Component";
+import type { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 
 interface IInspectEntityInformationSubsectionEvents extends Events<Component> {
 	change(): any;
@@ -21,7 +10,7 @@ interface IInspectEntityInformationSubsectionEvents extends Events<Component> {
 }
 
 export default abstract class InspectEntityInformationSubsection extends Component {
-	public override event: IEventEmitter<this, IInspectEntityInformationSubsectionEvents>;
+	declare public event: IEventEmitter<this, IInspectEntityInformationSubsectionEvents>;
 
 	public constructor() {
 		super();
@@ -30,5 +19,7 @@ export default abstract class InspectEntityInformationSubsection extends Compone
 
 	public abstract update(entity: Entity): void;
 
-	public getImmutableStats(): Stat[] { return []; }
+	public getImmutableStats(): Stat[] {
+		return [];
+	}
 }

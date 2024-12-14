@@ -1,22 +1,11 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { Action } from "game/entity/action/Action";
-import { ActionArgument } from "game/entity/action/IAction";
-import { EntityType } from "game/entity/IEntity";
-import Tile from "game/tile/Tile";
-import { defaultUsability } from "../Actions";
-import { IPaintData } from "../ui/panel/PaintPanel";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
+import type Tile from "@wayward/game/game/tile/Tile";
+import { defaultCanUseHandler } from "../Actions";
+import type { IPaintData } from "../ui/panel/PaintPanel";
 import SetTilled from "./helpers/SetTilled";
-import { RenderSource } from "renderer/IRenderer";
+import { RenderSource } from "@wayward/game/renderer/IRenderer";
 
 /**
  * Places terrain, creatures, NPCs, doodads, corpses, and/or tile events on the given tiles.
@@ -25,7 +14,8 @@ import { RenderSource } from "renderer/IRenderer";
  */
 export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 	.setUsableBy(EntityType.Human)
-	.setUsableWhen(...defaultUsability)
+	.setUsableWhen(ActionUsability.Always)
+	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, tiles: Tile[], data: IPaintData) => {
 		for (const tile of tiles) {
 			for (const k of Object.keys(data)) {
@@ -36,11 +26,15 @@ export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 						if (data.terrain!.tilled !== undefined && data.terrain!.tilled !== tile.isTilled) {
 							SetTilled(action.executor.island, tile, data.terrain!.tilled);
 						}
+
 						break;
 					}
+
 					case "creature": {
 						const creature = tile.creature;
-						if (creature) action.executor.island.creatures.remove(creature);
+						if (creature) {
+							action.executor.island.creatures.remove(creature);
+						}
 
 						const type = data.creature!.type;
 						if (type !== "remove") {
@@ -49,20 +43,26 @@ export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 
 						break;
 					}
+
 					case "npc": {
 						const npc = tile.npc;
-						if (npc) action.executor.island.npcs.remove(npc);
+						if (npc) {
+							action.executor.island.npcs.remove(npc);
+						}
 
 						const type = data.npc!.type;
 						if (type !== "remove") {
-							action.executor.island.npcs.spawn(type, tile, { allowEdgeSpawning: true, allowOverDooadsAndTileEvents: true, allowOnFire: true, allowOnBlockedTiles: true });
+							action.executor.island.npcs.create(type, tile, { allowEdgeSpawning: true, allowOverDooadsAndTileEvents: true, allowOnFire: true, allowOnBlockedTiles: true });
 						}
 
 						break;
 					}
+
 					case "doodad": {
 						const doodad = tile.doodad;
-						if (doodad) action.executor.island.doodads.remove(doodad);
+						if (doodad) {
+							action.executor.island.doodads.remove(doodad);
+						}
 
 						const type = data.doodad!.type;
 						if (type !== "remove") {
@@ -71,6 +71,7 @@ export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 
 						break;
 					}
+
 					case "corpse": {
 						if (data.corpse!.replaceExisting || data.corpse!.type === "remove") {
 							const corpses = tile.corpses;
@@ -88,6 +89,7 @@ export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 
 						break;
 					}
+
 					case "tileEvent": {
 						if (data.tileEvent!.replaceExisting || data.tileEvent!.type === "remove") {
 							const tileEvents = tile.events;

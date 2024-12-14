@@ -1,27 +1,16 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { Events, IEventEmitter } from "event/EventEmitter";
-import { TerrainType } from "game/tile/ITerrain";
-import { terrainDescriptions } from "game/tile/Terrains";
-import { CheckButton } from "ui/component/CheckButton";
-import Component from "ui/component/Component";
-import TerrainDropdown from "ui/component/dropdown/TerrainDropdown";
-import { LabelledRow } from "ui/component/LabelledRow";
-import { Bound } from "utilities/Decorators";
+import type { TerrainType } from "@wayward/game/game/tile/ITerrain";
+import { terrainDescriptions } from "@wayward/game/game/tile/Terrains";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
+import Component from "@wayward/game/ui/component/Component";
+import TerrainDropdown from "@wayward/game/ui/component/dropdown/TerrainDropdown";
+import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
+import { Bound } from "@wayward/utilities/Decorators";
+import type { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
-import { IPaintSection } from "../panel/PaintPanel";
+import type { IPaintSection } from "../panel/PaintPanel";
 
 export default class TerrainPaint extends Component implements IPaintSection {
-	public override event: IEventEmitter<this, Events<IPaintSection>>;
+	declare public event: IEventEmitter<this, Events<IPaintSection>>;
 
 	private readonly tilledCheckButton: CheckButton;
 	private terrain: TerrainType | undefined;
@@ -45,7 +34,7 @@ export default class TerrainPaint extends Component implements IPaintSection {
 			.appendTo(this);
 	}
 
-	public getTilePaintData() {
+	public getTilePaintData(): { terrain: { type: TerrainType; tilled: boolean } } | undefined {
 		return this.terrain === undefined ? undefined : {
 			terrain: {
 				type: this.terrain,
@@ -54,21 +43,23 @@ export default class TerrainPaint extends Component implements IPaintSection {
 		};
 	}
 
-	public isChanging() {
+	public isChanging(): boolean {
 		return this.terrain !== undefined;
 	}
 
-	public reset() {
+	public reset(): void {
 		this.dropdown.select("nochange");
 	}
 
 	@Bound
-	private changeTerrain(_: any, terrain: TerrainType | "nochange") {
+	private changeTerrain(_: any, terrain: TerrainType | "nochange"): void {
 		this.terrain = terrain === "nochange" ? undefined : terrain;
 
 		const tillable = terrain !== "nochange" && terrainDescriptions[terrain]!.tillable === true;
 		this.tilledCheckButton.toggle(tillable);
-		if (!tillable) this.tilledCheckButton.setChecked(false);
+		if (!tillable) {
+			this.tilledCheckButton.setChecked(false);
+		}
 
 		this.event.emit("change");
 	}

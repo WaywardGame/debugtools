@@ -1,32 +1,28 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { OwnEventHandler } from "event/EventManager";
-import Translation from "language/Translation";
-import Mod from "mod/Mod";
-import { Save, SaveLocation } from "ui/IUi";
-import { DialogId, Edge, IDialogDescription } from "ui/screen/screens/game/Dialogs";
-import TabDialog, { SubpanelInformation } from "ui/screen/screens/game/component/TabDialog";
-import { Tuple } from "utilities/collection/Tuple";
-import Vector2 from "utilities/math/Vector2";
-import { sleep } from "utilities/promise/Async";
-import DebugTools from "../DebugTools";
+import type Translation from "@wayward/game/language/Translation";
+import Mod from "@wayward/game/mod/Mod";
+import { Save, SaveLocation } from "@wayward/game/ui/IUi";
+import type Bindable from "@wayward/game/ui/input/Bindable";
+import type { DialogId, IDialogDescription } from "@wayward/game/ui/screen/screens/game/Dialogs";
+import { Edge } from "@wayward/game/ui/screen/screens/game/Dialogs";
+import type { SubpanelInformation } from "@wayward/game/ui/screen/screens/game/component/TabDialog";
+import TabDialog from "@wayward/game/ui/screen/screens/game/component/TabDialog";
+import type { MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
+import type DebugTools from "../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
 import DebugToolsPanel from "./component/DebugToolsPanel";
 import DisplayPanel from "./panel/DisplayPanel";
 import GeneralPanel from "./panel/GeneralPanel";
+import HistoryPanel from "./panel/HistoryPanel";
+import NPCPanel from "./panel/NPCPanel";
 import PaintPanel from "./panel/PaintPanel";
 import SelectionPanel from "./panel/SelectionPanel";
 import TemperaturePanel from "./panel/TemperaturePanel";
 import TemplatePanel from "./panel/TemplatePanel";
+import ZonesPanel from "./panel/ZonesPanel";
+import Task from "@wayward/utilities/promise/Task";
 
 export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
 
@@ -39,7 +35,10 @@ const subpanelClasses: DebugToolsDialogPanelClass[] = [
 	PaintPanel,
 	SelectionPanel,
 	TemplatePanel,
+	ZonesPanel,
+	NPCPanel,
 	TemperaturePanel,
+	HistoryPanel,
 ];
 
 export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
@@ -51,7 +50,7 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 		size: new Vector2(29, 31),
 		edges: [
 			[Edge.Right, 50],
-			[Edge.Bottom, 38],
+			[Edge.Top, 7],
 		],
 	};
 
@@ -66,7 +65,7 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 		this.classes.add("debug-tools-dialog");
 
 		if (!this.DEBUG_TOOLS.hasPermission()) {
-			sleep(1).then(() => gameScreen?.dialogs.close(id));
+			void Task.yield().then(() => gameScreen?.dialogs.close(id));
 		}
 	}
 
@@ -74,21 +73,20 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 		return translation(DebugToolsTranslation.DialogTitleMain);
 	}
 
-	public override getBindable() {
+	public override getBindable(): Bindable {
 		return this.DEBUG_TOOLS.bindableToggleDialog;
 	}
 
-	override getIcon() {
+	public override getIcon(): MenuBarButtonType {
 		return this.DEBUG_TOOLS.menuBarButton;
 	}
-
 
 	protected override getDefaultSubpanelInformation(): SubpanelInformation | undefined {
 		return this.subpanelInformations.find(spi => spi[0] === this.current) ?? super.getDefaultSubpanelInformation();
 	}
 
 	@OwnEventHandler(DebugToolsDialog, "changeSubpanel")
-	protected onChangeSubpanel(activeSubpanel: SubpanelInformation) {
+	protected onChangeSubpanel(activeSubpanel: SubpanelInformation): void {
 		this.current = activeSubpanel[0];
 	}
 
@@ -97,11 +95,10 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 	 * This will only be called once
 	 */
 	protected override getSubpanels(): DebugToolsPanel[] {
-		return subpanelClasses.stream()
-			.merge(this.DEBUG_TOOLS.modRegistryMainDialogPanels.getRegistrations()
+		return subpanelClasses
+			.concat(this.DEBUG_TOOLS.modRegistryMainDialogPanels.getRegistrations()
 				.map(registration => registration.data(DebugToolsPanel)))
-			.map(cls => new cls())
-			.toArray();
+			.map(cls => new cls());
 	}
 
 	/**

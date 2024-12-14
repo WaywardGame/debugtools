@@ -1,56 +1,49 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { SfxType } from "audio/IAudio";
-import { EventBus } from "event/EventBuses";
-import { EventHandler, OwnEventHandler } from "event/EventManager";
-import { WorldZ } from "game/WorldZ";
-import { BiomeType } from "game/biome/IBiome";
-import { DEFAULT_ISLAND_ID, IslandId, IslandPosition } from "game/island/IIsland";
-import Tile from "game/tile/Tile";
-import Dictionary from "language/Dictionary";
-import { TextContext } from "language/ITranslation";
-import Translation from "language/Translation";
-import TranslationImpl from "language/impl/TranslationImpl";
-import Mod from "mod/Mod";
-import { ParticleType } from "renderer/particle/IParticle";
-import particles from "renderer/particle/Particles";
-import { BlockRow } from "ui/component/BlockRow";
-import Button from "ui/component/Button";
-import { CheckButton } from "ui/component/CheckButton";
-import Divider from "ui/component/Divider";
-import Dropdown, { IDropdownOption } from "ui/component/Dropdown";
-import Input from "ui/component/Input";
-import { LabelledRow } from "ui/component/LabelledRow";
-import { RangeRow } from "ui/component/RangeRow";
-import Text, { Heading } from "ui/component/Text";
-import BaseIslandDropdown from "ui/component/dropdown/IslandDropdown";
-import MovementHandler from "ui/screen/screens/game/util/movement/MovementHandler";
-import { Bound, Debounce } from "utilities/Decorators";
-import { Tuple } from "utilities/collection/Tuple";
-import Enums from "utilities/enum/Enums";
-import DebugTools from "../../DebugTools";
+import { SfxType } from "@wayward/game/audio/IAudio";
+import { EventBus } from "@wayward/game/event/EventBuses";
+import { EventHandler } from "@wayward/game/event/EventManager";
+import { TickFlag } from "@wayward/game/game/IGame";
+import { BiomeType } from "@wayward/game/game/biome/IBiome";
+import type { IslandId } from "@wayward/game/game/island/IIsland";
+import { DEFAULT_ISLAND_ID, IslandPosition } from "@wayward/game/game/island/IIsland";
+import type Tile from "@wayward/game/game/tile/Tile";
+import Dictionary from "@wayward/game/language/Dictionary";
+import { TextContext } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
+import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
+import Mod from "@wayward/game/mod/Mod";
+import { ParticleType } from "@wayward/game/renderer/particle/IParticle";
+import particles from "@wayward/game/renderer/particle/Particles";
+import { BlockRow } from "@wayward/game/ui/component/BlockRow";
+import Button from "@wayward/game/ui/component/Button";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
+import Divider from "@wayward/game/ui/component/Divider";
+import type { IDropdownOption } from "@wayward/game/ui/component/Dropdown";
+import Dropdown from "@wayward/game/ui/component/Dropdown";
+import Input from "@wayward/game/ui/component/Input";
+import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
+import { RangeRow } from "@wayward/game/ui/component/RangeRow";
+import Text, { Heading } from "@wayward/game/ui/component/Text";
+import BaseIslandDropdown from "@wayward/game/ui/component/dropdown/IslandDropdown";
+import MovementHandler from "@wayward/game/ui/screen/screens/game/util/movement/MovementHandler";
+import Enums from "@wayward/game/utilities/enum/Enums";
+import { Bound, Debounce } from "@wayward/utilities/Decorators";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
+import WorldZ from "@wayward/utilities/game/WorldZ";
+import type CancelablePromise from "@wayward/utilities/promise/CancelablePromise";
+import type DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import ChangeLayer from "../../action/ChangeLayer";
+import FastForward from "../../action/FastForward";
 import ForceSailToCivilization from "../../action/ForceSailToCivilization";
 import MoveToIsland from "../../action/MoveToIsland";
 import RenameIsland from "../../action/RenameIsland";
 import SetTime from "../../action/SetTime";
-import CancelablePromise from "../../util/CancelablePromise";
 import DebugToolsPanel from "../component/DebugToolsPanel";
-
 
 const TRAVEL_DROPDOWN_NEW_ISLAND_PREFIX = "new_island_";
 
-function getTravelDropdownNewIslandOptionId(biomeType: BiomeType) {
+function getTravelDropdownNewIslandOptionId(biomeType: BiomeType): string {
 	return `${TRAVEL_DROPDOWN_NEW_ISLAND_PREFIX}${BiomeType[biomeType].toLowerCase()}`;
 }
 
@@ -80,7 +73,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 				this.checkButtonAudio.setChecked(false, false);
 				this.checkButtonParticle.setChecked(false, false);
 
-				return this.selectionLogic(checked, (tile) => {
+				return this.selectionLogic(checked, tile => {
 					this.inspectButton.setChecked(false, false);
 
 					if (tile) {
@@ -127,11 +120,24 @@ export default class GeneralPanel extends DebugToolsPanel {
 				.setStep(0.001)
 				.setMin(0)
 				.setMax(1)
-				.setRefreshMethod(() => localIsland.time.getTime()))
-			.setDisplayValue(time => localIsland.time.getTranslation(time))
+				.setRefreshMethod(() => game.time.getTime()))
+			.setDisplayValue(time => game.time.getTranslation(time))
 			.event.subscribe("change", (_, time) => {
-				SetTime.execute(localPlayer, time);
+				void SetTime.execute(localPlayer, time);
 			})
+			.appendTo(this);
+
+		const fastForwardRow: RangeRow = new RangeRow()
+			.classes.add("has-default-button")
+			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelFastForward)))
+			.editRange(range => range
+				.setStep(0.01)
+				.setMax(50))
+			.setDisplayValue(value => [{ content: `${Math.floor(1.3 ** value)}` }])
+			.append(new Button()
+				.setText(translation(DebugToolsTranslation.ButtonExecute))
+				.event.subscribe("activate", () =>
+					FastForward.execute(localPlayer, Math.floor(1.3 ** fastForwardRow.value), TickFlag.All)))
 			.appendTo(this);
 
 		////////////////////////////////////
@@ -155,7 +161,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.classes.add("dropdown-label")
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelTravel)))
 			.append(this.dropdownTravel = new IslandDropdown<string>(getTravelDropdownNewIslandOptionId(BiomeType.Random), () => [
-				...Enums.values(BiomeType).filter(biomeType => biomeType !== BiomeType.Template)
+				...Enums.values(BiomeType).filter(biomeType => biomeType !== BiomeType.Template && (biomeType !== BiomeType.Dungeon || saveDataGlobal.options.developerMode))
 					.map(biome => [getTravelDropdownNewIslandOptionId(biome), option => option
 						.setText(translation(DebugToolsTranslation.OptionTravelNewIsland)
 							.addArgs(Translation.get(Dictionary.Biome, biome).inContext(TextContext.Title)))] as IDropdownOption<string>),
@@ -185,7 +191,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 					this.inspectButton.setChecked(false, false);
 					this.checkButtonParticle.setChecked(false, false);
 
-					return this.selectionLogic(checked, (tile) => tile?.queueSoundEffect(this.dropdownAudio.selection), () => this.checkButtonAudio.checked);
+					return this.selectionLogic(checked, tile => tile?.queueSoundEffect(this.dropdownAudio.selectedOption), () => this.checkButtonAudio.checked);
 				}))
 			.append(this.dropdownAudio = new Dropdown<SfxType>()
 				.setRefreshMethod(() => ({
@@ -205,7 +211,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 					this.inspectButton.setChecked(false, false);
 					this.checkButtonAudio.setChecked(false, false);
 
-					return this.selectionLogic(checked, (tile) => tile?.createParticles(particles[this.dropdownParticle.selection]), () => this.checkButtonParticle.checked);
+					return this.selectionLogic(checked, tile => tile?.createParticles(particles[this.dropdownParticle.selectedOption]), () => this.checkButtonParticle.checked);
 				}))
 			.append(this.dropdownParticle = new Dropdown<ParticleType>()
 				.setRefreshMethod(() => ({
@@ -218,34 +224,37 @@ export default class GeneralPanel extends DebugToolsPanel {
 			.appendTo(this);
 	}
 
-	public override getTranslation() {
+	public override getTranslation(): DebugToolsTranslation {
 		return DebugToolsTranslation.PanelGeneral;
 	}
 
 	@EventHandler(MovementHandler, "canMove")
 	public canClientMove(): false | undefined {
-		if (this.selectionPromise || this.checkButtonAudio.checked || this.checkButtonParticle.checked) return false;
+		if (this.selectionPromise || this.checkButtonAudio.checked || this.checkButtonParticle.checked) {
+			return false;
+		}
 
 		return undefined;
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "changeZ")
-	protected onChangeZ(_: any, z: WorldZ) {
-		if (this.dropdownLayer.selection === z)
+	protected onChangeZ(_: any, z: WorldZ): void {
+		if (this.dropdownLayer.selection === z) {
 			return;
+		}
 
 		this.dropdownLayer.refresh();
 	}
 
-	@EventHandler(EventBus.Game, "tickEnd")
+	@EventHandler(EventBus.Island, "tickEnd")
 	@Debounce(100)
-	public onGameTickEnd() {
+	public onGameTickEnd(): void {
 		if (this.timeRange) {
 			this.timeRange.refresh();
 		}
 	}
 
-	private selectionLogic(checked: boolean, onSelection: (tile: Tile | undefined) => void, triggerAgain?: () => boolean) {
+	private selectionLogic(checked: boolean, onSelection: (tile: Tile | undefined) => void, triggerAgain?: () => boolean): boolean {
 		if (this.selectionPromise && !this.selectionPromise.isResolved) {
 			this.selectionPromise.cancel();
 		}
@@ -254,7 +263,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 
 		if (checked) {
 			this.selectionPromise = this.DEBUG_TOOLS.selector.select();
-			this.selectionPromise.then((tile) => {
+			void this.selectionPromise.then(tile => {
 				delete this.selectionPromise;
 
 				onSelection(tile);
@@ -271,18 +280,20 @@ export default class GeneralPanel extends DebugToolsPanel {
 	}
 
 	@OwnEventHandler(GeneralPanel, "switchTo")
-	protected onSwitchTo() {
+	protected onSwitchTo(): void {
 		this.timeRange.refresh();
 		this.dropdownLayer.refresh();
 
 		this.DEBUG_TOOLS.event.until(this, "switchAway")
 			.subscribe("inspect", () => {
-				if (this.selectionPromise) this.selectionPromise.cancel();
+				if (this.selectionPromise) {
+					this.selectionPromise.cancel();
+				}
 			});
 	}
 
 	@OwnEventHandler(GeneralPanel, "switchAway")
-	protected onSwitchAway() {
+	protected onSwitchAway(): void {
 		this.selectionPromise?.cancel();
 		delete this.selectionPromise;
 
@@ -291,23 +302,23 @@ export default class GeneralPanel extends DebugToolsPanel {
 		this.checkButtonParticle.setChecked(false, false);
 	}
 
-	@Bound private changeLayer(_: any, layer: WorldZ) {
+	@Bound private changeLayer(_: any, layer: WorldZ): void {
 		if (localPlayer.z !== layer) {
-			ChangeLayer.execute(localPlayer, layer);
+			void ChangeLayer.execute(localPlayer, layer);
 		}
 	}
 
-	@Bound private travel() {
-		if (this.dropdownTravel.selection === "civilization") {
-			this.sailToCivilization();
+	@Bound private travel(): void {
+		if (this.dropdownTravel.selectedOption === "civilization") {
+			void this.sailToCivilization();
 			return;
 		}
 
 		let islandId: IslandId = DEFAULT_ISLAND_ID;
 		const biome = Enums.values(BiomeType)
-			.find(b => this.dropdownTravel.selection === getTravelDropdownNewIslandOptionId(b)) ?? BiomeType.Random;
+			.find(b => this.dropdownTravel.selectedOption === getTravelDropdownNewIslandOptionId(b)) ?? BiomeType.Random;
 
-		if (this.dropdownTravel.selection.startsWith(TRAVEL_DROPDOWN_NEW_ISLAND_PREFIX)) {
+		if (this.dropdownTravel.selectedOption.startsWith(TRAVEL_DROPDOWN_NEW_ISLAND_PREFIX)) {
 			const currentIslandPosition = localIsland.position;
 
 			for (let i = 1; i < Infinity; i++) {
@@ -330,16 +341,19 @@ export default class GeneralPanel extends DebugToolsPanel {
 					.random()!;
 		}
 
-		MoveToIsland.execute(localPlayer, islandId, biome);
+		void MoveToIsland.execute(localPlayer, islandId, biome);
 	}
 
-	private async sailToCivilization() {
-		if (multiplayer.isConnected() && !game.isChallenge) return;
-		ForceSailToCivilization.execute(localPlayer);
+	private async sailToCivilization(): Promise<void> {
+		if (multiplayer.isConnected && !game.isChallenge) {
+			return;
+		}
+
+		void ForceSailToCivilization.execute(localPlayer);
 	}
 
-	@Bound private renameIsland(input: Input) {
-		RenameIsland.execute(localPlayer, input.text);
+	@Bound private renameIsland(input: Input): void {
+		void RenameIsland.execute(localPlayer, input.text);
 		this.dropdownTravel.refresh();
 	}
 }
@@ -350,9 +364,10 @@ class IslandDropdown<OTHER_OPTIONS extends string = never> extends BaseIslandDro
 		super(defaultOption, options);
 	}
 
-	protected override isInGroup(islandId: IslandId, biome: BiomeType) {
-		if (islandId.startsWith(TRAVEL_DROPDOWN_NEW_ISLAND_PREFIX))
+	protected override isInGroup(islandId: IslandId, biome: BiomeType): boolean {
+		if (islandId.startsWith(TRAVEL_DROPDOWN_NEW_ISLAND_PREFIX)) {
 			return islandId === getTravelDropdownNewIslandOptionId(biome);
+		}
 
 		return super.isInGroup(islandId, biome);
 	}

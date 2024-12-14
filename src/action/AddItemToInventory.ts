@@ -1,59 +1,96 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { Action } from "game/entity/action/Action";
-import { ActionArgument } from "game/entity/action/IAction";
-import Human from "game/entity/Human";
-import { EntityType } from "game/entity/IEntity";
-import { ItemType } from "game/item/IItem";
-import Item from "game/item/Item";
-import Enums from "utilities/enum/Enums";
-import { defaultUsability } from "../Actions";
+import { Quality } from "@wayward/game/game/IObject";
+import Human from "@wayward/game/game/entity/Human";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
+import { ItemType, ItemTypeGroup } from "@wayward/game/game/item/IItem";
+import type Item from "@wayward/game/game/item/Item";
+import ItemManager from "@wayward/game/game/item/ItemManager";
+import Dictionary from "@wayward/game/language/Dictionary";
+import Translation from "@wayward/game/language/Translation";
+import Enums from "@wayward/game/utilities/enum/Enums";
+import Arrays from "@wayward/utilities/collection/Arrays";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
+import StackMap from "@wayward/utilities/collection/map/StackMap";
+import { defaultCanUseHandler } from "../Actions";
 import InspectDialog from "../ui/InspectDialog";
 
 export const ADD_ITEM_RANDOM = 1000000001;
 export const ADD_ITEM_ALL = 1000000002;
 
+const FILTER_REGEX_CACHE = new StackMap<string, RegExp>(undefined, 500);
+const WORD_TO_GROUPS_MAP = new StackMap<string, ItemTypeGroup[]>(undefined, 100);
+const GROUP_REGEX = new RegExp("^group:(.*)$");
+let GROUP_MAP: Map<string, ItemTypeGroup> | undefined;
+
+function itemMatchesWord(word: string, item: ItemType, text: string): boolean {
+	const baseRegex = FILTER_REGEX_CACHE.getOrDefault(word, () =>
+		new RegExp(`\\b${word.replace("\\", "\\\\")}`), true);
+	if (baseRegex.test(text)) {
+		return true;
+	}
+
+	const groups = WORD_TO_GROUPS_MAP.getOrDefault(word, () => {
+		const [, groupName] = word.match(GROUP_REGEX) ?? Arrays.EMPTY;
+
+		GROUP_MAP ??= Enums.values(ItemTypeGroup)
+			.map(group => Tuple(Translation.get(Dictionary.ItemGroup, group).getString().toLowerCase().replace(/\s*/g, ""), group))
+			.toMap();
+
+		return !groupName ? [] : GROUP_MAP.entryStream()
+			.filter(([name]) => name.startsWith(groupName))
+			.toArray(([, data]) => data);
+	}, true);
+
+	if (!groups.length) {
+		return false;
+	}
+
+	return groups.some(group => ItemManager.isInGroup(item, group));
+}
+
 /**
  * Adds an item to the inventory of a doodad, human, or tile.
  */
-export default new Action(ActionArgument.Container, ActionArgument.Integer32, ActionArgument.Quality, ActionArgument.Integer32)
+export default new Action(ActionArgument.Container, ActionArgument.ANY(ActionArgument.Integer32, ActionArgument.String), ActionArgument.ENUM(Quality), ActionArgument.Integer32)
 	.setUsableBy(EntityType.Human)
-	.setUsableWhen(...defaultUsability)
-	.setHandler((action, target, item: ItemType | typeof ADD_ITEM_RANDOM | typeof ADD_ITEM_ALL, quality, quantity) => {
-		const total = Enums.values(ItemType).length - 1;
-		if (item === ADD_ITEM_ALL) {
-			quantity = total; // we don't want "none"
-		}
-
+	.setUsableWhen(ActionUsability.Always)
+	.setCanUse(defaultCanUseHandler)
+	.setHandler((action, target, item: ItemType | typeof ADD_ITEM_RANDOM | typeof ADD_ITEM_ALL | string, quality, quantity) => {
 		const containerObject = action.executor.island.items.resolveContainer(target);
 
-		if (containerObject instanceof Human) {
-			oldui.startAddingMultipleItemsToContainer(action.executor.inventory);
+		let items = Enums.values(ItemType);
+		if (typeof item === "string") {
+			const filterBy = item;
+			const filterWords = filterBy.split(" ");
+			items = items.filter(item => {
+				const text = Translation.get(Dictionary.Item, item).getString();
+				return text.includes(filterBy) || filterWords.every(word =>
+					itemMatchesWord(word, item, text));
+			});
 		}
 
 		const createdItems: Item[] = [];
+		function addItem(item: ItemType): void {
+			const createdItem = action.executor.island.items.create(item, undefined, quality);
+			createdItems.push(createdItem);
+		}
+
 		for (let i = 0; i < quantity; i++) {
-			const addItem = item === ADD_ITEM_ALL ? i + 1 : item === ADD_ITEM_RANDOM ? action.executor.island.seededRandom.int(total) + 1 : item;
-			if (containerObject instanceof Human) {
-				const createdItem = containerObject.createItemInInventory(addItem, quality, false);
-				createdItems.push(createdItem);
+			if (item === ADD_ITEM_ALL || typeof item === "string") {
+				for (const item of items) {
+					addItem(item);
+				}
+			} else if (item === ADD_ITEM_RANDOM) {
+				addItem(action.executor.island.seededRandom.choice(...items));
 			} else {
-				action.executor.island.items.create(addItem, target, quality);
+				addItem(item);
 			}
 		}
 
-		if (containerObject instanceof Human) {
-			oldui.completeAddingMultipleItemsToContainer(action.executor.inventory, createdItems);
+		action.executor.island.items.moveItemsToContainer(action.executor, createdItems, target);
 
+		if (containerObject instanceof Human) {
 			containerObject.updateTablesAndWeight("M");
 		} else {
 			action.setUpdateView();

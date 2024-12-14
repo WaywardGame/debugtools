@@ -1,27 +1,23 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { ActionApi } from "game/entity/action/IAction";
-import Entity from "game/entity/Entity";
-import Player from "game/entity/player/Player";
+import type { ActionApi } from "@wayward/game/game/entity/action/IAction";
+import type Entity from "@wayward/game/game/entity/Entity";
+import { MoveAnimation } from "@wayward/game/game/entity/IEntity";
+import type Player from "@wayward/game/game/entity/player/Player";
+import type Tile from "@wayward/game/game/tile/Tile";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { getTile } from "./GetTile";
-import Tile from "game/tile/Tile";
-import { MoveAnimation } from "game/entity/IEntity";
 
-export function teleportEntity(action: ActionApi<any>, entity: Entity, tile: Tile) {
+export function teleportEntity(action: ActionApi<any>, entity: Entity, tile: Tile): void {
+	const canUse = action.canUse();
+	if (!canUse.usable) {
+		return;
+	}
+
 	const targetTile = getTile(action.executor as Player, tile, () => translation(DebugToolsTranslation.ActionTeleport)
 		.get(entity.getName()));
 
-	if (!entity || !targetTile) return;
+	if (!entity || !targetTile) {
+		return;
+	}
 
 	if (entity.asPlayer) {
 		entity.asPlayer.setPosition(targetTile);
@@ -39,8 +35,8 @@ export function teleportEntity(action: ActionApi<any>, entity: Entity, tile: Til
 		}
 	}
 
-	if (entity.asPlayer?.isLocalPlayer()) {
-		gameScreen!.movementHandler.walkToTileHandler.reset();
+	if (entity.asPlayer?.isLocalPlayer) {
+		gameScreen?.interactionManager.pathing.reset();
 	}
 
 	action.setUpdateView(true);

@@ -1,30 +1,19 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import Log, { LogSource } from "utilities/Log";
+import Log from "@wayward/utilities/Log";
 
 type VersionMappable = string | Version | [number, number, number?];
 
 export default class Version {
 	private readonly version: [number, number, number?];
 
-	public get major() {
+	public get major(): number {
 		return this.version[0];
 	}
 
-	public get minor() {
+	public get minor(): number {
 		return this.version[1];
 	}
 
-	public get patch() {
+	public get patch(): number | undefined {
 		return this.version[2];
 	}
 
@@ -43,17 +32,17 @@ export default class Version {
 					.map(v => +v) as [number, number, number?];
 
 			} catch (e) {
-				Log.warn(LogSource.Mod, "DebugTools", "Version")(`Invalid version string ${version}`);
+				Log.warn("Mod", "DebugTools", "Version")(`Invalid version string ${version}`);
 				this.version = [0, 0, 0];
 			}
 		}
 	}
 
-	public getString() {
+	public getString(): string {
 		return this.version.join(".");
 	}
 
-	public isNewerThan(version: VersionMappable) {
+	public isNewerThan(version: VersionMappable): boolean {
 		const compareVersion = new Version(version);
 		for (let i = 0; i < this.version.length; i++) {
 			const a = this.version[i]!;
@@ -68,7 +57,7 @@ export default class Version {
 		return false;
 	}
 
-	public isOlderThan(version: VersionMappable) {
+	public isOlderThan(version: VersionMappable): boolean {
 		const compareVersion = new Version(version);
 		for (let i = 0; i < this.version.length; i++) {
 			const a = this.version[i]!;
@@ -83,7 +72,7 @@ export default class Version {
 		return false;
 	}
 
-	public isSameVersion(version: VersionMappable) {
+	public isSameVersion(version: VersionMappable): boolean {
 		const compareVersion = new Version(version);
 		for (let i = 0; i < this.version.length; i++) {
 			if (this.version[i] !== compareVersion.version[i]) {

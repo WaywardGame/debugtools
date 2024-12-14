@@ -1,44 +1,47 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import Entity from "game/entity/Entity";
-import { EntityType } from "game/entity/IEntity";
-import { Action } from "game/entity/action/Action";
-import { ActionArgument, optional } from "game/entity/action/IAction";
-import Player from "game/entity/player/Player";
-import Island from "game/island/Island";
-import { IVector3 } from "utilities/math/IVector";
-import Vector3 from "utilities/math/Vector3";
-import { defaultUsability } from "../Actions";
+import Entity from "@wayward/game/game/entity/Entity";
+import { EntityType } from "@wayward/game/game/entity/IEntity";
+import { Action } from "@wayward/game/game/entity/action/Action";
+import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
+import Player from "@wayward/game/game/entity/player/Player";
+import type Island from "@wayward/game/game/island/Island";
+import { IVector3 } from "@wayward/game/utilities/math/IVector";
+import Vector3 from "@wayward/game/utilities/math/Vector3";
+import { defaultCanUseHandler } from "../Actions";
 import { DebugToolsTranslation } from "../IDebugTools";
 import Remove from "./helpers/Remove";
 import { teleportEntity } from "./helpers/TeleportEntity";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import type NPC from "@wayward/game/game/entity/npc/NPC";
+import type Creature from "@wayward/game/game/entity/creature/Creature";
+import type TileEvent from "@wayward/game/game/tile/TileEvent";
+import type Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
 
 /**
  * Runs a miscellaneous command on a selection of things.
  * @param executionType A `DebugToolsTranslation` naming what command to perform.
  * @param selection An array of `[SelectionType, number]` tuples. Each represents a selected thing, such as a creature and its ID. 
  */
-export default new Action(ActionArgument.Integer32, ActionArgument.Array, optional(ActionArgument.String))
+export default new Action(ActionArgument.Integer32, ActionArgument.Array, ActionArgument.OPTIONAL(ActionArgument.String))
 	.setUsableBy(EntityType.Human)
-	.setUsableWhen(...defaultUsability)
-	.setHandler((action, executionType: DebugToolsTranslation, selection: [SelectionType, number][], alternativeTarget) => {
+	.setUsableWhen(ActionUsability.Always)
+	.setCanUse(defaultCanUseHandler)
+	.setHandler((action, executionType: DebugToolsTranslation, selection: Array<[SelectionType, number]>, alternativeTarget) => {
 		for (const [type, id] of selection) {
 			const target = getTarget(action.executor.island, type, id);
-			if (!target) continue;
+			if (!target) {
+				continue;
+			}
 
 			switch (executionType) {
 				case DebugToolsTranslation.ActionRemove:
-					if (target instanceof Player) continue;
-					if (!(target instanceof Entity) && IVector3.is(target)) continue;
+					if (target instanceof Player) {
+						continue;
+					}
+
+					if (!(target instanceof Entity) && IVector3.is(target)) {
+						continue;
+					}
+
 					Remove(action, target);
 					break;
 				case DebugToolsTranslation.ActionTeleport:
@@ -46,6 +49,7 @@ export default new Action(ActionArgument.Integer32, ActionArgument.Array, option
 					if (playerToTeleport) {
 						teleportEntity(action, playerToTeleport, target instanceof Entity ? target.tile : action.executor.island.getTile(...target.xyz));
 					}
+
 					return;
 			}
 		}
@@ -54,7 +58,7 @@ export default new Action(ActionArgument.Integer32, ActionArgument.Array, option
 		action.setUpdateRender();
 	});
 
-function getTarget(island: Island, type: SelectionType, id: string | number) {
+function getTarget(island: Island, type: SelectionType, id: string | number): Player | Doodad | NPC | Creature | Corpse | TileEvent | Vector3 | undefined {
 	switch (type) {
 		case SelectionType.Creature: return island.creatures.get(id as number);
 		case SelectionType.NPC: return island.npcs.get(id as number);

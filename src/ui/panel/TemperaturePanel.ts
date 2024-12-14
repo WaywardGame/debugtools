@@ -1,28 +1,18 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { EventBus } from "event/EventBuses";
-import { EventHandler } from "event/EventManager";
-import Translation from "language/Translation";
-import Mod from "mod/Mod";
-import ChoiceList, { Choice } from "ui/component/ChoiceList";
-import Divider from "ui/component/Divider";
-import { LabelledRow } from "ui/component/LabelledRow";
-import Text, { Heading } from "ui/component/Text";
-import DebugTools from "../../DebugTools";
-import { DebugToolsTranslation, ISaveData, translation } from "../../IDebugTools";
+import { EventBus } from "@wayward/game/event/EventBuses";
+import { EventHandler } from "@wayward/game/event/EventManager";
+import Translation from "@wayward/game/language/Translation";
+import Mod from "@wayward/game/mod/Mod";
+import ChoiceList, { Choice } from "@wayward/game/ui/component/ChoiceList";
+import Divider from "@wayward/game/ui/component/Divider";
+import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
+import Text, { Heading } from "@wayward/game/ui/component/Text";
+import type DebugTools from "../../DebugTools";
+import type { ISaveData } from "../../IDebugTools";
+import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { TemperatureOverlayMode } from "../../overlay/TemperatureOverlay";
 import DebugToolsPanel from "../component/DebugToolsPanel";
-// import Component from "ui/component/Component";
-// import Renderer from "renderer/Renderer";
+// import Component from "@wayward/game/ui/component/Component";
+// import Renderer from "@wayward/game/renderer/Renderer";
 
 export default class TemperaturePanel extends DebugToolsPanel {
 
@@ -32,8 +22,8 @@ export default class TemperaturePanel extends DebugToolsPanel {
 	@Mod.saveData<DebugTools>("Debug Tools")
 	public saveData: ISaveData;
 
-	private biomeTimeModifier: Text;
-	private layerTimeModifier: Text;
+	private readonly biomeTimeModifier: Text;
+	private readonly layerTimeModifier: Text;
 
 	public constructor() {
 		super();
@@ -87,18 +77,18 @@ export default class TemperaturePanel extends DebugToolsPanel {
 			.appendTo(this);
 	}
 
-	public override getTranslation() {
+	public override getTranslation(): DebugToolsTranslation {
 		return DebugToolsTranslation.PanelTemperature;
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "changeZ")
 	@EventHandler(EventBus.LocalPlayer, "moveToIsland")
-	protected onChangeArea() {
+	protected onChangeArea(): void {
 		ui.refreshTranslations(this);
 	}
 
 	@EventHandler(EventBus.Island, "tickEnd")
-	protected onTime() {
+	protected onTime(): void {
 		this.biomeTimeModifier.refresh();
 		this.layerTimeModifier.refresh();
 	}

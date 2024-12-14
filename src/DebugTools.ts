@@ -1,92 +1,93 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { EventBus } from "event/EventBuses";
-import { Events, IEventEmitter } from "event/EventEmitter";
-import EventManager, { EventHandler } from "event/EventManager";
-import { ActionType } from "game/entity/action/IAction";
-import Creature from "game/entity/creature/Creature";
-import NPC from "game/entity/npc/NPC";
-import { Source } from "game/entity/player/IMessageManager";
-import Player from "game/entity/player/Player";
-import { InspectType } from "game/inspection/IInspection";
-import Island from "game/island/Island";
-import Item from "game/item/Item";
-import { OverlayType } from "game/tile/ITerrain";
-import Tile from "game/tile/Tile";
-import Dictionary from "language/Dictionary";
-import Message from "language/dictionary/Message";
-import InterModRegistry from "mod/InterModRegistry";
-import Mod from "mod/Mod";
-import Register, { Registry } from "mod/ModRegistry";
-import { RenderSource, UpdateRenderFlag, ZOOM_LEVEL_MAX } from "renderer/IRenderer";
-import Renderer from "renderer/Renderer";
-import WorldRenderer from "renderer/world/WorldRenderer";
-import Bind, { IBindHandlerApi } from "ui/input/Bind";
-import Bindable from "ui/input/Bindable";
-import { IInput } from "ui/input/IInput";
-import InputManager from "ui/input/InputManager";
-import GameScreen from "ui/screen/screens/GameScreen";
-import { DialogId } from "ui/screen/screens/game/Dialogs";
-import { MenuBarButtonGroup, MenuBarButtonType } from "ui/screen/screens/game/static/menubar/IMenuBarButton";
-import { Bound } from "utilities/Decorators";
-import Log from "utilities/Log";
-import { IInjectionApi, Inject, InjectionPosition } from "utilities/class/Inject";
-import { IVector2 } from "utilities/math/IVector";
-import Vector2 from "utilities/math/Vector2";
-import Vector3 from "utilities/math/Vector3";
+import { EventBus } from "@wayward/game/event/EventBuses";
+import { EventHandler, eventManager } from "@wayward/game/event/EventManager";
+import type Entity from "@wayward/game/game/entity/Entity";
+import type { ActionType } from "@wayward/game/game/entity/action/IAction";
+import type { Source } from "@wayward/game/game/entity/player/IMessageManager";
+import type Player from "@wayward/game/game/entity/player/Player";
+import type { InspectType } from "@wayward/game/game/inspection/IInspection";
+import Island from "@wayward/game/game/island/Island";
+import type { OverlayType } from "@wayward/game/game/tile/ITerrain";
+import type Tile from "@wayward/game/game/tile/Tile";
+import type Dictionary from "@wayward/game/language/Dictionary";
+import type Message from "@wayward/game/language/dictionary/Message";
+import type InterModRegistry from "@wayward/game/mod/InterModRegistry";
+import Mod from "@wayward/game/mod/Mod";
+import Register, { Registry } from "@wayward/game/mod/ModRegistry";
+import { RenderSource, UpdateRenderFlag, ZOOM_LEVEL_MAX } from "@wayward/game/renderer/IRenderer";
+import type { Renderer } from "@wayward/game/renderer/Renderer";
+import { WorldRenderer } from "@wayward/game/renderer/world/WorldRenderer";
+import type { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
+import Bind from "@wayward/game/ui/input/Bind";
+import type Bindable from "@wayward/game/ui/input/Bindable";
+import { IInput } from "@wayward/game/ui/input/IInput";
+import InputManager from "@wayward/game/ui/input/InputManager";
+import type { DialogId } from "@wayward/game/ui/screen/screens/game/Dialogs";
+import ItemComponent, { ItemClasses } from "@wayward/game/ui/screen/screens/game/component/ItemComponent";
+import type { MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
+import { MenuBarButtonGroup } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
+import Draggable from "@wayward/game/ui/util/Draggable";
+import type { IVector2 } from "@wayward/game/utilities/math/IVector";
+import Vector2 from "@wayward/game/utilities/math/Vector2";
+import Vector3 from "@wayward/game/utilities/math/Vector3";
+import { Bound } from "@wayward/utilities/Decorators";
+import type Log from "@wayward/utilities/Log";
+import _ from "@wayward/utilities/_";
+import type { IInjectionApi } from "@wayward/utilities/class/Inject";
+import { Inject, InjectionPosition } from "@wayward/utilities/class/Inject";
+import type { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import Actions from "./Actions";
-import { DebugToolsTranslation, IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
+import type { IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection } from "./IDebugTools";
+import { DebugToolsTranslation, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
 import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
 import AddItemToInventory from "./action/AddItemToInventory";
 import ChangeLayer from "./action/ChangeLayer";
 import ChangeTerrain from "./action/ChangeTerrain";
 import ClearInventory from "./action/ClearInventory";
+import ClearNotes from "./action/ClearNotes";
 import Clone from "./action/Clone";
+import FastForward from "./action/FastForward";
 import ForceSailToCivilization from "./action/ForceSailToCivilization";
 import Heal from "./action/Heal";
 import Kill from "./action/Kill";
+import MagicalPropertyActions from "./action/MagicalPropertyActions";
 import MoveToIsland from "./action/MoveToIsland";
 import Paint from "./action/Paint";
 import PlaceTemplate from "./action/PlaceTemplate";
 import Remove from "./action/Remove";
 import RenameIsland from "./action/RenameIsland";
 import ReplacePlayerData from "./action/ReplacePlayerData";
+import ResetNPCSpawnInterval from "./action/ResetNPCSpawnInterval";
 import SelectionExecute from "./action/SelectionExecute";
 import SetDecay from "./action/SetDecay";
 import SetDecayBulk from "./action/SetDecayBulk";
 import SetDurability from "./action/SetDurability";
 import SetDurabilityBulk from "./action/SetDurabilityBulk";
 import SetGrowingStage from "./action/SetGrowingStage";
+import SetPlayerData from "./action/SetPlayerData";
+import SetQuality from "./action/SetQuality";
+import SetQualityBulk from "./action/SetQualityBulk";
 import SetSkill from "./action/SetSkill";
 import SetStat from "./action/SetStat";
+import SetStatMax from "./action/SetStatMax";
 import SetTamed from "./action/SetTamed";
 import SetTime from "./action/SetTime";
-import SetWeightBonus from "./action/SetWeightBonus";
 import TeleportEntity from "./action/TeleportEntity";
-import ToggleInvulnerable from "./action/ToggleInvulnerable";
+import ToggleAiMask from "./action/ToggleAiMask";
+import ToggleAiType from "./action/ToggleAiType";
 import ToggleNoClip from "./action/ToggleNoClip";
-import TogglePermissions from "./action/TogglePermissions";
+import ToggleFastMovement from "./action/ToggleFastMovement";
 import ToggleTilled from "./action/ToggleTilled";
-import UpdateStatsAndAttributes from "./action/UpdateStatsAndAttributes";
+import { CreatureZoneOverlay, CreatureZoneOverlayMode } from "./overlay/CreatureZoneOverlay";
 import { TemperatureOverlay, TemperatureOverlayMode } from "./overlay/TemperatureOverlay";
 import AccidentalDeathHelper from "./ui/AccidentalDeathHelper";
 import MainDialog, { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import DebugToolsPrompts from "./ui/DebugToolsPrompts";
 import InspectDialog from "./ui/InspectDialog";
-import Container from "./ui/component/Container";
 import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import TemperatureInspection from "./ui/inspection/Temperature";
 import Version from "./util/Version";
+import { RendererConstants } from "@wayward/game/renderer/RendererConstants";
 
 /**
  * An enum representing the possible states of the camera
@@ -125,7 +126,7 @@ interface IDebugToolsEvents extends Events<Mod> {
 }
 
 export default class DebugTools extends Mod {
-	public override event: IEventEmitter<this, IDebugToolsEvents>;
+	declare public event: IEventEmitter<this, IDebugToolsEvents>;
 
 	////////////////////////////////////
 	// Static
@@ -182,6 +183,8 @@ export default class DebugTools extends Mod {
 	public readonly bindableTeleportLocalPlayer: Bindable;
 	@Register.bindable("ToggleNoClip", IInput.key("KeyN", "Alt"))
 	public readonly bindableToggleNoClipOnLocalPlayer: Bindable;
+	@Register.bindable("ToggleFastMovement", IInput.key("KeyN", "Shift"))
+	public readonly bindableToggleFastMovementOnLocalPlayer: Bindable;
 
 	@Register.bindable("ToggleCameraLock", IInput.key("KeyC", "Alt"))
 	public readonly bindableToggleCameraLock: Bindable;
@@ -240,14 +243,14 @@ export default class DebugTools extends Mod {
 	@Register.action("SetStat", SetStat)
 	public readonly actionSetStat: ActionType;
 
+	@Register.action("SetStatMax", SetStatMax)
+	public readonly actionSetStatMax: ActionType;
+
 	@Register.action("SetTamed", SetTamed)
 	public readonly actionSetTamed: ActionType;
 
 	@Register.action("Remove", Remove)
 	public readonly actionRemove: ActionType;
-
-	@Register.action("SetWeightBonus", SetWeightBonus)
-	public readonly actionSetWeightBonus: ActionType;
 
 	@Register.action("ChangeLayer", ChangeLayer)
 	public readonly actionChangeLayer: ActionType;
@@ -258,9 +261,6 @@ export default class DebugTools extends Mod {
 	@Register.action("ToggleTilled", ToggleTilled)
 	public readonly actionToggleTilled: ActionType;
 
-	@Register.action("UpdateStatsAndAttributes", UpdateStatsAndAttributes)
-	public readonly actionUpdateStatsAndAttributes: ActionType;
-
 	@Register.action("AddItemToInventory", AddItemToInventory)
 	public readonly actionAddItemToInventory: ActionType;
 
@@ -269,6 +269,12 @@ export default class DebugTools extends Mod {
 
 	@Register.action("SetDecay", SetDecay)
 	public readonly actionSetDecay: ActionType;
+
+	@Register.action("SetQuality", SetQuality)
+	public readonly actionSetQuality: ActionType;
+
+	@Register.action("SetQualityBulk", SetQualityBulk)
+	public readonly actionSetQualityBulk: ActionType;
 
 	@Register.action("SetDurabilityBulk", SetDurabilityBulk)
 	public readonly actionSetDurabilityBulk: ActionType;
@@ -282,9 +288,6 @@ export default class DebugTools extends Mod {
 	@Register.action("Paint", Paint)
 	public readonly actionPaint: ActionType;
 
-	@Register.action("ToggleInvulnerable", ToggleInvulnerable)
-	public readonly actionToggleInvulnerable: ActionType;
-
 	@Register.action("SetSkill", SetSkill)
 	public readonly actionSetSkill: ActionType;
 
@@ -294,8 +297,8 @@ export default class DebugTools extends Mod {
 	@Register.action("ToggleNoclip", ToggleNoClip)
 	public readonly actionToggleNoclip: ActionType;
 
-	@Register.action("TogglePermissions", TogglePermissions)
-	public readonly actionTogglePermissions: ActionType;
+	@Register.action("ToggleFastMovement", ToggleFastMovement)
+	public readonly actionToggleFastMovement: ActionType;
 
 	@Register.action("RenameIsland", RenameIsland)
 	public readonly actionRenameIsland: ActionType;
@@ -308,6 +311,33 @@ export default class DebugTools extends Mod {
 
 	@Register.action("ReplacePlayerData", ReplacePlayerData)
 	public readonly actionReplacePlayerData: ActionType;
+
+	@Register.action("FastForward", FastForward)
+	public readonly actionFastForward: ActionType;
+
+	@Register.action("ClearNotes", ClearNotes)
+	public readonly actionClearNotes: ActionType;
+
+	@Register.action("SetPlayerData", SetPlayerData)
+	public readonly actionSetPlayerData: ActionType;
+
+	@Register.action("MagicalPropertyRemove", MagicalPropertyActions.Remove)
+	public readonly actionMagicalPropertyRemove: ActionType;
+
+	@Register.action("MagicalPropertyChange", MagicalPropertyActions.Change)
+	public readonly actionMagicalPropertyChange: ActionType;
+
+	@Register.action("MagicalPropertyClearAll", MagicalPropertyActions.Clear)
+	public readonly actionMagicalPropertyClearAll: ActionType;
+
+	@Register.action("ToggleAiType", ToggleAiType)
+	public readonly actionToggleAiType: ActionType;
+
+	@Register.action("ToggleAiMask", ToggleAiMask)
+	public readonly actionToggleAiMask: ActionType;
+
+	@Register.action("ResetNPCSpawnInterval", ResetNPCSpawnInterval)
+	public readonly actionResetNPCSpawnInterval: ActionType;
 
 	////////////////////////////////////
 	// UI
@@ -354,13 +384,14 @@ export default class DebugTools extends Mod {
 	// 
 
 	public temperatureOverlay = new TemperatureOverlay();
+	public creatureZoneOverlay = new CreatureZoneOverlay();
 	public accidentalDeathHelper = new AccidentalDeathHelper();
 	private cameraState = CameraState.Locked;
 
 	/**
 	 * Retruns true if the camera state is `CameraState.Unlocked`. `CameraState.Transition` is considered "locked"
 	 */
-	public get isCameraUnlocked() {
+	public get isCameraUnlocked(): boolean {
 		return this.cameraState === CameraState.Unlocked;
 	}
 
@@ -380,8 +411,9 @@ export default class DebugTools extends Mod {
 
 		return (playerData[player.identifier] = {
 			weightBonus: 0,
-			invulnerable: false,
-			permissions: player.isServer(),
+			unkillable: false,
+			noRender: false,
+			permissions: player.isServer,
 			fog: undefined,
 			lighting: true,
 		})[key];
@@ -397,10 +429,38 @@ export default class DebugTools extends Mod {
 	 * 
 	 * Note: Emits `DebugToolsEvent.PlayerDataChange` with the id of the player, the key of the changing data, and the new value.
 	 */
-	public setPlayerData<K extends keyof IPlayerData>(player: Player, key: K, value: IPlayerData[K]) {
+	public setPlayerData<K extends keyof IPlayerData>(player: Player, key: K, value: IPlayerData[K]): void {
 		this.getPlayerData(player, key); // initializes it if it doesn't exist
 		this.data.playerData[player.identifier][key] = value;
 		this.event.emit("playerDataChange", player.id, key, value);
+
+		switch (key) {
+			case "permissions":
+				DebugTools.LOG.info(`Updating permissions for ${player.getName().toString()} to ${value}`);
+				break;
+
+			case "weightBonus":
+				player.updateStrength();
+				player.updateTablesAndWeight("M");
+
+				break;
+
+			case "lighting":
+				player.updateStatsAndAttributes();
+
+				if (player.isLocalPlayer) {
+					player.updateView(RenderSource.Mod, true);
+				}
+
+				break;
+
+			case "fog":
+				if (player.isLocalPlayer) {
+					this.updateFog();
+				}
+
+				break;
+		}
 
 		if (!this.hasPermission() && gameScreen) {
 			gameScreen.dialogs.close(this.dialogMain);
@@ -415,23 +475,23 @@ export default class DebugTools extends Mod {
 	/**
 	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
 	 */
-	public override initializeGlobalData(data?: IGlobalData) {
+	public override initializeGlobalData(data?: IGlobalData): IGlobalData | undefined {
 		return !this.needsUpgrade(data) ? data : {
-			lastVersion: game.modManager.getVersion(this.getIndex()),
+			lastVersion: this.mod.version,
 		};
 	}
 
 	/**
 	 * If the data doesn't exist or the user upgraded to a new version, we reinitialize the data.
 	 */
-	public override initializeSaveData(data?: ISaveData) {
+	public override initializeSaveData(data?: ISaveData): ISaveData | undefined {
 		return !this.needsUpgrade(data) ? data : {
 			playerData: {},
-			lastVersion: game.modManager.getVersion(this.getIndex()),
+			lastVersion: this.mod.version,
 		};
 	}
 
-	public override onInitialize() {
+	public override onInitialize(): void {
 		translation.setDebugToolsInstance(this);
 	}
 
@@ -439,12 +499,14 @@ export default class DebugTools extends Mod {
 	 * Called when Debug Tools is loaded (in a save)
 	 * - Registers the `LocationSelector` stored in `this.selector` as a hook host.
 	 */
-	public override onLoad() {
-		EventManager.registerEventBusSubscriber(this.selector);
+	public override onLoad(): void {
+		eventManager.registerEventBusSubscriber(this.selector);
 		Bind.registerHandlers(this.selector);
-		EventManager.registerEventBusSubscriber(this.accidentalDeathHelper);
+		eventManager.registerEventBusSubscriber(this.accidentalDeathHelper);
 		this.temperatureOverlay.register();
 		this.temperatureOverlay.hide();
+		this.creatureZoneOverlay.register();
+		this.creatureZoneOverlay.hide();
 	}
 
 	/**
@@ -452,20 +514,21 @@ export default class DebugTools extends Mod {
 	 * - Deregisters `this.selector` as a hook host.
 	 * - Removes the `AddItemToInventory` UI Component.
 	 */
-	public override onUnload() {
-		Container.releaseAndRemove();
-		EventManager.deregisterEventBusSubscriber(this.selector);
+	public override onUnload(): void {
+		eventManager.deregisterEventBusSubscriber(this.selector);
 		Bind.deregisterHandlers(this.selector);
 		this.unlockedCameraMovementHandler.end();
 		this.temperatureOverlay.deregister();
 		this.temperatureOverlay.setMode(TemperatureOverlayMode.None);
-		EventManager.deregisterEventBusSubscriber(this.accidentalDeathHelper);
+		this.creatureZoneOverlay.deregister();
+		this.creatureZoneOverlay.setMode(CreatureZoneOverlayMode.None);
+		this.accidentalDeathHelper.deregister();
 	}
 
 	/**
 	 * Saves the save data for Debug Tools
 	 */
-	public onSave(): any {
+	public onSave(): ISaveData {
 		return this.data;
 	}
 
@@ -476,7 +539,7 @@ export default class DebugTools extends Mod {
 	/**
 	 * Updates the field of view based on whether it's disabled in the mod.
 	 */
-	public updateFog() {
+	public updateFog(): void {
 		if (renderer) {
 			const fogForceEnabled = this.getPlayerData(localPlayer, "fog");
 			if (fogForceEnabled !== undefined && renderer.fieldOfView.disabled !== !fogForceEnabled) {
@@ -491,17 +554,19 @@ export default class DebugTools extends Mod {
 	 * @param unlocked If true, unlocks the camera. Otherwise, sets the camera state to `CameraState.Transition`, allowing the camera
 	 * movement handler to transition it back to the player so it can be locked.
 	 */
-	public setCameraUnlocked(unlocked: boolean) {
+	public setCameraUnlocked(unlocked: boolean): void {
 		if (unlocked) {
 			this.cameraState = CameraState.Unlocked;
-			this.unlockedCameraMovementHandler.position = new Vector2(localPlayer);
+			this.unlockedCameraMovementHandler.position = new Vector2(localPlayer)
+				.add(RendererConstants.cameraPositionOffset);
 			this.unlockedCameraMovementHandler.velocity = Vector2.ZERO;
 			this.unlockedCameraMovementHandler.transition = undefined;
 			this.unlockedCameraMovementHandler.homingVelocity = 0;
 
 		} else {
 			this.cameraState = CameraState.Transition;
-			this.unlockedCameraMovementHandler.transition = new Vector2(localPlayer);
+			this.unlockedCameraMovementHandler.transition = new Vector2(localPlayer)
+				.add(RendererConstants.cameraPositionOffset);;
 		}
 	}
 
@@ -510,7 +575,7 @@ export default class DebugTools extends Mod {
 	 * - Opens the `InspectDialog`.
 	 * - Emits `DebugToolsEvent.Inspect`
 	 */
-	public inspect(what: Tile | Creature | Player | NPC | Item) {
+	public inspect(what: Tile | Entity): void {
 		if (!gameScreen) {
 			return;
 		}
@@ -524,25 +589,24 @@ export default class DebugTools extends Mod {
 	/**
 	 * Toggles the main dialog.
 	 */
-	public toggleDialog() {
-		if (!this.hasPermission() || !gameScreen) return;
+	public toggleDialog(): void {
+		if (!this.hasPermission() || !gameScreen) {
+			return;
+		}
 
 		gameScreen.dialogs.toggle(this.dialogMain);
 	}
 
-	public hasPermission() {
-		return !multiplayer.isConnected() || multiplayer.isServer() || this.getPlayerData(localPlayer, "permissions");
+	public hasPermission(player = localPlayer): boolean | undefined {
+		return player.isHost || this.getPlayerData(player, "permissions");
 	}
 
-	public toggleFog(fog: boolean) {
-		this.setPlayerData(localPlayer, "fog", fog);
-		this.updateFog();
+	public toggleFog(fog: boolean): void {
+		void SetPlayerData.execute(localPlayer, localPlayer, "fog", fog);
 	}
 
-	public toggleLighting(lighting: boolean) {
-		this.setPlayerData(localPlayer, "lighting", lighting);
-		UpdateStatsAndAttributes.execute(localPlayer, localPlayer);
-		localPlayer.updateView(RenderSource.Mod, true);
+	public toggleLighting(lighting: boolean): void {
+		void SetPlayerData.execute(localPlayer, localPlayer, "lighting", lighting);
 	}
 
 	////////////////////////////////////
@@ -550,16 +614,15 @@ export default class DebugTools extends Mod {
 	//
 
 	@Register.command("DebugToolsPermission")
-	public debugToolsAccessCommand(_: any, player: Player, args: string) {
+	public debugToolsAccessCommand(_: any, player: Player, args: string): void {
 		if (!this.hasPermission()) {
 			return;
 		}
 
 		const targetPlayer = game.playerManager.getByName(args);
-		if (targetPlayer !== undefined && !targetPlayer.isLocalPlayer()) {
+		if (targetPlayer !== undefined && !targetPlayer.isLocalPlayer) {
 			const newPermissions = !this.getPlayerData(targetPlayer, "permissions");
-			TogglePermissions.execute(localPlayer, targetPlayer, newPermissions);
-			DebugTools.LOG.info(`Updating permissions for ${targetPlayer.getName().toString()} to ${newPermissions}`);
+			void SetPlayerData.execute(localPlayer, targetPlayer, "permissions", newPermissions);
 		}
 	}
 
@@ -571,27 +634,18 @@ export default class DebugTools extends Mod {
 	 * When the field of view has initialized, we update the fog (enables/disables it based on the mod save data)
 	 */
 	@EventHandler(EventBus.Game, "postFieldOfView")
-	public postFieldOfView() {
+	public postFieldOfView(): void {
 		this.updateFog();
 	}
 
-	/**
-	 * Called when the game screen becomes visible
-	 * - Initializes the `AddItemToInventory` UI Component (it takes a second or two to be created, and there are multiple places in
-	 * the UI that use it. We initialize it only once so the slow initialization only happens once.)
-	 */
-	@EventHandler(GameScreen, "show")
-	public onGameScreenVisible() {
-		Container.init();
-	}
-
 	@EventHandler(EventBus.Game, "play")
-	protected onGamePlay() {
+	protected onGamePlay(): void {
 		this.unlockedCameraMovementHandler.begin();
+		this.toggleExtraneousUI(this.data.hideExtraneousUI ?? false);
 	}
 
 	@EventHandler(EventBus.Game, "rendererCreated")
-	protected onRendererCreated(_: any, renderer: Renderer) {
+	protected onRendererCreated(_: any, renderer: Renderer): void {
 		const rendererEventsUntilDeleted = renderer.event.until(renderer, "deleted");
 		rendererEventsUntilDeleted?.subscribe("getMaxZoomLevel", this.getMaxZoomLevel);
 		rendererEventsUntilDeleted?.subscribe("getZoomLevel", this.getZoomLevel);
@@ -619,7 +673,7 @@ export default class DebugTools extends Mod {
 	 * - If our internal zoom level is `1`: `0.125`
 	 * - If our internal zoom level is `0`: `0.0625`
 	 */
-	@Bound public getZoomLevel(_renderer: any, zoomLevel: number) {
+	@Bound public getZoomLevel(_renderer: any, zoomLevel: number): number | undefined {
 		if (!this.hasPermission()) {
 			return undefined;
 		}
@@ -645,7 +699,8 @@ export default class DebugTools extends Mod {
 		}
 
 		if (this.cameraState === CameraState.Transition) {
-			this.unlockedCameraMovementHandler.transition = new Vector2(localPlayer);
+			this.unlockedCameraMovementHandler.transition = new Vector2(localPlayer)
+				.add(RendererConstants.cameraPositionOffset);;
 			if (Vector2.isDistanceWithin(this.unlockedCameraMovementHandler.position, localPlayer, 0.5)) {
 				this.cameraState = CameraState.Locked;
 				return undefined;
@@ -657,31 +712,41 @@ export default class DebugTools extends Mod {
 
 	@EventHandler(EventBus.Players, "shouldDie")
 	public onPlayerDie(player: Player): false | void {
-		if (this.getPlayerData(player, "invulnerable"))
+		if (this.getPlayerData(player, "unkillable")) {
 			return false;
+		}
+	}
+
+	@EventHandler(EventBus.Players, "shouldRender")
+	public onPlayerRender(player: Player): false | void {
+		if (this.getPlayerData(player, "noRender")) {
+			return false;
+		}
 	}
 
 	/**
 	 * We add the weight bonus from the player's save data to the existing strength.
 	 */
 	@EventHandler(EventBus.Players, "getMaxWeight")
-	protected getPlayerMaxWeight(player: Player, weight: number) {
+	protected getPlayerMaxWeight(player: Player, weight: number): number {
 		return weight + this.getPlayerData(player, "weightBonus");
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableToggleCameraLock"))
-	public onToggleCameraLock() {
-		if (!this.hasPermission())
+	public onToggleCameraLock(): boolean {
+		if (!this.hasPermission()) {
 			return false;
+		}
 
 		this.setCameraUnlocked(this.cameraState !== CameraState.Unlocked);
 		return true;
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableToggleFullVisibility"))
-	public onToggleFullVisibility() {
-		if (!this.hasPermission())
+	public onToggleFullVisibility(): boolean {
+		if (!this.hasPermission()) {
 			return false;
+		}
 
 		const visibility = !(this.getPlayerData(localPlayer, "fog") || this.getPlayerData(localPlayer, "lighting"));
 		this.toggleFog(visibility);
@@ -690,66 +755,89 @@ export default class DebugTools extends Mod {
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableInspectTile"))
-	public onInspectTile() {
-		if (!this.hasPermission() || !gameScreen?.isMouseWithin() || !renderer)
+	public onInspectTile(): boolean {
+		if (!this.hasPermission() || !gameScreen?.isMouseWithin || !renderer) {
 			return false;
+		}
 
 		const tile = renderer.worldRenderer.screenToTile(...InputManager.mouse.position.xy);
-		if (!tile)
+		if (!tile) {
 			return false;
+		}
 
-		this.inspect(tile);
+		this.inspect(_
+			?? tile.getPlayersOnTile().first()
+			?? tile.npc
+			?? tile.creature
+			?? tile.doodad
+			?? (tile.events?.length === 1 ? tile.events.first() : undefined)
+			?? tile);
 		return true;
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableInspectItem"))
-	public onInspectItem(api: IBindHandlerApi) {
-		const itemElement = oldui.screenInGame?.getHoveredItem(api);
-		const item = itemElement && localIsland.items.get(+itemElement.dataset.itemId!);
-		if (!this.hasPermission() || !item)
+	public onInspectItem(api: IBindHandlerApi): boolean {
+		const item = api.mouse.isWithin(`.${ItemClasses.Main}`)?.component?.getAs(ItemComponent)?.handler.getItem?.();
+		if (!this.hasPermission() || !item) {
 			return false;
+		}
 
 		this.inspect(item);
 		return true;
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableInspectLocalPlayer"))
-	public onInspectLocalPlayer() {
-		if (!this.hasPermission())
+	public onInspectLocalPlayer(): boolean {
+		if (!this.hasPermission()) {
 			return false;
+		}
 
 		this.inspect(localPlayer);
 		return true;
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableHealLocalPlayer"))
-	public onHealLocalPlayer() {
-		if (!this.hasPermission())
+	public onHealLocalPlayer(): boolean {
+		if (!this.hasPermission()) {
 			return false;
+		}
 
-		Heal.execute(localPlayer, localPlayer);
+		void Heal.execute(localPlayer, localPlayer);
 		return true;
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableTeleportLocalPlayer"))
-	public onTeleportLocalPlayer(api: IBindHandlerApi) {
-		if (!this.hasPermission() || !renderer)
+	public onTeleportLocalPlayer(api: IBindHandlerApi): boolean {
+		if (!this.hasPermission() || !renderer || Draggable.isDragging) {
 			return false;
+		}
 
 		const tile = renderer.worldRenderer.screenToTile(...api.mouse.position.xy);
-		if (!tile)
+		if (!tile) {
 			return false;
+		}
 
-		TeleportEntity.execute(localPlayer, localPlayer, tile);
+		void TeleportEntity.execute(localPlayer, localPlayer, tile);
 		return true;
 	}
 
 	@Bind.onDown(Registry<DebugTools>().get("bindableToggleNoClipOnLocalPlayer"))
-	public onToggleNoClipOnLocalPlayer() {
-		if (!this.hasPermission())
+	public onToggleNoClipOnLocalPlayer(): boolean {
+		if (!this.hasPermission()) {
 			return false;
+		}
 
-		ToggleNoClip.execute(localPlayer, localPlayer);
+		void ToggleNoClip.execute(localPlayer, localPlayer);
+		return true;
+	}
+
+	@Bind.onDown(Registry<DebugTools>().get("bindableToggleFastMovementOnLocalPlayer"))
+	public onToggleFastMovementOnLocalPlayer(): boolean {
+		if (!this.hasPermission()) {
+			return false;
+		}
+
+		void ToggleFastMovement.execute(localPlayer, localPlayer);
 		return true;
 	}
 
@@ -757,7 +845,7 @@ export default class DebugTools extends Mod {
 	 * If lighting is disabled, we return maximum light on all channels.
 	 */
 	@Inject(WorldRenderer, "calculateAmbientColor", InjectionPosition.Pre)
-	public getAmbientColor(api: IInjectionApi<WorldRenderer, "calculateAmbientColor">) {
+	public getAmbientColor(api: IInjectionApi<WorldRenderer, "calculateAmbientColor">): void {
 		if (this.getPlayerData(localPlayer, "lighting") === false) {
 			api.returnValue = Vector3.ONE.xyz;
 			api.cancelled = true;
@@ -769,7 +857,7 @@ export default class DebugTools extends Mod {
 	 */
 	// @Inject(Renderer, "calculateAmbientLightLevel", InjectionPosition.Pre)
 	// public getAmbientLightLevel(api: IInjectionApi<Renderer, "calculateAmbientLightLevel">, entity: Entity, z: number) {
-	// 	if (entity === localPlayer && this.getPlayerData(localPlayer, "lighting") === false) {
+	// 	if (entity?.asLocalPlayer && this.getPlayerData(localPlayer, "lighting") === false) {
 	// 		api.returnValue = 1;
 	// 		api.cancelled = true;
 	// 	}
@@ -779,20 +867,20 @@ export default class DebugTools extends Mod {
 	 * If lighting is disabled, we return the minimum light level.
 	 */
 	@Inject(Island, "calculateTileLightLevel", InjectionPosition.Pre)
-	public getTileLightLevel(api: IInjectionApi<Island, "calculateTileLightLevel">, tile: Tile) {
+	public getTileLightLevel(api: IInjectionApi<Island, "calculateTileLightLevel">, tile: Tile): void {
 		if (this.getPlayerData(localPlayer, "lighting") === false) {
 			api.returnValue = 0;
 			api.cancelled = true;
 		}
 	}
 
-	private needsUpgrade(data?: { lastVersion?: string }) {
+	private needsUpgrade(data?: { lastVersion?: string }): boolean {
 		if (!data) {
 			return true;
 		}
 
-		const versionString = game.modManager.getVersion(this.getIndex());
-		const lastLoadVersionString = (data && data.lastVersion) || "0.0.0";
+		const versionString = this.mod.version;
+		const lastLoadVersionString = (data?.lastVersion) || "0.0.0";
 
 		if (versionString === lastLoadVersionString) {
 			return false;
@@ -802,6 +890,15 @@ export default class DebugTools extends Mod {
 		const lastLoadVersion = new Version(lastLoadVersionString);
 
 		return lastLoadVersion.isOlderThan(version);
+	}
+
+	public toggleExtraneousUI(checked: boolean): void {
+		for (const placeholder of document.getElementsByClassName("game-quadrant-placeholder")) {
+			placeholder.classList.toggle("debug-tools-hidden", checked);
+		}
+
+		document.getElementById("window-title-text")?.classList.toggle("debug-tools-hidden", checked);
+		this.data.hideExtraneousUI = checked;
 	}
 }
 

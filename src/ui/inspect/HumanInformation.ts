@@ -1,35 +1,27 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { OwnEventHandler } from "event/EventManager";
-import Entity from "game/entity/Entity";
-import Human, { REPUTATION_MAX } from "game/entity/Human";
-import { StatusEffectChangeReason, StatusType } from "game/entity/IEntity";
-import { IStat, Stat } from "game/entity/IStats";
-import Dictionary from "language/Dictionary";
-import { TextContext } from "language/ITranslation";
-import Translation from "language/Translation";
-import { CheckButton } from "ui/component/CheckButton";
-import Component from "ui/component/Component";
-import { RangeRow } from "ui/component/RangeRow";
-import { Bound } from "utilities/Decorators";
-import { DebugToolsTranslation, translation } from "../../IDebugTools";
-import SetStat from "../../action/SetStat";
+import type Deity from "@wayward/game/game/deity/Deity";
+import type Entity from "@wayward/game/game/entity/Entity";
+import type Human from "@wayward/game/game/entity/Human";
+import { StatusChangeReason } from "@wayward/game/game/entity/IEntity";
+import { Stat } from "@wayward/game/game/entity/IStats";
+import { BleedLevel } from "@wayward/game/game/entity/status/handler/IBleeding";
+import { StatusType } from "@wayward/game/game/entity/status/IStatus";
+import { UiStatusType } from "@wayward/game/game/entity/status/Status";
+import Dictionary from "@wayward/game/language/Dictionary";
+import { TextContext } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
+import Component from "@wayward/game/ui/component/Component";
+import type { RangeRow } from "@wayward/game/ui/component/RangeRow";
+import _ from "@wayward/utilities/_";
+import { Bound } from "@wayward/utilities/Decorators";
+import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import Container from "../component/Container";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 
 export default class HumanInformation extends InspectEntityInformationSubsection {
 	private readonly addItemContainer: Component;
-	private readonly reputationSliders: { [key in Stat.Malignity | Stat.Benignity]?: RangeRow } = {};
-	private readonly statusCheckButtons: PartialRecord<StatusType, CheckButton> = {};
+	private readonly alignmentSliders: Partial<Record<Deity.Evil | Deity.Good, RangeRow>> = {};
+	private readonly statusCheckButtons: PartialRecord<UiStatusType | StatusType, CheckButton> = {};
 
 	private human: Human | undefined;
 
@@ -38,45 +30,57 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 		this.addItemContainer = new Component().appendTo(this);
 
-		this.addReputationSlider(DebugToolsTranslation.LabelMalignity, Stat.Malignity);
-		this.addReputationSlider(DebugToolsTranslation.LabelBenignity, Stat.Benignity);
-
-		for (const status of [StatusType.Bleeding, StatusType.Burned, StatusType.Poisoned, StatusType.Frostbitten]) {
+		for (const status of [UiStatusType.Cut, StatusType.Bleeding, StatusType.Burned, StatusType.Poisoned, StatusType.Frostbitten]) {
 			this.statusCheckButtons[status] = new CheckButton()
-				.setText(Translation.get(Dictionary.StatusEffect, status).inContext(TextContext.Title))
-				.setRefreshMethod(() => !!this.human?.hasStatus(status))
-				.event.subscribe("toggle", (_: any, state: boolean) => this.human?.setStatus(status, state, state ? StatusEffectChangeReason.Gained : StatusEffectChangeReason.Treated))
+				.setText((_
+					?? (status === UiStatusType.Cut ? Translation.get(Dictionary.BleedLevel, BleedLevel.Minor) : undefined)
+					?? Translation.get(Dictionary.Status, status as StatusType))
+					.inContext(TextContext.Title))
+				.setRefreshMethod(() => _
+					?? (status === UiStatusType.Cut ? this.human?.getStatusLevel(StatusType.Bleeding) === BleedLevel.Minor : undefined)
+					?? (status === StatusType.Bleeding ? this.human?.getStatusLevel(StatusType.Bleeding) === BleedLevel.Major : undefined)
+					?? !!this.human?.hasStatus(status as StatusType))
+				.event.subscribe("toggle", (_: any, state: boolean) =>
+					this.human?.setStatus(
+						status === UiStatusType.Cut ? StatusType.Bleeding : status,
+						state && status === StatusType.Bleeding ? BleedLevel.Major : state,
+						state ? StatusChangeReason.Gained : StatusChangeReason.Treated,
+						true))
 				.appendTo(this);
 		}
 	}
 
 	@OwnEventHandler(HumanInformation, "switchTo")
-	protected onSwitchTo() {
-		Container.appendTo(this.addItemContainer, this, () => this.human?.inventory);
+	protected onSwitchTo(): void {
+		this.addItemContainer.dump();
+		void Container.appendTo(this.addItemContainer, this, () => this.human);
 	}
 
-	public override getImmutableStats() {
+	public override getImmutableStats(): Stat[] {
 		return this.human ? [
-			Stat.Benignity,
-			Stat.Malignity,
 			Stat.Attack,
 			Stat.Defense,
-			Stat.Reputation,
 			Stat.Weight,
+			Stat.InsulationHeat,
+			Stat.InsulationCold,
 		] : [];
 	}
 
-	public override update(entity: Entity) {
-		if (this.human === entity) return;
+	public override update(entity: Entity): void {
+		if (this.human === entity) {
+			return;
+		}
 
 		this.human = entity.asHuman;
 		this.toggle(!!this.human);
 
 		this.event.emit("change");
 
-		if (!this.human) return;
+		if (!this.human) {
+			return;
+		}
 
-		for (const slider of Object.values(this.reputationSliders)) {
+		for (const slider of Object.values(this.alignmentSliders)) {
 			slider.refresh();
 		}
 
@@ -84,41 +88,12 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 			checkButton.refresh();
 		}
 
-		const entityEvents = entity?.asEntityWithStats?.event.until(this, "switchAway");
-		entityEvents?.subscribe("statChanged", this.onStatChange);
+		const entityEvents = entity?.asHuman?.event.until(this, "switchAway");
 		entityEvents?.subscribe("statusChange", this.onStatusChange);
 	}
 
-	private addReputationSlider(labelTranslation: DebugToolsTranslation, type: Stat.Benignity | Stat.Malignity) {
-		this.reputationSliders[type] = new RangeRow()
-			.setLabel(label => label.setText(translation(labelTranslation)))
-			.editRange(range => range
-				.setMin(0)
-				.setMax(REPUTATION_MAX)
-				.setRefreshMethod(() => this.human ? this.human.stat.getValue(type)! : 0))
-			.setDisplayValue(true)
-			.event.subscribe("finish", this.setReputation(type))
-			.appendTo(this);
-	}
-
-	private setReputation(type: Stat.Malignity | Stat.Benignity) {
-		return (_: any, value: number) => {
-			if (this.human!.stat.getValue(type) === value) return;
-			SetStat.execute(localPlayer, this.human!, type, value);
-		};
-	}
-
-	@Bound
-	private onStatChange(_: any, stat: IStat) {
-		switch (stat.type) {
-			case Stat.Malignity:
-			case Stat.Benignity:
-				this.reputationSliders[stat.type]!.refresh();
-				break;
-		}
-	}
-
-	@Bound private onStatusChange(_: any, status: StatusType) {
-		this.statusCheckButtons[status]?.refresh();
+	@Bound private onStatusChange(_: any, status: StatusType): void {
+		this.statusCheckButtons[status]?.refresh(false);
+		this.statusCheckButtons[status === StatusType.Bleeding ? UiStatusType.Cut : -1 as StatusType]?.refresh(false);
 	}
 }

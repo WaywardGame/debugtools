@@ -1,16 +1,6 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import Translation from "language/Translation";
-import { RenderLayerFlag } from "renderer/world/IWorldRenderer";
+import Translation from "@wayward/game/language/Translation";
+import type TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
+import type { RenderLayerFlag } from "@wayward/game/renderer/world/IWorldRenderer";
 import type DebugTools from "./DebugTools";
 import type { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
 import type { InspectDialogInformationSectionClass } from "./ui/InspectDialog";
@@ -27,13 +17,13 @@ let debugTools: DebugTools | undefined;
  * Returns a translation object using the `DebugToolsTranslation` dictionary
  * @param debugToolsTranslation The `DebugToolsTranslation` to get a `Translation` instance of
  */
-export function translation(debugToolsTranslation: DebugToolsTranslation | Translation) {
+export function translation(debugToolsTranslation: DebugToolsTranslation | Translation): TranslationImpl {
 	return !debugTools ? Translation.empty()
 		: typeof debugToolsTranslation !== "number" ? debugToolsTranslation : Translation.get(debugTools.dictionary, debugToolsTranslation);
 }
 
-export module translation {
-	export function setDebugToolsInstance(instance: DebugTools) {
+export namespace translation {
+	export function setDebugToolsInstance(instance: DebugTools): void {
 		debugTools = instance;
 	}
 }
@@ -50,6 +40,7 @@ export enum DebugToolsTranslation {
 	// General
 	PanelGeneral,
 	LabelTime,
+	LabelFastForward,
 	ButtonInspect,
 	ButtonInspectLocalPlayer,
 	ButtonRemoveAllCreatures,
@@ -73,11 +64,17 @@ export enum DebugToolsTranslation {
 	ZoomLevel,
 	ButtonUnlockCamera,
 	ButtonResetRenderer,
+	ButtonLoseWebGlContext,
 	ButtonRefreshTiles,
 	ButtonReloadShaders,
-	ButtonReloadUIImages,
+	ButtonReloadTextures,
 	HeadingLayers,
 	ButtonToggleLayer,
+	CreatureZoneOverlayModeActive,
+	CreatureZoneOverlayModeAll,
+	CreatureZoneOverlayModeFollowingEntity,
+	ButtonHideExtraneousUI,
+
 	// Manipulation
 	PanelPaint,
 	ButtonPaint,
@@ -145,6 +142,25 @@ export enum DebugToolsTranslation {
 	TemperatureOverlayModeProduced,
 	TemperatureOverlayModeCalculated,
 
+	// history
+	PanelHistory,
+	Tick,
+
+	// zones
+	PanelZones,
+	HeadingZonesOverlay,
+
+	// npcs
+	PanelNPCs,
+	HeadingNPCInterval,
+	LabelNPCIntervalTimeUntil,
+	LabelNPCIntervalLength,
+	LabelNPCIntervalSpawned,
+	LabelNPCIntervalChancesWere,
+	NPCIntervalInactive,
+	ResetSpawnInterval,
+	LabelNPCCount,
+
 	////////////////////////////////////
 	// Inspect Dialog
 	//
@@ -170,14 +186,14 @@ export enum DebugToolsTranslation {
 	ButtonTameCreature,
 	LabelWeightBonus,
 	LabelItem,
-	LabelMalignity,
-	LabelBenignity,
 	OptionTeleportSelectLocation,
 	OptionTeleportToLocalPlayer,
 	OptionTeleportToHost,
 	OptionTeleportToPlayer,
-	ButtonToggleInvulnerable,
+	ButtonToggleUnkillable,
+	ButtonToggleNoRender,
 	ButtonToggleNoClip,
+	ButtonToggleFastMovement,
 	LabelSkill,
 	None,
 	LabelQuality,
@@ -187,6 +203,7 @@ export enum DebugToolsTranslation {
 	ButtonApply,
 	AddToInventory,
 	DoodadName,
+	VehicleName,
 	TabItemStack,
 	UnlockInspection,
 	LockInspection,
@@ -200,6 +217,23 @@ export enum DebugToolsTranslation {
 	LabelItems,
 	LabelReplaceData,
 	ButtonReplace,
+	LabelMax,
+	ButtonClearNotes,
+	ButtonLoadMore,
+	LabelValue,
+	LabelMagicalPropertyAdd,
+	ButtonRemoveAllMagicalProperties,
+	LabelAi,
+	LabelBaseAi,
+	LabelAiMasks,
+	LabelIncludes,
+	LabelExcludes,
+	LabelCondition,
+	ConditionMet,
+	ConditionUnmet,
+	ConditionAlwaysActive,
+	LabelWanderIntent,
+	ButtonCreatureZone,
 	////////////////////////////////////
 	// Inspection
 	//
@@ -229,11 +263,15 @@ export interface ISaveData {
 	/**
 	 * Data for each player in this save, indexed by their IDs.
 	 */
-	playerData: { [key: string]: IPlayerData };
+	playerData: Record<string, IPlayerData>;
 	/**
 	 * Layers to render
 	 */
 	renderLayerFlags?: RenderLayerFlag;
+	/**
+	 * Hide extraneous UI
+	 */
+	hideExtraneousUI?: boolean;
 }
 
 export interface IPlayerData {
@@ -241,22 +279,31 @@ export interface IPlayerData {
 	 * Added to the player's strength
 	 */
 	weightBonus: number;
+
 	/**
-	 * Whether the player is immune to damage
+	 * Whether the player cannot die from negative damage
 	 */
-	invulnerable?: boolean;
+	unkillable?: boolean;
+
 	/**
 	 * Whether lighting is enabled
 	 */
 	lighting?: boolean;
+
 	/**
 	 * Whether the fog/field of view/fog of war is enabled
 	 */
 	fog?: boolean;
+
 	/**
 	 * Whether the player can use Debug Tools.
 	 */
 	permissions?: boolean;
+
+	/**
+	 * Whether the player has no render enabled
+	 */
+	noRender?: boolean;
 }
 
 export interface IGlobalData {

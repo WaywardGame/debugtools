@@ -1,28 +1,18 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import Corpse from "game/entity/creature/corpse/Corpse";
-import Tile from "game/tile/Tile";
-import { TextContext } from "language/ITranslation";
-import { Article } from "language/Translation";
-import Mod from "mod/Mod";
-import Button from "ui/component/Button";
-import { Bound } from "utilities/Decorators";
-import Log from "utilities/Log";
-import { Tuple } from "utilities/collection/Tuple";
+import type Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
+import type Tile from "@wayward/game/game/tile/Tile";
+import { TextContext } from "@wayward/game/language/ITranslation";
+import { Article } from "@wayward/game/language/Translation";
+import Mod from "@wayward/game/mod/Mod";
+import Button from "@wayward/game/ui/component/Button";
+import { Bound } from "@wayward/utilities/Decorators";
+import type Log from "@wayward/utilities/Log";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Heal from "../../action/Heal";
 import Remove from "../../action/Remove";
 import { areArraysIdentical } from "../../util/Array";
-import InspectInformationSection, { TabInformation } from "../component/InspectInformationSection";
+import type { TabInformation } from "../component/InspectInformationSection";
+import InspectInformationSection from "../component/InspectInformationSection";
 
 export default class CorpseInformation extends InspectInformationSection {
 
@@ -47,43 +37,48 @@ export default class CorpseInformation extends InspectInformationSection {
 	}
 
 	public override getTabs(): TabInformation[] {
-		return this.corpses.entries().stream()
+		return this.corpses.entries()
 			.map(([i, corpse]) => Tuple(i, () => translation(DebugToolsTranslation.CorpseName)
 				.get(localIsland.corpses.getName(corpse, Article.None).inContext(TextContext.Title))))
 			.toArray();
 	}
 
-	public override setTab(corpse: number) {
+	public override setTab(corpse: number): this {
 		this.corpse = this.corpses[corpse];
 		return this;
 	}
 
-	public override update(tile: Tile) {
+	public override update(tile: Tile): void {
 		const corpses = [...tile.corpses || []];
 
-		if (areArraysIdentical(corpses, this.corpses)) return;
+		if (areArraysIdentical(corpses, this.corpses)) {
+			return;
+		}
+
 		this.corpses = corpses;
 
-		if (!this.corpses.length) return;
+		if (!this.corpses.length) {
+			return;
+		}
 
 		this.setShouldLog();
 	}
 
-	public override logUpdate() {
+	public override logUpdate(): void {
 		for (const corpse of this.corpses) {
 			this.LOG.info("Corpse:", corpse);
 		}
 	}
 
 	@Bound
-	private resurrect() {
-		Heal.execute(localPlayer, this.corpse!);
+	private resurrect(): void {
+		void Heal.execute(localPlayer, this.corpse!);
 		this.event.emit("update");
 	}
 
 	@Bound
-	private removeCorpse() {
-		Remove.execute(localPlayer, this.corpse!);
+	private removeCorpse(): void {
+		void Remove.execute(localPlayer, this.corpse!);
 		this.event.emit("update");
 	}
 }

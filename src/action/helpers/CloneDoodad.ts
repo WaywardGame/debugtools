@@ -1,23 +1,12 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import Doodad from "game/doodad/Doodad";
-import MagicalPropertyManager from "game/magic/MagicalPropertyManager";
-import Tile from "game/tile/Tile";
+import type Doodad from "@wayward/game/game/doodad/Doodad";
+import MagicalPropertyManager from "@wayward/game/game/magic/MagicalPropertyManager";
+import type Tile from "@wayward/game/game/tile/Tile";
 import CloneContainedItems from "./CloneContainedItems";
 
 /**
  * Clones a doodad to another position.
  */
-export default function (doodad: Doodad, tile: Tile) {
+export default function (doodad: Doodad, tile: Tile): void {
 	const clone = doodad.island.doodads.create(doodad.type, tile, {
 		quality: doodad.quality,
 		stillContainer: doodad.stillContainer,
@@ -32,7 +21,9 @@ export default function (doodad: Doodad, tile: Tile) {
 		step: doodad.step,
 	});
 
-	if (!clone) return;
+	if (!clone) {
+		return;
+	}
 
 	MagicalPropertyManager.inherit(doodad, clone);
 

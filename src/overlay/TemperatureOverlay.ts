@@ -1,23 +1,15 @@
-/*!
- * Copyright 2011-2023 Unlok
- * https://www.unlok.ca
- *
- * Credits & Thanks:
- * https://www.unlok.ca/credits-thanks/
- *
- * Wayward is a copyrighted and licensed work. Modification and/or distribution of any source files is prohibited. If you wish to modify the game in any way, please refer to the modding guide:
- * https://github.com/WaywardGame/types/wiki
- */
-
-import { TempType, Temperature } from "game/temperature/ITemperature";
-import TemperatureManager, { TEMPERATURE_BOUNDARY_MIN_VEC2, TEMPERATURE_INVALID } from "game/temperature/TemperatureManager";
-import { IOverlayInfo, OverlayType } from "game/tile/ITerrain";
-import Tile from "game/tile/Tile";
-import UniversalOverlay from "renderer/overlay/UniversalOverlay";
-import Color, { IRGB } from "utilities/Color";
-import { Bound } from "utilities/Decorators";
-import Math2 from "utilities/math/Math2";
-import Vector2 from "utilities/math/Vector2";
+import { TempType, Temperature } from "@wayward/game/game/temperature/ITemperature";
+import type TemperatureManager from "@wayward/game/game/temperature/TemperatureManager";
+import { TEMPERATURE_BOUNDARY_MIN_VEC2, TEMPERATURE_INVALID } from "@wayward/game/game/temperature/TemperatureManager";
+import type { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
+import { OverlayType } from "@wayward/game/game/tile/ITerrain";
+import type Tile from "@wayward/game/game/tile/Tile";
+import UniversalOverlay from "@wayward/game/renderer/overlay/UniversalOverlay";
+import type { IRGB } from "@wayward/utilities/Color";
+import Color from "@wayward/utilities/Color";
+import { Bound } from "@wayward/utilities/Decorators";
+import Math2 from "@wayward/utilities/math/Math2";
+import type Vector2 from "@wayward/game/utilities/math/Vector2";
 
 const COLOR_COOL = Color.fromInt(0x00B5FF);
 const COLOR_COLD = Color.fromInt(0x78FFFF);
@@ -43,11 +35,11 @@ export class TemperatureOverlay extends UniversalOverlay {
 
 	private mode = TemperatureOverlayMode.None;
 
-	public getMode() {
+	public getMode(): TemperatureOverlayMode {
 		return this.mode;
 	}
 
-	public setMode(mode: TemperatureOverlayMode) {
+	public setMode(mode: TemperatureOverlayMode): this {
 		if (this.mode === mode) {
 			return this;
 		}
@@ -102,7 +94,7 @@ export class TemperatureOverlay extends UniversalOverlay {
 		return this.generateOverlayInfo(tile);
 	}
 
-	protected override onPreMoveToIsland() {
+	protected override onPreMoveToIsland(): void {
 		super.onPreMoveToIsland();
 		localIsland.temperature.event.unsubscribe("updateProducedTile", this.onUpdateProduced);
 		localIsland.temperature.event.unsubscribe("recalculate", this.recalculateTile);
@@ -114,27 +106,30 @@ export class TemperatureOverlay extends UniversalOverlay {
 		localIsland.temperature.event.subscribe("recalculate", this.recalculateTile);
 	}
 
-	@Bound protected onUpdateProduced(temperatureManager: TemperatureManager, tile: Tile, invalidateRange?: number) {
+	@Bound protected onUpdateProduced(temperatureManager: TemperatureManager, tile: Tile, invalidateRange?: number): void {
 		this.invalidate(tile, invalidateRange);
 	}
 
-	@Bound protected recalculateTile(temperatureManager: TemperatureManager, x: number, y: number, z: number, tempType: TempType) {
+	@Bound protected recalculateTile(temperatureManager: TemperatureManager, x: number, y: number, z: number, tempType: TempType): void {
 		this.addOrUpdate(localIsland.getTile(x, y, z));
 	}
 
-	private getTemperature(tile: Tile, tempType: TempType) {
+	private getTemperature(tile: Tile, tempType: TempType): number | "?" {
 		const temp = tile.island.temperature?.getCachedCalculated(tile, tempType);
 		return temp === TEMPERATURE_INVALID || temp === undefined ? "?" : temp;
 	}
 
-	private getTileMod(tile: Tile) {
+	private getTileMod(tile: Tile): number | "?" {
 		const heat = this.getTemperature(tile, TempType.Heat);
 		const cold = this.getTemperature(tile, TempType.Cold);
-		if (heat === "?" || cold === "?") return "?";
+		if (heat === "?" || cold === "?") {
+			return "?";
+		}
 
-		let tileTemp = heat - cold;
-		if (this.mode === TemperatureOverlayMode.Produced)
+		const tileTemp = heat - cold;
+		if (this.mode === TemperatureOverlayMode.Produced) {
 			return tileTemp;
+		}
 
 		const base = tile.island.temperature.getBiomeBase();
 		const time = tile.island.temperature.getBiomeTimeModifier();
