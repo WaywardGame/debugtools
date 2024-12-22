@@ -18,6 +18,7 @@ import SetGrowingStage from "../../action/SetGrowingStage";
 import Container from "../component/Container";
 import type { TabInformation } from "../component/InspectInformationSection";
 import InspectInformationSection from "../component/InspectInformationSection";
+import ConsoleUtility from "@wayward/utilities/console/ConsoleUtility";
 
 export default class DoodadInformation extends InspectInformationSection {
 
@@ -83,7 +84,8 @@ export default class DoodadInformation extends InspectInformationSection {
 	}
 
 	public override logUpdate(): void {
-		this.LOG.info("Doodad:", this.doodad);
+		ConsoleUtility.magic.$$doodad(this, me => me?.doodad);
+		this.LOG.info("$$doodad:", this.doodad?.["debug"]);
 	}
 
 	@Bound

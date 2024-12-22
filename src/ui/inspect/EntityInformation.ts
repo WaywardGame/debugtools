@@ -43,6 +43,7 @@ import CreatureInformation from "./CreatureInformation";
 import HumanInformation from "./HumanInformation";
 import NpcInformation from "./NpcInformation";
 import PlayerInformation from "./PlayerInformation";
+import ConsoleUtility from "@wayward/utilities/console/ConsoleUtility";
 
 export type InspectDialogEntityInformationSubsectionClass = new () => InspectEntityInformationSubsection;
 
@@ -201,9 +202,13 @@ export default class EntityInformation extends InspectInformationSection {
 	}
 
 	public override logUpdate(): void {
-		for (const entity of this.entities) {
-			this.LOG.info("Entity:", entity);
+		for (let i = 0; i < this.entities.length; i++) {
+			const entity = this.entities[i];
+			const isLastEntity = i === this.entities.length - 1;
+			this.LOG.info(isLastEntity ? "$$entity" : `Entity ${i}:`, entity?.["debug"]);
 		}
+
+		ConsoleUtility.magic.$$entity(this, me => me?.entities.at(-1));
 	}
 
 	private initializeStats(): void {

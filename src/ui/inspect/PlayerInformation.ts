@@ -25,6 +25,7 @@ import ToggleFastMovement from "../../action/ToggleFastMovement";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
 import SetPlayerData from "../../action/SetPlayerData";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
+import ConsoleUtility from "@wayward/utilities/console/ConsoleUtility";
 
 export default class PlayerInformation extends InspectEntityInformationSubsection {
 
@@ -160,6 +161,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			return;
 		}
 
+		ConsoleUtility.magic.$$player(this, me => me?.player);
 		this.event.emit("change");
 
 		this.refresh();

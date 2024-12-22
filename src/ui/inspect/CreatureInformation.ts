@@ -17,6 +17,7 @@ import ToggleAiMask from "../../action/ToggleAiMask";
 import ToggleAiType from "../../action/ToggleAiType";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
+import ConsoleUtility from "@wayward/utilities/console/ConsoleUtility";
 
 interface IAiRefreshable {
 	refresh?(): any;
@@ -135,6 +136,7 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 			return;
 		}
 
+		ConsoleUtility.magic.$$creature(this, me => me?.creature);
 		this.creature = entity.asCreature;
 		this.event.emit("change");
 
