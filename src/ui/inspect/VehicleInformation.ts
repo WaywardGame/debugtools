@@ -31,7 +31,7 @@ export default class VehicleInformation extends DoodadInformation {
 	}
 
 	public override logUpdate(): void {
-		this.LOG.info("Vehicle:", this.doodad);
+		this.LOG.info("Vehicle:", this.doodad?.["debug"]);
 	}
 
 }

@@ -5,7 +5,6 @@ import Entity from "@wayward/game/game/entity/Entity";
 import type Island from "@wayward/game/game/island/Island";
 import Item from "@wayward/game/game/item/Item";
 import type { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
-import { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import Tile from "@wayward/game/game/tile/Tile";
 import type Translation from "@wayward/game/language/Translation";
 import Mod from "@wayward/game/mod/Mod";
@@ -40,6 +39,7 @@ import ItemInformation from "./inspect/ItemInformation";
 import TerrainInformation from "./inspect/TerrainInformation";
 import TileEventInformation from "./inspect/TileEventInformation";
 import VehicleInformation from "./inspect/VehicleInformation";
+import ConsoleUtility from "@wayward/utilities/console/ConsoleUtility";
 
 export type InspectDialogInformationSectionClass = new () => InspectInformationSection;
 
@@ -164,7 +164,8 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 
 		const item = what instanceof Item ? what : undefined;
 		if (item) {
-			this.LOG.info("Item:", item);
+			ConsoleUtility.magic.$$item(item);
+			this.LOG.info("$$item:", item["debug"]);
 		}
 
 		while (what instanceof Item) {
@@ -352,8 +353,13 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	@Bound
 	private logUpdate(): void {
 		if (this.shouldLog) {
-			const tileData = this.tile ? this.tile.getTileData() : undefined;
-			this.LOG.info("Tile:", this.tile, this.tile?.toString(), tileData?.map(data => TerrainType[data.type]).join(", "), tileData);
+			Object.defineProperty(window, "$$tile", {
+				configurable: true,
+				get: () => {
+					return this.tile;
+				},
+			});
+			this.LOG.info("$$tile:", this.tile?.["debug"]);
 			this.shouldLog = false;
 		}
 

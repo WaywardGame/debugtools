@@ -6,6 +6,7 @@ import { Bound } from "@wayward/utilities/Decorators";
 import Remove from "../../action/Remove";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
+import ConsoleUtility from "@wayward/utilities/console/ConsoleUtility";
 
 export default class NpcInformation extends InspectEntityInformationSubsection {
 	private npc: NPC | undefined;
@@ -22,6 +23,10 @@ export default class NpcInformation extends InspectEntityInformationSubsection {
 	public override update(entity: Creature | Player | NPC): void {
 		this.npc = entity.asNPC;
 		this.toggle(!!this.npc);
+
+		if (this.npc) {
+			ConsoleUtility.magic.$$npc(this, me => me?.npc);
+		}
 	}
 
 	@Bound

@@ -7,6 +7,7 @@ import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebug
 import Container from "../component/Container";
 import type { TabInformation } from "../component/InspectInformationSection";
 import InspectInformationSection from "../component/InspectInformationSection";
+import ConsoleUtility from "@wayward/utilities/console/ConsoleUtility";
 
 export default class ItemInformation extends InspectInformationSection {
 
@@ -37,7 +38,8 @@ export default class ItemInformation extends InspectInformationSection {
 	}
 
 	public override logUpdate(): void {
-		this.LOG.info("Items:", this.tile?.containedItems);
+		ConsoleUtility.magic.$$items(this, me => me?.tile.containedItems);
+		this.LOG.info("$$items:", this.tile?.containedItems?.map(item => item["debug"]));
 	}
 
 	@Bound private getTile(): ITileContainer {

@@ -101,7 +101,6 @@ export default class TerrainInformation extends InspectInformationSection {
 	}
 
 	public override logUpdate(): void {
-		this.LOG.info("Terrain:", this.terrainType, ...this.isTillable() ? ["Tilled:", this.isTilled()] : []);
 	}
 
 	@Bound
