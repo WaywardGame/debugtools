@@ -22,7 +22,7 @@ import type Bindable from "@wayward/game/ui/input/Bindable";
 import { IInput } from "@wayward/game/ui/input/IInput";
 import InputManager from "@wayward/game/ui/input/InputManager";
 import type { DialogId } from "@wayward/game/ui/screen/screens/game/Dialogs";
-import ItemComponent, { ItemClasses } from "@wayward/game/ui/screen/screens/game/component/ItemComponent";
+import ItemComponent from "@wayward/game/ui/screen/screens/game/component/ItemComponent";
 import type { MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
 import { MenuBarButtonGroup } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
 import Draggable from "@wayward/game/ui/util/Draggable";
@@ -88,6 +88,7 @@ import DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import TemperatureInspection from "./ui/inspection/Temperature";
 import Version from "./util/Version";
 import { RendererConstants } from "@wayward/game/renderer/RendererConstants";
+import { ItemClasses } from "@wayward/game/ui/screen/screens/game/component/item/IItemComponent";
 
 /**
  * An enum representing the possible states of the camera
