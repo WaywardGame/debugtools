@@ -3,11 +3,11 @@ import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
 import { ActionArgumentCustom } from "@wayward/game/game/entity/action/argument/ActionArgumentCustom";
-import type { MagicalPropertyIdentityHash } from "@wayward/game/game/magic/MagicalPropertyManager";
-import { MagicalPropertyIdentity } from "@wayward/game/game/magic/MagicalPropertyManager";
 import MagicalPropertyType, { magicalPropertyDescriptions } from "@wayward/game/game/magic/MagicalPropertyType";
 import Enums from "@wayward/game/utilities/enum/Enums";
 import { defaultCanUseHandler } from "../Actions";
+import type { MagicalPropertyIdentityHash } from "@wayward/game/game/magic/IMagicalProperty";
+import { MagicalPropertyIdentity } from "@wayward/game/game/magic/IMagicalProperty";
 
 export class MagicalPropertyIdentityArgument extends ActionArgumentCustom<MagicalPropertyIdentity> {
 

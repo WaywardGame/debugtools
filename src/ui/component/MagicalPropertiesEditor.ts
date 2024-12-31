@@ -1,7 +1,5 @@
 import type Doodad from "@wayward/game/game/doodad/Doodad";
 import type Item from "@wayward/game/game/item/Item";
-import type { MagicalPropertyIdentityHash } from "@wayward/game/game/magic/MagicalPropertyManager";
-import { MagicalPropertyIdentity } from "@wayward/game/game/magic/MagicalPropertyManager";
 import type MagicalPropertyType from "@wayward/game/game/magic/MagicalPropertyType";
 import { magicalPropertyDescriptions } from "@wayward/game/game/magic/MagicalPropertyType";
 import { TextContext } from "@wayward/game/language/ITranslation";
@@ -16,6 +14,8 @@ import { Bound } from "@wayward/utilities/Decorators";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import MagicalPropertyActions from "../../action/MagicalPropertyActions";
 import SingletonEditor from "./SingletonEditor";
+import type { MagicalPropertyIdentityHash } from "@wayward/game/game/magic/IMagicalProperty";
+import { MagicalPropertyIdentity } from "@wayward/game/game/magic/IMagicalProperty";
 
 export enum MagicalPropertiesEditorClasses {
 	Main = "debug-tools-magical-properties-editor",

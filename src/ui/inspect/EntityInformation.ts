@@ -220,8 +220,9 @@ export default class EntityInformation extends InspectInformationSection {
 			return;
 		}
 
+		// TODO: Take off Curse check when we add it back in
 		const stats = Enums.values(Stat)
-			.filter(stat => this.entity?.asEntityWithStats?.stat.has(stat) && (!this.subsections.some(subsection => subsection.getImmutableStats().includes(stat))))
+			.filter(stat => this.entity?.asEntityWithStats?.stat.has(stat) && (!this.subsections.some(subsection => subsection.getImmutableStats().includes(stat))) && stat !== Stat.Curse)
 			.map(stat => this.entity?.asEntityWithStats?.stat.get<IStat>(stat))
 			.filterNullish();
 
