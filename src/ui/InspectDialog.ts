@@ -353,12 +353,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	@Bound
 	private logUpdate(): void {
 		if (this.shouldLog) {
-			Object.defineProperty(window, "$$tile", {
-				configurable: true,
-				get: () => {
-					return this.tile;
-				},
-			});
+			ConsoleUtility.magic.$$tile(this, me => me?.tile);
 			this.LOG.info("$$tile:", this.tile?.["debug"]);
 			this.shouldLog = false;
 		}
