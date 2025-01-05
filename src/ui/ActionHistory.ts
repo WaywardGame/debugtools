@@ -79,7 +79,10 @@ export default class ActionHistory extends Component {
 			const executor = game.references.resolve(context.executorReference) as Entity | undefined;
 			this.renderHistoryItem(executor, context);
 			if (Date.now() - lastSleep > 2) {
-				await this.sleep(10);
+				if (!await this.sleep(10)) {
+					return;
+				}
+
 				lastSleep = Date.now();
 			}
 		}
