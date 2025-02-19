@@ -89,10 +89,13 @@ export default new Action(ActionArgument.Entity, ActionArgument.OPTIONAL(ActionA
 
 			if (equippedReferences) {
 				for (const [equipType, itemReference] of Object.entries(equippedReferences)) {
-					const item = ItemReference.item(itemReference);
-					if (item) {
-						human.equip(item, +equipType as EquipType);
+					const itemRef = ItemReference.create(itemReference);
+
+					if (itemRef?.item) {
+						human.equip(itemRef.item, +equipType as EquipType);
 					}
+
+					itemRef?.dispose();
 				}
 			}
 		}
