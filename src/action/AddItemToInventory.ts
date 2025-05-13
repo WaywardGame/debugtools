@@ -88,7 +88,7 @@ export default new Action(ActionArgument.Container, ActionArgument.ANY(ActionArg
 			}
 		}
 
-		action.executor.island.items.moveItemsToContainer(action.executor, createdItems, target);
+		action.executor.island.items.moveItemsToContainer(action.executor, createdItems, target, { skipDrop: true });
 
 		if (containerObject instanceof Human) {
 			containerObject.updateTablesAndWeight("M");
