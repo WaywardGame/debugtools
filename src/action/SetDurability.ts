@@ -25,7 +25,7 @@ export function setDurability(action: IActionHandlerApi<Human>, durability: numb
 	let human: Human | undefined;
 	for (const item of items) {
 		human ??= item.getCurrentOwner();
-		item.durability = Number.isInteger(durability) || durability > 1 ? durability : Math.ceil((item.durabilityMax ?? 1) * durability);
+		item.durability = Number.isInteger(durability) || durability > 1 ? durability : Math.ceil((item.durabilityMaxWithMagical ?? 1) * durability);
 	}
 
 	if (human) {

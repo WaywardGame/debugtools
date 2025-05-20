@@ -352,7 +352,7 @@ export class ContainerItemDetails extends Details {
 		new RangeRow()
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDurability)))
 			.editRange(range => range
-				.setMax(unscale(this.item.durabilityMax))
+				.setMax(unscale(this.item.durabilityMaxWithMagical))
 				.setStep(0.01)
 				.setRefreshMethod(() => unscale(this.item.durability)))
 			.setDisplayValue(value => [{ content: `${scale(value)}` }])
