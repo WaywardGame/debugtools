@@ -105,7 +105,7 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 									: DebugToolsTranslation.ConditionUnmet))))))
 					.setRefreshMethod(() => !!this.creature?.ai.aiMasks.includes(maskType))
 					.event.subscribe("toggle", (_, checked) =>
-						this.creature && ToggleAiMask.execute(localPlayer, this.creature, maskType, checked))
+						multiplayer.executeClientside(() => this.creature && ToggleAiMask.execute(localPlayer, this.creature, maskType, checked)))
 					.schedule(registerAiRefreshable)))
 			.appendTo(this);
 
@@ -120,7 +120,7 @@ export default class CreatureInformation extends InspectEntityInformationSubsect
 					.setText(Translation.merge(AiType[aiType]))
 					.setRefreshMethod(() => !!((this.creature?.ai.ai ?? 0) & aiType))
 					.event.subscribe("toggle", (_, checked) =>
-						this.creature && ToggleAiType.execute(localPlayer, this.creature, aiType, checked))
+						multiplayer.executeClientside(() => this.creature && ToggleAiType.execute(localPlayer, this.creature, aiType, checked)))
 					.schedule(registerAiRefreshable)))
 			.appendTo(this);
 
