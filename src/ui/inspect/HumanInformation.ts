@@ -30,7 +30,7 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 		this.addItemContainer = new Component().appendTo(this);
 
-		for (const status of [UiStatusType.Cut, StatusType.Bleeding, StatusType.Burned, StatusType.Poisoned, StatusType.Frostbitten]) {
+		for (const status of [UiStatusType.Cut, StatusType.Bleeding, StatusType.Burned, StatusType.Poisoned, StatusType.Frostbitten] as const) {
 			this.statusCheckButtons[status] = new CheckButton()
 				.setText((_
 					?? (status === UiStatusType.Cut ? Translation.get(Dictionary.BleedLevel, BleedLevel.Minor) : undefined)
