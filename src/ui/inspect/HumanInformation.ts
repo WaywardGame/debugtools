@@ -4,8 +4,7 @@ import type Human from "@wayward/game/game/entity/Human";
 import { StatusChangeReason } from "@wayward/game/game/entity/IEntity";
 import { Stat } from "@wayward/game/game/entity/IStats";
 import { BleedLevel } from "@wayward/game/game/entity/status/handler/IBleeding";
-import { StatusType } from "@wayward/game/game/entity/status/IStatus";
-import { UiStatusType } from "@wayward/game/game/entity/status/Status";
+import { StatusType, DisplayStatusType } from "@wayward/game/game/entity/status/IStatus";
 import Dictionary from "@wayward/game/language/Dictionary";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
@@ -21,7 +20,7 @@ import InspectEntityInformationSubsection from "../component/InspectEntityInform
 export default class HumanInformation extends InspectEntityInformationSubsection {
 	private readonly addItemContainer: Component;
 	private readonly alignmentSliders: Partial<Record<Deity.Evil | Deity.Good, RangeRow>> = {};
-	private readonly statusCheckButtons: PartialRecord<UiStatusType | StatusType, CheckButton> = {};
+	private readonly statusCheckButtons: PartialRecord<DisplayStatusType | StatusType, CheckButton> = {};
 
 	private human: Human | undefined;
 
@@ -30,19 +29,19 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 		this.addItemContainer = new Component().appendTo(this);
 
-		for (const status of [UiStatusType.Cut, StatusType.Bleeding, StatusType.Burned, StatusType.Poisoned, StatusType.Frostbitten] as const) {
+		for (const status of [DisplayStatusType.Cut, StatusType.Bleeding, StatusType.Burned, StatusType.Poisoned, StatusType.Frostbitten] as const) {
 			this.statusCheckButtons[status] = new CheckButton()
 				.setText((_
-					?? (status === UiStatusType.Cut ? Translation.get(Dictionary.BleedLevel, BleedLevel.Minor) : undefined)
+					?? (status === DisplayStatusType.Cut ? Translation.get(Dictionary.BleedLevel, BleedLevel.Minor) : undefined)
 					?? Translation.get(Dictionary.Status, status as StatusType))
 					.inContext(TextContext.Title))
 				.setRefreshMethod(() => _
-					?? (status === UiStatusType.Cut ? this.human?.getStatusLevel(StatusType.Bleeding) === BleedLevel.Minor : undefined)
+					?? (status === DisplayStatusType.Cut ? this.human?.getStatusLevel(StatusType.Bleeding) === BleedLevel.Minor : undefined)
 					?? (status === StatusType.Bleeding ? this.human?.getStatusLevel(StatusType.Bleeding) === BleedLevel.Major : undefined)
 					?? !!this.human?.hasStatus(status as StatusType))
 				.event.subscribe("toggle", (_: any, state: boolean) =>
 					this.human?.setStatus(
-						status === UiStatusType.Cut ? StatusType.Bleeding : status,
+						status === DisplayStatusType.Cut ? StatusType.Bleeding : status,
 						state && status === StatusType.Bleeding ? BleedLevel.Major : state,
 						state ? StatusChangeReason.Gained : StatusChangeReason.Treated,
 						true))
@@ -94,6 +93,6 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 
 	@Bound private onStatusChange(_: any, status: StatusType): void {
 		this.statusCheckButtons[status]?.refresh(false);
-		this.statusCheckButtons[status === StatusType.Bleeding ? UiStatusType.Cut : -1 as StatusType]?.refresh(false);
+		this.statusCheckButtons[status === StatusType.Bleeding ? DisplayStatusType.Cut : -1 as StatusType]?.refresh(false);
 	}
 }

@@ -5,7 +5,6 @@ import type { IActionHandlerApi } from "@wayward/game/game/entity/action/IAction
 import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
 import type Item from "@wayward/game/game/item/Item";
 import { defaultCanUseHandler } from "../Actions";
-import InspectDialog from "../ui/InspectDialog";
 
 /**
  * Sets the durability of all items in a human's inventory
@@ -34,5 +33,5 @@ export function setDurability(action: IActionHandlerApi<Human>, durability: numb
 		action.setUpdateView();
 	}
 
-	InspectDialog.INSTANCE?.update();
+	debugTools?.getInspectDialog()?.update();
 }

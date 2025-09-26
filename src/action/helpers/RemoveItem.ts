@@ -1,7 +1,6 @@
 import type { IActionApi } from "@wayward/game/game/entity/action/IAction";
 import type Entity from "@wayward/game/game/entity/Entity";
 import type Item from "@wayward/game/game/item/Item";
-import InspectDialog from "../../ui/InspectDialog";
 import type Human from "@wayward/game/game/entity/Human";
 
 export default function (action: IActionApi<Human>, item: Item): void {
@@ -18,5 +17,5 @@ export default function (action: IActionApi<Human>, item: Item): void {
 		}
 	}
 
-	InspectDialog.INSTANCE?.update();
+	debugTools?.getInspectDialog()?.update();
 }

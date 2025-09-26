@@ -90,6 +90,10 @@ import Version from "./util/Version";
 import { RendererConstants } from "@wayward/game/renderer/RendererConstants";
 import { ItemClasses } from "@wayward/game/ui/screen/screens/game/component/item/IItemComponent";
 
+declare global {
+	export const debugTools: DebugTools | undefined;
+}
+
 /**
  * An enum representing the possible states of the camera
  */
@@ -370,6 +374,10 @@ export default class DebugTools extends Mod {
 	public readonly overlayTarget: OverlayType;
 	@Register.overlay("Paint")
 	public readonly overlayPaint: OverlayType;
+
+	public getInspectDialog(): InspectDialog | undefined {
+		return InspectDialog.INSTANCE;
+	}
 
 	////////////////////////////////////
 	// Data Storage

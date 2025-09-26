@@ -3,7 +3,6 @@ import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/actio
 import Human from "@wayward/game/game/entity/Human";
 import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { defaultCanUseHandler } from "../Actions";
-import InspectDialog from "../ui/InspectDialog";
 
 /**
  * Adds an item to the inventory of a doodad, human, or tile.
@@ -22,5 +21,5 @@ export default new Action(ActionArgument.Container)
 			action.setUpdateView();
 		}
 
-		InspectDialog.INSTANCE?.update();
+		debugTools?.getInspectDialog()?.update();
 	});

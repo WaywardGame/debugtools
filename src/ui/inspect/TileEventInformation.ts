@@ -1,8 +1,8 @@
 import type Tile from "@wayward/game/game/tile/Tile";
 import type TileEvent from "@wayward/game/game/tile/TileEvent";
 import Dictionary from "@wayward/game/language/Dictionary";
-import { TextContext } from "@wayward/game/language/ITranslation";
-import Translation, { Article } from "@wayward/game/language/Translation";
+import { TextContext, Article } from "@wayward/game/language/ITranslation";
+import Translation from "@wayward/game/language/Translation";
 import Mod from "@wayward/game/mod/Mod";
 import Button from "@wayward/game/ui/component/Button";
 import { Bound } from "@wayward/utilities/Decorators";
