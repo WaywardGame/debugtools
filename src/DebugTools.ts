@@ -78,6 +78,9 @@ import ToggleAiType from "./action/ToggleAiType";
 import ToggleNoClip from "./action/ToggleNoClip";
 import ToggleFastMovement from "./action/ToggleFastMovement";
 import ToggleTilled from "./action/ToggleTilled";
+import SetNight from "./action/SetNight";
+import SpawnCurseEvent from "./action/SpawnCurseEvent";
+import ClearCurseEvents from "./action/ClearCurseEvents";
 import { CreatureZoneOverlay, CreatureZoneOverlayMode } from "./overlay/CreatureZoneOverlay";
 import { TemperatureOverlay, TemperatureOverlayMode } from "./overlay/TemperatureOverlay";
 import AccidentalDeathHelper from "./ui/AccidentalDeathHelper";
@@ -242,6 +245,9 @@ export default class DebugTools extends Mod {
 	@Register.action("SetTime", SetTime)
 	public readonly actionSetTime: ActionType;
 
+	@Register.action("SetNight", SetNight)
+	public readonly actionSetNight: ActionType;
+
 	@Register.action("Heal", Heal)
 	public readonly actionHeal: ActionType;
 
@@ -325,6 +331,12 @@ export default class DebugTools extends Mod {
 
 	@Register.action("SetPlayerData", SetPlayerData)
 	public readonly actionSetPlayerData: ActionType;
+
+	@Register.action("SpawnCurseEvent", SpawnCurseEvent)
+	public readonly actionSpawnCurseEvent: ActionType;
+
+	@Register.action("ClearCurseEvents", ClearCurseEvents)
+	public readonly actionClearCurseEvents: ActionType;
 
 	@Register.action("MagicalPropertyRemove", MagicalPropertyActions.Remove)
 	public readonly actionMagicalPropertyRemove: ActionType;

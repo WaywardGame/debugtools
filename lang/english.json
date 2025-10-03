@@ -186,6 +186,7 @@
 			"inspectionTemperatureLayerModifier": "Layer mod",
 			"inspectionTemperatureLayerTimeModifier": "Layer time mod",
 			"inspectionTemperatureTileCalculated": "Tile mod",
+			"inspectionTemperatureLayerInjectModifier": "Inject mod",
 			"inspectionTemperatureTileCalculatedHeat": "Tile calc heat",
 			"inspectionTemperatureTileCalculatedCold": "Tile calc cold",
 			"inspectionTemperatureTileProducedHeat": "Tile produced heat",
@@ -230,7 +231,11 @@
 			"labelNPCIntervalChancesWere": "Chances Were",
 			"nPCIntervalInactive": "Inactive",
 			"resetSpawnInterval": "Reset Interval",
-			"labelNPCCount": "Current Count"
+			"labelNPCCount": "Current Count",
+			"panelCurse": "Curse",
+			"setNight": "Skip to Night",
+			"spawnCurseEvent": "Spawn",
+			"clearCurseEvents": "Clear Curse Events"
 		},
 		"item": {
 			"none": "none"

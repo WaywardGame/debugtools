@@ -24,6 +24,7 @@ export default class TemperaturePanel extends DebugToolsPanel {
 
 	private readonly biomeTimeModifier: Text;
 	private readonly layerTimeModifier: Text;
+	private readonly modTimeModifier: Text;
 
 	public constructor() {
 		super();
@@ -54,6 +55,13 @@ export default class TemperaturePanel extends DebugToolsPanel {
 				.passTo(Translation.colorizeImportance("secondary"))))
 			.append(this.layerTimeModifier = new Text().setText(Translation.colorizeImportance("primary")
 				.addArgs(() => localIsland.temperature.getLayerTimeModifier(localPlayer.z))))
+			.appendTo(this);
+
+		new LabelledRow()
+			.setLabel(label => label.setText(translation(DebugToolsTranslation.InspectionTemperatureLayerInjectModifier)
+				.passTo(Translation.colorizeImportance("secondary"))))
+			.append(this.modTimeModifier = new Text().setText(Translation.colorizeImportance("primary")
+				.addArgs(() => localIsland.temperature.getTempModifier(localIsland.biomeType, localPlayer.z))))
 			.appendTo(this);
 
 		new Divider()
@@ -91,6 +99,7 @@ export default class TemperaturePanel extends DebugToolsPanel {
 	protected onTime(): void {
 		this.biomeTimeModifier.refresh();
 		this.layerTimeModifier.refresh();
+		this.modTimeModifier.refresh();
 	}
 
 }

@@ -78,6 +78,11 @@
 	margin-top: calc(-2px * max(1, var(--scale)));
 }
 
+.debug-tools-auto-1fr-auto {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+}
+
 .debug-tools-island-heading .input>input {
 	width: 100%;
 	border: none;

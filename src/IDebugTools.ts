@@ -161,6 +161,12 @@ export enum DebugToolsTranslation {
 	ResetSpawnInterval,
 	LabelNPCCount,
 
+	// curse
+	PanelCurse,
+	SetNight,
+	SpawnCurseEvent,
+	ClearCurseEvents,
+
 	////////////////////////////////////
 	// Inspect Dialog
 	//
@@ -242,6 +248,7 @@ export enum DebugToolsTranslation {
 	InspectionTemperatureBiomeTimeModifier,
 	InspectionTemperatureLayerModifier,
 	InspectionTemperatureLayerTimeModifier,
+	InspectionTemperatureLayerInjectModifier,
 	InspectionTemperatureTileCalculated,
 	InspectionTemperatureTileCalculatedHeat,
 	InspectionTemperatureTileCalculatedCold,
