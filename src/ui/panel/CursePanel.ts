@@ -9,6 +9,8 @@ import ClearCurseEvents from "../../action/ClearCurseEvents";
 import DebugToolsPanel from "../component/DebugToolsPanel";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
+import Enums from "@wayward/game/utilities/enum/Enums";
+import CurseEventDefinitions from "@wayward/game/game/curse/CurseEventDefinitions";
 
 export default class CursePanel extends DebugToolsPanel {
 
@@ -20,7 +22,9 @@ export default class CursePanel extends DebugToolsPanel {
 			.event.subscribe("activate", () => void SetNight.execute(localPlayer))
 			.appendTo(this);
 
-		const dropdownEvent = new EnumDropdown(CurseEventType, Dictionary.CurseEvent, CurseEventType.None);
+		const dropdownEvent = new EnumDropdown(CurseEventType, Dictionary.CurseEvent, CurseEventType.None)
+			.setExcluded(...Enums.values(CurseEventType).filter(type => type !== CurseEventType.None && !CurseEventDefinitions[type]))
+			;
 
 		new LabelledRow()
 			.classes.add("debug-tools-auto-1fr-auto")

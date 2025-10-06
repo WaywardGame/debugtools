@@ -10,6 +10,8 @@ export default new Action()
 	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
 	.setHandler(action => {
+		const oldNight = action.executor.island.curse.night;
 		Curse.cleanup(action.executor.island);
+		action.executor.island.curse.night = oldNight;
 		CurseHelpers.updateStatuses(action.executor.island);
 	});
