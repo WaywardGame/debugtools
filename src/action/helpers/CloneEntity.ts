@@ -19,7 +19,7 @@ export default function (entity: Entity, tile: Tile): void {
 	const creature = entity.asCreature;
 	const human = entity.asHuman;
 	if (creature) {
-		clone = entity.island.creatures.spawn(creature.type, tile, true, creature.aberrant, undefined, true)!;
+		clone = entity.island.creatures.spawn(creature.type, tile, { bypassTiles: true, forceAberrant: creature.aberrant, bypassCreatureLimit: true })!;
 
 		if (creature.isTamed) {
 			clone.tame(creature.getOwner()!);
