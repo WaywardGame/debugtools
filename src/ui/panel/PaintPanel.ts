@@ -22,7 +22,7 @@ import Bindable from "@wayward/game/ui/input/Bindable";
 import InputManager from "@wayward/game/ui/input/InputManager";
 import MovementHandler from "@wayward/game/ui/screen/screens/game/util/movement/MovementHandler";
 import { Bound } from "@wayward/utilities/Decorators";
-import Vector2 from "@wayward/game/utilities/math/Vector2";
+import Vector2, { DistanceType } from "@wayward/game/utilities/math/Vector2";
 import type DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Paint from "../../action/Paint";
@@ -198,7 +198,7 @@ export default class PaintPanel extends DebugToolsPanel {
 				break;
 			}
 
-			for (const paintTile of tile.tilesInRange(this.paintRadius.value, true)) {
+			for (const paintTile of tile.tilesInRange(DistanceType.Euclidean, this.paintRadius.value, true)) {
 				if (SelectionOverlay.add(paintTile)) {
 					shouldUpdateView = true;
 					this.paintTiles.add(paintTile);
@@ -245,7 +245,7 @@ export default class PaintPanel extends DebugToolsPanel {
 				break;
 			}
 
-			for (const paintTile of tile.tilesInRange(this.paintRadius.value, true)) {
+			for (const paintTile of tile.tilesInRange(DistanceType.Euclidean, this.paintRadius.value, true)) {
 				if (SelectionOverlay.remove(paintTile)) {
 					shouldUpdateView = true;
 					this.paintTiles.delete(paintTile);
