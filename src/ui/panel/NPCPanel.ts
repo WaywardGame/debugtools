@@ -138,7 +138,7 @@ export default class NPCPanel extends DebugToolsPanel {
 			return undefined;
 		}
 
-		const realTimeDayCount = Math.floor(days(ticks / game.time.dayLength));
+		const realTimeDayCount = Math.floor(days(ticks / game.time.getDayLength()));
 		return Time.total(realTimeDayCount);
 	}
 

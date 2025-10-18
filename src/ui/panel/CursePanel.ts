@@ -11,6 +11,7 @@ import { DebugToolsTranslation, translation } from "../../IDebugTools";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import Enums from "@wayward/game/utilities/enum/Enums";
 import CurseEventDefinitions from "@wayward/game/game/curse/CurseEventDefinitions";
+import SkipCurseEventTimers from "../../action/SkipCurseEventTimers";
 
 export default class CursePanel extends DebugToolsPanel {
 
@@ -37,6 +38,11 @@ export default class CursePanel extends DebugToolsPanel {
 						void SpawnCurseEvent.execute(localPlayer, dropdownEvent.selectedOption);
 					}
 				}))
+			.appendTo(this);
+
+		new Button()
+			.setText(translation(DebugToolsTranslation.SkipCurseEventTimers))
+			.event.subscribe("activate", () => void SkipCurseEventTimers.execute(localPlayer))
 			.appendTo(this);
 
 		new Button()

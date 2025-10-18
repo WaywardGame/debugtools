@@ -92,10 +92,7 @@ import TemperatureInspection from "./ui/inspection/Temperature";
 import Version from "./util/Version";
 import { RendererConstants } from "@wayward/game/renderer/RendererConstants";
 import { ItemClasses } from "@wayward/game/ui/screen/screens/game/component/item/IItemComponent";
-
-declare global {
-	export const debugTools: DebugTools | undefined;
-}
+import SkipCurseEventTimers from "./action/SkipCurseEventTimers";
 
 /**
  * An enum representing the possible states of the camera
@@ -338,11 +335,17 @@ export default class DebugTools extends Mod {
 	@Register.action("ClearCurseEvents", ClearCurseEvents)
 	public readonly actionClearCurseEvents: ActionType;
 
+	@Register.action("SkipCurseEventTimers", SkipCurseEventTimers)
+	public readonly actionSkipCurseEventTimers: ActionType;
+
 	@Register.action("MagicalPropertyRemove", MagicalPropertyActions.Remove)
 	public readonly actionMagicalPropertyRemove: ActionType;
 
 	@Register.action("MagicalPropertyChange", MagicalPropertyActions.Change)
 	public readonly actionMagicalPropertyChange: ActionType;
+
+	@Register.action("MagicalPropertySetCurse", MagicalPropertyActions.SetCurse)
+	public readonly actionMagicalPropertySetCurse: ActionType;
 
 	@Register.action("MagicalPropertyClearAll", MagicalPropertyActions.Clear)
 	public readonly actionMagicalPropertyClearAll: ActionType;

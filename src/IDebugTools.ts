@@ -166,6 +166,7 @@ export enum DebugToolsTranslation {
 	SetNight,
 	SpawnCurseEvent,
 	ClearCurseEvents,
+	SkipCurseEventTimers,
 
 	////////////////////////////////////
 	// Inspect Dialog
@@ -227,6 +228,7 @@ export enum DebugToolsTranslation {
 	ButtonClearNotes,
 	ButtonLoadMore,
 	LabelValue,
+	LabelCurse,
 	LabelMagicalPropertyAdd,
 	ButtonRemoveAllMagicalProperties,
 	LabelAi,

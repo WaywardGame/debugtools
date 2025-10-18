@@ -2,6 +2,10 @@ import type { IActionApi } from "@wayward/game/game/entity/action/IAction";
 import type Entity from "@wayward/game/game/entity/Entity";
 import type Item from "@wayward/game/game/item/Item";
 import type Human from "@wayward/game/game/entity/Human";
+import Mod from "@wayward/game/mod/Mod";
+import type DebugTools from "../../DebugTools";
+
+const DEBUG_TOOLS = Mod.get<DebugTools>();
 
 export default function (action: IActionApi<Human>, item: Item): void {
 	const container = item.containedWithin;
@@ -17,5 +21,5 @@ export default function (action: IActionApi<Human>, item: Item): void {
 		}
 	}
 
-	debugTools?.getInspectDialog()?.update();
+	DEBUG_TOOLS?.instance?.getInspectDialog()?.update();
 }

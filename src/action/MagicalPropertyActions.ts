@@ -59,11 +59,16 @@ namespace MagicalPropertyActions {
 		.setCanUse(defaultCanUseHandler)
 		.setHandler((action, itemOrDoodad, identity, value) => {
 			itemOrDoodad.asItem?.initializeMagicalPropertyManager();
-			if (MagicalPropertyIdentity.isNormalProperty(identity)) {
-				itemOrDoodad.magic?.set(identity[0], value);
-			} else if (MagicalPropertyIdentity.isSubProperty(identity)) {
-				itemOrDoodad.magic?.set(identity[0], identity[1], value);
-			}
+			itemOrDoodad.magic?.set(...identity, value);
+		});
+
+	export const SetCurse = new Action(ActionArgument.ANY(ActionArgument.Item, ActionArgument.Doodad), new MagicalPropertyIdentityArgument(), ActionArgument.Boolean)
+		.setUsableBy(EntityType.Human)
+		.setUsableWhen(ActionUsability.Always)
+		.setCanUse(defaultCanUseHandler)
+		.setHandler((action, itemOrDoodad, identity, value) => {
+			itemOrDoodad.asItem?.initializeMagicalPropertyManager();
+			itemOrDoodad.magic?.setCurse(...identity, value);
 		});
 
 	export const Clear = new Action(ActionArgument.ANY(ActionArgument.Item, ActionArgument.Doodad))

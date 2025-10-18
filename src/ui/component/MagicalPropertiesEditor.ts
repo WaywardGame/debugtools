@@ -16,6 +16,7 @@ import MagicalPropertyActions from "../../action/MagicalPropertyActions";
 import SingletonEditor from "./SingletonEditor";
 import type { MagicalPropertyIdentityHash } from "@wayward/game/game/magic/IMagicalProperty";
 import { MagicalPropertyIdentity } from "@wayward/game/game/magic/IMagicalProperty";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
 
 export enum MagicalPropertiesEditorClasses {
 	Main = "debug-tools-magical-properties-editor",
@@ -227,6 +228,13 @@ class MagicalPropertyEditor extends Details {
 			}
 		}
 
+		new CheckButton()
+			.setText(translation(DebugToolsTranslation.LabelCurse))
+			.setChecked(!!this.itemOrDoodad?.magic?.isCurse(...identity))
+			.setDisabled(!!magicalPropertyDescriptions[identity[0]]?.disableCurse)
+			.event.subscribe("toggle", this.onChangeCurse)
+			.appendTo(this);
+
 		new Button()
 			.setText(translation(DebugToolsTranslation.ActionRemove).addArgs(this.translate, on.deref()?.getName().inContext(TextContext.Title)))
 			.event.subscribe("activate", this.onRemove)
@@ -251,6 +259,14 @@ class MagicalPropertyEditor extends Details {
 		void MagicalPropertyActions.Change.execute(localPlayer, this.itemOrDoodad, this.identity, value);
 	}
 
+	@Bound private onChangeCurse(_: any, value: boolean) {
+		if (!this.itemOrDoodad) {
+			return;
+		}
+
+		void MagicalPropertyActions.SetCurse.execute(localPlayer, this.itemOrDoodad, this.identity, value);
+	}
+
 	@Bound private translate() {
 		return MagicalPropertyDropdown.getDeveloperMagicalPropertyTranslation(this.identity);
 	}
@@ -261,7 +277,7 @@ export default class MagicalPropertiesEditorDetails extends SingletonEditor.Deta
 	public constructor(public readonly itemOrDoodad: Item | Doodad) {
 		super();
 		this.classes.add(MagicalPropertiesEditorClasses.Details);
-		this.setSummary(summary => summary.setText(UiTranslation.GameTooltipMagicalLabel));
+		this.setSummary(summary => summary.setText(UiTranslation.GameTooltipSharedMagicalLabel));
 	}
 
 	public override createEditor(): SingletonEditor<[Item | Doodad]> {

@@ -205,6 +205,7 @@
 			"buttonClearNotes": "Clear Notes",
 			"buttonLoadMore": "Load More",
 			"labelValue": "Value",
+			"labelCurse": "Curse",
 			"labelMagicalPropertyAdd": "Add",
 			"buttonRemoveAllMagicalProperties": "Remove All Magical Properties",
 			"panelZones": "Creature Zones",
@@ -235,7 +236,8 @@
 			"panelCurse": "Curse",
 			"setNight": "Skip to Night",
 			"spawnCurseEvent": "Spawn",
-			"clearCurseEvents": "Clear Curse Events"
+			"clearCurseEvents": "Clear Curse Events",
+			"skipCurseEventTimers": "Skip Timers"
 		},
 		"item": {
 			"none": "none"
