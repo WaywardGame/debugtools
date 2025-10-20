@@ -1,7 +1,7 @@
 import type Doodad from "@wayward/game/game/doodad/Doodad";
 import type Item from "@wayward/game/game/item/Item";
 import type MagicalPropertyType from "@wayward/game/game/magic/MagicalPropertyType";
-import { magicalPropertyDescriptions } from "@wayward/game/game/magic/MagicalPropertyType";
+import { magicalPropertyDescriptions } from "@wayward/game/game/magic/MagicalPropertyDescriptions";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import UiTranslation from "@wayward/game/language/dictionary/UiTranslation";
 import Button from "@wayward/game/ui/component/Button";

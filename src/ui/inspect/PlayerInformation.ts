@@ -1,4 +1,3 @@
-import type { SkillType } from "@wayward/game/game/entity/IHuman";
 import type Creature from "@wayward/game/game/entity/creature/Creature";
 import type NPC from "@wayward/game/game/entity/npc/NPC";
 import type Player from "@wayward/game/game/entity/player/Player";
@@ -26,6 +25,7 @@ import InspectEntityInformationSubsection from "../component/InspectEntityInform
 import SetPlayerData from "../../action/SetPlayerData";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
 import ConsoleUtility from "@wayward/utilities/console/ConsoleUtility";
+import type { SkillType } from "@wayward/game/game/entity/skill/ISkills";
 
 export default class PlayerInformation extends InspectEntityInformationSubsection {
 
