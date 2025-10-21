@@ -12,15 +12,23 @@ import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import Enums from "@wayward/game/utilities/enum/Enums";
 import CurseEventDefinitions from "@wayward/game/game/curse/CurseEventDefinitions";
 import SkipCurseEventTimers from "../../action/SkipCurseEventTimers";
+import SetDay from "../../action/SetDay";
+import { BlockRow } from "@wayward/game/ui/component/BlockRow";
 
 export default class CursePanel extends DebugToolsPanel {
 
 	public constructor() {
 		super();
 
-		new Button()
-			.setText(translation(DebugToolsTranslation.SetNight))
-			.event.subscribe("activate", () => void SetNight.execute(localPlayer))
+		new BlockRow()
+			.append((new Button()
+				.setText(translation(DebugToolsTranslation.SetNight))
+				.event.subscribe("activate", () => void SetNight.execute(localPlayer))
+			))
+			.append((new Button()
+				.setText(translation(DebugToolsTranslation.SetDay))
+				.event.subscribe("activate", () => void SetDay.execute(localPlayer))
+			))
 			.appendTo(this);
 
 		const dropdownEvent = new EnumDropdown(CurseEventType, Dictionary.CurseEvent, CurseEventType.None)

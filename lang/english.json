@@ -235,6 +235,7 @@
 			"labelNPCCount": "Current Count",
 			"panelCurse": "Curse",
 			"setNight": "Skip to Night",
+			"setDay": "Skip to Morning",
 			"spawnCurseEvent": "Spawn",
 			"clearCurseEvents": "Clear Curse Events",
 			"skipCurseEventTimers": "Skip Timers"

@@ -93,6 +93,7 @@ import Version from "./util/Version";
 import { RendererConstants } from "@wayward/game/renderer/RendererConstants";
 import { ItemClasses } from "@wayward/game/ui/screen/screens/game/component/item/IItemComponent";
 import SkipCurseEventTimers from "./action/SkipCurseEventTimers";
+import SetDay from "./action/SetDay";
 
 /**
  * An enum representing the possible states of the camera
@@ -244,6 +245,9 @@ export default class DebugTools extends Mod {
 
 	@Register.action("SetNight", SetNight)
 	public readonly actionSetNight: ActionType;
+
+	@Register.action("SetDay", SetDay)
+	public readonly actionSetDay: ActionType;
 
 	@Register.action("Heal", Heal)
 	public readonly actionHeal: ActionType;

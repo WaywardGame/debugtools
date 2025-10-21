@@ -164,6 +164,7 @@ export enum DebugToolsTranslation {
 	// curse
 	PanelCurse,
 	SetNight,
+	SetDay,
 	SpawnCurseEvent,
 	ClearCurseEvents,
 	SkipCurseEventTimers,
