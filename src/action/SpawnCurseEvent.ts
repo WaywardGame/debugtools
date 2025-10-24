@@ -14,7 +14,7 @@ export default new Action(ActionArgument.ENUM(CurseEventType))
 	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, curseType: CurseEventType) => {
-		const instance = Curse.attemptSpecificCurseEventSpawnOnPlayer(action.executor, curseType);
+		const instance = Curse.attemptSpecificCurseEventSpawnOnPlayer(action.executor, curseType, "full");
 		if (instance) {
 			DebugTools?.log.info("Spawned curse event", CurseEventType[curseType], instance);
 		} else {
