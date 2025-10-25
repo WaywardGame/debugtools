@@ -66,7 +66,7 @@ export default class CorpseInformation extends InspectInformationSection {
 
 	public override logUpdate(): void {
 		for (const corpse of this.corpses) {
-			this.LOG.info("Corpse:", corpse?.["debug"]);
+			this.LOG.info("Corpse:", corpse?.debug());
 		}
 	}
 

@@ -156,7 +156,7 @@ class MagicalPropertiesEditor extends SingletonEditor<[Item | Doodad]> {
 		this.addMagicalPropertyValue.editRange(range => range
 			.setMin(info.min)
 			.setMax(info.max)
-			.setStep(info.roundToNearestTenthPlace ? 0.1 : 1)
+			.setStep(info.roundToNearestTenthPlace ? 0.1 : !Number.isInteger(info.min) || !Number.isInteger(info.max) ? 0.01 : 1)
 			.schedule(range => range.value = info.min));
 	}
 
@@ -220,7 +220,7 @@ class MagicalPropertyEditor extends Details {
 					.editRange(range => range
 						.setMin(info.min)
 						.setMax(info.max)
-						.setStep(info.roundToNearestTenthPlace ? 0.1 : 1)
+						.setStep(info.roundToNearestTenthPlace ? 0.1 : !Number.isInteger(info.min) || !Number.isInteger(info.max) ? 0.01 : 1)
 						.setRefreshMethod(() => item.magic?.get(...identity) ?? info.min))
 					.setDisplayValue(true)
 					.event.subscribe("finish", this.onChangeValue)

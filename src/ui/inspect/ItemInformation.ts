@@ -39,7 +39,7 @@ export default class ItemInformation extends InspectInformationSection {
 
 	public override logUpdate(): void {
 		ConsoleUtility.magic.$$items(this, me => me?.tile.containedItems);
-		this.LOG.info("$$items:", this.tile?.containedItems?.map(item => item["debug"]));
+		this.LOG.info("$$items:", this.tile?.containedItems?.map(item => item.debug()));
 	}
 
 	@Bound private getTile(): ITileContainer {

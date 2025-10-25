@@ -238,7 +238,8 @@
 			"setDay": "Skip to Morning",
 			"spawnCurseEvent": "Spawn",
 			"clearCurseEvents": "Clear Curse Events",
-			"skipCurseEventTimers": "Skip Timers"
+			"skipCurseEventTimers": "Skip Timers + Tick",
+			"curseOverride": "Curse Override"
 		},
 		"item": {
 			"none": "none"

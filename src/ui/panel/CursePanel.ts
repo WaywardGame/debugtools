@@ -14,11 +14,29 @@ import CurseEventDefinitions from "@wayward/game/game/curse/CurseEventDefinition
 import SkipCurseEventTimers from "../../action/SkipCurseEventTimers";
 import SetDay from "../../action/SetDay";
 import { BlockRow } from "@wayward/game/ui/component/BlockRow";
+import CheckButtonRange from "@wayward/game/ui/component/CheckButtonRange";
+import Mod from "@wayward/game/mod/Mod";
+import type DebugToolsMod from "../../DebugTools";
+import SetPlayerData from "../../action/SetPlayerData";
+
+const DebugTools = Mod.get<DebugToolsMod>();
 
 export default class CursePanel extends DebugToolsPanel {
 
 	public constructor() {
 		super();
+
+		new CheckButtonRange()
+			.setText(translation(DebugToolsTranslation.CurseOverride))
+			.setRefreshMethod(() => DebugTools?.instance.getPlayerData(localPlayer, "curseOverride") !== undefined)
+			.editRange(range => (range
+				.setMin(0)
+				.setMax(100)
+				.setStep(0.1)
+				.setRefreshMethod(() => (DebugTools?.instance.getPlayerData(localPlayer, "curseOverride") ?? 0) * 100)
+			))
+			.event.subscribeUnsafe("change", (_, value) => SetPlayerData.execute(localPlayer, localPlayer, "curseOverride", value !== undefined ? value / 100 : undefined))
+			.appendTo(this);
 
 		new BlockRow()
 			.append((new Button()

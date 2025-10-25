@@ -444,6 +444,7 @@ export default class DebugTools extends Mod {
 			permissions: player.isServer,
 			fog: undefined,
 			lighting: true,
+			curseOverride: undefined,
 		})[key];
 	}
 
@@ -487,6 +488,10 @@ export default class DebugTools extends Mod {
 					this.updateFog();
 				}
 
+				break;
+
+			case "curseOverride":
+				player.getCurse(true);
 				break;
 		}
 
@@ -900,6 +905,11 @@ export default class DebugTools extends Mod {
 			api.returnValue = 0;
 			api.cancelled = true;
 		}
+	}
+
+	@EventHandler(EventBus.Players, "getCurse")
+	protected onGetCurse(player: Player, curse: number): number {
+		return this.getPlayerData(player, "curseOverride") ?? curse;
 	}
 
 	private needsUpgrade(data?: { lastVersion?: string }): boolean {

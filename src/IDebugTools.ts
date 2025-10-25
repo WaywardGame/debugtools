@@ -168,6 +168,7 @@ export enum DebugToolsTranslation {
 	SpawnCurseEvent,
 	ClearCurseEvents,
 	SkipCurseEventTimers,
+	CurseOverride,
 
 	////////////////////////////////////
 	// Inspect Dialog
@@ -314,6 +315,11 @@ export interface IPlayerData {
 	 * Whether the player has no render enabled
 	 */
 	noRender?: boolean;
+
+	/**
+	 * An override for curse level (0.0 - 1.0)
+	 */
+	curseOverride?: number;
 }
 
 export interface IGlobalData {

@@ -58,7 +58,7 @@ export default class TileEventInformation extends InspectInformationSection {
 
 	public override logUpdate(): void {
 		for (const tileEvent of this.tileEvents) {
-			this.LOG.info("Tile Event:", tileEvent?.["debug"]);
+			this.LOG.info("Tile Event:", tileEvent?.debug());
 		}
 	}
 
