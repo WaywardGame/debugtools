@@ -32,8 +32,8 @@ import Vector3 from "@wayward/game/utilities/math/Vector3";
 import { Bound } from "@wayward/utilities/Decorators";
 import type Log from "@wayward/utilities/Log";
 import _ from "@wayward/utilities/_";
-import type { IInjectionApi } from "@wayward/utilities/class/Inject";
-import { Inject, InjectionPosition } from "@wayward/utilities/class/Inject";
+import type { IInjectionApi } from "@wayward/game/utilities/Inject";
+import { Inject, InjectionPosition } from "@wayward/game/utilities/Inject";
 import type { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import Actions from "./Actions";
 import type { IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection } from "./IDebugTools";
@@ -78,6 +78,9 @@ import ToggleAiType from "./action/ToggleAiType";
 import ToggleNoClip from "./action/ToggleNoClip";
 import ToggleFastMovement from "./action/ToggleFastMovement";
 import ToggleTilled from "./action/ToggleTilled";
+import SetNight from "./action/SetNight";
+import SpawnCurseEvent from "./action/SpawnCurseEvent";
+import ClearCurseEvents from "./action/ClearCurseEvents";
 import { CreatureZoneOverlay, CreatureZoneOverlayMode } from "./overlay/CreatureZoneOverlay";
 import { TemperatureOverlay, TemperatureOverlayMode } from "./overlay/TemperatureOverlay";
 import AccidentalDeathHelper from "./ui/AccidentalDeathHelper";
@@ -89,6 +92,8 @@ import TemperatureInspection from "./ui/inspection/Temperature";
 import Version from "./util/Version";
 import { RendererConstants } from "@wayward/game/renderer/RendererConstants";
 import { ItemClasses } from "@wayward/game/ui/screen/screens/game/component/item/IItemComponent";
+import SkipCurseEventTimers from "./action/SkipCurseEventTimers";
+import SetDay from "./action/SetDay";
 
 /**
  * An enum representing the possible states of the camera
@@ -238,6 +243,12 @@ export default class DebugTools extends Mod {
 	@Register.action("SetTime", SetTime)
 	public readonly actionSetTime: ActionType;
 
+	@Register.action("SetNight", SetNight)
+	public readonly actionSetNight: ActionType;
+
+	@Register.action("SetDay", SetDay)
+	public readonly actionSetDay: ActionType;
+
 	@Register.action("Heal", Heal)
 	public readonly actionHeal: ActionType;
 
@@ -322,11 +333,23 @@ export default class DebugTools extends Mod {
 	@Register.action("SetPlayerData", SetPlayerData)
 	public readonly actionSetPlayerData: ActionType;
 
+	@Register.action("SpawnCurseEvent", SpawnCurseEvent)
+	public readonly actionSpawnCurseEvent: ActionType;
+
+	@Register.action("ClearCurseEvents", ClearCurseEvents)
+	public readonly actionClearCurseEvents: ActionType;
+
+	@Register.action("SkipCurseEventTimers", SkipCurseEventTimers)
+	public readonly actionSkipCurseEventTimers: ActionType;
+
 	@Register.action("MagicalPropertyRemove", MagicalPropertyActions.Remove)
 	public readonly actionMagicalPropertyRemove: ActionType;
 
 	@Register.action("MagicalPropertyChange", MagicalPropertyActions.Change)
 	public readonly actionMagicalPropertyChange: ActionType;
+
+	@Register.action("MagicalPropertySetCurse", MagicalPropertyActions.SetCurse)
+	public readonly actionMagicalPropertySetCurse: ActionType;
 
 	@Register.action("MagicalPropertyClearAll", MagicalPropertyActions.Clear)
 	public readonly actionMagicalPropertyClearAll: ActionType;
@@ -370,6 +393,10 @@ export default class DebugTools extends Mod {
 	public readonly overlayTarget: OverlayType;
 	@Register.overlay("Paint")
 	public readonly overlayPaint: OverlayType;
+
+	public getInspectDialog(): InspectDialog | undefined {
+		return InspectDialog.INSTANCE;
+	}
 
 	////////////////////////////////////
 	// Data Storage
@@ -417,6 +444,7 @@ export default class DebugTools extends Mod {
 			permissions: player.isServer,
 			fog: undefined,
 			lighting: true,
+			curseOverride: undefined,
 		})[key];
 	}
 
@@ -460,6 +488,10 @@ export default class DebugTools extends Mod {
 					this.updateFog();
 				}
 
+				break;
+
+			case "curseOverride":
+				player.getCurse(true);
 				break;
 		}
 
@@ -873,6 +905,11 @@ export default class DebugTools extends Mod {
 			api.returnValue = 0;
 			api.cancelled = true;
 		}
+	}
+
+	@EventHandler(EventBus.Players, "getCurse")
+	protected onGetCurse(player: Player, curse: number): number {
+		return this.getPlayerData(player, "curseOverride") ?? curse;
 	}
 
 	private needsUpgrade(data?: { lastVersion?: string }): boolean {

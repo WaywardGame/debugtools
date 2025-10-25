@@ -23,6 +23,7 @@ import TemperaturePanel from "./panel/TemperaturePanel";
 import TemplatePanel from "./panel/TemplatePanel";
 import ZonesPanel from "./panel/ZonesPanel";
 import Task from "@wayward/utilities/promise/Task";
+import CursePanel from "./panel/CursePanel";
 
 export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
 
@@ -37,6 +38,7 @@ const subpanelClasses: DebugToolsDialogPanelClass[] = [
 	TemplatePanel,
 	ZonesPanel,
 	NPCPanel,
+	CursePanel,
 	TemperaturePanel,
 	HistoryPanel,
 ];

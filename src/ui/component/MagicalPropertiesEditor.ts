@@ -1,7 +1,7 @@
 import type Doodad from "@wayward/game/game/doodad/Doodad";
 import type Item from "@wayward/game/game/item/Item";
 import type MagicalPropertyType from "@wayward/game/game/magic/MagicalPropertyType";
-import { magicalPropertyDescriptions } from "@wayward/game/game/magic/MagicalPropertyType";
+import { magicalPropertyDescriptions } from "@wayward/game/game/magic/MagicalPropertyDescriptions";
 import { TextContext } from "@wayward/game/language/ITranslation";
 import UiTranslation from "@wayward/game/language/dictionary/UiTranslation";
 import Button from "@wayward/game/ui/component/Button";
@@ -16,6 +16,7 @@ import MagicalPropertyActions from "../../action/MagicalPropertyActions";
 import SingletonEditor from "./SingletonEditor";
 import type { MagicalPropertyIdentityHash } from "@wayward/game/game/magic/IMagicalProperty";
 import { MagicalPropertyIdentity } from "@wayward/game/game/magic/IMagicalProperty";
+import { CheckButton } from "@wayward/game/ui/component/CheckButton";
 
 export enum MagicalPropertiesEditorClasses {
 	Main = "debug-tools-magical-properties-editor",
@@ -155,7 +156,7 @@ class MagicalPropertiesEditor extends SingletonEditor<[Item | Doodad]> {
 		this.addMagicalPropertyValue.editRange(range => range
 			.setMin(info.min)
 			.setMax(info.max)
-			.setStep(info.roundToNearestTenthPlace ? 0.1 : 1)
+			.setStep(info.roundToNearestTenthPlace ? 0.1 : !Number.isInteger(info.min) || !Number.isInteger(info.max) ? 0.01 : 1)
 			.schedule(range => range.value = info.min));
 	}
 
@@ -219,13 +220,20 @@ class MagicalPropertyEditor extends Details {
 					.editRange(range => range
 						.setMin(info.min)
 						.setMax(info.max)
-						.setStep(info.roundToNearestTenthPlace ? 0.1 : 1)
+						.setStep(info.roundToNearestTenthPlace ? 0.1 : !Number.isInteger(info.min) || !Number.isInteger(info.max) ? 0.01 : 1)
 						.setRefreshMethod(() => item.magic?.get(...identity) ?? info.min))
 					.setDisplayValue(true)
 					.event.subscribe("finish", this.onChangeValue)
 					.appendTo(this);
 			}
 		}
+
+		new CheckButton()
+			.setText(translation(DebugToolsTranslation.LabelCurse))
+			.setChecked(!!this.itemOrDoodad?.magic?.isCurse(...identity))
+			.setDisabled(!!magicalPropertyDescriptions[identity[0]]?.disableCurse)
+			.event.subscribe("toggle", this.onChangeCurse)
+			.appendTo(this);
 
 		new Button()
 			.setText(translation(DebugToolsTranslation.ActionRemove).addArgs(this.translate, on.deref()?.getName().inContext(TextContext.Title)))
@@ -251,6 +259,14 @@ class MagicalPropertyEditor extends Details {
 		void MagicalPropertyActions.Change.execute(localPlayer, this.itemOrDoodad, this.identity, value);
 	}
 
+	@Bound private onChangeCurse(_: any, value: boolean) {
+		if (!this.itemOrDoodad) {
+			return;
+		}
+
+		void MagicalPropertyActions.SetCurse.execute(localPlayer, this.itemOrDoodad, this.identity, value);
+	}
+
 	@Bound private translate() {
 		return MagicalPropertyDropdown.getDeveloperMagicalPropertyTranslation(this.identity);
 	}
@@ -261,7 +277,7 @@ export default class MagicalPropertiesEditorDetails extends SingletonEditor.Deta
 	public constructor(public readonly itemOrDoodad: Item | Doodad) {
 		super();
 		this.classes.add(MagicalPropertiesEditorClasses.Details);
-		this.setSummary(summary => summary.setText(UiTranslation.GameTooltipMagicalLabel));
+		this.setSummary(summary => summary.setText(UiTranslation.GameTooltipSharedMagicalLabel));
 	}
 
 	public override createEditor(): SingletonEditor<[Item | Doodad]> {

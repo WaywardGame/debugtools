@@ -1,6 +1,6 @@
 import type Tile from "@wayward/game/game/tile/Tile";
 import { TextContext } from "@wayward/game/language/ITranslation";
-import { Article } from "@wayward/game/language/Translation";
+import { Article } from "@wayward/game/language/ITranslation";
 import DoodadInformation from "./DoodadInformation";
 import { translation, DebugToolsTranslation } from "../../IDebugTools";
 import type { TabInformation } from "../component/InspectInformationSection";

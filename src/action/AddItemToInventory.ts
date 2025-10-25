@@ -13,8 +13,11 @@ import Arrays from "@wayward/utilities/collection/Arrays";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import StackMap from "@wayward/utilities/collection/map/StackMap";
 import { defaultCanUseHandler } from "../Actions";
-import InspectDialog from "../ui/InspectDialog";
 import { MagicalLootType } from "@wayward/game/game/item/MagicalLoot";
+import Mod from "@wayward/game/mod/Mod";
+import type DebugTools from "../DebugTools";
+
+const DEBUG_TOOLS = Mod.get<DebugTools>();
 
 export const ADD_ITEM_RANDOM = 1000000001;
 export const ADD_ITEM_ALL = 1000000002;
@@ -98,5 +101,5 @@ export default new Action(ActionArgument.Container, ActionArgument.ANY(ActionArg
 			action.setUpdateView();
 		}
 
-		InspectDialog.INSTANCE?.update();
+		DEBUG_TOOLS?.instance?.getInspectDialog()?.update();
 	});

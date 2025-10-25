@@ -3,7 +3,8 @@ import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
 import { ActionArgumentCustom } from "@wayward/game/game/entity/action/argument/ActionArgumentCustom";
-import MagicalPropertyType, { magicalPropertyDescriptions } from "@wayward/game/game/magic/MagicalPropertyType";
+import MagicalPropertyType from "@wayward/game/game/magic/MagicalPropertyType";
+import { magicalPropertyDescriptions } from "@wayward/game/game/magic/MagicalPropertyDescriptions";
 import Enums from "@wayward/game/utilities/enum/Enums";
 import { defaultCanUseHandler } from "../Actions";
 import type { MagicalPropertyIdentityHash } from "@wayward/game/game/magic/IMagicalProperty";
@@ -59,11 +60,16 @@ namespace MagicalPropertyActions {
 		.setCanUse(defaultCanUseHandler)
 		.setHandler((action, itemOrDoodad, identity, value) => {
 			itemOrDoodad.asItem?.initializeMagicalPropertyManager();
-			if (MagicalPropertyIdentity.isNormalProperty(identity)) {
-				itemOrDoodad.magic?.set(identity[0], value);
-			} else if (MagicalPropertyIdentity.isSubProperty(identity)) {
-				itemOrDoodad.magic?.set(identity[0], identity[1], value);
-			}
+			itemOrDoodad.magic?.set(...identity, value);
+		});
+
+	export const SetCurse = new Action(ActionArgument.ANY(ActionArgument.Item, ActionArgument.Doodad), new MagicalPropertyIdentityArgument(), ActionArgument.Boolean)
+		.setUsableBy(EntityType.Human)
+		.setUsableWhen(ActionUsability.Always)
+		.setCanUse(defaultCanUseHandler)
+		.setHandler((action, itemOrDoodad, identity, value) => {
+			itemOrDoodad.asItem?.initializeMagicalPropertyManager();
+			itemOrDoodad.magic?.setCurse(...identity, value);
 		});
 
 	export const Clear = new Action(ActionArgument.ANY(ActionArgument.Item, ActionArgument.Doodad))

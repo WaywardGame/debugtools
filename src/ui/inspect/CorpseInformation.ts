@@ -1,7 +1,7 @@
 import type Corpse from "@wayward/game/game/entity/creature/corpse/Corpse";
 import type Tile from "@wayward/game/game/tile/Tile";
 import { TextContext } from "@wayward/game/language/ITranslation";
-import { Article } from "@wayward/game/language/Translation";
+import { Article } from "@wayward/game/language/ITranslation";
 import Mod from "@wayward/game/mod/Mod";
 import Button from "@wayward/game/ui/component/Button";
 import { Bound } from "@wayward/utilities/Decorators";
@@ -66,7 +66,7 @@ export default class CorpseInformation extends InspectInformationSection {
 
 	public override logUpdate(): void {
 		for (const corpse of this.corpses) {
-			this.LOG.info("Corpse:", corpse?.["debug"]);
+			this.LOG.info("Corpse:", corpse?.debug());
 		}
 	}
 

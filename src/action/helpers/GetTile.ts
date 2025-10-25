@@ -1,5 +1,4 @@
 import type Human from "@wayward/game/game/entity/Human";
-import { MoveType } from "@wayward/game/game/entity/IEntity";
 import { MessageType } from "@wayward/game/game/entity/player/IMessageManager";
 import type Tile from "@wayward/game/game/tile/Tile";
 import type { TranslationGenerator } from "@wayward/game/ui/component/IComponent";
@@ -13,7 +12,7 @@ import Actions from "../../Actions";
  * @param actionName The name of the action the player is attempting to execute. This is printed in the error message.
  */
 export function getTile(human: Human, tile: Tile, actionName: TranslationGenerator): Tile | undefined {
-	if (tile.isOpen || human.getMoveType() === MoveType.Flying) {
+	if (tile.isOpen || human.isFlying) {
 		return tile;
 	}
 

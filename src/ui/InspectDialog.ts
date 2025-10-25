@@ -165,7 +165,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 		const item = what instanceof Item ? what : undefined;
 		if (item) {
 			ConsoleUtility.magic.$$item(item);
-			this.LOG.info("$$item:", item["debug"]);
+			this.LOG.info("$$item:", item.debug());
 		}
 
 		while (what instanceof Item) {
@@ -372,12 +372,12 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 */
 	@Bound
 	private showInspectionLockMenu(index: number): void {
-		new ContextMenu(this.entityButtons[index].classes.hasEvery("inspection-lock") ?
-			["Unlock Inspection", {
+		new ContextMenu(this.entityButtons[index].classes.hasEvery("inspection-lock")
+			? ["Unlock Inspection", {
 				translation: translation(DebugToolsTranslation.UnlockInspection),
 				onActivate: this.unlockInspection,
-			}] :
-			["Lock Inspection", {
+			}]
+			: ["Lock Inspection", {
 				translation: translation(DebugToolsTranslation.LockInspection),
 				onActivate: this.lockInspection(index),
 			}])

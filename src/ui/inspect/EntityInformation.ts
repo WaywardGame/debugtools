@@ -205,7 +205,7 @@ export default class EntityInformation extends InspectInformationSection {
 		for (let i = 0; i < this.entities.length; i++) {
 			const entity = this.entities[i];
 			const isLastEntity = i === this.entities.length - 1;
-			this.LOG.info(isLastEntity ? "$$entity" : `Entity ${i}:`, entity?.["debug"]);
+			this.LOG.info(isLastEntity ? "$$entity" : `Entity ${i}:`, entity?.debug());
 		}
 
 		ConsoleUtility.magic.$$entity(this, me => me?.entities.at(-1));

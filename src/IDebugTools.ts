@@ -161,6 +161,15 @@ export enum DebugToolsTranslation {
 	ResetSpawnInterval,
 	LabelNPCCount,
 
+	// curse
+	PanelCurse,
+	SetNight,
+	SetDay,
+	SpawnCurseEvent,
+	ClearCurseEvents,
+	SkipCurseEventTimers,
+	CurseOverride,
+
 	////////////////////////////////////
 	// Inspect Dialog
 	//
@@ -221,6 +230,7 @@ export enum DebugToolsTranslation {
 	ButtonClearNotes,
 	ButtonLoadMore,
 	LabelValue,
+	LabelCurse,
 	LabelMagicalPropertyAdd,
 	ButtonRemoveAllMagicalProperties,
 	LabelAi,
@@ -242,6 +252,7 @@ export enum DebugToolsTranslation {
 	InspectionTemperatureBiomeTimeModifier,
 	InspectionTemperatureLayerModifier,
 	InspectionTemperatureLayerTimeModifier,
+	InspectionTemperatureLayerInjectModifier,
 	InspectionTemperatureTileCalculated,
 	InspectionTemperatureTileCalculatedHeat,
 	InspectionTemperatureTileCalculatedCold,
@@ -304,6 +315,11 @@ export interface IPlayerData {
 	 * Whether the player has no render enabled
 	 */
 	noRender?: boolean;
+
+	/**
+	 * An override for curse level (0.0 - 1.0)
+	 */
+	curseOverride?: number;
 }
 
 export interface IGlobalData {
