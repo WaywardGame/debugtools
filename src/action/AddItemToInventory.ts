@@ -13,7 +13,6 @@ import Arrays from "@wayward/utilities/collection/Arrays";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import StackMap from "@wayward/utilities/collection/map/StackMap";
 import { defaultCanUseHandler } from "../Actions";
-import { MagicalLootType } from "@wayward/game/game/item/MagicalLoot";
 import Mod from "@wayward/game/mod/Mod";
 import type DebugTools from "../DebugTools";
 
@@ -76,8 +75,7 @@ export default new Action(ActionArgument.Container, ActionArgument.ANY(ActionArg
 
 		const createdItems: Item[] = [];
 		function addItem(item: ItemType): void {
-			// Fix so that motes get a fake magical loot type
-			const createdItem = action.executor.island.items.create(item, undefined, quality, undefined, undefined, item === ItemType.MagicalMote ? MagicalLootType.All : undefined);
+			const createdItem = action.executor.island.items.create(item, undefined, quality);
 			createdItems.push(createdItem);
 		}
 
