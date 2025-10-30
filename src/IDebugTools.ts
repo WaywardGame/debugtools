@@ -169,6 +169,7 @@ export enum DebugToolsTranslation {
 	ClearCurseEvents,
 	SkipCurseEventTimers,
 	CurseOverride,
+	RevealCurseEvents,
 
 	////////////////////////////////////
 	// Inspect Dialog

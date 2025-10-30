@@ -18,6 +18,7 @@ import CheckButtonRange from "@wayward/game/ui/component/CheckButtonRange";
 import Mod from "@wayward/game/mod/Mod";
 import type DebugToolsMod from "../../DebugTools";
 import SetPlayerData from "../../action/SetPlayerData";
+import RevealCurseEvents from "../../action/RevealCurseEvents";
 
 const DebugTools = Mod.get<DebugToolsMod>();
 
@@ -69,6 +70,11 @@ export default class CursePanel extends DebugToolsPanel {
 		new Button()
 			.setText(translation(DebugToolsTranslation.SkipCurseEventTimers))
 			.event.subscribe("activate", () => void SkipCurseEventTimers.execute(localPlayer))
+			.appendTo(this);
+
+		new Button()
+			.setText(translation(DebugToolsTranslation.RevealCurseEvents))
+			.event.subscribe("activate", () => void RevealCurseEvents.execute(localPlayer))
 			.appendTo(this);
 
 		new Button()

@@ -94,6 +94,7 @@ import { RendererConstants } from "@wayward/game/renderer/RendererConstants";
 import { ItemClasses } from "@wayward/game/ui/screen/screens/game/component/item/IItemComponent";
 import SkipCurseEventTimers from "./action/SkipCurseEventTimers";
 import SetDay from "./action/SetDay";
+import RevealCurseEvents from "./action/RevealCurseEvents";
 
 /**
  * An enum representing the possible states of the camera
@@ -341,6 +342,9 @@ export default class DebugTools extends Mod {
 
 	@Register.action("SkipCurseEventTimers", SkipCurseEventTimers)
 	public readonly actionSkipCurseEventTimers: ActionType;
+
+	@Register.action("RevealCurseEvents", RevealCurseEvents)
+	public readonly actionRevealCurseEvents: ActionType;
 
 	@Register.action("MagicalPropertyRemove", MagicalPropertyActions.Remove)
 	public readonly actionMagicalPropertyRemove: ActionType;
