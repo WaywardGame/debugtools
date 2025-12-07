@@ -12,4 +12,5 @@ export default new Action()
 		for (const curse of Curse.all(action.executor.island)) {
 			curse.reveal(action.executor);
 		}
-	});
+	})
+	.modRegistration("RevealCurseEvents");

@@ -17,7 +17,8 @@ export default new Action(ActionArgument.Item, ActionArgument.Float64)
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
-	.setHandler((action, item, durability) => setDurability(action, durability, item));
+	.setHandler((action, item, durability) => setDurability(action, durability, item))
+	.modRegistration("SetDurability");
 
 export function setDurability(action: IActionHandlerApi<Human>, durability: number, ...items: Item[]): void {
 	const canUse = action.canUse();

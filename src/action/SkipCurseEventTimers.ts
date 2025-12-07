@@ -28,4 +28,5 @@ export default new Action()
 				state.iterationsRemaining = 0;
 			}
 		}
-	});
+	})
+	.modRegistration("SkipCurseEventTimers");

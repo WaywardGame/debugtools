@@ -11,4 +11,5 @@ export default new Action(ActionArgument.Container, ActionArgument.Float64)
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
-	.setHandler((action, target, decay) => setDecay(action, decay, ...target.containedItems));
+	.setHandler((action, target, decay) => setDecay(action, decay, ...target.containedItems))
+	.modRegistration("SetDecayBulk");

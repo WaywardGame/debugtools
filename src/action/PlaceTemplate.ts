@@ -12,4 +12,5 @@ export default new Action(ActionArgument.Integer32, ActionArgument.Vector2, Acti
 	.setHandler((action, type: TileTemplateType, point, options: MapGenHelpers.ITemplateOptions) => {
 		MapGenHelpers.spawnTemplate(action.executor.island, type, point!.x, point!.y, action.executor.z, options);
 		action.setUpdateView(true);
-	});
+	})
+	.modRegistration("PlaceTemplate");

@@ -3,7 +3,7 @@ import { MessageType } from "@wayward/game/game/entity/player/IMessageManager";
 import type Tile from "@wayward/game/game/tile/Tile";
 import type { TranslationGenerator } from "@wayward/game/ui/component/IComponent";
 import Text from "@wayward/game/ui/component/Text";
-import Actions from "../../Actions";
+import { messageFailureTileBlocked, messageSource } from "../../IDebugTools";
 
 /**
  * Given a position, finds an open tile, or sends an error message to executing player.
@@ -18,9 +18,9 @@ export function getTile(human: Human, tile: Tile, actionName: TranslationGenerat
 
 	const openTile = tile?.findMatchingTile(tile => !tile.isBlocked);
 	if (!openTile) {
-		human.messages.source(Actions.DEBUG_TOOLS.source)
+		human.messages.source(messageSource.value)
 			.type(MessageType.Bad)
-			.send(Actions.DEBUG_TOOLS.messageFailureTileBlocked, Text.resolve(actionName).sections);
+			.send(messageFailureTileBlocked.value, Text.resolve(actionName).sections);
 	}
 
 	return openTile;

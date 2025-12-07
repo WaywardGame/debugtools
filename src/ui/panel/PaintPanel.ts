@@ -8,7 +8,6 @@ import type { TerrainType } from "@wayward/game/game/tile/ITerrain";
 import type { TileEventType } from "@wayward/game/game/tile/ITileEvent";
 import type Tile from "@wayward/game/game/tile/Tile";
 import Mod from "@wayward/game/mod/Mod";
-import { Registry } from "@wayward/game/mod/ModRegistry";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
 import { BlockRow } from "@wayward/game/ui/component/BlockRow";
 import Button from "@wayward/game/ui/component/Button";
@@ -35,6 +34,13 @@ import NPCPaint from "../paint/NPC";
 import TerrainPaint from "../paint/Terrain";
 import TileEventPaint from "../paint/TileEvent";
 import { EventHandler } from "@wayward/game/event/EventManager";
+import { IInput } from "@wayward/game/ui/input/IInput";
+
+const bindablePaint = Mod.register.bindable("Paint", IInput.mouseButton(0));
+const bindableErasePaint = Mod.register.bindable("ErasePaint", IInput.mouseButton(2));
+const bindableClearPaint = Mod.register.bindable("ClearPaint", IInput.key("Backspace"));
+const bindableCancelPaint = Mod.register.bindable("CancelPaint", IInput.key("Escape"));
+const bindableCompletePaint = Mod.register.bindable("CompletePaint", IInput.key("Enter"));
 
 export interface IPaintData {
 	terrain?: {
@@ -164,13 +170,13 @@ export default class PaintPanel extends DebugToolsPanel {
 		return false;
 	}
 
-	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindablePaint"), Priority.High)
-	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableErasePaint"), Priority.High)
+	@Bind.onDown(bindablePaint.value, Priority.High)
+	@Bind.onDown(bindableErasePaint.value, Priority.High)
 	protected onStartPaintOrErasePaint(api: IBindHandlerApi): boolean {
 		return this.painting && !!gameScreen?.mouseStartWasWithin(api);
 	}
 
-	@Bind.onHolding(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindablePaint"), Priority.High)
+	@Bind.onHolding(bindablePaint.value, Priority.High)
 	protected onPaint(api: IBindHandlerApi): boolean {
 		if (!this.painting || !gameScreen?.mouseStartWasWithin(api) || !renderer) {
 			return false;
@@ -217,7 +223,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		return true;
 	}
 
-	@Bind.onHolding(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableErasePaint"))
+	@Bind.onHolding(bindableErasePaint.value, Priority.High)
 	protected onErasePaint(api: IBindHandlerApi): boolean {
 		if (!this.painting || !gameScreen?.mouseStartWasWithin(api) || !renderer) {
 			return false;
@@ -264,17 +270,17 @@ export default class PaintPanel extends DebugToolsPanel {
 		return true;
 	}
 
-	@Bind.onUp(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindablePaint"))
-	@Bind.onUp(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableErasePaint"))
+	@Bind.onUp(bindablePaint.value)
+	@Bind.onUp(bindableErasePaint.value)
 	protected onStopPaint(api: IBindHandlerApi): boolean {
-		if (this.painting && !api.input.isHolding(this.DEBUG_TOOLS.bindablePaint) && !api.input.isHolding(this.DEBUG_TOOLS.bindableErasePaint)) {
+		if (this.painting && !api.input.isHolding(bindablePaint.value) && !api.input.isHolding(bindableErasePaint.value)) {
 			delete this.lastPaintTile;
 		}
 
 		return false;
 	}
 
-	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableCancelPaint"), Priority.High)
+	@Bind.onDown(bindableCancelPaint.value, Priority.High)
 	protected onCancelPaint(): boolean {
 		if (!this.painting) {
 			return false;
@@ -285,7 +291,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		return true;
 	}
 
-	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableClearPaint"), Priority.High)
+	@Bind.onDown(bindableClearPaint.value, Priority.High)
 	protected onClearPaint(): boolean {
 		if (!this.painting) {
 			return false;
@@ -295,7 +301,7 @@ export default class PaintPanel extends DebugToolsPanel {
 		return true;
 	}
 
-	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableCompletePaint"), Priority.High)
+	@Bind.onDown(bindableCompletePaint.value, Priority.High)
 	protected onCompletePaint(): boolean {
 		if (!this.painting) {
 			return false;

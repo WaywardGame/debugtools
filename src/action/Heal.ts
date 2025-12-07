@@ -11,8 +11,12 @@ import { StatusType } from "@wayward/game/game/entity/status/IStatus";
 import type { IItemReference } from "@wayward/game/game/item/ItemReference";
 import ItemReference from "@wayward/game/game/item/ItemReference";
 import { RenderSource, UpdateRenderFlag } from "@wayward/game/renderer/IRenderer";
-import Actions, { defaultCanUseHandler } from "../Actions";
+import { defaultCanUseHandler } from "../Actions";
 import ResurrectCorpse from "./helpers/ResurrectCorpse";
+import Mod from "@wayward/game/mod/Mod";
+import type DebugToolsMod from "../DebugTools";
+
+const DebugTools = Mod.get<DebugToolsMod>();
 
 /**
  * The core stats, namely, Health, Stamina, Hunger, and Thirst, are all set to their maximum values. Any status effects are removed.
@@ -101,6 +105,7 @@ export default new Action(ActionArgument.Entity, ActionArgument.OPTIONAL(ActionA
 		}
 
 		action.setUpdateRender();
-		Actions.DEBUG_TOOLS.updateFog();
+		DebugTools?.instance?.updateFog();
 		gameScreen?.onIslandTickEnd(entity.island, { ticks: 1, tickFlags: TickFlag.All });
-	});
+	})
+	.modRegistration("Heal");

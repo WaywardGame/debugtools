@@ -14,4 +14,5 @@ export default new Action()
 		Curse.cleanup(action.executor.island);
 		action.executor.island.curse.night = oldNight;
 		CurseHelpers.updateStatuses(action.executor.island);
-	});
+	})
+	.modRegistration("ClearCurseEvents");

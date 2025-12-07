@@ -10,4 +10,5 @@ export default new Action(ActionArgument.Creature, ActionArgument.ENUM(AiType), 
 	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, creature, ai, present) => {
 		creature.ai.toggle(ai, present);
-	});
+	})
+	.modRegistration("ToggleAiType");

@@ -15,4 +15,5 @@ export default new Action(ActionArgument.Integer32, ActionArgument.Tile)
 
 		renderers.computeSpritesInViewport(tile);
 		action.setUpdateRender();
-	});
+	})
+	.modRegistration("ChangeTerrain");

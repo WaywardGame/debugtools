@@ -14,4 +14,5 @@ export default new Action(ActionArgument.Entity, ActionArgument.Integer32, Actio
 		if (entity.asLocalPlayer && stat === Stat.Health) {
 			ui.screens.get(ScreenId.Game)?.["refreshHealthBasedEffects"]();
 		}
-	});
+	})
+	.modRegistration("SetStat");

@@ -32,4 +32,5 @@ export default new Action(ActionArgument.ANY(ActionArgument.Entity, ActionArgume
 
 		renderers.computeSpritesInViewport(targetTile);
 		action.setUpdateRender();
-	});
+	})
+	.modRegistration("Clone");

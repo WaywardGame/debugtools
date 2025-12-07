@@ -3,15 +3,16 @@ import { SkillType } from "@wayward/game/game/entity/skill/ISkills";
 import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
 import Enums from "@wayward/game/utilities/enum/Enums";
-import Actions, { defaultCanUseHandler } from "../Actions";
+import { defaultCanUseHandler } from "../Actions";
 import CloneInventory from "./helpers/CloneInventory";
+import { PromptReplacePlayerData } from "../ui/DebugToolsPrompts";
 
 export default new Action(ActionArgument.Player, ActionArgument.Player)
 	.setUsableBy(EntityType.Player)
 	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
 	.setConfirmer((action, target, from) => {
-		return action.prompt(Actions.DEBUG_TOOLS.prompts.promptReplacePlayerData,
+		return action.prompt(PromptReplacePlayerData.value,
 			target.getName(),
 			from.getName());
 	})
@@ -23,4 +24,5 @@ export default new Action(ActionArgument.Player, ActionArgument.Player)
 		CloneInventory(from, target);
 
 		// stats?
-	});
+	})
+	.modRegistration("ReplacePlayerData");

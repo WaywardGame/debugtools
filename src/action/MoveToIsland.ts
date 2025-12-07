@@ -11,4 +11,5 @@ export default new Action(ActionArgument.String, ActionArgument.Integer32)
 	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, islandId, biome) => {
 		void action.executor.moveToIslandId(islandId as IslandId, { newIslandOverrides: { biomeType: biome } });
-	});
+	})
+	.modRegistration("MoveToIsland");

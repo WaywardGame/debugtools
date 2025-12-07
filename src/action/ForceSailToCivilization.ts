@@ -37,4 +37,5 @@ export default new Action()
 			void Ride.execute(action.executor, sailboat);
 			void SailToCivilization.execute(action, sailboat, true);
 		}
-	});
+	})
+	.modRegistration("ForceSailToCivilization");

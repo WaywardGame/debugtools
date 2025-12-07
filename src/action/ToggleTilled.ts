@@ -17,4 +17,5 @@ export default new Action(ActionArgument.Tile, ActionArgument.Boolean)
 
 		renderers.computeSpritesInViewport(tile);
 		action.setUpdateRender();
-	});
+	})
+	.modRegistration("ToggleTilled");

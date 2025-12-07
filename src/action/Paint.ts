@@ -112,4 +112,5 @@ export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 		}
 
 		renderers.updateView(undefined, RenderSource.Mod, true);
-	});
+	})
+	.modRegistration("Paint");

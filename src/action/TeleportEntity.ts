@@ -11,5 +11,6 @@ export default new Action(ActionArgument.Entity, ActionArgument.Tile)
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
-	.setHandler(teleportEntity);
+	.setHandler(teleportEntity)
+	.modRegistration("TeleportEntity");
 

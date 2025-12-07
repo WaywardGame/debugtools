@@ -11,4 +11,5 @@ export default new Action(ActionArgument.Float64)
 		action.executor.island.game.time.setTime(time);
 		action.executor.computeLights();
 		action.setUpdateView(true);
-	});
+	})
+	.modRegistration("SetTime");

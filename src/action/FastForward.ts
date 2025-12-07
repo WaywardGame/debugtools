@@ -20,4 +20,5 @@ export default new Action(ActionArgument.Integer32, ActionArgument.OPTIONAL(Acti
 				isSynced: true,
 				pauseIncomingPacketProcessing: true,
 			});
-	});
+	})
+	.modRegistration("FastForward");

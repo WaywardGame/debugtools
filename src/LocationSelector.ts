@@ -2,32 +2,20 @@ import { Priority } from "@wayward/utilities/event/EventEmitter";
 import { EventHandler } from "@wayward/game/event/EventManager";
 import type Tile from "@wayward/game/game/tile/Tile";
 import Mod from "@wayward/game/mod/Mod";
-import Register, { Registry } from "@wayward/game/mod/ModRegistry";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
 import Bind from "@wayward/game/ui/input/Bind";
-import type Bindable from "@wayward/game/ui/input/Bindable";
 import { IInput } from "@wayward/game/ui/input/IInput";
 import InputManager from "@wayward/game/ui/input/InputManager";
 import MovementHandler from "@wayward/game/ui/screen/screens/game/util/movement/MovementHandler";
 import { Bound } from "@wayward/utilities/Decorators";
-import type DebugTools from "./DebugTools";
-import { DEBUG_TOOLS_ID } from "./IDebugTools";
+import { overlayTarget } from "./IDebugTools";
 import CancelablePromise from "@wayward/utilities/promise/CancelablePromise";
 import type { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
 
+export const bindableSelectLocation = Mod.register.bindable("SelectLocation", IInput.mouseButton(0));
+export const bindableCancelSelectLocation = Mod.register.bindable("CancelSelectLocation", IInput.mouseButton(2));
+
 export default class SelectLocation {
-
-	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
-	public readonly DEBUG_TOOLS: DebugTools;
-
-	////////////////////////////////////
-	// Registrations
-	//
-
-	@Register.bindable("SelectLocation", IInput.mouseButton(0))
-	public readonly bindableSelectLocation: Bindable;
-	@Register.bindable("CancelSelectLocation", IInput.mouseButton(2))
-	public readonly bindableCancelSelectLocation: Bindable;
 
 	////////////////////////////////////
 	// Fields
@@ -76,13 +64,13 @@ export default class SelectLocation {
 		return undefined;
 	}
 
-	@Bind.onDown(Registry<SelectLocation>().get("bindableSelectLocation"), Priority.High)
-	@Bind.onDown(Registry<SelectLocation>().get("bindableCancelSelectLocation"), Priority.High)
+	@Bind.onDown(bindableSelectLocation.value, Priority.High)
+	@Bind.onDown(bindableCancelSelectLocation.value, Priority.High)
 	protected onSelectOrCancelSelectLocation(): boolean {
 		return this.selecting;
 	}
 
-	@Bind.onUp(Registry<SelectLocation>().get("bindableSelectLocation"))
+	@Bind.onUp(bindableSelectLocation.value)
 	protected onStopSelectLocation(): boolean {
 		this.selectTileHeld = false;
 		return false;
@@ -99,8 +87,8 @@ export default class SelectLocation {
 
 		setTimeout(this.selectionTick, game.interval);
 
-		const selectTilePressed = InputManager.input.isHolding(this.bindableSelectLocation) && gameScreen?.isMouseWithin;
-		const cancelSelectTilePressed = InputManager.input.isHolding(this.bindableCancelSelectLocation) && gameScreen?.isMouseWithin;
+		const selectTilePressed = InputManager.input.isHolding(bindableSelectLocation.value) && gameScreen?.isMouseWithin;
+		const cancelSelectTilePressed = InputManager.input.isHolding(bindableCancelSelectLocation.value) && gameScreen?.isMouseWithin;
 
 		let updateRender = false;
 
@@ -113,7 +101,7 @@ export default class SelectLocation {
 					this.hoverTile.tile.removeOverlay(this.hoverTile.overlay);
 				}
 
-				this.hoverTile = { tile, overlay: { type: this.DEBUG_TOOLS.overlayTarget } };
+				this.hoverTile = { tile, overlay: { type: overlayTarget.value } };
 				tile.addOrUpdateOverlay(this.hoverTile.overlay);
 			}
 

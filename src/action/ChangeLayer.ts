@@ -15,4 +15,5 @@ export default new Action(ActionArgument.Integer32)
 		}
 
 		action.executor.setZ(z);
-	});
+	})
+	.modRegistration("ChangeLayer");

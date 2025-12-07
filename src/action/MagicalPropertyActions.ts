@@ -52,7 +52,8 @@ namespace MagicalPropertyActions {
 		.setCanUse(defaultCanUseHandler)
 		.setHandler((action, itemOrDoodad, identity) => {
 			itemOrDoodad.magic?.remove(...identity);
-		});
+		})
+		.modRegistration("MagicalPropertyRemove");
 
 	export const Change = new Action(ActionArgument.ANY(ActionArgument.Item, ActionArgument.Doodad), new MagicalPropertyIdentityArgument(), ActionArgument.Float64)
 		.setUsableBy(EntityType.Human)
@@ -61,7 +62,8 @@ namespace MagicalPropertyActions {
 		.setHandler((action, itemOrDoodad, identity, value) => {
 			itemOrDoodad.asItem?.initializeMagicalPropertyManager();
 			itemOrDoodad.magic?.set(...identity, value);
-		});
+		})
+		.modRegistration("MagicalPropertyChange");
 
 	export const SetCurse = new Action(ActionArgument.ANY(ActionArgument.Item, ActionArgument.Doodad), new MagicalPropertyIdentityArgument(), ActionArgument.Boolean)
 		.setUsableBy(EntityType.Human)
@@ -70,7 +72,8 @@ namespace MagicalPropertyActions {
 		.setHandler((action, itemOrDoodad, identity, value) => {
 			itemOrDoodad.asItem?.initializeMagicalPropertyManager();
 			itemOrDoodad.magic?.setCurse(...identity, value);
-		});
+		})
+		.modRegistration("MagicalPropertySetCurse");
 
 	export const Clear = new Action(ActionArgument.ANY(ActionArgument.Item, ActionArgument.Doodad))
 		.setUsableBy(EntityType.Human)
@@ -78,7 +81,8 @@ namespace MagicalPropertyActions {
 		.setCanUse(defaultCanUseHandler)
 		.setHandler((action, itemOrDoodad) => {
 			itemOrDoodad.removeMagic();
-		});
+		})
+		.modRegistration("MagicalPropertyClearAll");
 
 }
 

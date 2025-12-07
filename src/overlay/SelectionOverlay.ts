@@ -1,12 +1,10 @@
 import type Tile from "@wayward/game/game/tile/Tile";
-import Mod from "@wayward/game/mod/Mod";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import Enums from "@wayward/game/utilities/enum/Enums";
 import type { IVector2 } from "@wayward/game/utilities/math/IVector";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 import Vector3 from "@wayward/game/utilities/math/Vector3";
-import type DebugTools from "../DebugTools";
-import { DEBUG_TOOLS_ID } from "../IDebugTools";
+import { overlayPaint } from "../IDebugTools";
 import type { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
 import Objects from "@wayward/utilities/object/Objects";
 
@@ -22,9 +20,6 @@ export default class SelectionOverlay {
 	 * List of overlays being rendered for each tile
 	 */
 	private static readonly subTileOverlays = new Map<Tile, Set<IOverlayInfo>>();
-
-	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
-	public static readonly debugTools: DebugTools;
 
 	public static add(tile: Tile): boolean {
 		if (!this.overlays.has(tile)) {
@@ -93,7 +88,7 @@ export default class SelectionOverlay {
 
 				if (mappedTile[subTilePosition] === 4) {
 					subTileOverlay = {
-						type: SelectionOverlay.debugTools.overlayPaint,
+						type: overlayPaint.value,
 						size: 8,
 						offsetX: 20,
 						offsetY: 4,
@@ -103,7 +98,7 @@ export default class SelectionOverlay {
 
 				} else {
 					subTileOverlay = {
-						type: SelectionOverlay.debugTools.overlayPaint,
+						type: overlayPaint.value,
 						size: 8,
 						offsetX: mappedTile[subTilePosition] * 16 + offset.x,
 						offsetY: offset.y,

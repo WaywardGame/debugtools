@@ -1,40 +1,20 @@
 import Mod from "@wayward/game/mod/Mod";
-import Register from "@wayward/game/mod/ModRegistry";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
-import type Bindable from "@wayward/game/ui/input/Bindable";
 import { IInput } from "@wayward/game/ui/input/IInput";
 import InputManager from "@wayward/game/ui/input/InputManager";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 import { Bound } from "@wayward/utilities/Decorators";
 
-import type DebugTools from "./DebugTools";
-import { DEBUG_TOOLS_ID } from "./IDebugTools";
-
 const ACCELERATION = 0.12;
 const MOVE_FRICTION = 0.98;
 const STOP_FRICTION = 0.9;
 
+const bindMoveCameraUp = Mod.register.bindable("CameraMoveUp", IInput.key("KeyW", "Alt"));
+const bindMoveCameraLeft = Mod.register.bindable("CameraMoveLeft", IInput.key("KeyA", "Alt"));
+const bindMoveCameraDown = Mod.register.bindable("CameraMoveDown", IInput.key("KeyS", "Alt"));
+const bindMoveCameraRight = Mod.register.bindable("CameraMoveRight", IInput.key("KeyD", "Alt"));
+
 export default class UnlockedCameraMovementHandler {
-
-	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
-	public readonly DEBUG_TOOLS: DebugTools;
-
-	////////////////////////////////////
-	// Registrations
-	//
-
-	@Register.bindable("CameraMoveUp", IInput.key("KeyW", "Alt"))
-	public readonly bindMoveCameraUp: Bindable;
-	@Register.bindable("CameraMoveLeft", IInput.key("KeyA", "Alt"))
-	public readonly bindMoveCameraLeft: Bindable;
-	@Register.bindable("CameraMoveDown", IInput.key("KeyS", "Alt"))
-	public readonly bindMoveCameraDown: Bindable;
-	@Register.bindable("CameraMoveRight", IInput.key("KeyD", "Alt"))
-	public readonly bindMoveCameraRight: Bindable;
-
-	////////////////////////////////////
-	// Fields
-	//
 
 	public velocity = Vector2.ZERO;
 	public position = Vector2.ZERO;
@@ -64,22 +44,22 @@ export default class UnlockedCameraMovementHandler {
 		let friction = STOP_FRICTION;
 
 		if (!this.transition) {
-			if (InputManager.input.isHolding(this.bindMoveCameraLeft)) {
+			if (InputManager.input.isHolding(bindMoveCameraLeft.value)) {
 				this.velocity.x -= ACCELERATION / renderer.worldRenderer.getTileScale();
 				friction = MOVE_FRICTION;
 			}
 
-			if (InputManager.input.isHolding(this.bindMoveCameraRight)) {
+			if (InputManager.input.isHolding(bindMoveCameraRight.value)) {
 				this.velocity.x += ACCELERATION / renderer.worldRenderer.getTileScale();
 				friction = MOVE_FRICTION;
 			}
 
-			if (InputManager.input.isHolding(this.bindMoveCameraUp)) {
+			if (InputManager.input.isHolding(bindMoveCameraUp.value)) {
 				this.velocity.y -= ACCELERATION / renderer.worldRenderer.getTileScale();
 				friction = MOVE_FRICTION;
 			}
 
-			if (InputManager.input.isHolding(this.bindMoveCameraDown)) {
+			if (InputManager.input.isHolding(bindMoveCameraDown.value)) {
 				this.velocity.y += ACCELERATION / renderer.worldRenderer.getTileScale();
 				friction = MOVE_FRICTION;
 			}

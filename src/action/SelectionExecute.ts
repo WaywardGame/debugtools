@@ -56,7 +56,8 @@ export default new Action(ActionArgument.Integer32, ActionArgument.Array, Action
 
 		renderers.computeSpritesInViewport(action.executor);
 		action.setUpdateRender();
-	});
+	})
+	.modRegistration("SelectionExecute");
 
 function getTarget(island: Island, type: SelectionType, id: string | number): Player | Doodad | NPC | Creature | Corpse | TileEvent | Vector3 | undefined {
 	switch (type) {
