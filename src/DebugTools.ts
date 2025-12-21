@@ -1,30 +1,19 @@
 import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler, eventManager } from "@wayward/game/event/EventManager";
 import type Entity from "@wayward/game/game/entity/Entity";
-import type { ActionType } from "@wayward/game/game/entity/action/IAction";
-import type { Source } from "@wayward/game/game/entity/player/IMessageManager";
 import type Player from "@wayward/game/game/entity/player/Player";
-import type { InspectType } from "@wayward/game/game/inspection/IInspection";
 import Island from "@wayward/game/game/island/Island";
-import type { OverlayType } from "@wayward/game/game/tile/ITerrain";
 import type Tile from "@wayward/game/game/tile/Tile";
-import type Dictionary from "@wayward/game/language/Dictionary";
-import type Message from "@wayward/game/language/dictionary/Message";
-import type InterModRegistry from "@wayward/game/mod/InterModRegistry";
 import Mod from "@wayward/game/mod/Mod";
-import Register, { Registry } from "@wayward/game/mod/ModRegistry";
+import Register from "@wayward/game/mod/ModRegistry";
 import { RenderSource, UpdateRenderFlag, ZOOM_LEVEL_MAX } from "@wayward/game/renderer/IRenderer";
 import type { Renderer } from "@wayward/game/renderer/Renderer";
 import { WorldRenderer } from "@wayward/game/renderer/world/WorldRenderer";
 import type { IBindHandlerApi } from "@wayward/game/ui/input/Bind";
 import Bind from "@wayward/game/ui/input/Bind";
-import type Bindable from "@wayward/game/ui/input/Bindable";
 import { IInput } from "@wayward/game/ui/input/IInput";
 import InputManager from "@wayward/game/ui/input/InputManager";
-import type { DialogId } from "@wayward/game/ui/screen/screens/game/Dialogs";
 import ItemComponent from "@wayward/game/ui/screen/screens/game/component/ItemComponent";
-import type { MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
-import { MenuBarButtonGroup } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
 import Draggable from "@wayward/game/ui/util/Draggable";
 import type { IVector2 } from "@wayward/game/utilities/math/IVector";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
@@ -35,65 +24,24 @@ import _ from "@wayward/utilities/_";
 import type { IInjectionApi } from "@wayward/game/utilities/Inject";
 import { Inject, InjectionPosition } from "@wayward/game/utilities/Inject";
 import type { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
-import Actions from "./Actions";
-import type { IGlobalData, IPlayerData, ISaveData, ModRegistrationInspectDialogEntityInformationSubsection, ModRegistrationInspectDialogInformationSection } from "./IDebugTools";
-import { DebugToolsTranslation, ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
+import type { IGlobalData, IPlayerData, ISaveData } from "./IDebugTools";
+import { ModRegistrationMainDialogPanel, translation } from "./IDebugTools";
 import LocationSelector from "./LocationSelector";
-import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
-import AddItemToInventory from "./action/AddItemToInventory";
-import ChangeLayer from "./action/ChangeLayer";
-import ChangeTerrain from "./action/ChangeTerrain";
-import ClearInventory from "./action/ClearInventory";
-import ClearNotes from "./action/ClearNotes";
-import Clone from "./action/Clone";
-import FastForward from "./action/FastForward";
-import ForceSailToCivilization from "./action/ForceSailToCivilization";
 import Heal from "./action/Heal";
-import Kill from "./action/Kill";
-import MagicalPropertyActions from "./action/MagicalPropertyActions";
-import MoveToIsland from "./action/MoveToIsland";
-import Paint from "./action/Paint";
-import PlaceTemplate from "./action/PlaceTemplate";
-import Remove from "./action/Remove";
-import RenameIsland from "./action/RenameIsland";
-import ReplacePlayerData from "./action/ReplacePlayerData";
-import ResetNPCSpawnInterval from "./action/ResetNPCSpawnInterval";
-import SelectionExecute from "./action/SelectionExecute";
-import SetDecay from "./action/SetDecay";
-import SetDecayBulk from "./action/SetDecayBulk";
-import SetDurability from "./action/SetDurability";
-import SetDurabilityBulk from "./action/SetDurabilityBulk";
-import SetGrowingStage from "./action/SetGrowingStage";
 import SetPlayerData from "./action/SetPlayerData";
-import SetQuality from "./action/SetQuality";
-import SetQualityBulk from "./action/SetQualityBulk";
-import SetSkill from "./action/SetSkill";
-import SetStat from "./action/SetStat";
-import SetStatMax from "./action/SetStatMax";
-import SetTamed from "./action/SetTamed";
-import SetTime from "./action/SetTime";
 import TeleportEntity from "./action/TeleportEntity";
-import ToggleAiMask from "./action/ToggleAiMask";
-import ToggleAiType from "./action/ToggleAiType";
 import ToggleNoClip from "./action/ToggleNoClip";
 import ToggleFastMovement from "./action/ToggleFastMovement";
-import ToggleTilled from "./action/ToggleTilled";
-import SetNight from "./action/SetNight";
-import SpawnCurseEvent from "./action/SpawnCurseEvent";
-import ClearCurseEvents from "./action/ClearCurseEvents";
 import { CreatureZoneOverlay, CreatureZoneOverlayMode } from "./overlay/CreatureZoneOverlay";
 import { TemperatureOverlay, TemperatureOverlayMode } from "./overlay/TemperatureOverlay";
 import AccidentalDeathHelper from "./ui/AccidentalDeathHelper";
 import MainDialog, { DebugToolsDialogPanelClass } from "./ui/DebugToolsDialog";
-import DebugToolsPrompts from "./ui/DebugToolsPrompts";
 import InspectDialog from "./ui/InspectDialog";
 import DebugToolsPanel from "./ui/component/DebugToolsPanel";
-import TemperatureInspection from "./ui/inspection/Temperature";
 import Version from "./util/Version";
 import { RendererConstants } from "@wayward/game/renderer/RendererConstants";
 import { ItemClasses } from "@wayward/game/ui/screen/screens/game/component/item/IItemComponent";
-import SkipCurseEventTimers from "./action/SkipCurseEventTimers";
-import SetDay from "./action/SetDay";
+import UnlockedCameraMovementHandler from "./UnlockedCameraMovementHandler";
 
 /**
  * An enum representing the possible states of the camera
@@ -131,6 +79,21 @@ interface IDebugToolsEvents extends Events<Mod> {
 	permissionsChange(): any;
 }
 
+const bindableInspectTile = Mod.register.bindable("InspectTile", IInput.mouseButton(2, "Alt"));
+const bindableInspectLocalPlayer = Mod.register.bindable("InspectLocalPlayer", IInput.key("KeyP", "Alt"));
+const bindableInspectItem = Mod.register.bindable("InspectItem", IInput.mouseButton(2, "Alt"));
+
+const bindableToggleCameraLock = Mod.register.bindable("ToggleCameraLock", IInput.key("KeyC", "Alt"));
+const bindableToggleFullVisibility = Mod.register.bindable("ToggleFullVisibility", IInput.key("KeyV", "Alt"));
+
+const bindableHealLocalPlayer = Mod.register.bindable("HealLocalPlayer", IInput.key("KeyH", "Alt"));
+const bindableTeleportLocalPlayer = Mod.register.bindable("TeleportLocalPlayer", IInput.mouseButton(0, "Alt"));
+const bindableToggleNoClipOnLocalPlayer = Mod.register.bindable("ToggleNoClip", IInput.key("KeyN", "Alt"));
+const bindableToggleFastMovementOnLocalPlayer = Mod.register.bindable("ToggleFastMovement", IInput.key("KeyN", "Shift"));
+
+const dialogMain = Mod.register.dialog("Main", MainDialog.description, MainDialog);
+const dialogInspect = Mod.register.dialog("Inspect", InspectDialog.description, InspectDialog);
+
 export default class DebugTools extends Mod {
 	declare public event: IEventEmitter<this, IDebugToolsEvents>;
 
@@ -142,257 +105,6 @@ export default class DebugTools extends Mod {
 	public static readonly INSTANCE: DebugTools;
 	@Mod.log()
 	public static readonly LOG: Log;
-
-	////////////////////////////////////
-	// Registries
-	//
-
-	@Register.registry(Actions)
-	public readonly actions: Actions;
-	@Register.registry(LocationSelector)
-	public readonly selector: LocationSelector;
-	@Register.registry(UnlockedCameraMovementHandler)
-	public readonly unlockedCameraMovementHandler: UnlockedCameraMovementHandler;
-	@Register.registry(DebugToolsPrompts)
-	public readonly prompts: DebugToolsPrompts;
-
-	////////////////////////////////////
-	// Extension Registries
-	//
-
-	@Register.interModRegistry("MainDialogPanel")
-	public readonly modRegistryMainDialogPanels: InterModRegistry<ModRegistrationMainDialogPanel>;
-	@Register.interModRegistry("InspectDialogPanel")
-	public readonly modRegistryInspectDialogPanels: InterModRegistry<ModRegistrationInspectDialogInformationSection>;
-	@Register.interModRegistry("InspectDialogEntityInformationSubsection")
-	public readonly modRegistryInspectDialogEntityInformationSubsections: InterModRegistry<ModRegistrationInspectDialogEntityInformationSubsection>;
-
-	////////////////////////////////////
-	// Bindables
-	//
-
-	@Register.bindable("ToggleDialog", IInput.key("Backslash"), IInput.key("IntlBackslash"))
-	public readonly bindableToggleDialog: Bindable;
-	@Register.bindable("CloseInspectDialog", IInput.key("KeyI", "Alt"))
-	public readonly bindableCloseInspectDialog: Bindable;
-
-	@Register.bindable("InspectTile", IInput.mouseButton(2, "Alt"))
-	public readonly bindableInspectTile: Bindable;
-	@Register.bindable("InspectLocalPlayer", IInput.key("KeyP", "Alt"))
-	public readonly bindableInspectLocalPlayer: Bindable;
-	@Register.bindable("InspectItem", IInput.mouseButton(2, "Alt"))
-	public readonly bindableInspectItem: Bindable;
-
-	@Register.bindable("HealLocalPlayer", IInput.key("KeyH", "Alt"))
-	public readonly bindableHealLocalPlayer: Bindable;
-	@Register.bindable("TeleportLocalPlayer", IInput.mouseButton(0, "Alt"))
-	public readonly bindableTeleportLocalPlayer: Bindable;
-	@Register.bindable("ToggleNoClip", IInput.key("KeyN", "Alt"))
-	public readonly bindableToggleNoClipOnLocalPlayer: Bindable;
-	@Register.bindable("ToggleFastMovement", IInput.key("KeyN", "Shift"))
-	public readonly bindableToggleFastMovementOnLocalPlayer: Bindable;
-
-	@Register.bindable("ToggleCameraLock", IInput.key("KeyC", "Alt"))
-	public readonly bindableToggleCameraLock: Bindable;
-	@Register.bindable("ToggleFullVisibility", IInput.key("KeyV", "Alt"))
-	public readonly bindableToggleFullVisibility: Bindable;
-
-	@Register.bindable("Paint", IInput.mouseButton(0))
-	public readonly bindablePaint: Bindable;
-	@Register.bindable("ErasePaint", IInput.mouseButton(2))
-	public readonly bindableErasePaint: Bindable;
-	@Register.bindable("ClearPaint", IInput.key("Backspace"))
-	public readonly bindableClearPaint: Bindable;
-	@Register.bindable("CancelPaint", IInput.key("Escape"))
-	public readonly bindableCancelPaint: Bindable;
-	@Register.bindable("CompletePaint", IInput.key("Enter"))
-	public readonly bindableCompletePaint: Bindable;
-
-	////////////////////////////////////
-	// Language
-	//
-
-	@Register.dictionary("DebugTools", DebugToolsTranslation)
-	public readonly dictionary: Dictionary;
-
-	@Register.message("FailureTileBlocked")
-	public readonly messageFailureTileBlocked: Message;
-
-	@Register.messageSource("DebugTools")
-	public readonly source: Source;
-
-	////////////////////////////////////
-	// Actions
-	//
-
-	@Register.action("PlaceTemplate", PlaceTemplate)
-	public readonly actionPlaceTemplate: ActionType;
-
-	@Register.action("SelectionExecute", SelectionExecute)
-	public readonly actionSelectionExecute: ActionType;
-
-	@Register.action("TeleportEntity", TeleportEntity)
-	public readonly actionTeleportEntity: ActionType;
-
-	@Register.action("Kill", Kill)
-	public readonly actionKill: ActionType;
-
-	@Register.action("Clone", Clone)
-	public readonly actionClone: ActionType;
-
-	@Register.action("SetTime", SetTime)
-	public readonly actionSetTime: ActionType;
-
-	@Register.action("SetNight", SetNight)
-	public readonly actionSetNight: ActionType;
-
-	@Register.action("SetDay", SetDay)
-	public readonly actionSetDay: ActionType;
-
-	@Register.action("Heal", Heal)
-	public readonly actionHeal: ActionType;
-
-	@Register.action("SetStat", SetStat)
-	public readonly actionSetStat: ActionType;
-
-	@Register.action("SetStatMax", SetStatMax)
-	public readonly actionSetStatMax: ActionType;
-
-	@Register.action("SetTamed", SetTamed)
-	public readonly actionSetTamed: ActionType;
-
-	@Register.action("Remove", Remove)
-	public readonly actionRemove: ActionType;
-
-	@Register.action("ChangeLayer", ChangeLayer)
-	public readonly actionChangeLayer: ActionType;
-
-	@Register.action("ChangeTerrain", ChangeTerrain)
-	public readonly actionChangeTerrain: ActionType;
-
-	@Register.action("ToggleTilled", ToggleTilled)
-	public readonly actionToggleTilled: ActionType;
-
-	@Register.action("AddItemToInventory", AddItemToInventory)
-	public readonly actionAddItemToInventory: ActionType;
-
-	@Register.action("SetDurability", SetDurability)
-	public readonly actionSetDurability: ActionType;
-
-	@Register.action("SetDecay", SetDecay)
-	public readonly actionSetDecay: ActionType;
-
-	@Register.action("SetQuality", SetQuality)
-	public readonly actionSetQuality: ActionType;
-
-	@Register.action("SetQualityBulk", SetQualityBulk)
-	public readonly actionSetQualityBulk: ActionType;
-
-	@Register.action("SetDurabilityBulk", SetDurabilityBulk)
-	public readonly actionSetDurabilityBulk: ActionType;
-
-	@Register.action("SetDecayBulk", SetDecayBulk)
-	public readonly actionSetDecayBulk: ActionType;
-
-	@Register.action("ClearInventory", ClearInventory)
-	public readonly actionClearInventory: ActionType;
-
-	@Register.action("Paint", Paint)
-	public readonly actionPaint: ActionType;
-
-	@Register.action("SetSkill", SetSkill)
-	public readonly actionSetSkill: ActionType;
-
-	@Register.action("SetGrowingStage", SetGrowingStage)
-	public readonly actionSetGrowingStage: ActionType;
-
-	@Register.action("ToggleNoclip", ToggleNoClip)
-	public readonly actionToggleNoclip: ActionType;
-
-	@Register.action("ToggleFastMovement", ToggleFastMovement)
-	public readonly actionToggleFastMovement: ActionType;
-
-	@Register.action("RenameIsland", RenameIsland)
-	public readonly actionRenameIsland: ActionType;
-
-	@Register.action("MoveToIsland", MoveToIsland)
-	public readonly actionMoveToIsland: ActionType;
-
-	@Register.action("ForceSailToCivilization", ForceSailToCivilization)
-	public readonly actionForceSailToCivilization: ActionType;
-
-	@Register.action("ReplacePlayerData", ReplacePlayerData)
-	public readonly actionReplacePlayerData: ActionType;
-
-	@Register.action("FastForward", FastForward)
-	public readonly actionFastForward: ActionType;
-
-	@Register.action("ClearNotes", ClearNotes)
-	public readonly actionClearNotes: ActionType;
-
-	@Register.action("SetPlayerData", SetPlayerData)
-	public readonly actionSetPlayerData: ActionType;
-
-	@Register.action("SpawnCurseEvent", SpawnCurseEvent)
-	public readonly actionSpawnCurseEvent: ActionType;
-
-	@Register.action("ClearCurseEvents", ClearCurseEvents)
-	public readonly actionClearCurseEvents: ActionType;
-
-	@Register.action("SkipCurseEventTimers", SkipCurseEventTimers)
-	public readonly actionSkipCurseEventTimers: ActionType;
-
-	@Register.action("MagicalPropertyRemove", MagicalPropertyActions.Remove)
-	public readonly actionMagicalPropertyRemove: ActionType;
-
-	@Register.action("MagicalPropertyChange", MagicalPropertyActions.Change)
-	public readonly actionMagicalPropertyChange: ActionType;
-
-	@Register.action("MagicalPropertySetCurse", MagicalPropertyActions.SetCurse)
-	public readonly actionMagicalPropertySetCurse: ActionType;
-
-	@Register.action("MagicalPropertyClearAll", MagicalPropertyActions.Clear)
-	public readonly actionMagicalPropertyClearAll: ActionType;
-
-	@Register.action("ToggleAiType", ToggleAiType)
-	public readonly actionToggleAiType: ActionType;
-
-	@Register.action("ToggleAiMask", ToggleAiMask)
-	public readonly actionToggleAiMask: ActionType;
-
-	@Register.action("ResetNPCSpawnInterval", ResetNPCSpawnInterval)
-	public readonly actionResetNPCSpawnInterval: ActionType;
-
-	////////////////////////////////////
-	// UI
-	//
-
-	@Register.dialog("Main", MainDialog.description, MainDialog)
-	public readonly dialogMain: DialogId;
-	@Register.dialog("Inspect", InspectDialog.description, InspectDialog)
-	public readonly dialogInspect: DialogId;
-
-	@Register.inspectionType("temperature", TemperatureInspection)
-	public readonly inspectionTemperature: InspectType;
-
-	@Register.menuBarButton("Dialog", {
-		onActivate: () => DebugTools.INSTANCE.toggleDialog(),
-		group: MenuBarButtonGroup.Meta,
-		bindable: Registry<DebugTools>().get("bindableToggleDialog"),
-		tooltip: tooltip => tooltip.schedule(tooltip => tooltip.getLastBlock().dump())
-			.setText(translation(DebugToolsTranslation.DialogTitleMain)),
-		onCreate: button => {
-			button.toggle(DebugTools.INSTANCE.hasPermission());
-			DebugTools.INSTANCE.event.until(DebugTools.INSTANCE, "unload")
-				.subscribe("playerDataChange", () => button.toggle(DebugTools.INSTANCE.hasPermission()));
-		},
-	})
-	public readonly menuBarButton: MenuBarButtonType;
-
-	@Register.overlay("Target")
-	public readonly overlayTarget: OverlayType;
-	@Register.overlay("Paint")
-	public readonly overlayPaint: OverlayType;
 
 	public getInspectDialog(): InspectDialog | undefined {
 		return InspectDialog.INSTANCE;
@@ -411,6 +123,8 @@ export default class DebugTools extends Mod {
 	// Fields
 	// 
 
+	public readonly selector = new LocationSelector();
+	public readonly unlockedCameraMovementHandler = new UnlockedCameraMovementHandler();
 	public temperatureOverlay = new TemperatureOverlay();
 	public creatureZoneOverlay = new CreatureZoneOverlay();
 	public accidentalDeathHelper = new AccidentalDeathHelper();
@@ -496,8 +210,8 @@ export default class DebugTools extends Mod {
 		}
 
 		if (!this.hasPermission() && gameScreen) {
-			gameScreen.dialogs.close(this.dialogMain);
-			gameScreen.dialogs.close(this.dialogInspect);
+			gameScreen.dialogs.close(dialogMain.value);
+			gameScreen.dialogs.close(dialogInspect.value);
 		}
 	}
 
@@ -613,7 +327,7 @@ export default class DebugTools extends Mod {
 			return;
 		}
 
-		gameScreen.dialogs.open<InspectDialog>(DebugTools.INSTANCE.dialogInspect)
+		gameScreen.dialogs.open<InspectDialog>(dialogInspect.value)
 			.setInspection(what);
 
 		this.event.emit("inspect");
@@ -627,7 +341,7 @@ export default class DebugTools extends Mod {
 			return;
 		}
 
-		gameScreen.dialogs.toggle(this.dialogMain);
+		gameScreen.dialogs.toggle(dialogMain.value);
 	}
 
 	public hasPermission(player = localPlayer): boolean | undefined {
@@ -765,7 +479,7 @@ export default class DebugTools extends Mod {
 		return weight + this.getPlayerData(player, "weightBonus");
 	}
 
-	@Bind.onDown(Registry<DebugTools>().get("bindableToggleCameraLock"))
+	@Bind.onDown(bindableToggleCameraLock.value)
 	public onToggleCameraLock(): boolean {
 		if (!this.hasPermission()) {
 			return false;
@@ -775,7 +489,7 @@ export default class DebugTools extends Mod {
 		return true;
 	}
 
-	@Bind.onDown(Registry<DebugTools>().get("bindableToggleFullVisibility"))
+	@Bind.onDown(bindableToggleFullVisibility.value)
 	public onToggleFullVisibility(): boolean {
 		if (!this.hasPermission()) {
 			return false;
@@ -787,7 +501,7 @@ export default class DebugTools extends Mod {
 		return true;
 	}
 
-	@Bind.onDown(Registry<DebugTools>().get("bindableInspectTile"))
+	@Bind.onDown(bindableInspectTile.value)
 	public onInspectTile(): boolean {
 		if (!this.hasPermission() || !gameScreen?.isMouseWithin || !renderer) {
 			return false;
@@ -808,7 +522,7 @@ export default class DebugTools extends Mod {
 		return true;
 	}
 
-	@Bind.onDown(Registry<DebugTools>().get("bindableInspectItem"))
+	@Bind.onDown(bindableInspectItem.value)
 	public onInspectItem(api: IBindHandlerApi): boolean {
 		const item = api.mouse.isWithin(`.${ItemClasses.Main}`)?.component?.getAs(ItemComponent)?.handler.getItem?.();
 		if (!this.hasPermission() || !item) {
@@ -819,7 +533,7 @@ export default class DebugTools extends Mod {
 		return true;
 	}
 
-	@Bind.onDown(Registry<DebugTools>().get("bindableInspectLocalPlayer"))
+	@Bind.onDown(bindableInspectLocalPlayer.value)
 	public onInspectLocalPlayer(): boolean {
 		if (!this.hasPermission()) {
 			return false;
@@ -829,7 +543,7 @@ export default class DebugTools extends Mod {
 		return true;
 	}
 
-	@Bind.onDown(Registry<DebugTools>().get("bindableHealLocalPlayer"))
+	@Bind.onDown(bindableHealLocalPlayer.value)
 	public onHealLocalPlayer(): boolean {
 		if (!this.hasPermission()) {
 			return false;
@@ -839,7 +553,7 @@ export default class DebugTools extends Mod {
 		return true;
 	}
 
-	@Bind.onDown(Registry<DebugTools>().get("bindableTeleportLocalPlayer"))
+	@Bind.onDown(bindableTeleportLocalPlayer.value)
 	public onTeleportLocalPlayer(api: IBindHandlerApi): boolean {
 		if (!this.hasPermission() || !renderer || Draggable.isDragging) {
 			return false;
@@ -854,7 +568,7 @@ export default class DebugTools extends Mod {
 		return true;
 	}
 
-	@Bind.onDown(Registry<DebugTools>().get("bindableToggleNoClipOnLocalPlayer"))
+	@Bind.onDown(bindableToggleNoClipOnLocalPlayer.value)
 	public onToggleNoClipOnLocalPlayer(): boolean {
 		if (!this.hasPermission()) {
 			return false;
@@ -864,7 +578,7 @@ export default class DebugTools extends Mod {
 		return true;
 	}
 
-	@Bind.onDown(Registry<DebugTools>().get("bindableToggleFastMovementOnLocalPlayer"))
+	@Bind.onDown(bindableToggleFastMovementOnLocalPlayer.value)
 	public onToggleFastMovementOnLocalPlayer(): boolean {
 		if (!this.hasPermission()) {
 			return false;

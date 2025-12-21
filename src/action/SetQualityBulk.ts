@@ -12,4 +12,5 @@ export default new Action(ActionArgument.Container, ActionArgument.ENUM(Quality)
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
-	.setHandler((action, target, quality) => setQuality(action, quality, ...target.containedItems));
+	.setHandler((action, target, quality) => setQuality(action, quality, ...target.containedItems))
+	.modRegistration("SetQualityBulk");

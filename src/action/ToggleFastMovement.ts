@@ -13,4 +13,5 @@ export default new Action(ActionArgument.Player)
 		}
 
 		player.fastMoving = !player.fastMoving;
-	});
+	})
+	.modRegistration("ToggleFastMovement");

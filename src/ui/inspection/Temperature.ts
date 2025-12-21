@@ -17,22 +17,18 @@ import type TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 import Mod from "@wayward/game/mod/Mod";
 import type { TranslationGenerator } from "@wayward/game/ui/component/IComponent";
 import { Heading, Paragraph } from "@wayward/game/ui/component/Text";
-import type DebugTools from "../../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
+import { DebugToolsTranslation, translation } from "../../IDebugTools";
 
 export default class TemperatureInspection extends Inspection<Tile> {
 
 	private tempValue?: number;
 
-	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
-	public static readonly DEBUG_TOOLS: DebugTools;
-
 	public static getFromTile(tile: Tile, context?: InfoProviderContext): never[] | TemperatureInspection {
-		return TemperatureInspection.DEBUG_TOOLS ? new TemperatureInspection(tile, context) : [];
+		return new TemperatureInspection(tile, context);
 	}
 
 	public constructor(tile: Tile, context?: InfoProviderContext) {
-		super(TemperatureInspection.DEBUG_TOOLS.inspectionTemperature, tile, context);
+		super(inspectionTemperature.value, tile, context);
 	}
 
 	public override getId(): string {
@@ -151,3 +147,5 @@ export default class TemperatureInspection extends Inspection<Tile> {
 			.addArgs(heat - cold);
 	}
 }
+
+const inspectionTemperature = Mod.register.inspectionType("temperature", TemperatureInspection);

@@ -27,6 +27,7 @@ import type Log from "@wayward/utilities/Log";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { weakRefify } from "@wayward/utilities/object/Objects";
 import type DebugTools from "../../DebugTools";
+import type { ModRegistrationInspectDialogEntityInformationSubsection } from "../../IDebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Clone from "../../action/Clone";
 import Heal from "../../action/Heal";
@@ -53,6 +54,8 @@ const entitySubsectionClasses: InspectDialogEntityInformationSubsectionClass[] =
 	NpcInformation,
 	CreatureInformation,
 ];
+
+const modRegistryInspectDialogEntityInformationSubsections = Mod.register.interModRegistry<ModRegistrationInspectDialogEntityInformationSubsection>("InspectDialogEntityInformationSubsection");
 
 export default class EntityInformation extends InspectInformationSection {
 
@@ -111,7 +114,7 @@ export default class EntityInformation extends InspectInformationSection {
 			.subscribe("changeMode", () => this.highlightZone.refresh(false));
 
 		this.subsections = entitySubsectionClasses
-			.concat(this.DEBUG_TOOLS.modRegistryInspectDialogEntityInformationSubsections.getRegistrations()
+			.concat(modRegistryInspectDialogEntityInformationSubsections.value.getRegistrations()
 				.map(registration => registration.data(InspectEntityInformationSubsection)))
 			.map(cls => new cls()
 				.appendTo(this));

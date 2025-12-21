@@ -23,4 +23,5 @@ export default new Action(ActionArgument.Player, ActionArgument.Integer32, Actio
 				}
 			}
 		}
-	});
+	})
+	.modRegistration("SetSkill");

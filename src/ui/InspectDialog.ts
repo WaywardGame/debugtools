@@ -8,7 +8,6 @@ import type { IOverlayInfo } from "@wayward/game/game/tile/ITerrain";
 import Tile from "@wayward/game/game/tile/Tile";
 import type Translation from "@wayward/game/language/Translation";
 import Mod from "@wayward/game/mod/Mod";
-import { Registry } from "@wayward/game/mod/ModRegistry";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
 import type Button from "@wayward/game/ui/component/Button";
 import type Component from "@wayward/game/ui/component/Component";
@@ -29,7 +28,8 @@ import { Tuple } from "@wayward/utilities/collection/Tuple";
 import type { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitter";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import type DebugTools from "../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
+import type { ModRegistrationInspectDialogInformationSection } from "../IDebugTools";
+import { DEBUG_TOOLS_ID, DebugToolsTranslation, overlayTarget, translation } from "../IDebugTools";
 import Container from "./component/Container";
 import InspectInformationSection from "./component/InspectInformationSection";
 import CorpseInformation from "./inspect/CorpseInformation";
@@ -40,6 +40,7 @@ import TerrainInformation from "./inspect/TerrainInformation";
 import TileEventInformation from "./inspect/TileEventInformation";
 import VehicleInformation from "./inspect/VehicleInformation";
 import ConsoleUtility from "@wayward/utilities/console/ConsoleUtility";
+import { IInput } from "@wayward/game/ui/input/IInput";
 
 export type InspectDialogInformationSectionClass = new () => InspectInformationSection;
 
@@ -55,6 +56,9 @@ const informationSectionClasses: InspectDialogInformationSectionClass[] = [
 	TileEventInformation,
 	ItemInformation,
 ];
+
+const modRegistryInspectDialogPanels = Mod.register.interModRegistry<ModRegistrationInspectDialogInformationSection>("InspectDialogPanel");
+const bindableCloseInspectDialog = Mod.register.bindable("CloseInspectDialog", IInput.key("KeyI", "Alt"));
 
 export interface IInspectDialogEvents extends Events<TabDialog<InspectInformationSection>> {
 	updateSubpanels(): any;
@@ -106,7 +110,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	 */
 	protected override getSubpanels(): InspectInformationSection[] {
 		const subpanels = informationSectionClasses
-			.concat(this.DEBUG_TOOLS.modRegistryInspectDialogPanels.getRegistrations()
+			.concat(modRegistryInspectDialogPanels.value.getRegistrations()
 				.map(registration => registration.data(InspectInformationSection)))
 			.map(cls => new cls()
 				.event.subscribe("update", this.update));
@@ -215,7 +219,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 	}
 
 	@EventHandler(EventBus.LocalPlayer, "preMoveToIsland")
-	@Bind.onDown(Registry<DebugTools>(DEBUG_TOOLS_ID).get("bindableCloseInspectDialog"))
+	@Bind.onDown(bindableCloseInspectDialog.value)
 	public onCloseBind(): boolean {
 		void this.close();
 		return true;
@@ -338,7 +342,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 		this.inspectingTile = {
 			tile: this.tile,
 			overlay: {
-				type: this.DEBUG_TOOLS.overlayTarget,
+				type: overlayTarget.value,
 				red: 0,
 				blue: 0,
 			},

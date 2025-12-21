@@ -20,4 +20,5 @@ export default new Action()
 
 		action.executor.computeLights();
 		action.setUpdateView(true);
-	});
+	})
+	.modRegistration("SetNight");

@@ -4,7 +4,6 @@ import { TileTemplateType } from "@wayward/game/game/tile/ITerrain";
 import { terrainTemplates } from "@wayward/game/game/tile/TerrainTemplates";
 import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 import Mod from "@wayward/game/mod/Mod";
-import { Registry } from "@wayward/game/mod/ModRegistry";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
 import type Button from "@wayward/game/ui/component/Button";
 import { CheckButton } from "@wayward/game/ui/component/CheckButton";
@@ -29,6 +28,7 @@ import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebug
 import PlaceTemplate from "../../action/PlaceTemplate";
 import SelectionOverlay from "../../overlay/SelectionOverlay";
 import DebugToolsPanel from "../component/DebugToolsPanel";
+import { bindableCancelSelectLocation, bindableSelectLocation } from "../../LocationSelector";
 
 export default class TemplatePanel extends DebugToolsPanel {
 
@@ -133,7 +133,7 @@ export default class TemplatePanel extends DebugToolsPanel {
 		return undefined;
 	}
 
-	@Bind.onUp(Registry<DebugTools>(DEBUG_TOOLS_ID).registry("selector").get("bindableSelectLocation"), Priority.High + 1)
+	@Bind.onUp(bindableSelectLocation.value, Priority.High + 1)
 	protected onStopSelectLocation(): boolean {
 		this.selectHeld = false;
 		return false;
@@ -177,14 +177,14 @@ export default class TemplatePanel extends DebugToolsPanel {
 		const topLeft = new Vector2(center)
 			.subtract({ x: Math.floor(width / 2), y: Math.floor(height / 2) });
 
-		if (InputManager.input.isHolding(this.DEBUG_TOOLS.selector.bindableSelectLocation)) {
+		if (InputManager.input.isHolding(bindableSelectLocation.value)) {
 			this.placeTemplate(topLeft);
 			this.selectHeld = true;
 			this.clearPreview();
 			return true;
 		}
 
-		if (InputManager.input.isHolding(this.DEBUG_TOOLS.selector.bindableCancelSelectLocation)) {
+		if (InputManager.input.isHolding(bindableCancelSelectLocation.value)) {
 			this.place.setChecked(false);
 			this.clearPreview();
 			return true;

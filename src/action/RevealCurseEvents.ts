@@ -3,16 +3,14 @@ import { Action } from "@wayward/game/game/entity/action/Action";
 import { ActionUsability } from "@wayward/game/game/entity/action/IAction";
 import { EntityType } from "@wayward/game/game/entity/IEntity";
 import { defaultCanUseHandler } from "../Actions";
-import CurseHelpers from "./helpers/CurseHelpers";
 
 export default new Action()
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
 	.setHandler(action => {
-		const oldNight = action.executor.island.curse.night;
-		Curse.cleanup(action.executor.island);
-		action.executor.island.curse.night = oldNight;
-		CurseHelpers.updateStatuses(action.executor.island);
+		for (const curse of Curse.all(action.executor.island)) {
+			curse.reveal(action.executor);
+		}
 	})
-	.modRegistration("ClearCurseEvents");
+	.modRegistration("RevealCurseEvents");

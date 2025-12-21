@@ -6,12 +6,12 @@ import type { DialogId, IDialogDescription } from "@wayward/game/ui/screen/scree
 import { Edge } from "@wayward/game/ui/screen/screens/game/Dialogs";
 import type { SubpanelInformation } from "@wayward/game/ui/screen/screens/game/component/TabDialog";
 import TabDialog from "@wayward/game/ui/screen/screens/game/component/TabDialog";
-import type { MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
+import { MenuBarButtonGroup, type MenuBarButtonType } from "@wayward/game/ui/screen/screens/game/static/menubar/IMenuBarButton";
 import Vector2 from "@wayward/game/utilities/math/Vector2";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
-import type DebugTools from "../DebugTools";
-import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../IDebugTools";
+import type { ModRegistrationMainDialogPanel } from "../IDebugTools";
+import { DebugToolsTranslation, translation } from "../IDebugTools";
 import DebugToolsPanel from "./component/DebugToolsPanel";
 import DisplayPanel from "./panel/DisplayPanel";
 import GeneralPanel from "./panel/GeneralPanel";
@@ -24,6 +24,10 @@ import TemplatePanel from "./panel/TemplatePanel";
 import ZonesPanel from "./panel/ZonesPanel";
 import Task from "@wayward/utilities/promise/Task";
 import CursePanel from "./panel/CursePanel";
+import { IInput } from "@wayward/game/ui/input/IInput";
+import type DebugToolsMod from "../DebugTools";
+
+const DebugTools = Mod.get<DebugToolsMod>();
 
 export type DebugToolsDialogPanelClass = new () => DebugToolsPanel;
 
@@ -43,6 +47,23 @@ const subpanelClasses: DebugToolsDialogPanelClass[] = [
 	HistoryPanel,
 ];
 
+const modRegistryMainDialogPanels = Mod.register.interModRegistry<ModRegistrationMainDialogPanel>("MainDialogPanel");
+export const bindableToggleDialog = Mod.register.bindable("ToggleDialog", IInput.key("Backslash"), IInput.key("IntlBackslash"));
+
+const menuBarButton = Mod.register.menuBarButton("Dialog", {
+	onActivate: () => DebugTools?.instance?.toggleDialog(),
+	group: MenuBarButtonGroup.Meta,
+	bindable: bindableToggleDialog.value,
+	tooltip: tooltip => tooltip.schedule(tooltip => tooltip.getLastBlock().dump())
+		.setText(translation(DebugToolsTranslation.DialogTitleMain)),
+	onCreate: button => {
+		const debugTools = DebugTools?.instance as DebugToolsMod | undefined;
+		button.toggle(debugTools?.hasPermission());
+		debugTools?.event.until(debugTools, "unload")
+			.subscribe("playerDataChange", () => button.toggle(debugTools?.hasPermission()));
+	},
+});
+
 export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 	/**
 	 * The positioning settings for the dialog.
@@ -56,9 +77,6 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 		],
 	};
 
-	@Mod.instance<DebugTools>(DEBUG_TOOLS_ID)
-	public readonly DEBUG_TOOLS: DebugTools;
-
 	@Save(SaveLocation.Local)
 	private current: string | number | undefined;
 
@@ -66,7 +84,7 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 		super(id);
 		this.classes.add("debug-tools-dialog");
 
-		if (!this.DEBUG_TOOLS.hasPermission()) {
+		if (!DebugTools?.instance?.hasPermission()) {
 			void Task.yield().then(() => gameScreen?.dialogs.close(id));
 		}
 	}
@@ -76,11 +94,11 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 	}
 
 	public override getBindable(): Bindable {
-		return this.DEBUG_TOOLS.bindableToggleDialog;
+		return bindableToggleDialog.value;
 	}
 
 	public override getIcon(): MenuBarButtonType {
-		return this.DEBUG_TOOLS.menuBarButton;
+		return menuBarButton.value;
 	}
 
 	protected override getDefaultSubpanelInformation(): SubpanelInformation | undefined {
@@ -98,7 +116,7 @@ export default class DebugToolsDialog extends TabDialog<DebugToolsPanel> {
 	 */
 	protected override getSubpanels(): DebugToolsPanel[] {
 		return subpanelClasses
-			.concat(this.DEBUG_TOOLS.modRegistryMainDialogPanels.getRegistrations()
+			.concat(modRegistryMainDialogPanels.value.getRegistrations()
 				.map(registration => registration.data(DebugToolsPanel)))
 			.map(cls => new cls());
 	}

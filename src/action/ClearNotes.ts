@@ -9,4 +9,5 @@ export default new Action(ActionArgument.Human)
 	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, human) => {
 		human.notes.clear();
-	});
+	})
+	.modRegistration("ClearNotes");

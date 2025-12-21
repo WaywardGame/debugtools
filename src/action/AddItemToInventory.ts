@@ -100,4 +100,5 @@ export default new Action(ActionArgument.Container, ActionArgument.ANY(ActionArg
 		}
 
 		DEBUG_TOOLS?.instance?.getInspectDialog()?.update();
-	});
+	})
+	.modRegistration("AddItemToInventory");

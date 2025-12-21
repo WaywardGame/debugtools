@@ -14,4 +14,5 @@ export default new Action(ActionArgument.Doodad, ActionArgument.Integer32)
 
 		doodad.setGrowingStage(growingStage);
 		action.setUpdateView(true);
-	});
+	})
+	.modRegistration("SetGrowingStage");

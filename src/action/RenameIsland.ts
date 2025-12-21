@@ -15,4 +15,5 @@ export default new Action(ActionArgument.String)
 
 		action.setContext(undefined, Translation.merge(action.executor.island.getName()), { NEW_NAME: name });
 		action.executor.island.name = name === action.executor.island.id ? undefined : name;
-	});
+	})
+	.modRegistration("RenameIsland");

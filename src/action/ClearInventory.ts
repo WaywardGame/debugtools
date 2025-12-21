@@ -26,4 +26,5 @@ export default new Action(ActionArgument.Container)
 		}
 
 		DEBUG_TOOLS?.instance?.getInspectDialog()?.update();
-	});
+	})
+	.modRegistration("ClearInventory");

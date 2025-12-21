@@ -239,7 +239,8 @@
 			"spawnCurseEvent": "Spawn",
 			"clearCurseEvents": "Clear Curse Events",
 			"skipCurseEventTimers": "Skip Timers + Tick",
-			"curseOverride": "Curse Override"
+			"curseOverride": "Curse Override",
+			"revealCurseEvents": "Reveal Curse Events"
 		},
 		"item": {
 			"none": "none"

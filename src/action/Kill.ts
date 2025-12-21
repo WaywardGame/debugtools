@@ -23,4 +23,5 @@ export default new Action(ActionArgument.Entity)
 			action.setUpdateRender();
 			action.setPassTurn();
 		}
-	});
+	})
+	.modRegistration("Kill");

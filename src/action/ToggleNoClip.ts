@@ -16,4 +16,5 @@ export default new Action(ActionArgument.Player)
 		player.setMoveType(player.isFlying ? MoveType.Land : MoveType.Flying);
 
 		player.updateView(RenderSource.Mod, true);
-	});
+	})
+	.modRegistration("ToggleNoClip");

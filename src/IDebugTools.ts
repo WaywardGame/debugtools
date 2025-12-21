@@ -8,6 +8,7 @@ import type DebugToolsPanel from "./ui/component/DebugToolsPanel";
 import type InspectEntityInformationSubsection from "./ui/component/InspectEntityInformationSubsection";
 import type InspectInformationSection from "./ui/component/InspectInformationSection";
 import type { InspectDialogEntityInformationSubsectionClass } from "./ui/inspect/EntityInformation";
+import Mod from "@wayward/game/mod/Mod";
 
 export const DEBUG_TOOLS_ID = "Debug Tools";
 
@@ -19,7 +20,7 @@ let debugTools: DebugTools | undefined;
  */
 export function translation(debugToolsTranslation: DebugToolsTranslation | Translation): TranslationImpl {
 	return !debugTools ? Translation.empty()
-		: typeof debugToolsTranslation !== "number" ? debugToolsTranslation : Translation.get(debugTools.dictionary, debugToolsTranslation);
+		: typeof debugToolsTranslation !== "number" ? debugToolsTranslation : Translation.get(DebugToolsDictionary.value, debugToolsTranslation);
 }
 
 export namespace translation {
@@ -169,6 +170,7 @@ export enum DebugToolsTranslation {
 	ClearCurseEvents,
 	SkipCurseEventTimers,
 	CurseOverride,
+	RevealCurseEvents,
 
 	////////////////////////////////////
 	// Inspect Dialog
@@ -269,6 +271,8 @@ export enum DebugToolsTranslation {
 	StatsPercentage,
 }
 
+export const DebugToolsDictionary = Mod.register.dictionary("DebugTools", DebugToolsTranslation);
+
 export interface ISaveData {
 	lastVersion: string;
 	/**
@@ -329,3 +333,9 @@ export interface IGlobalData {
 export type ModRegistrationMainDialogPanel = (cls: typeof DebugToolsPanel) => DebugToolsDialogPanelClass;
 export type ModRegistrationInspectDialogInformationSection = (cls: typeof InspectInformationSection) => InspectDialogInformationSectionClass;
 export type ModRegistrationInspectDialogEntityInformationSubsection = (cls: typeof InspectEntityInformationSubsection) => InspectDialogEntityInformationSubsectionClass;
+
+export const overlayTarget = Mod.register.overlay("Target");
+export const overlayPaint = Mod.register.overlay("Paint");
+
+export const messageFailureTileBlocked = Mod.register.message("FailureTileBlocked");
+export const messageSource = Mod.register.messageSource("DebugTools");

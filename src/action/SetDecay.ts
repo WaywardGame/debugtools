@@ -17,7 +17,8 @@ export default new Action(ActionArgument.Item, ActionArgument.Float64)
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
-	.setHandler((action, item, decay) => setDecay(action, decay, item));
+	.setHandler((action, item, decay) => setDecay(action, decay, item))
+	.modRegistration("SetDecay");
 
 export function setDecay(action: IActionHandlerApi<Human>, decay: number, ...items: Item[]): void {
 	const canUse = action.canUse();

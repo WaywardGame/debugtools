@@ -21,4 +21,5 @@ export default new Action(ActionArgument.ANY(ActionArgument.Entity, ActionArgume
 
 		renderers.computeSpritesInViewport(toRemove);
 		action.setUpdateRender();
-	});
+	})
+	.modRegistration("Remove");

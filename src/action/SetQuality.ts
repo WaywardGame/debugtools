@@ -18,7 +18,8 @@ export default new Action(ActionArgument.Item, ActionArgument.ENUM(Quality))
 	.setUsableBy(EntityType.Human)
 	.setUsableWhen(ActionUsability.Always)
 	.setCanUse(defaultCanUseHandler)
-	.setHandler((action, item, quality) => setQuality(action, quality, item));
+	.setHandler((action, item, quality) => setQuality(action, quality, item))
+	.modRegistration("SetQuality");
 
 export function setQuality(action: IActionHandlerApi<Human>, quality: Quality, ...items: Item[]): void {
 	const canUse = action.canUse();

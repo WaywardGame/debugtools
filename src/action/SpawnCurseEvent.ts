@@ -20,4 +20,5 @@ export default new Action(ActionArgument.ENUM(CurseEventType))
 		} else {
 			DebugTools?.log.info("Curse event did not spawn");
 		}
-	});
+	})
+	.modRegistration("SpawnCurseEvent");

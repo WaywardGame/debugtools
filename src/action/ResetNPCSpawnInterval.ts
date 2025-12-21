@@ -10,4 +10,5 @@ export default new Action(ActionArgument.ENUM(NPCType))
 	.setCanUse(defaultCanUseHandler)
 	.setHandler((action, type) => {
 		action.executor.island.npcs.resetSpawnInterval(type);
-	});
+	})
+	.modRegistration("ResetNPCSpawnInterval");

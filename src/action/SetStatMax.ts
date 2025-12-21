@@ -15,4 +15,5 @@ export default new Action(ActionArgument.Entity, ActionArgument.Integer32, Actio
 			entity?.asEntityWithStats?.stat.setValue(Stat.Strength, value); // Health is handled via strength, so we need to update its value too
 			ui.screens.get(ScreenId.Game)?.["refreshHealthBasedEffects"]();
 		}
-	});
+	})
+	.modRegistration("SetStatMax");

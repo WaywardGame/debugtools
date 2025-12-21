@@ -13,4 +13,5 @@ export default new Action(ActionArgument.Creature, ActionArgument.Boolean)
 		} else {
 			creature!.release();
 		}
-	});
+	})
+	.modRegistration("SetTamed");
