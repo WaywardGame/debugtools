@@ -26,7 +26,7 @@ export class MagicalPropertyIdentityArgument extends ActionArgumentCustom<Magica
 			return true;
 		}
 
-		return Enums.isValid(subTypeEnum, value[1]);
+		return Enums.isValid(subTypeEnum, value[1], !magicalPropertyDescriptions[value[0] as MagicalPropertyType]?.notBasicEnum);
 	}
 
 	public override read(): MagicalPropertyIdentity {
