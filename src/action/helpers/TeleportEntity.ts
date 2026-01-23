@@ -40,4 +40,8 @@ export function teleportEntity(action: ActionApi<any>, entity: Entity, tile: Til
 	}
 
 	action.setUpdateView(true);
+
+	if (entity.isLocalPlayer) {
+		void audio?.updatePosition();
+	}
 }
