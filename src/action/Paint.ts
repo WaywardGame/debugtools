@@ -38,7 +38,7 @@ export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 
 						const type = data.creature!.type;
 						if (type !== "remove") {
-							action.executor.island.creatures.spawn(type, tile, { bypassTiles: true, forceAberrant: data.creature!.aberrant, bypassCreatureLimit: true });
+							action.executor.island.creatures.spawn(type, tile, { bypassTiles: true, aberrant: data.creature!.aberrant, bypassCreatureLimit: true });
 						}
 
 						break;

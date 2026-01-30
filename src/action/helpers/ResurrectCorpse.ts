@@ -12,7 +12,7 @@ export default function (human: Human, corpse: Corpse): boolean {
 		return false;
 	}
 
-	const creature = human.island.creatures.spawn(corpse.type, tile, { bypassTiles: true, forceAberrant: corpse.aberrant, bypassCreatureLimit: true });
+	const creature = human.island.creatures.spawn(corpse.type, tile, { bypassTiles: true, aberrant: corpse.aberrant ?? false, bypassCreatureLimit: true });
 	creature!.renamed = corpse.renamed;
 	human.island.corpses.remove(corpse);
 
