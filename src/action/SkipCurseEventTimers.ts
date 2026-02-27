@@ -15,7 +15,9 @@ export default new Action()
 			for (const script of curse.scriptProcesses ?? []) {
 				skipIntervals(script);
 			}
+		}
 
+		if (action.executor.island.curse.events?.length) {
 			Curse.tickCurse(action.executor.island, action.executor.island.getPlayers(true));
 		}
 
