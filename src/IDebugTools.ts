@@ -171,6 +171,15 @@ export enum DebugToolsTranslation {
 	SkipCurseEventTimers,
 	CurseOverride,
 	RevealCurseEvents,
+	HeadingPlayerCurseData,
+	LabelInitialCurseModifier,
+	LabelCurseCumulativeEvilCrafting,
+	LabelCurseCumulativeKilling,
+	LabelCurseSleeplessness,
+	LabelCurseHighestAttack,
+	LabelCurseHighestDefense,
+	LabelCurseObliviousnessDays,
+	LabelCurseObliviousnessThisNightInvalidated,
 
 	////////////////////////////////////
 	// Inspect Dialog

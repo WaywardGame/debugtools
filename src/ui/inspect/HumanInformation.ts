@@ -62,6 +62,9 @@ export default class HumanInformation extends InspectEntityInformationSubsection
 			Stat.Weight,
 			Stat.InsulationHeat,
 			Stat.InsulationCold,
+			Stat.Strength,
+			Stat.Luck,
+			Stat.CurseRate,
 		] : [];
 	}
 

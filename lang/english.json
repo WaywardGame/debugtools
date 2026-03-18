@@ -240,7 +240,16 @@
 			"clearCurseEvents": "Clear Curse Events",
 			"skipCurseEventTimers": "Skip Timers + Tick",
 			"curseOverride": "Curse Override",
-			"revealCurseEvents": "Reveal Curse Events"
+			"revealCurseEvents": "Reveal Curse Events",
+			"headingPlayerCurseData": "Player Curse Data",
+			"labelInitialCurseModifier": "Initial Curse Modifier",
+			"labelCurseCumulativeEvilCrafting": "Cumulative Evil Crafting",
+			"labelCurseCumulativeKilling": "Cumulative Killing",
+			"labelCurseSleeplessness": "Sleeplessness",
+			"labelCurseHighestAttack": "Highest Attack",
+			"labelCurseHighestDefense": "Highest Defense",
+			"labelCurseObliviousnessDays": "Obliviousness Days",
+			"labelCurseObliviousnessThisNightInvalidated": "Obliviousness Invalidated Tonight"
 		},
 		"item": {
 			"none": "none"

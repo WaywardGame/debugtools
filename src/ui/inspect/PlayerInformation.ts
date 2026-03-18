@@ -1,3 +1,6 @@
+import { EventBus } from "@wayward/game/event/EventBuses";
+import { EventHandler } from "@wayward/game/event/EventManager";
+import { CURSE_CAP, CumulativeEvilCrafting, CumulativeKilling, HighestAttack, HighestDefense, Obliviousness, Sleeplessness } from "@wayward/game/game/curse/Curse";
 import type Creature from "@wayward/game/game/entity/creature/Creature";
 import type NPC from "@wayward/game/game/entity/npc/NPC";
 import type Player from "@wayward/game/game/entity/player/Player";
@@ -9,6 +12,7 @@ import Button from "@wayward/game/ui/component/Button";
 import { CheckButton } from "@wayward/game/ui/component/CheckButton";
 import type { IDropdownOption } from "@wayward/game/ui/component/Dropdown";
 import Dropdown from "@wayward/game/ui/component/Dropdown";
+import Input, { ClearType } from "@wayward/game/ui/component/Input";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
 import { RangeRow } from "@wayward/game/ui/component/RangeRow";
 import SkillDropdown from "@wayward/game/ui/component/dropdown/SkillDropdown";
@@ -19,6 +23,7 @@ import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebug
 import ClearNotes from "../../action/ClearNotes";
 import ReplacePlayerData from "../../action/ReplacePlayerData";
 import SetSkill from "../../action/SetSkill";
+import SetPlayerCurse, { PlayerCurseValueType } from "../../action/SetPlayerCurse";
 import ToggleNoClip from "../../action/ToggleNoClip";
 import ToggleFastMovement from "../../action/ToggleFastMovement";
 import InspectEntityInformationSubsection from "../component/InspectEntityInformationSubsection";
@@ -26,6 +31,7 @@ import SetPlayerData from "../../action/SetPlayerData";
 import { RenderSource } from "@wayward/game/renderer/IRenderer";
 import ConsoleUtility from "@wayward/utilities/console/ConsoleUtility";
 import type { SkillType } from "@wayward/game/game/entity/skill/ISkills";
+import Details from "@wayward/game/ui/component/Details";
 
 export default class PlayerInformation extends InspectEntityInformationSubsection {
 
@@ -38,6 +44,14 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	private readonly checkButtonNoClip: CheckButton;
 	private readonly checkButtonFastMovement: CheckButton;
 	private readonly skillRangeRow: RangeRow;
+	private readonly initialCurseModifier: RangeRow;
+	private readonly inputCurseCumulativeEvilCrafting: Input;
+	private readonly inputCurseCumulativeKilling: Input;
+	private readonly inputCurseSleeplessness: Input;
+	private readonly inputCurseHighestAttack: Input;
+	private readonly inputCurseHighestDefense: Input;
+	private readonly inputCurseObliviousnessDays: Input;
+	private readonly checkButtonCurseObliviousnessInvalidated: CheckButton;
 	private readonly checkButtonPermissions?: CheckButton;
 	private readonly playerToReplaceDataWithDropdown?: Dropdown<string>;
 	private readonly buttonExecuteDataReplace: Button;
@@ -120,6 +134,42 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 			.event.subscribe("finish", this.setSkill)
 			.appendTo(this);
 
+		const curseDetails = new Details()
+			.setSummary(summary => summary
+				.setText(translation(DebugToolsTranslation.HeadingPlayerCurseData)),
+			)
+			.appendTo(this);
+
+		this.initialCurseModifier = new RangeRow()
+			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelInitialCurseModifier)))
+			.editRange(range => range
+				.setMin(-CURSE_CAP)
+				.setMax(CURSE_CAP)
+				.setRefreshMethod(() => !this.player ? 0 : this.player.getGameOptions().initialCurse / 100 * CURSE_CAP))
+			.setDisplayValue(true)
+			.event.subscribe("finish", this.setInitialCurseModifier)
+			.appendTo(curseDetails);
+
+		let row: LabelledRow;
+		({ input: this.inputCurseCumulativeEvilCrafting, row } = this.addCurseNumberInput(DebugToolsTranslation.LabelCurseCumulativeEvilCrafting, () => this.player ? CumulativeEvilCrafting.get(this.player) : 0, PlayerCurseValueType.CumulativeEvilCrafting));
+		row.appendTo(curseDetails);
+		({ input: this.inputCurseCumulativeKilling, row } = this.addCurseNumberInput(DebugToolsTranslation.LabelCurseCumulativeKilling, () => this.player ? CumulativeKilling.get(this.player) : 0, PlayerCurseValueType.CumulativeKilling));
+		row.appendTo(curseDetails);
+		({ input: this.inputCurseSleeplessness, row } = this.addCurseNumberInput(DebugToolsTranslation.LabelCurseSleeplessness, () => this.player ? Sleeplessness.get(this.player) : 0, PlayerCurseValueType.Sleeplessness));
+		row.appendTo(curseDetails);
+		({ input: this.inputCurseHighestAttack, row } = this.addCurseNumberInput(DebugToolsTranslation.LabelCurseHighestAttack, () => this.player ? HighestAttack.get(this.player) : 0, PlayerCurseValueType.HighestAttack));
+		row.appendTo(curseDetails);
+		({ input: this.inputCurseHighestDefense, row } = this.addCurseNumberInput(DebugToolsTranslation.LabelCurseHighestDefense, () => this.player ? HighestDefense.get(this.player) : 0, PlayerCurseValueType.HighestDefense));
+		row.appendTo(curseDetails);
+		({ input: this.inputCurseObliviousnessDays, row } = this.addCurseNumberInput(DebugToolsTranslation.LabelCurseObliviousnessDays, () => this.player ? Obliviousness.get(this.player).days : 0, PlayerCurseValueType.ObliviousnessDays));
+		row.appendTo(curseDetails);
+
+		this.checkButtonCurseObliviousnessInvalidated = new CheckButton()
+			.setText(translation(DebugToolsTranslation.LabelCurseObliviousnessThisNightInvalidated))
+			.setRefreshMethod(() => this.player ? Obliviousness.get(this.player).thisNightInvalidated : false)
+			.event.subscribe("toggle", this.toggleObliviousnessInvalidated)
+			.appendTo(curseDetails);
+
 		const replaceDataRow: LabelledRow = new LabelledRow()
 			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelReplaceData)))
 			.appendTo(this);
@@ -185,8 +235,23 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 		this.checkButtonUnkillable.refresh();
 		this.checkButtonNoRender.refresh();
 		this.rangeWeightBonus.refresh();
+		this.initialCurseModifier.refresh();
+		this.refreshCurseInput(this.inputCurseCumulativeEvilCrafting);
+		this.refreshCurseInput(this.inputCurseCumulativeKilling);
+		this.refreshCurseInput(this.inputCurseSleeplessness);
+		this.refreshCurseInput(this.inputCurseHighestAttack);
+		this.refreshCurseInput(this.inputCurseHighestDefense);
+		this.refreshCurseInput(this.inputCurseObliviousnessDays);
+		this.checkButtonCurseObliviousnessInvalidated.refresh();
 		this.playerToReplaceDataWithDropdown?.refresh();
 		this.buttonExecuteDataReplace.refreshText();
+	}
+
+	@EventHandler(EventBus.LocalIsland, "tickEnd")
+	protected onTickEnd(): void {
+		if (this.player) {
+			this.refresh();
+		}
 	}
 
 	@Bound
@@ -200,6 +265,11 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	@Bound
 	private setSkill(_: any, value: number): void {
 		void SetSkill.execute(localPlayer, this.player!, typeof this.skill === "string" ? -1 : this.skill, value);
+	}
+
+	@Bound
+	private setInitialCurseModifier(_: any, value: number): void {
+		void SetPlayerCurse.execute(localPlayer, this.player!, PlayerCurseValueType.InitialCurseModifier, value);
 	}
 
 	@Bound
@@ -258,8 +328,13 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	}
 
 	@Bound
+	private toggleObliviousnessInvalidated(_: any, value: boolean): void {
+		void SetPlayerCurse.execute(localPlayer, this.player!, PlayerCurseValueType.ObliviousnessThisNightInvalidated, value);
+	}
+
+	@Bound
 	private onPlayerDataChange<K extends keyof IPlayerData>(_: any, playerId: number, key: K, value: IPlayerData[K]): void {
-		if (!this.player || playerId !== this.player.id) {
+		if (playerId !== this.player?.id) {
 			return;
 		}
 
@@ -280,6 +355,36 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 				break;
 		}
+	}
+
+	private addCurseNumberInput(label: DebugToolsTranslation, getter: () => number, type: PlayerCurseValueType): { input: Input; row: LabelledRow } {
+		const input = new Input()
+			.setClearToDefaultWhenEmpty()
+			.setDefault(() => `${getter()}`, true)
+			.event.subscribe("done", (input, value) => {
+				const parsed = +value;
+				if (isNaN(parsed) || !this.player) {
+					input.clear(ClearType.UseDefault);
+					return;
+				}
+
+				void SetPlayerCurse.execute(localPlayer, this.player, type, parsed);
+			});
+
+		const row = new LabelledRow()
+			.setLabel(labelComponent => labelComponent.setText(translation(label)))
+			.append(input)
+			.appendTo(this);
+
+		return { input, row };
+	}
+
+	private refreshCurseInput(input: Input): void {
+		if (input.isFocused() || input.changed) {
+			return;
+		}
+
+		input.clear(ClearType.UseDefault);
 	}
 
 	@Bound private replaceData(): void {

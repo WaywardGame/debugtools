@@ -45,6 +45,7 @@ import HumanInformation from "./HumanInformation";
 import NpcInformation from "./NpcInformation";
 import PlayerInformation from "./PlayerInformation";
 import ConsoleUtility from "@wayward/utilities/console/ConsoleUtility";
+import Math2 from "@wayward/utilities/math/Math2";
 
 export type InspectDialogEntityInformationSubsectionClass = new () => InspectEntityInformationSubsection;
 
@@ -223,35 +224,45 @@ export default class EntityInformation extends InspectInformationSection {
 			return;
 		}
 
-		// TODO: Take off Curse check when we add it back in
 		const stats = Enums.values(Stat)
-			.filter(stat => this.entity?.asEntityWithStats?.stat.has(stat) && (!this.subsections.some(subsection => subsection.getImmutableStats().includes(stat))) && stat !== Stat.Curse)
+			.filter(stat => this.entity?.asEntityWithStats?.stat.has(stat) && (!this.subsections.some(subsection => subsection.getImmutableStats().includes(stat))))
 			.map(stat => this.entity?.asEntityWithStats?.stat.get<IStat>(stat))
 			.filterNullish();
 
 		for (const stat of stats) {
-			if ("max" in stat && !stat.canExceedMax) {
+			if (!stat.canExceedMax) {
+				const statMax = stat.type === Stat.Curse ? 1 : stat.max;
 				this.statComponents.set(stat.type, new RangeRow()
 					.setLabel(label => label.setText(Translation.stat(stat.type).inContext(TextContext.Title)))
 					.editRange(range => range
 						.noClampOnRefresh()
 						.setMin(0)
-						.setMax(stat.max!)
+						.setMax(statMax!)
+						.schedule(range => {
+							if (stat.type === Stat.Curse) {
+								range.setStep(0.001);
+							}
+						})
 						.setRefreshMethod(() => this.entity ? this.entity.asEntityWithStats?.stat.getValue(stat.type)! : 0))
 					.event.subscribe("finish", this.setStat(stat.type))
-					.setDisplayValue(true)
+					.setDisplayValue((false
+						|| stat.type !== Stat.Curse
+						|| (v => Translation.merge(Math2.roundNumber(v, 3)))
+					))
 					.appendTo(this.statWrapper));
 
-				this.statMaxComponents.set(stat.type, new RangeRow()
-					.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelMax).addArgs(Translation.stat(stat.type).inContext(TextContext.Title))))
-					.editRange(range => range
-						.noClampOnRefresh()
-						.setMin(0)
-						.setMax(500)
-						.setRefreshMethod(() => this.entity ? this.entity.asEntityWithStats?.stat.getMax(stat.type)! : 0))
-					.event.subscribe("finish", this.setStatMax(stat.type))
-					.setDisplayValue(true)
-					.appendTo(this.statWrapper));
+				if (this.entity.asEntityWithStats.stat.hasMax(stat.type)) {
+					this.statMaxComponents.set(stat.type, new RangeRow()
+						.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelMax).addArgs(Translation.stat(stat.type).inContext(TextContext.Title))))
+						.editRange(range => range
+							.noClampOnRefresh()
+							.setMin(0)
+							.setMax(500)
+							.setRefreshMethod(() => this.entity ? this.entity.asEntityWithStats?.stat.getMax(stat.type)! : 0))
+						.event.subscribe("finish", this.setStatMax(stat.type))
+						.setDisplayValue(true)
+						.appendTo(this.statWrapper));
+				}
 
 			} else {
 				this.statComponents.set(stat.type, new Input()
