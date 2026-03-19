@@ -171,6 +171,8 @@ export enum DebugToolsTranslation {
 	SkipCurseEventTimers,
 	CurseOverride,
 	RevealCurseEvents,
+	ObscureCurseVisualFoW,
+	ResetCurseVisualFoW,
 	HeadingPlayerCurseData,
 	LabelInitialCurseModifier,
 	LabelCurseCumulativeEvilCrafting,

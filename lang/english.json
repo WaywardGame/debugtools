@@ -241,6 +241,8 @@
 			"skipCurseEventTimers": "Skip Timers + Tick",
 			"curseOverride": "Curse Override",
 			"revealCurseEvents": "Reveal Curse Events",
+			"obscureCurseVisualFoW": "Obscure all FoW",
+			"resetCurseVisualFoW": "Reveal all FoW",
 			"headingPlayerCurseData": "Player Curse Data",
 			"labelInitialCurseModifier": "Initial Curse Modifier",
 			"labelCurseCumulativeEvilCrafting": "Cumulative Evil Crafting",

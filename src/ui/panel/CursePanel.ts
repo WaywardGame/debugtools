@@ -19,6 +19,8 @@ import Mod from "@wayward/game/mod/Mod";
 import type DebugToolsMod from "../../DebugTools";
 import SetPlayerData from "../../action/SetPlayerData";
 import RevealCurseEvents from "../../action/RevealCurseEvents";
+import ObscureCurseVisualFoW from "../../action/ObscureCurseVisualFoW";
+import ResetCurseVisualFoW from "../../action/ResetCurseVisualFoW";
 
 const DebugTools = Mod.get<DebugToolsMod>();
 
@@ -75,6 +77,17 @@ export default class CursePanel extends DebugToolsPanel {
 		new Button()
 			.setText(translation(DebugToolsTranslation.RevealCurseEvents))
 			.event.subscribe("activate", () => void RevealCurseEvents.execute(localPlayer))
+			.appendTo(this);
+
+		new BlockRow()
+			.append((new Button()
+				.setText(translation(DebugToolsTranslation.ObscureCurseVisualFoW))
+				.event.subscribe("activate", () => void ObscureCurseVisualFoW.execute(localPlayer))
+			))
+			.append((new Button()
+				.setText(translation(DebugToolsTranslation.ResetCurseVisualFoW))
+				.event.subscribe("activate", () => void ResetCurseVisualFoW.execute(localPlayer))
+			))
 			.appendTo(this);
 
 		new Button()
