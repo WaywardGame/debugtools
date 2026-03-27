@@ -2,6 +2,7 @@ import type { Events, IEventEmitter } from "@wayward/utilities/event/EventEmitte
 import { Priority } from "@wayward/utilities/event/EventEmitter";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
 import type { DoodadType } from "@wayward/game/game/doodad/IDoodad";
+import type { Quality } from "@wayward/game/game/IObject";
 import type { CreatureType } from "@wayward/game/game/entity/creature/ICreature";
 import type { NPCType } from "@wayward/game/game/entity/npc/INPCs";
 import type { TerrainType } from "@wayward/game/game/tile/ITerrain";
@@ -56,6 +57,7 @@ export interface IPaintData {
 	};
 	doodad?: {
 		type: DoodadType | "remove";
+		quality?: Quality;
 	};
 	corpse?: {
 		type: CreatureType | "remove" | undefined;

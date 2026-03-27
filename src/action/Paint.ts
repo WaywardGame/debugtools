@@ -66,7 +66,7 @@ export default new Action(ActionArgument.TileArray, ActionArgument.Object)
 
 						const type = data.doodad!.type;
 						if (type !== "remove") {
-							action.executor.island.doodads.create(type, tile);
+							action.executor.island.doodads.create(type, tile, { quality: data.doodad!.quality });
 						}
 
 						break;
