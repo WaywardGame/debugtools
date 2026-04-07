@@ -137,6 +137,7 @@
 			"buttonHealLocalPlayer": "Heal {BINDINGS:ModDebugToolsHealLocalPlayer}",
 			"buttonTeleportLocalPlayer": "Teleport {BINDINGS:ModDebugToolsTeleportLocalPlayer}",
 			"buttonCloneEntity": "Clone",
+			"buttonAddItemsWithAllMagicalProperties": "Add Items With All Magical Properties",
 			"buttonClearInventory": "Remove All Contained Items",
 			"labelBulkItemOperations": "Bulk Item Actions",
 			"killEntityDeathMessage": "by l33t h4x0r",

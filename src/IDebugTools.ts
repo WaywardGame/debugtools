@@ -265,6 +265,7 @@ export enum DebugToolsTranslation {
 	UnlockInspection,
 	LockInspection,
 	TileEventName,
+	ButtonAddItemsWithAllMagicalProperties,
 	ButtonTogglePermissions,
 	ButtonSetGrowthStage,
 	LabelItemDetails,

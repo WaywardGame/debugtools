@@ -22,6 +22,7 @@ import { Bound } from "@wayward/utilities/Decorators";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import type EventEmitter from "@wayward/utilities/event/EventEmitter";
 import { DebugToolsTranslation, translation } from "../../IDebugTools";
+import AddItemsWithAllMagicalProperties from "../../action/AddItemsWithAllMagicalProperties";
 import ClearInventory from "../../action/ClearInventory";
 import Remove from "../../action/Remove";
 import SetDecay from "../../action/SetDecay";
@@ -138,6 +139,9 @@ export default class Container extends Component {
 				.append(this.buttonBulkQualityApply = new Button()
 					.setText(translation(DebugToolsTranslation.ButtonApply))
 					.event.subscribe("activate", this.applyBulkQuality)))
+			.append(new Button()
+				.setText(translation(DebugToolsTranslation.ButtonAddItemsWithAllMagicalProperties))
+				.event.subscribe("activate", this.addItemsWithAllMagicalProperties))
 			.append(new Button()
 				.setText(translation(DebugToolsTranslation.ButtonClearInventory))
 				.setType(ButtonType.Warning)
@@ -279,6 +283,13 @@ export default class Container extends Component {
 		const container = this.getContainer();
 		if (container) {
 			void ClearInventory.execute(localPlayer, container);
+		}
+	}
+
+	@Bound private addItemsWithAllMagicalProperties(): void {
+		const container = this.getContainer();
+		if (container) {
+			void AddItemsWithAllMagicalProperties.execute(localPlayer, container);
 		}
 	}
 
