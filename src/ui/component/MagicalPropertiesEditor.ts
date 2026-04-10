@@ -87,11 +87,8 @@ class MagicalPropertiesEditor extends SingletonEditor<[Item | Doodad]> {
 	}
 
 	public override apply(itemOrDoodad: Item | Doodad) {
-		if (itemOrDoodad === this.itemOrDoodad) {
-			return;
-		}
-
 		this.itemOrDoodadRef = new WeakRef(itemOrDoodad);
+		// Reopening the same singleton editor tears down listeners on unclaim, so reclaiming must always rebuild state.
 		this.refresh();
 
 		const addEventHandlers = () => {

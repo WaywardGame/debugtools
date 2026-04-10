@@ -11,6 +11,7 @@ import Button from "@wayward/game/ui/component/Button";
 import Dropdown from "@wayward/game/ui/component/Dropdown";
 import EnumContextMenu, { EnumSort } from "@wayward/game/ui/component/EnumContextMenu";
 import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
+import { RangeRow } from "@wayward/game/ui/component/RangeRow";
 import Enums from "@wayward/game/utilities/enum/Enums";
 import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { Bound } from "@wayward/utilities/Decorators";
@@ -21,6 +22,7 @@ import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebug
 import Clone from "../../action/Clone";
 import Remove from "../../action/Remove";
 import SetDoodadQuality from "../../action/SetDoodadQuality";
+import SetDoodadDecay from "../../action/SetDoodadDecay";
 import SetGrowingStage from "../../action/SetGrowingStage";
 import Container from "../component/Container";
 import type { TabInformation } from "../component/InspectInformationSection";
@@ -38,6 +40,7 @@ export default class DoodadInformation extends InspectInformationSection {
 	protected readonly buttonGrowthStage: Button;
 	protected readonly dropdownQuality: Dropdown<Quality>;
 	protected readonly buttonQualityApply: Button;
+	protected readonly rangeDecay: RangeRow;
 	protected container?: Container;
 
 	public constructor() {
@@ -73,6 +76,16 @@ export default class DoodadInformation extends InspectInformationSection {
 				.setText(translation(DebugToolsTranslation.ButtonApply))
 				.event.subscribe("activate", this.applyQuality))
 			.appendTo(this);
+
+		this.rangeDecay = new RangeRow()
+			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDecay)))
+			.editRange(range => range
+				.setMax(60)
+				.setStep(0.01)
+				.setRefreshMethod(() => unscale(this.doodad?.decay ?? 0)))
+			.setDisplayValue(value => [{ content: `${scale(value)}` }])
+			.event.subscribe("finish", this.applyDecay)
+			.appendTo(this);
 	}
 
 	@OwnEventHandler(DoodadInformation, "switchTo")
@@ -106,6 +119,14 @@ export default class DoodadInformation extends InspectInformationSection {
 		this.buttonGrowthStage.toggle(this.doodad.growth !== undefined);
 		this.dropdownQuality.refresh();
 		this.buttonQualityApply.toggle(this.dropdownQuality.selectedOption === Quality.Random);
+
+		const hasDecay = this.doodad.decay !== undefined;
+		this.rangeDecay.toggle(hasDecay);
+		if (hasDecay) {
+			this.rangeDecay.editRange(range => range
+				.setMax(this.doodad?.startingDecay ? unscale(this.doodad.startingDecay) : 60));
+			this.rangeDecay.refresh();
+		}
 
 		this.setShouldLog();
 	}
@@ -149,4 +170,17 @@ export default class DoodadInformation extends InspectInformationSection {
 		this.buttonQualityApply.toggle(this.dropdownQuality.selectedOption === Quality.Random);
 		void SetDoodadQuality.execute(localPlayer, this.doodad!, this.dropdownQuality.selectedOption);
 	}
+
+	@Bound
+	private applyDecay(_: any, value: number): void {
+		void SetDoodadDecay.execute(localPlayer, this.doodad!, scale(value));
+	}
+}
+
+function scale(value: number): number {
+	return Math.floor(1.2 ** value) - 1;
+}
+
+function unscale(value: number): number {
+	return Math.ceil(Math.log((value + 1)) / Math.log(1.2) * 100) / 100;
 }
