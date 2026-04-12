@@ -17,6 +17,7 @@ import SingletonEditor from "./SingletonEditor";
 import type { MagicalPropertyIdentityHash } from "@wayward/game/game/magic/IMagicalProperty";
 import { MagicalPropertyIdentity } from "@wayward/game/game/magic/IMagicalProperty";
 import { CheckButton } from "@wayward/game/ui/component/CheckButton";
+import { Quality } from "@wayward/game/game/IObject";
 
 export enum MagicalPropertiesEditorClasses {
 	Main = "debug-tools-magical-properties-editor",
@@ -86,11 +87,8 @@ class MagicalPropertiesEditor extends SingletonEditor<[Item | Doodad]> {
 	}
 
 	public override apply(itemOrDoodad: Item | Doodad) {
-		if (itemOrDoodad === this.itemOrDoodad) {
-			return;
-		}
-
 		this.itemOrDoodadRef = new WeakRef(itemOrDoodad);
+		// Reopening the same singleton editor tears down listeners on unclaim, so reclaiming must always rebuild state.
 		this.refresh();
 
 		const addEventHandlers = () => {
@@ -155,7 +153,7 @@ class MagicalPropertiesEditor extends SingletonEditor<[Item | Doodad]> {
 
 		this.addMagicalPropertyValue.editRange(range => range
 			.setMin(info.min)
-			.setMax(info.max)
+			.setMax(info.max * (info.expandable && this.item?.quality === Quality.Relic ? 2 : 1))
 			.setStep(info.precision ? Math.pow(10, -info.precision) : 1)
 			.schedule(range => range.value = info.min));
 	}
@@ -219,7 +217,7 @@ class MagicalPropertyEditor extends Details {
 					.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelValue)))
 					.editRange(range => range
 						.setMin(info.min)
-						.setMax(info.max)
+						.setMax(info.max * (info.expandable && item.quality === Quality.Relic ? 2 : 1))
 						.setStep(info.precision ? Math.pow(10, -info.precision) : 1)
 						.setRefreshMethod(() => item.magic?.get(...identity) ?? info.min))
 					.setDisplayValue(true)

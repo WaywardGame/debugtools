@@ -249,3 +249,28 @@
 .debug-tools-hidden {
 	display: none !important;
 }
+
+.debug-tools-curse-script-array {
+	border-left: 1px solid var(--color-text-tertiary);
+	margin-left: calc(-8px * max(1, var(--scale)));
+	padding-left: calc(10px * max(1, var(--scale)));
+	display: grid;
+	gap: calc(4px * max(1, var(--scale)));
+}
+
+.debug-tools-curse-script-row {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	align-items: center;
+	gap: calc(8px * max(1, var(--scale)));
+	min-height: var(--block-height);
+}
+
+.debug-tools-curse-script-folder-controls {
+	display: flex;
+	margin-bottom: calc(4px * max(1, var(--scale)));
+}
+
+.debug-tools-curse-script-node-inactive:not(:hover) {
+	opacity: 0.45;
+}

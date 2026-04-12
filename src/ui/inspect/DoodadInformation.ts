@@ -1,12 +1,19 @@
 import type Doodad from "@wayward/game/game/doodad/Doodad";
 import { GrowingStage } from "@wayward/game/game/doodad/IDoodad";
+import { Quality } from "@wayward/game/game/IObject";
 import type { IContainer } from "@wayward/game/game/item/IItem";
 import type Tile from "@wayward/game/game/tile/Tile";
+import Dictionary from "@wayward/game/language/Dictionary";
 import { TextContext, Article } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
 import Mod from "@wayward/game/mod/Mod";
 import Button from "@wayward/game/ui/component/Button";
+import Dropdown from "@wayward/game/ui/component/Dropdown";
 import EnumContextMenu, { EnumSort } from "@wayward/game/ui/component/EnumContextMenu";
+import { LabelledRow } from "@wayward/game/ui/component/LabelledRow";
+import { RangeRow } from "@wayward/game/ui/component/RangeRow";
+import Enums from "@wayward/game/utilities/enum/Enums";
+import { Tuple } from "@wayward/utilities/collection/Tuple";
 import { Bound } from "@wayward/utilities/Decorators";
 import type Log from "@wayward/utilities/Log";
 import { OwnEventHandler } from "@wayward/utilities/event/EventManager";
@@ -14,6 +21,8 @@ import type DebugTools from "../../DebugTools";
 import { DEBUG_TOOLS_ID, DebugToolsTranslation, translation } from "../../IDebugTools";
 import Clone from "../../action/Clone";
 import Remove from "../../action/Remove";
+import SetDoodadQuality from "../../action/SetDoodadQuality";
+import SetDoodadDecay from "../../action/SetDoodadDecay";
 import SetGrowingStage from "../../action/SetGrowingStage";
 import Container from "../component/Container";
 import type { TabInformation } from "../component/InspectInformationSection";
@@ -29,6 +38,9 @@ export default class DoodadInformation extends InspectInformationSection {
 
 	protected doodad: Doodad | undefined;
 	protected readonly buttonGrowthStage: Button;
+	protected readonly dropdownQuality: Dropdown<Quality>;
+	protected readonly buttonQualityApply: Button;
+	protected readonly rangeDecay: RangeRow;
 	protected container?: Container;
 
 	public constructor() {
@@ -47,6 +59,32 @@ export default class DoodadInformation extends InspectInformationSection {
 		this.buttonGrowthStage = new Button()
 			.setText(translation(DebugToolsTranslation.ButtonSetGrowthStage))
 			.event.subscribe("activate", this.setGrowthStage)
+			.appendTo(this);
+
+		new LabelledRow()
+			.classes.add("dropdown-label", "debug-tools-inspect-human-wrapper-set-bulk")
+			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelQuality)))
+			.append(this.dropdownQuality = new Dropdown<Quality>()
+				.setRefreshMethod(() => ({
+					defaultOption: this.doodad?.quality ?? Quality.None,
+					options: Enums.values(Quality)
+						.map(quality => Tuple(quality, Translation.get(Dictionary.Quality, quality).inContext(TextContext.Title)))
+						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
+				}))
+				.event.subscribe("selection", this.applyQuality))
+			.append(this.buttonQualityApply = new Button()
+				.setText(translation(DebugToolsTranslation.ButtonApply))
+				.event.subscribe("activate", this.applyQuality))
+			.appendTo(this);
+
+		this.rangeDecay = new RangeRow()
+			.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDecay)))
+			.editRange(range => range
+				.setMax(60)
+				.setStep(0.01)
+				.setRefreshMethod(() => unscale(this.doodad?.decay ?? 0)))
+			.setDisplayValue(value => [{ content: `${scale(value)}` }])
+			.event.subscribe("finish", this.applyDecay)
 			.appendTo(this);
 	}
 
@@ -79,6 +117,16 @@ export default class DoodadInformation extends InspectInformationSection {
 		}
 
 		this.buttonGrowthStage.toggle(this.doodad.growth !== undefined);
+		this.dropdownQuality.refresh();
+		this.buttonQualityApply.toggle(this.dropdownQuality.selectedOption === Quality.Random);
+
+		const hasDecay = this.doodad.decay !== undefined;
+		this.rangeDecay.toggle(hasDecay);
+		if (hasDecay) {
+			this.rangeDecay.editRange(range => range
+				.setMax(this.doodad?.startingDecay ? unscale(this.doodad.startingDecay) : 60));
+			this.rangeDecay.refresh();
+		}
 
 		this.setShouldLog();
 	}
@@ -116,4 +164,23 @@ export default class DoodadInformation extends InspectInformationSection {
 
 		void SetGrowingStage.execute(localPlayer, this.doodad!, growthStage);
 	}
+
+	@Bound
+	private applyQuality(): void {
+		this.buttonQualityApply.toggle(this.dropdownQuality.selectedOption === Quality.Random);
+		void SetDoodadQuality.execute(localPlayer, this.doodad!, this.dropdownQuality.selectedOption);
+	}
+
+	@Bound
+	private applyDecay(_: any, value: number): void {
+		void SetDoodadDecay.execute(localPlayer, this.doodad!, scale(value));
+	}
+}
+
+function scale(value: number): number {
+	return Math.floor(1.2 ** value) - 1;
+}
+
+function unscale(value: number): number {
+	return Math.ceil(Math.log((value + 1)) / Math.log(1.2) * 100) / 100;
 }

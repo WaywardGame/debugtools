@@ -203,10 +203,6 @@ export default class DebugTools extends Mod {
 				}
 
 				break;
-
-			case "curseOverride":
-				player.getCurse(true);
-				break;
 		}
 
 		if (!this.hasPermission() && gameScreen) {
