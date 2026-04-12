@@ -36,7 +36,10 @@ interface IAnalysisItemCandidate {
 	isContainer: boolean;
 	isDefense: boolean;
 	isEquipment: boolean;
+	hasContainedItemsInsulation: boolean;
+	hasEquippedInsulation: boolean;
 	isGrowingItem: boolean;
+	isBedroll: boolean;
 	isLit: boolean;
 	isOffer: boolean;
 	isDirectRecipeIngredient: boolean;
@@ -102,6 +105,33 @@ export function getMagicalPropertySpecimenPlan(island: Island): IMagicalProperty
 			continue;
 		}
 
+		if (type === MagicalPropertyType.Insulation) {
+			const defaultItemType = chosenItemTypes.get(type);
+			const usedItemTypes = new Set(chosenTypeValues);
+			if (defaultItemType !== undefined) {
+				usedItemTypes.delete(defaultItemType);
+			}
+
+			const equipmentItemType = chooseDedicatedItemType(candidates, type, usedItemTypes,
+				candidate => candidate.hasEquippedInsulation && candidate.isEquipment && !candidate.isContainer && !candidate.isBedroll,
+				"equipment");
+			usedItemTypes.add(equipmentItemType);
+
+			const bedrollItemType = chooseDedicatedItemType(candidates, type, usedItemTypes,
+				candidate => candidate.hasEquippedInsulation && candidate.isBedroll,
+				"bedroll");
+			usedItemTypes.add(bedrollItemType);
+
+			const containerItemType = chooseDedicatedItemType(candidates, type, usedItemTypes,
+				candidate => candidate.hasContainedItemsInsulation && candidate.isContainer,
+				"container");
+
+			plan.push(...createPropertyPlanEntries(island, equipmentItemType, type, "equipment"));
+			plan.push(...createPropertyPlanEntries(island, bedrollItemType, type, "bedroll"));
+			plan.push(...createPropertyPlanEntries(island, containerItemType, type, "container"));
+			continue;
+		}
+
 		const itemType = chosenItemTypes.get(type);
 		if (itemType === undefined) {
 			throw new Error(`Unable to resolve a unique item type for magical property ${type}`);
@@ -152,8 +182,12 @@ export function createMagicalPropertySpecimens(executor: Human, container: ICont
 		createdItems.push(item);
 	}
 
-	executor.island.items.moveItemsToContainer(executor, createdItems, container, { skipDrop: true, skipWeightChecks: true });
-	return createdItems;
+	const { itemsMoved } = executor.island.items.moveItemsToContainer(executor, createdItems, container, { skipDrop: true, skipWeightChecks: true });
+	for (const itemType of new Set(itemsMoved.map(item => item.type))) {
+		executor.island.items.setStacked(executor, container, itemType, true);
+	}
+
+	return itemsMoved;
 }
 
 function getCandidates(island: Island): readonly IAnalysisItemCandidate[] {
@@ -213,7 +247,7 @@ function chooseDedicatedItemType(candidates: readonly IAnalysisItemCandidate[], 
 
 function createCandidate(island: Island, itemType: ItemType): IAnalysisItemCandidate | undefined {
 	const description = itemDescriptions[itemType];
-	if (!description) {
+	if (!description || description.spawnOnDecay !== undefined) {
 		return undefined;
 	}
 
@@ -227,7 +261,10 @@ function createCandidate(island: Island, itemType: ItemType): IAnalysisItemCandi
 	const isContainer = item.getWeightCapacity() !== undefined;
 	const isDefense = !!description.defense;
 	const isEquipment = !!description.equip;
+	const hasContainedItemsInsulation = description.containedItemsInsulation !== undefined;
+	const hasEquippedInsulation = description.equippedInsulation !== undefined;
 	const isGrowingItem = island.items.isItemUsedForGrowingPlants(itemType);
+	const isBedroll = item.isInGroup(ItemTypeGroup.Bedding);
 	const isLit = !!description.lit;
 	const isOffer = island.items.isItemAcceptedAsOffer(itemType);
 	const isDirectRecipeIngredient = island.items.isItemUsedInRecipe(itemType);
@@ -262,7 +299,10 @@ function createCandidate(island: Island, itemType: ItemType): IAnalysisItemCandi
 		isContainer,
 		isDefense,
 		isEquipment,
+		hasContainedItemsInsulation,
+		hasEquippedInsulation,
 		isGrowingItem,
+		isBedroll,
 		isLit,
 		isOffer,
 		isDirectRecipeIngredient,
