@@ -1,6 +1,7 @@
 import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler } from "@wayward/game/event/EventManager";
-import { CURSE_CAP, CumulativeEvilCrafting, CumulativeKilling, HighestAttack, HighestDefense, Obliviousness, Sleeplessness } from "@wayward/game/game/curse/Curse";
+import { CURSE_CAP, CumulativeEvilCrafting, CumulativeKilling, Obliviousness, Sleeplessness } from "@wayward/game/game/curse/Curse";
+import DataComponent, { DataComponentType } from "@wayward/game/game/entity/data/DataComponent";
 import type Creature from "@wayward/game/game/entity/creature/Creature";
 import type NPC from "@wayward/game/game/entity/npc/NPC";
 import type Player from "@wayward/game/game/entity/player/Player";
@@ -32,6 +33,9 @@ import { RenderSource } from "@wayward/game/renderer/IRenderer";
 import ConsoleUtility from "@wayward/utilities/console/ConsoleUtility";
 import type { SkillType } from "@wayward/game/game/entity/skill/ISkills";
 import Details from "@wayward/game/ui/component/Details";
+
+const HighestAttack = DataComponent<number>(DataComponentType.CurseHighestAttack);
+const HighestDefense = DataComponent<number>(DataComponentType.CurseHighestDefense);
 
 export default class PlayerInformation extends InspectEntityInformationSubsection {
 
@@ -157,9 +161,9 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 		row.appendTo(curseDetails);
 		({ input: this.inputCurseSleeplessness, row } = this.addCurseNumberInput(DebugToolsTranslation.LabelCurseSleeplessness, () => this.player ? Sleeplessness.get(this.player) : 0, PlayerCurseValueType.Sleeplessness));
 		row.appendTo(curseDetails);
-		({ input: this.inputCurseHighestAttack, row } = this.addCurseNumberInput(DebugToolsTranslation.LabelCurseHighestAttack, () => this.player ? HighestAttack.get(this.player) : 0, PlayerCurseValueType.HighestAttack));
+		({ input: this.inputCurseHighestAttack, row } = this.addCurseNumberInput(DebugToolsTranslation.LabelCurseHighestAttack, () => this.player ? HighestAttack.get(this.player) ?? 0 : 0, PlayerCurseValueType.HighestAttack));
 		row.appendTo(curseDetails);
-		({ input: this.inputCurseHighestDefense, row } = this.addCurseNumberInput(DebugToolsTranslation.LabelCurseHighestDefense, () => this.player ? HighestDefense.get(this.player) : 0, PlayerCurseValueType.HighestDefense));
+		({ input: this.inputCurseHighestDefense, row } = this.addCurseNumberInput(DebugToolsTranslation.LabelCurseHighestDefense, () => this.player ? HighestDefense.get(this.player) ?? 0 : 0, PlayerCurseValueType.HighestDefense));
 		row.appendTo(curseDetails);
 		({ input: this.inputCurseObliviousnessDays, row } = this.addCurseNumberInput(DebugToolsTranslation.LabelCurseObliviousnessDays, () => this.player ? Obliviousness.get(this.player).days : 0, PlayerCurseValueType.ObliviousnessDays));
 		row.appendTo(curseDetails);

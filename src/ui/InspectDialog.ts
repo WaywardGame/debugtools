@@ -33,6 +33,7 @@ import { DEBUG_TOOLS_ID, DebugToolsTranslation, overlayTarget, translation } fro
 import Container from "./component/Container";
 import InspectInformationSection from "./component/InspectInformationSection";
 import CorpseInformation from "./inspect/CorpseInformation";
+import CreatureZoneInformation from "./inspect/CreatureZoneInformation";
 import DoodadInformation from "./inspect/DoodadInformation";
 import EntityInformation from "./inspect/EntityInformation";
 import ItemInformation from "./inspect/ItemInformation";
@@ -49,6 +50,7 @@ export type InspectDialogInformationSectionClass = new () => InspectInformationS
  */
 const informationSectionClasses: InspectDialogInformationSectionClass[] = [
 	TerrainInformation,
+	CreatureZoneInformation,
 	EntityInformation,
 	CorpseInformation,
 	DoodadInformation,
@@ -113,7 +115,7 @@ export default class InspectDialog extends TabDialog<InspectInformationSection> 
 			.concat(modRegistryInspectDialogPanels.value.getRegistrations()
 				.map(registration => registration.data(InspectInformationSection)))
 			.map(cls => new cls()
-				.event.subscribe("update", this.update));
+				.event.until(this, "remove").subscribe("update", this.update));
 
 		// we're going to need the entity information section for some other stuff
 		this.entityInfoSection = subpanels
