@@ -11,7 +11,7 @@ import { TextContext } from "@wayward/game/language/ITranslation";
 import Translation from "@wayward/game/language/Translation";
 import TranslationImpl from "@wayward/game/language/impl/TranslationImpl";
 import Mod from "@wayward/game/mod/Mod";
-import { ParticleType } from "@wayward/game/renderer/particle/IParticle";
+import { ParticlePhysics, ParticleType } from "@wayward/game/renderer/particle/IParticle";
 import particles from "@wayward/game/renderer/particle/Particles";
 import { BlockRow } from "@wayward/game/ui/component/BlockRow";
 import Button from "@wayward/game/ui/component/Button";
@@ -57,6 +57,7 @@ export default class GeneralPanel extends DebugToolsPanel {
 	private readonly checkButtonAudio: CheckButton;
 	private readonly dropdownAudio: Dropdown<SfxType>;
 	private readonly dropdownParticle: Dropdown<ParticleType>;
+	private readonly dropdownParticlePhysics: Dropdown<ParticlePhysics>;
 	private readonly dropdownLayer: Dropdown<WorldZ>;
 	private readonly dropdownTravel: IslandDropdown<string>;
 	private readonly checkButtonParticle: CheckButton;
@@ -211,13 +212,21 @@ export default class GeneralPanel extends DebugToolsPanel {
 					this.inspectButton.setChecked(false, false);
 					this.checkButtonAudio.setChecked(false, false);
 
-					return this.selectionLogic(checked, tile => tile?.createParticles(particles[this.dropdownParticle.selectedOption]), () => this.checkButtonParticle.checked);
+					return this.selectionLogic(checked, tile => tile?.createParticles(particles[this.dropdownParticle.selectedOption], this.dropdownParticlePhysics.selectedOption), () => this.checkButtonParticle.checked);
 				}))
 			.append(this.dropdownParticle = new Dropdown<ParticleType>()
 				.setRefreshMethod(() => ({
 					defaultOption: ParticleType.Blood,
 					options: Enums.values(ParticleType)
 						.map(particle => Tuple(particle, TranslationImpl.generator(ParticleType[particle])))
+						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
+						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
+				})))
+			.append(this.dropdownParticlePhysics = new Dropdown<ParticlePhysics>()
+				.setRefreshMethod(() => ({
+					defaultOption: ParticlePhysics.Fall,
+					options: Enums.values(ParticlePhysics)
+						.map(physics => Tuple(physics, TranslationImpl.generator(ParticlePhysics[physics])))
 						.sort(([, t1], [, t2]) => Text.toString(t1).localeCompare(Text.toString(t2)))
 						.map(([id, t]) => Tuple(id, (option: Button) => option.setText(t))),
 				})))
