@@ -34,7 +34,7 @@ export default new Action(ActionArgument.Player, ActionArgument.ENUM(PlayerCurse
 					return;
 				}
 
-				const gameOptions = Objects.deepClone(game.getGameOptions());
+				const gameOptions = Objects.deepClone(game.getGameOptionsBeforeModifiers());
 				gameOptions.player.initialCurse = value / CURSE_CAP * 100;
 				game.updateGameOptions(gameOptions);
 

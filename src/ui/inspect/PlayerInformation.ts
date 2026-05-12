@@ -238,8 +238,8 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 		this.checkButtonFastMovement.refresh();
 		this.checkButtonUnkillable.refresh();
 		this.checkButtonNoRender.refresh();
-		this.rangeWeightBonus.refresh();
-		this.initialCurseModifier.refresh();
+		this.rangeWeightBonus.refresh(false);
+		this.initialCurseModifier.refresh(false);
 		this.refreshCurseInput(this.inputCurseCumulativeEvilCrafting);
 		this.refreshCurseInput(this.inputCurseCumulativeKilling);
 		this.refreshCurseInput(this.inputCurseSleeplessness);
@@ -261,7 +261,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 	@Bound
 	private changeSkill(_: any, skill: SkillType | "none" | "all"): void {
 		this.skill = skill;
-		this.skillRangeRow.refresh();
+		this.skillRangeRow.refresh(false);
 
 		this.skillRangeRow.toggle(skill !== "none");
 	}
@@ -344,7 +344,7 @@ export default class PlayerInformation extends InspectEntityInformationSubsectio
 
 		switch (key) {
 			case "weightBonus":
-				this.rangeWeightBonus.refresh();
+				this.rangeWeightBonus.refresh(false);
 				break;
 			case "unkillable":
 				this.checkButtonUnkillable.refresh();
