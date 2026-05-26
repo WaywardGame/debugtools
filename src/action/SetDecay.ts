@@ -4,6 +4,7 @@ import { Action } from "@wayward/game/game/entity/action/Action";
 import type { IActionHandlerApi } from "@wayward/game/game/entity/action/IAction";
 import { ActionArgument, ActionUsability } from "@wayward/game/game/entity/action/IAction";
 import type Item from "@wayward/game/game/item/Item";
+import MagicalPropertyType from "@wayward/game/game/magic/MagicalPropertyType";
 import { defaultCanUseHandler } from "../Actions";
 import Mod from "@wayward/game/mod/Mod";
 import type DebugTools from "../DebugTools";
@@ -31,8 +32,10 @@ export function setDecay(action: IActionHandlerApi<Human>, decay: number, ...ite
 		owner ??= item.getCurrentOwner();
 		if (item.canDecay()) {
 			item.setDecayTime(Number.isInteger(decay) || decay > 1 ? decay : Math.ceil((item.startingDecay ?? 1) * decay));
-			if (!item.startingDecay || item.getDecayTime()! > item.startingDecay) {
-				item.startingDecay = item.getDecayTime();
+			const magicalBonus = Math.ceil((item.magic?.get(MagicalPropertyType.Hoarding_MaxDecay) ?? 0) * item.island.getGameOptions().items.decayMultiplier);
+			const startingDecayWithoutBonus = (item.getDecayTime() ?? 0) - magicalBonus;
+			if (!item.startingDecay || startingDecayWithoutBonus > item.startingDecay) {
+				item.startingDecay = startingDecayWithoutBonus;
 			}
 		}
 	}

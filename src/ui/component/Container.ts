@@ -374,7 +374,7 @@ export class ContainerItemDetails extends Details {
 			new RangeRow()
 				.setLabel(label => label.setText(translation(DebugToolsTranslation.LabelDecay)))
 				.editRange(range => range
-					.setMax(this.item.startingDecay ? unscale(this.item.startingDecay) : 60)
+					.setMax(unscale(this.item.getDecayAtStartWithMagical() || 60))
 					.setStep(0.01)
 					.setRefreshMethod(() => unscale(this.item.getDecayTime() ?? 0)))
 				.setDisplayValue(value => [{ content: `${scale(value)}` }])
