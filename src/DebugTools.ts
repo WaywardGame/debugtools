@@ -1,6 +1,7 @@
 import { EventBus } from "@wayward/game/event/EventBuses";
 import { EventHandler, eventManager } from "@wayward/game/event/EventManager";
 import type Entity from "@wayward/game/game/entity/Entity";
+import { MoveType } from "@wayward/game/game/entity/IEntity";
 import type Player from "@wayward/game/game/entity/player/Player";
 import Island from "@wayward/game/game/island/Island";
 import type Tile from "@wayward/game/game/tile/Tile";
@@ -258,6 +259,7 @@ export default class DebugTools extends Mod {
 	 * - Removes the `AddItemToInventory` UI Component.
 	 */
 	public override onUnload(): void {
+		this.resetTemporaryPlayerMovementFlags();
 		eventManager.deregisterEventBusSubscriber(this.selector);
 		Bind.deregisterHandlers(this.selector);
 		this.unlockedCameraMovementHandler.end();
@@ -266,6 +268,27 @@ export default class DebugTools extends Mod {
 		this.creatureZoneOverlay.deregister();
 		this.creatureZoneOverlay.setMode(CreatureZoneOverlayMode.None);
 		this.accidentalDeathHelper.deregister();
+	}
+
+	private resetTemporaryPlayerMovementFlags(): void {
+		for (const player of game.playerManager.getAll(true, true, true, true)) {
+			if (player.isGhost) {
+				continue;
+			}
+
+			if (player.isFastMoving) {
+				player.setFastMoving(false);
+				delete player.fastMovingDelay;
+				player.nextMoveTime = 0;
+			}
+
+			if (player.getMoveType() === MoveType.Flying) {
+				player.setMoveType(player.vehicleItemReference?.item?.description?.vehicle?.movementType ?? (MoveType.Land | MoveType.Water | MoveType.ShallowWater));
+				if (player.isLocalPlayer) {
+					player.updateView(RenderSource.Mod, true);
+				}
+			}
+		}
 	}
 
 	/**
