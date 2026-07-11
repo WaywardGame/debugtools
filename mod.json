@@ -1,7 +1,7 @@
 {
 	"name": "Debug Tools",
 	"description": "Adds a special debug tools menu into the game.",
-	"version": "2.5.0",
+	"version": "2.5.1",
 	"author": "Chiri Vulpes, Spacetech, Vaughn Royko",
 	"github": "https://github.com/WaywardGame/debugtools",
 	"waywardVersion": "2.15.0-beta",
